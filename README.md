@@ -155,6 +155,21 @@ Swagger API, Logs, Monitoring, Database, Redis, WebSocket Connections, CPU/Memor
 
 ---
 
+## Risk Mitigation Strategies
+
+The project addresses four critical risks with strategic solutions, each backed by concrete implementation:
+
+| Risk | Strategic Solution | Implementation |
+| --- | --- | --- |
+| **Scope Overload** (24 modules, 1 developer) | **3-Phase MoSCoW Model** | Build MVP (Modules 1–11) first; Phase 2 (12–17) for enhancement; Phase 3 (18–24) as stretch goals. No phase advances until prior phase is stable. |
+| **No Volunteers Nearby** | **3-Layer Escalation** | Layer 1: Auto-radius expansion (30s/45s/60s gates). Layer 2: Direct 108/112 dial with AI-generated summary. Layer 3: Guided Self-Care AI via cached RAG pipeline. |
+| **Medical Liability** | **Good Samaritan Law + Strict RAG Guardrails** | Legal disclaimer (non-dismissible) on all AI guidance screens. Strict RAG prompt constraints: no dosage, no diagnosis, no prescriptions. Protected under India's Good Samaritan Law (2016). |
+| **Viva/Defense Weakness** | **Digital Twin Simulation** | 5 real-time comparison charts during demo: AI-ranked vs. broadcast dispatch, indexed vs. unindexed geo queries, AI latency breakdown, throughput curves, and skill-aware vs. distance-only ranking. |
+
+> **Key guarantee**: The 3-Layer Escalation ensures a victim is *never* left without assistance — even with no volunteers and no network, the AI Self-Care fallback provides cached, offline first-aid guidance.
+
+---
+
 ## Technology Stack
 
 | Layer          | Technology                                         |
