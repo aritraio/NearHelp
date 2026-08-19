@@ -1,6 +1,6 @@
 /* ==========================================================================
    NearHelp AI — Central Demo State Store & Simulation Engine
-   File: src/store/DemoContext.tsx
+   File: src/store/DemoContext.tsx (Updated with design.md specifications)
    ========================================================================== */
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
@@ -8,18 +8,32 @@ import type {
   EmergencyScenario, 
   IncidentStatus, 
   PersonaMode, 
+  ScreenMode,
   ViewLayout, 
-  SystemTelemetry 
+  SystemTelemetry,
+  CrisisCategoryId
 } from '../mock/types';
-import { ALL_SCENARIOS, SCENARIO_A, INITIAL_TELEMETRY } from '../mock/scenarios';
+import { ALL_SCENARIOS, SCENARIO_A, INITIAL_TELEMETRY, EMERGENCY_CATEGORIES } from '../mock/scenarios';
 import { soundEngine } from '../utils/audio';
 
 interface DemoContextType {
-  // Scenario & Mode
+  // Scenario & Screen Mode
   currentScenario: EmergencyScenario;
+  screenMode: ScreenMode;
   personaMode: PersonaMode;
   viewLayout: ViewLayout;
   incidentStatus: IncidentStatus;
+  selectedCategoryId: CrisisCategoryId;
+  
+  // Guardian & Locality details
+  localityName: string;
+  safetyIndexScore: number;
+  streetAddress: string;
+  subAddress: string;
+
+  // Countdown & Dispatch State
+  countdownSeconds: number;
+  isCountingDown: boolean;
   
   // Simulation & Timing
   elapsedSeconds: number;
@@ -38,9 +52,14 @@ interface DemoContextType {
   
   // Actions
   setScenario: (id: 'scenario-a' | 'scenario-b' | 'scenario-c') => void;
+  setScreenMode: (mode: ScreenMode) => void;
   setPersonaMode: (mode: PersonaMode) => void;
   setViewLayout: (layout: ViewLayout) => void;
   setIncidentStatus: (status: IncidentStatus) => void;
+  selectCategory: (categoryId: CrisisCategoryId) => void;
+  startCountdown: () => void;
+  cancelCountdown: () => void;
+  confirmAddress: () => void;
   triggerSos: () => void;
   cancelSos: () => void;
   advanceStep: () => void;
@@ -59,9 +78,19 @@ const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
 export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentScenario, setCurrentScenarioState] = useState<EmergencyScenario>(SCENARIO_A);
+  const [screenMode, setScreenModeState] = useState<ScreenMode>('GUARDIAN');
   const [personaMode, setPersonaModeState] = useState<PersonaMode>('VICTIM');
-  const [viewLayout, setViewLayout] = useState<ViewLayout>('MOBILE_FRAME');
+  const [viewLayout, setViewLayout] = useState<ViewLayout>('SPLIT_SCREEN');
   const [incidentStatus, setIncidentStatusState] = useState<IncidentStatus>('IDLE');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<CrisisCategoryId>('medical');
+
+  const [localityName, setLocalityName] = useState<string>('China Basin');
+  const [safetyIndexScore, setSafetyIndexScore] = useState<number>(91);
+  const [streetAddress, setStreetAddress] = useState<string>('1234 Mission St');
+  const [subAddress, setSubAddress] = useState<string>('Apt #345B, 27th Floor • San Francisco, CA');
+
+  const [countdownSeconds, setCountdownSeconds] = useState<number>(3);
+  const [isCountingDown, setIsCountingDown] = useState<boolean>(false);
   
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [searchRadiusKm, setSearchRadiusKm] = useState<number>(0.5);
@@ -76,6 +105,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [offlineMeshActive, setOfflineMeshActive] = useState<boolean>(false);
 
   const timerRef = useRef<number | null>(null);
+  const countdownTimerRef = useRef<number | null>(null);
 
   // Sync mute with sound engine
   const toggleAudioMute = useCallback(() => {
@@ -106,29 +136,91 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const selected = ALL_SCENARIOS.find(s => s.id === id) || SCENARIO_A;
     soundEngine.playClick();
     setCurrentScenarioState(selected);
+    setSelectedCategoryId(selected.category);
+    setStreetAddress(selected.streetAddress);
+    setSubAddress(selected.subAddress);
+    setLocalityName(selected.locationName.split(',')[0] || 'China Basin');
+    setSafetyIndexScore(selected.id === 'scenario-a' ? 91 : selected.id === 'scenario-b' ? 84 : 72);
     setOfflineMeshActive(selected.id === 'scenario-c');
-    // Stop metronome on scenario switch
+    
     soundEngine.stopCprMetronome();
     setCprMetronomeActive(false);
-    // Reset state to IDLE for fresh scenario demonstration
     setIncidentStatusState('IDLE');
     setElapsedSeconds(0);
     setSearchRadiusKm(0.5);
+    setIsCountingDown(false);
+    setCountdownSeconds(3);
   }, []);
 
-  // Persona switching with subtle audio cue
+  // Screen Mode Switching
+  const setScreenMode = useCallback((mode: ScreenMode) => {
+    soundEngine.playClick();
+    setScreenModeState(mode);
+    if (mode === 'RESPONDER') {
+      setPersonaModeState('RESPONDER');
+    } else if (mode === 'GUARDIAN' || mode === 'CRISIS_MATRIX') {
+      setPersonaModeState('VICTIM');
+    } else if (mode === 'COMMAND_CENTER') {
+      setPersonaModeState('COMMAND_CENTER');
+    }
+  }, []);
+
+  // Persona switching
   const setPersonaMode = useCallback((mode: PersonaMode) => {
     soundEngine.playClick();
     setPersonaModeState(mode);
+    if (mode === 'VICTIM') {
+      setScreenModeState('CRISIS_MATRIX');
+    } else if (mode === 'RESPONDER') {
+      setScreenModeState('RESPONDER');
+    } else if (mode === 'COMMAND_CENTER') {
+      setScreenModeState('COMMAND_CENTER');
+    }
+  }, []);
+
+  // Category Selection
+  const selectCategory = useCallback((catId: CrisisCategoryId) => {
+    soundEngine.playClick();
+    setSelectedCategoryId(catId);
+    const categoryInfo = EMERGENCY_CATEGORIES.find(c => c.id === catId);
+    if (categoryInfo) {
+      setCurrentScenarioState(prev => ({
+        ...prev,
+        category: catId,
+        severity: categoryInfo.severity,
+        severityLabel: `Level ${categoryInfo.severity} — ${categoryInfo.label} Emergency`
+      }));
+    }
   }, []);
 
   // Trigger SOS Flow
   const triggerSos = useCallback(() => {
     soundEngine.playEmergencyAlert();
+    setIsCountingDown(false);
     setIncidentStatusState('SOS_TRIGGERED');
     setElapsedSeconds(0);
     setIsAutoSimulating(true);
   }, []);
+
+  // Countdown flow
+  const startCountdown = useCallback(() => {
+    soundEngine.playCountdownBeep(880);
+    setIsCountingDown(true);
+    setCountdownSeconds(3);
+    setIncidentStatusState('COUNTDOWN');
+  }, []);
+
+  const cancelCountdown = useCallback(() => {
+    soundEngine.playClick();
+    setIsCountingDown(false);
+    setCountdownSeconds(3);
+    setIncidentStatusState('IDLE');
+  }, []);
+
+  const confirmAddress = useCallback(() => {
+    soundEngine.playSuccessChime();
+    startCountdown();
+  }, [startCountdown]);
 
   // Cancel SOS
   const cancelSos = useCallback(() => {
@@ -138,6 +230,8 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIncidentStatusState('IDLE');
     setElapsedSeconds(0);
     setIsAutoSimulating(false);
+    setIsCountingDown(false);
+    setCountdownSeconds(3);
     setSearchRadiusKm(0.5);
   }, []);
 
@@ -163,6 +257,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCprMetronomeActive(false);
     setIncidentStatusState('RESOLVED');
     setIsAutoSimulating(false);
+    setIsCountingDown(false);
   }, []);
 
   // Reset entire demo cleanly
@@ -174,7 +269,10 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setElapsedSeconds(0);
     setSearchRadiusKm(0.5);
     setIsAutoSimulating(false);
+    setIsCountingDown(false);
+    setCountdownSeconds(3);
     setPersonaModeState('VICTIM');
+    setScreenModeState('GUARDIAN');
   }, []);
 
   // Step advancement
@@ -186,6 +284,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
           soundEngine.playEmergencyAlert();
           return 'SOS_TRIGGERED';
         case 'COUNTDOWN':
+          soundEngine.playEmergencyAlert();
           return 'SOS_TRIGGERED';
         case 'SOS_TRIGGERED':
           return 'AI_TRIAGING';
@@ -226,9 +325,45 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSimulationSpeedState(speed);
   }, []);
 
+  // 3-Second Grace Countdown ticker
+  useEffect(() => {
+    if (!isCountingDown) {
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+        countdownTimerRef.current = null;
+      }
+      return;
+    }
+
+    countdownTimerRef.current = window.setInterval(() => {
+      setCountdownSeconds(prev => {
+        if (prev > 1) {
+          soundEngine.playCountdownBeep(750 + (4 - prev) * 120);
+          return prev - 1;
+        } else {
+          // Trigger SOS when reaches 0
+          if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+          }
+          setIsCountingDown(false);
+          triggerSos();
+          return 0;
+        }
+      });
+    }, 1000);
+
+    return () => {
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+        countdownTimerRef.current = null;
+      }
+    };
+  }, [isCountingDown, triggerSos]);
+
   // Stopwatch & Auto-Simulation Progression Hook
   useEffect(() => {
-    if (incidentStatus === 'IDLE' || incidentStatus === 'RESOLVED') {
+    if (incidentStatus === 'IDLE' || incidentStatus === 'COUNTDOWN' || incidentStatus === 'RESOLVED') {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -241,14 +376,12 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setElapsedSeconds(prev => {
         const nextTime = prev + 1;
 
-        // Telemetry subtle jitter for realism
         setTelemetry(t => ({
           ...t,
           spatialQueryLatencyMs: +(11 + Math.random() * 2).toFixed(1),
           websocketConnectionsCount: t.websocketConnectionsCount + (Math.random() > 0.6 ? 1 : 0)
         }));
 
-        // Auto progression timeline
         if (isAutoSimulating) {
           if (nextTime === 2 && incidentStatus === 'SOS_TRIGGERED') {
             setIncidentStatusState('AI_TRIAGING');
@@ -286,9 +419,17 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <DemoContext.Provider
       value={{
         currentScenario,
+        screenMode,
         personaMode,
         viewLayout,
         incidentStatus,
+        selectedCategoryId,
+        localityName,
+        safetyIndexScore,
+        streetAddress,
+        subAddress,
+        countdownSeconds,
+        isCountingDown,
         elapsedSeconds,
         searchRadiusKm,
         isAutoSimulating,
@@ -299,9 +440,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         telemetry,
         offlineMeshActive,
         setScenario,
+        setScreenMode,
         setPersonaMode,
         setViewLayout,
         setIncidentStatus: setIncidentStatusState,
+        selectCategory,
+        startCountdown,
+        cancelCountdown,
+        confirmAddress,
         triggerSos,
         cancelSos,
         advanceStep,

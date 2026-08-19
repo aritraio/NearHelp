@@ -1,44 +1,66 @@
 /* ==========================================================================
    NearHelp AI — Design System Tokens & High-Contrast Emergency Theme
-   File: src/styles/theme.css
+   File: src/styles/theme.css (Aligned with docs/design.md)
    ========================================================================== */
 
 :root {
-  /* --- Core Palette (High-Contrast OLED Dark Theme) --- */
+  /* --- Guardian Palette (Calm & Safe Zone - Left Screen) --- */
+  --guardian-bg-top: #C8F5DC;
+  --guardian-bg-bottom: #E3FAF0;
+  --guardian-gradient: linear-gradient(180deg, #C8F5DC 0%, #E3FAF0 100%);
+  --guardian-mint-primary: #8EE4B8;
+  --guardian-emerald-accent: #22C55E;
+  --guardian-radar-circle: rgba(72, 187, 120, 0.35);
+  --guardian-radar-sweep: rgba(56, 161, 105, 0.25);
+  --guardian-search-pill: rgba(255, 255, 255, 0.82);
+
+  /* --- Crisis & Alert Palette (High Urgency Matrix - Right Screen) --- */
+  --crisis-surface-bg: #EFF3F6;
+  --emergency-crimson: #E52538;
+  --emergency-crimson-dark: #C2182B;
+  --emergency-crimson-gradient: linear-gradient(135deg, #FF3B30 0%, #D70015 100%);
+  --action-amber: #FF9800;
+  --cancel-pill-green: #34C759;
+  --countdown-badge-red: #E52538;
+  --card-neomorphic-light: #FFFFFF;
+  --card-neomorphic-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --card-neomorphic-active: 0 8px 24px rgba(229, 37, 56, 0.28);
+
+  /* --- Light Theme Text Tokens (Mobile App Frame) --- */
+  --text-primary-dark: #0F172A;
+  --text-secondary-muted: #64748B;
+  --text-disabled-light: #94A3B8;
+
+  /* --- Core Palette (High-Contrast OLED Dark Showcase Panel) --- */
   --bg-base: #0c0d0e;
   --bg-primary: #121214;
   --bg-surface: #1a1b1e;
   --bg-surface-elevated: #24262b;
   --bg-surface-hover: #2e3138;
   --bg-glass: rgba(26, 27, 30, 0.78);
-  --bg-glass-heavy: rgba(18, 18, 20, 0.88);
+  --bg-glass-heavy: rgba(18, 18, 20, 0.90);
   
   /* --- Emergency Severity Tokens --- */
-  /* Level 5 - Critical / Cardiac / Red */
   --color-emergency-red: #e53935;
   --color-emergency-red-bright: #ff1744;
   --color-emergency-red-glow: rgba(255, 23, 68, 0.35);
   --color-emergency-red-subtle: rgba(229, 57, 53, 0.12);
   
-  /* Level 3 & 4 - Action Amber / Warning */
   --color-action-amber: #ff9800;
   --color-action-amber-bright: #ffa726;
   --color-action-amber-glow: rgba(255, 152, 0, 0.35);
   --color-action-amber-subtle: rgba(255, 152, 0, 0.12);
 
-  /* Level 1 & 2 - Safe Green / Verified */
   --color-safe-green: #4caf50;
   --color-safe-green-bright: #00e676;
   --color-safe-green-glow: rgba(0, 230, 118, 0.35);
   --color-safe-green-subtle: rgba(76, 175, 80, 0.12);
 
-  /* AI Intelligence & RAG Blue/Cyan */
   --color-ai-blue: #2196f3;
   --color-ai-cyan: #00e5ff;
   --color-ai-glow: rgba(0, 229, 255, 0.35);
   --color-ai-subtle: rgba(33, 150, 243, 0.12);
 
-  /* Persona Accents */
   --color-victim: #ff1744;
   --color-responder: #00e676;
   --color-command: #00e5ff;
@@ -61,9 +83,9 @@
   /* --- Radii & Spacing --- */
   --radius-xs: 4px;
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
   --radius-full: 9999px;
 
   /* --- Shadows & Glows --- */
@@ -79,7 +101,7 @@
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* --- Typography Families --- */
   --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -94,36 +116,21 @@
 /* 1. SOS Button Breathing Pulse Glow */
 @keyframes sosPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.75), 0 0 30px rgba(255, 23, 68, 0.4);
+    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0.75), 0 0 30px rgba(229, 37, 56, 0.4);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 24px rgba(255, 23, 68, 0), 0 0 50px rgba(255, 23, 68, 0.7);
+    box-shadow: 0 0 0 22px rgba(229, 37, 56, 0), 0 0 50px rgba(229, 37, 56, 0.7);
     transform: scale(1.03);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 23, 68, 0), 0 0 30px rgba(255, 23, 68, 0.4);
+    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0), 0 0 30px rgba(229, 37, 56, 0.4);
     transform: scale(1);
   }
 }
 
-/* 2. Expanding Radar Rings (PostGIS Spatial Dispatch Simulation) */
-@keyframes radarWave {
-  0% {
-    transform: scale(0.2);
-    opacity: 0.9;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(3.5);
-    opacity: 0;
-  }
-}
-
-/* 3. Radar Sweep Beam */
-@keyframes radarSweep {
+/* 2. 360° Guardian Radar Sweep Rotation (3.5s cycle) */
+@keyframes guardianRadarSweep {
   0% {
     transform: rotate(0deg);
   }
@@ -132,7 +139,39 @@
   }
 }
 
-/* 4. CPR Metronome Beat Flash (110 BPM = 0.545s period) */
+/* 3. Concentric Radar Pulse Ring */
+@keyframes radarRingPulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+}
+
+/* 4. Countdown Ticker Badge Pulse */
+@keyframes countdownBadgePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0.7);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 12px rgba(229, 37, 56, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0);
+  }
+}
+
+/* 5. CPR Metronome Beat Flash (110 BPM = 0.545s period) */
 @keyframes cprMetronomeFlash {
   0%, 100% {
     transform: scale(1);
@@ -151,17 +190,17 @@
   }
 }
 
-/* 5. Voice Audio Waveform Bounce */
+/* 6. Audio Waveform Simulator */
 @keyframes audioWaveform {
   0%, 100% {
     height: 6px;
   }
   50% {
-    height: 32px;
+    height: 30px;
   }
 }
 
-/* 6. Live Telemetry Dot Ping */
+/* 7. Live Telemetry Dot Ping */
 @keyframes telemetryPing {
   0% {
     transform: scale(1);
@@ -173,19 +212,6 @@
   }
 }
 
-/* 7. Subtle Border Gradient Shimmer */
-@keyframes borderShimmer {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 /* ==========================================================================
    Utility Classes
    ========================================================================== */
@@ -194,9 +220,17 @@
   animation: sosPulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-.radar-sweep-beam {
-  animation: radarSweep 3s linear infinite;
+.guardian-radar-sweep {
+  animation: guardianRadarSweep 3.5s linear infinite;
   transform-origin: center center;
+}
+
+.radar-ring-pulse {
+  animation: radarRingPulse 2.2s infinite ease-in-out;
+}
+
+.countdown-pulse {
+  animation: countdownBadgePulse 0.8s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .cpr-beat-active {

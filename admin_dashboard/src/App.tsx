@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NearHelp AI — Main Application Shell
+   NearHelp AI — Main Application Shell (Aligned with docs/design.md)
    File: src/App.tsx
    ========================================================================== */
 
@@ -8,41 +8,51 @@ import { DemoProvider, useDemoStore } from './store/DemoContext';
 import { ScenarioController } from './components/demo/ScenarioController';
 import { MobileDeviceFrame } from './components/demo/MobileDeviceFrame';
 import { Phase1Showcase } from './components/demo/Phase1Showcase';
-import { VictimMobilePreview } from './components/victim/VictimMobilePreview';
+import { GuardianRadarScreen } from './components/guardian/GuardianRadarScreen';
+import { CrisisDispatchScreen } from './components/crisis/CrisisDispatchScreen';
 import { ResponderMobilePreview } from './components/responder/ResponderMobilePreview';
 
 const MainContent: React.FC = () => {
-  const { personaMode, viewLayout } = useDemoStore();
+  const { screenMode, viewLayout } = useDemoStore();
 
   return (
-    <div style={{
+    <main style={{
       minHeight: 'calc(100vh - 58px)',
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: 'var(--bg-base)',
       position: 'relative'
     }}>
-      {/* View Switcher based on viewLayout & personaMode */}
+      {/* View Switcher based on viewLayout & screenMode */}
       {viewLayout === 'DESKTOP_FULL' ? (
         <Phase1Showcase />
       ) : viewLayout === 'SPLIT_SCREEN' ? (
+        /* Dual Screen Showcase matching docs/design.md exact 2-screen layout */
         <div style={{
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'flex-start',
-          gap: '32px',
-          padding: '24px',
+          gap: '36px',
+          padding: '24px 16px',
           flexWrap: 'wrap',
-          maxWidth: '1200px',
+          maxWidth: '1280px',
           margin: '0 auto',
           width: '100%'
         }}>
-          <MobileDeviceFrame title="Victim Persona (1-Tap SOS)" badgeText="Caller">
-            <VictimMobilePreview />
+          {/* Left Screen: Guardian Radar & Safe Zone */}
+          <MobileDeviceFrame 
+            title="Screen 1: Guardian Radar (Safe Zone)" 
+            badgeText="91% Safety Index"
+          >
+            <GuardianRadarScreen />
           </MobileDeviceFrame>
 
-          <MobileDeviceFrame title="Responder Persona (Spatial Alert)" badgeText="Volunteer">
-            <ResponderMobilePreview />
+          {/* Right Screen: Crisis Dispatch & 16-Category Matrix */}
+          <MobileDeviceFrame 
+            title="Screen 2: Crisis Dispatch (16-Category Matrix)" 
+            badgeText="Triage Engine"
+          >
+            <CrisisDispatchScreen />
           </MobileDeviceFrame>
         </div>
       ) : (
@@ -55,16 +65,27 @@ const MainContent: React.FC = () => {
           width: '100%'
         }}>
           <MobileDeviceFrame 
-            title={personaMode === 'VICTIM' ? 'Victim Experience View' : personaMode === 'RESPONDER' ? 'Responder Rescue View' : 'NearHelp Mobile'}
-            badgeText={personaMode === 'VICTIM' ? 'SOS Mode' : personaMode === 'RESPONDER' ? 'Rescue Mode' : 'Admin'}
+            title={
+              screenMode === 'GUARDIAN' ? 'Screen 1: Guardian Radar' : 
+              screenMode === 'CRISIS_MATRIX' ? 'Screen 2: Crisis Dispatch Matrix' : 
+              screenMode === 'RESPONDER' ? 'Responder Rescue Navigation' : 
+              'NearHelp Mobile Client'
+            }
+            badgeText={
+              screenMode === 'GUARDIAN' ? 'Safe Zone' : 
+              screenMode === 'CRISIS_MATRIX' ? '16 Categories' : 
+              screenMode === 'RESPONDER' ? 'Rescue Mode' : 
+              'Admin'
+            }
           >
-            {personaMode === 'VICTIM' && <VictimMobilePreview />}
-            {personaMode === 'RESPONDER' && <ResponderMobilePreview />}
-            {personaMode === 'COMMAND_CENTER' && <VictimMobilePreview />}
+            {screenMode === 'GUARDIAN' && <GuardianRadarScreen />}
+            {screenMode === 'CRISIS_MATRIX' && <CrisisDispatchScreen />}
+            {screenMode === 'RESPONDER' && <ResponderMobilePreview />}
+            {screenMode === 'COMMAND_CENTER' && <CrisisDispatchScreen />}
           </MobileDeviceFrame>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

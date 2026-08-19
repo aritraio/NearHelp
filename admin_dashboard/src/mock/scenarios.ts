@@ -1,9 +1,32 @@
 /* ==========================================================================
-   NearHelp AI — Realistic Pre-Configured Kolkata Emergency Scenarios
+   NearHelp AI — Scenarios & 16-Category Matrix Data (design.md Aligned)
    File: src/mock/scenarios.ts
    ========================================================================== */
 
-import type { EmergencyScenario, SystemTelemetry } from './types';
+import type { EmergencyScenario, SystemTelemetry, CrisisCategoryItem } from './types';
+
+export const EMERGENCY_CATEGORIES: CrisisCategoryItem[] = [
+  // Row 1
+  { id: 'medical', label: 'Medical', emoji: '🩺', severity: 5, description: 'Cardiac arrest, unconsciousness, trauma, respiratory distress' },
+  { id: 'police', label: 'Police', emoji: '👮', severity: 4, description: 'Armed assault, physical threat, active security breach' },
+  { id: 'fire', label: 'Fire', emoji: '🔥', severity: 5, description: 'Building fire, smoke inhalation, electrical fire hazard' },
+  { id: 'accident', label: 'Accident', emoji: '🚗', severity: 4, description: 'Vehicle collision, pedestrian hit, rollover with entrapment' },
+  // Row 2
+  { id: 'robbery', label: 'Robbery', emoji: '🥷', severity: 4, description: 'Active mugging, home invasion, commercial robbery in progress' },
+  { id: 'kidnapping', label: 'Kidnapping', emoji: '🏃', severity: 5, description: 'Abduction in progress, missing vulnerable person, hostage' },
+  { id: 'gas_leak', label: 'Gas Leak', emoji: '⚠️', severity: 4, description: 'LPG/CNG line rupture, asphyxiation danger, explosive risk' },
+  { id: 'flood', label: 'Flood', emoji: '🌊', severity: 3, description: 'Urban flash flood, trapped in rising water, canal overflow' },
+  // Row 3
+  { id: 'earthquake', label: 'Earthquake', emoji: '🏚️', severity: 5, description: 'Structural tremor, building collapse, entrapment under debris' },
+  { id: 'tsunami', label: 'Tsunami', emoji: '🌊', severity: 5, description: 'Coastal surge warning, immediate vertical evacuation required' },
+  { id: 'power_out', label: 'Power out', emoji: '⚡', severity: 2, description: 'Grid blackout, oxygen concentrator failure, trapped in elevator' },
+  { id: 'structural', label: 'Structural', emoji: '🏢', severity: 4, description: 'Balcony/roof collapse, scaffolding failure, deep foundation crack' },
+  // Row 4
+  { id: 'hazmat', label: 'Hazmat', emoji: '🧪', severity: 5, description: 'Toxic chemical spill, industrial acid leak, corrosive vapour' },
+  { id: 'wildfire', label: 'Wildfire', emoji: '🌲', severity: 4, description: 'Rapid perimeter brush fire, smoke evacuation perimeter' },
+  { id: 'weather', label: 'Weather', emoji: '⛈️', severity: 3, description: 'Severe cyclone, supercell lightning strike, gale debris' },
+  { id: 'cyber', label: 'Cyber', emoji: '🔒', severity: 3, description: 'Critical infrastructure ransomware, extortion, device compromise' },
+];
 
 export const SCENARIO_A: EmergencyScenario = {
   id: 'scenario-a',
@@ -11,8 +34,10 @@ export const SCENARIO_A: EmergencyScenario = {
   title: 'Critical Cardiac Arrest (Sector V)',
   subtitle: 'Level 5 Maximum Urgency — Agonal Breathing & Sudden Collapse',
   locationName: 'Godrej Waterside, Sector V, Salt Lake, Kolkata',
+  streetAddress: 'Godrej Waterside, Tower 1',
+  subAddress: 'DP Block, Sector V, Salt Lake City • Kolkata, WB 700091',
   coordinates: [22.5726, 88.4312],
-  category: 'MEDICAL',
+  category: 'medical',
   severity: 5,
   severityLabel: 'Level 5 — Critical Life Threat (Suspected Cardiac Arrest)',
   aiConfidence: 98.4,
@@ -154,8 +179,10 @@ export const SCENARIO_B: EmergencyScenario = {
   title: 'Severe Arterial Bleed / Road Collision (EM Bypass)',
   subtitle: 'Level 4 Urgent — Two-Wheeler Collision with Compound Thigh Trauma',
   locationName: 'EM Bypass near Ruby Hospital Crossing, Kolkata',
+  streetAddress: '1234 EM Bypass Crossing',
+  subAddress: 'Near Ruby Hospital, Sector I, East Kolkata Township • Kolkata, WB 700107',
   coordinates: [22.5135, 88.3986],
-  category: 'ACCIDENT',
+  category: 'accident',
   severity: 4,
   severityLabel: 'Level 4 — High Urgency (Pulsatile Arterial Hemorrhage)',
   aiConfidence: 92.1,
@@ -286,8 +313,10 @@ export const SCENARIO_C: EmergencyScenario = {
   title: 'Offline Mesh & Binary SMS Fallback Simulation',
   subtitle: 'Zero Cellular Data — Emergency Beacon Dispatched via Compressed SMS',
   locationName: 'Basement Parking B2, Sector V, Kolkata (Zero Cellular Signal)',
+  streetAddress: 'Basement B2, Block EP & GP',
+  subAddress: 'Sector V, Salt Lake City • Kolkata, WB 700091 (No GSM/LTE)',
   coordinates: [22.5720, 88.4305],
-  category: 'MEDICAL',
+  category: 'medical',
   severity: 5,
   severityLabel: 'Level 5 — Severe Asthmatic Bronchospasm & Hypoxia',
   aiConfidence: 96.0,
@@ -390,4 +419,5 @@ export const INITIAL_TELEMETRY: SystemTelemetry = {
   ragAccuracyScore: 99.2,
   spatialQueryLatencyMs: 11.4,
   websocketConnectionsCount: 187,
+  safetyIndexScore: 91,
 };

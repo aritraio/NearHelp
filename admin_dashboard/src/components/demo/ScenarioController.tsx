@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NearHelp AI — Floating Demo Controller Bar
+   NearHelp AI — Floating Demo Controller Bar (Updated for design.md)
    File: src/components/demo/ScenarioController.tsx
    ========================================================================== */
 
@@ -19,7 +19,8 @@ import {
   Activity, 
   ShieldAlert, 
   Radio, 
-  UserCheck, 
+  Radar,
+  Grid,
   Ambulance, 
   Layers
 } from 'lucide-react';
@@ -27,7 +28,7 @@ import {
 export const ScenarioController: React.FC = () => {
   const {
     currentScenario,
-    personaMode,
+    screenMode,
     viewLayout,
     incidentStatus,
     elapsedSeconds,
@@ -36,7 +37,7 @@ export const ScenarioController: React.FC = () => {
     audioMuted,
     cprMetronomeActive,
     setScenario,
-    setPersonaMode,
+    setScreenMode,
     setViewLayout,
     advanceStep,
     resetDemo,
@@ -93,12 +94,12 @@ export const ScenarioController: React.FC = () => {
               border: '1px solid var(--border-ai)',
               fontWeight: 700
             }}>
-              DEMO ENGINE
+              SHOW MODE
             </span>
           </span>
         </div>
 
-        {/* Scenario Buttons */}
+        {/* Scenario Presets */}
         <div style={{ 
           display: 'flex', 
           backgroundColor: 'var(--bg-surface)', 
@@ -123,7 +124,7 @@ export const ScenarioController: React.FC = () => {
             title="Scenario A: Cardiac Arrest in Salt Lake Sector V"
           >
             <Activity size={13} />
-            <span>1: Cardiac (Sector V)</span>
+            <span>1: Cardiac</span>
           </button>
 
           <button
@@ -139,10 +140,10 @@ export const ScenarioController: React.FC = () => {
               alignItems: 'center',
               gap: '5px'
             }}
-            title="Scenario B: Severe Arterial Bleed on EM Bypass"
+            title="Scenario B: Severe Bleed on EM Bypass"
           >
             <ShieldAlert size={13} />
-            <span>2: Bleed (EM Bypass)</span>
+            <span>2: Bleed</span>
           </button>
 
           <button
@@ -161,14 +162,14 @@ export const ScenarioController: React.FC = () => {
             title="Scenario C: Offline Mesh/SMS Simulation"
           >
             <Radio size={13} />
-            <span>3: Offline Mesh</span>
+            <span>3: Offline</span>
           </button>
         </div>
       </div>
 
-      {/* Center: Persona Toggle & Status Badge */}
+      {/* Center: Screen Mode Selector & Status Badge */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-        {/* Persona Selector */}
+        {/* Screen / Persona Selector matching design.md */}
         <div style={{ 
           display: 'flex', 
           backgroundColor: 'var(--bg-surface)', 
@@ -178,60 +179,83 @@ export const ScenarioController: React.FC = () => {
           gap: '2px'
         }}>
           <button
-            onClick={() => setPersonaMode('VICTIM')}
+            onClick={() => setScreenMode('GUARDIAN')}
             style={{
-              padding: '5px 12px',
+              padding: '5px 10px',
               borderRadius: 'var(--radius-xs)',
               fontSize: '12px',
-              fontWeight: personaMode === 'VICTIM' ? 700 : 500,
-              backgroundColor: personaMode === 'VICTIM' ? 'rgba(255, 23, 68, 0.2)' : 'transparent',
-              color: personaMode === 'VICTIM' ? 'var(--color-emergency-red-bright)' : 'var(--text-secondary)',
-              border: personaMode === 'VICTIM' ? '1px solid var(--color-emergency-red)' : '1px solid transparent',
+              fontWeight: screenMode === 'GUARDIAN' ? 700 : 500,
+              backgroundColor: screenMode === 'GUARDIAN' ? 'rgba(52, 199, 89, 0.2)' : 'transparent',
+              color: screenMode === 'GUARDIAN' ? '#22C55E' : 'var(--text-secondary)',
+              border: screenMode === 'GUARDIAN' ? '1px solid #22C55E' : '1px solid transparent',
               display: 'flex',
               alignItems: 'center',
               gap: '5px'
             }}
+            title="Screen 1: Guardian Radar & Safe Zone"
           >
-            <UserCheck size={13} />
-            <span>🧑 Victim View</span>
+            <Radar size={13} />
+            <span>🌿 Guardian Radar</span>
           </button>
 
           <button
-            onClick={() => setPersonaMode('RESPONDER')}
+            onClick={() => setScreenMode('CRISIS_MATRIX')}
             style={{
-              padding: '5px 12px',
+              padding: '5px 10px',
               borderRadius: 'var(--radius-xs)',
               fontSize: '12px',
-              fontWeight: personaMode === 'RESPONDER' ? 700 : 500,
-              backgroundColor: personaMode === 'RESPONDER' ? 'rgba(0, 230, 118, 0.2)' : 'transparent',
-              color: personaMode === 'RESPONDER' ? 'var(--color-safe-green-bright)' : 'var(--text-secondary)',
-              border: personaMode === 'RESPONDER' ? '1px solid var(--color-safe-green)' : '1px solid transparent',
+              fontWeight: screenMode === 'CRISIS_MATRIX' ? 700 : 500,
+              backgroundColor: screenMode === 'CRISIS_MATRIX' ? 'rgba(229, 37, 56, 0.2)' : 'transparent',
+              color: screenMode === 'CRISIS_MATRIX' ? 'var(--color-emergency-red-bright)' : 'var(--text-secondary)',
+              border: screenMode === 'CRISIS_MATRIX' ? '1px solid var(--emergency-crimson)' : '1px solid transparent',
               display: 'flex',
               alignItems: 'center',
               gap: '5px'
             }}
+            title="Screen 2: 16-Category Emergency Matrix"
+          >
+            <Grid size={13} />
+            <span>🚨 Crisis Matrix</span>
+          </button>
+
+          <button
+            onClick={() => setScreenMode('RESPONDER')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '12px',
+              fontWeight: screenMode === 'RESPONDER' ? 700 : 500,
+              backgroundColor: screenMode === 'RESPONDER' ? 'rgba(0, 230, 118, 0.2)' : 'transparent',
+              color: screenMode === 'RESPONDER' ? 'var(--color-safe-green-bright)' : 'var(--text-secondary)',
+              border: screenMode === 'RESPONDER' ? '1px solid var(--color-safe-green)' : '1px solid transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+            title="Responder Rescue Flow"
           >
             <Ambulance size={13} />
-            <span>🚑 Responder View</span>
+            <span>🚑 Responder</span>
           </button>
 
           <button
-            onClick={() => setPersonaMode('COMMAND_CENTER')}
+            onClick={() => setScreenMode('COMMAND_CENTER')}
             style={{
-              padding: '5px 12px',
+              padding: '5px 10px',
               borderRadius: 'var(--radius-xs)',
               fontSize: '12px',
-              fontWeight: personaMode === 'COMMAND_CENTER' ? 700 : 500,
-              backgroundColor: personaMode === 'COMMAND_CENTER' ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
-              color: personaMode === 'COMMAND_CENTER' ? 'var(--color-ai-cyan)' : 'var(--text-secondary)',
-              border: personaMode === 'COMMAND_CENTER' ? '1px solid var(--color-ai-cyan)' : '1px solid transparent',
+              fontWeight: screenMode === 'COMMAND_CENTER' ? 700 : 500,
+              backgroundColor: screenMode === 'COMMAND_CENTER' ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
+              color: screenMode === 'COMMAND_CENTER' ? 'var(--color-ai-cyan)' : 'var(--text-secondary)',
+              border: screenMode === 'COMMAND_CENTER' ? '1px solid var(--color-ai-cyan)' : '1px solid transparent',
               display: 'flex',
               alignItems: 'center',
               gap: '5px'
             }}
+            title="Command Center Telemetry"
           >
             <Layers size={13} />
-            <span>🛰️ Command Center</span>
+            <span>🛰️ Command</span>
           </button>
         </div>
 
@@ -274,20 +298,8 @@ export const ScenarioController: React.FC = () => {
           gap: '2px'
         }}>
           <button
-            onClick={() => setViewLayout('MOBILE_FRAME')}
-            title="Mobile Smartphone Frame"
-            style={{
-              padding: '4px 7px',
-              borderRadius: 'var(--radius-xs)',
-              backgroundColor: viewLayout === 'MOBILE_FRAME' ? 'var(--bg-surface-elevated)' : 'transparent',
-              color: viewLayout === 'MOBILE_FRAME' ? 'var(--text-primary)' : 'var(--text-muted)'
-            }}
-          >
-            <Smartphone size={14} />
-          </button>
-          <button
             onClick={() => setViewLayout('SPLIT_SCREEN')}
-            title="Dual Persona Split Screen"
+            title="Dual Persona Split Screen (design.md Layout)"
             style={{
               padding: '4px 7px',
               borderRadius: 'var(--radius-xs)',
@@ -297,9 +309,23 @@ export const ScenarioController: React.FC = () => {
           >
             <Columns size={14} />
           </button>
+
+          <button
+            onClick={() => setViewLayout('MOBILE_FRAME')}
+            title="Single Mobile Smartphone Frame"
+            style={{
+              padding: '4px 7px',
+              borderRadius: 'var(--radius-xs)',
+              backgroundColor: viewLayout === 'MOBILE_FRAME' ? 'var(--bg-surface-elevated)' : 'transparent',
+              color: viewLayout === 'MOBILE_FRAME' ? 'var(--text-primary)' : 'var(--text-muted)'
+            }}
+          >
+            <Smartphone size={14} />
+          </button>
+
           <button
             onClick={() => setViewLayout('DESKTOP_FULL')}
-            title="Full Width Projector View"
+            title="Full Architecture & Token Visualizer"
             style={{
               padding: '4px 7px',
               borderRadius: 'var(--radius-xs)',
@@ -326,7 +352,7 @@ export const ScenarioController: React.FC = () => {
             color: cprMetronomeActive ? '#ffffff' : 'var(--text-secondary)',
             border: `1px solid ${cprMetronomeActive ? 'var(--color-emergency-red-bright)' : 'var(--border-subtle)'}`,
           }}
-          title="Toggle 110 BPM CPR Metronome (Sound & Visual Flash)"
+          title="Toggle 110 BPM CPR Metronome"
         >
           <Heart size={13} className={cprMetronomeActive ? 'cpr-beat-active' : ''} />
           <span>110 BPM</span>
@@ -342,7 +368,7 @@ export const ScenarioController: React.FC = () => {
             color: audioMuted ? 'var(--color-action-amber)' : 'var(--text-secondary)',
             border: '1px solid var(--border-subtle)'
           }}
-          title={audioMuted ? 'Unmute Sound Synthesizer' : 'Mute Sounds'}
+          title={audioMuted ? 'Unmute' : 'Mute'}
         >
           {audioMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
         </button>
@@ -381,7 +407,7 @@ export const ScenarioController: React.FC = () => {
             color: simulationSpeed > 1 ? 'var(--color-ai-cyan)' : 'var(--text-muted)',
             border: '1px solid var(--border-subtle)'
           }}
-          title="Toggle Simulation Speed (1x / 2x / 5x)"
+          title="Toggle Simulation Speed"
         >
           {simulationSpeed}x
         </button>

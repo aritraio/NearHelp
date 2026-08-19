@@ -1,7 +1,9 @@
 /* ==========================================================================
-   NearHelp AI — Data Types & Contracts
+   NearHelp AI — Data Types & Contracts (Aligned with design.md)
    File: src/mock/types.ts
    ========================================================================== */
+
+export type ScreenMode = 'GUARDIAN' | 'CRISIS_MATRIX' | 'RESPONDER' | 'COMMAND_CENTER';
 
 export type PersonaMode = 'VICTIM' | 'RESPONDER' | 'COMMAND_CENTER';
 
@@ -22,7 +24,31 @@ export type IncidentStatus =
 
 export type SeverityLevel = 1 | 2 | 3 | 4 | 5;
 
-export type CrisisCategory = 'MEDICAL' | 'FIRE' | 'CRIME' | 'ACCIDENT';
+export type CrisisCategoryId = 
+  | 'medical' 
+  | 'police' 
+  | 'fire' 
+  | 'accident'
+  | 'robbery' 
+  | 'kidnapping' 
+  | 'gas_leak' 
+  | 'flood'
+  | 'earthquake' 
+  | 'tsunami' 
+  | 'power_out' 
+  | 'structural'
+  | 'hazmat' 
+  | 'wildfire' 
+  | 'weather' 
+  | 'cyber';
+
+export interface CrisisCategoryItem {
+  id: CrisisCategoryId;
+  label: string;
+  emoji: string;
+  severity: SeverityLevel;
+  description: string;
+}
 
 export type ResponderSkill = 
   | 'CPR_CERTIFIED' 
@@ -98,8 +124,10 @@ export interface EmergencyScenario {
   title: string;
   subtitle: string;
   locationName: string;
+  streetAddress: string;
+  subAddress: string;
   coordinates: [number, number]; // [lat, lng]
-  category: CrisisCategory;
+  category: CrisisCategoryId;
   severity: SeverityLevel;
   severityLabel: string;
   aiConfidence: number; // e.g. 98.4
@@ -132,4 +160,5 @@ export interface SystemTelemetry {
   ragAccuracyScore: number;
   spatialQueryLatencyMs: number;
   websocketConnectionsCount: number;
+  safetyIndexScore: number;
 }

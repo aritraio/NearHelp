@@ -68,10 +68,10 @@ export const VictimMobilePreview: React.FC = () => {
       {/* Emergency Category Chips */}
       <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
         {[
-          { label: '🩺 Medical', active: currentScenario.category === 'MEDICAL' },
-          { label: '🚗 Accident', active: currentScenario.category === 'ACCIDENT' },
-          { label: '🔥 Fire', active: currentScenario.category === 'FIRE' },
-          { label: '🛡️ Crime', active: currentScenario.category === 'CRIME' },
+          { label: '🩺 Medical', active: currentScenario.category === 'medical' },
+          { label: '🚗 Accident', active: currentScenario.category === 'accident' },
+          { label: '🔥 Fire', active: currentScenario.category === 'fire' },
+          { label: '🛡️ Police', active: currentScenario.category === 'police' },
         ].map((cat, idx) => (
           <div
             key={idx}
@@ -176,7 +176,7 @@ export const VictimMobilePreview: React.FC = () => {
           </div>
 
           {/* CPR Metronome Quick Action */}
-          {currentScenario.category === 'MEDICAL' && (
+          {currentScenario.category === 'medical' && (
             <div style={{
               backgroundColor: 'var(--bg-surface)',
               border: `1px solid ${cprMetronomeActive ? 'var(--color-emergency-red)' : 'var(--border-subtle)'}`,
