@@ -28,7 +28,7 @@ const MainContent: React.FC = () => {
       {viewLayout === 'DESKTOP_FULL' ? (
         <Phase1Showcase />
       ) : viewLayout === 'SPLIT_SCREEN' ? (
-        /* Dual Screen Showcase matching docs/design.md exact 2-screen layout */
+        /* Dynamic Dual Persona Split Screen for Showcase Presentations */
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -36,25 +36,64 @@ const MainContent: React.FC = () => {
           gap: '36px',
           padding: '24px 16px',
           flexWrap: 'wrap',
-          maxWidth: '1280px',
+          maxWidth: '1360px',
           margin: '0 auto',
           width: '100%'
         }}>
-          {/* Left Screen: Guardian Radar & Safe Zone */}
-          <MobileDeviceFrame 
-            title="Screen 1: Guardian Radar (Safe Zone)" 
-            badgeText="91% Safety Index"
-          >
-            <GuardianRadarScreen />
-          </MobileDeviceFrame>
+          {screenMode === 'GUARDIAN' ? (
+            <>
+              {/* Left Screen: Guardian Radar & Safe Zone */}
+              <MobileDeviceFrame 
+                title="Screen 1: Guardian Radar (Safe Zone)" 
+                badgeText="91% Safety Index"
+              >
+                <GuardianRadarScreen />
+              </MobileDeviceFrame>
 
-          {/* Right Screen: Victim Experience (SOS Intake, AI Triage & Grounded First-Aid RAG) */}
-          <MobileDeviceFrame 
-            title="Screen 2: Victim Experience" 
-            badgeText="SOS • Triage • First-Aid"
-          >
-            <VictimMobilePreview />
-          </MobileDeviceFrame>
+              {/* Right Screen: Victim Experience */}
+              <MobileDeviceFrame 
+                title="Screen 2: Victim Experience" 
+                badgeText="SOS • Triage • First-Aid"
+              >
+                <VictimMobilePreview />
+              </MobileDeviceFrame>
+            </>
+          ) : screenMode === 'COMMAND_CENTER' ? (
+            <>
+              {/* Left Screen: Responder Experience */}
+              <MobileDeviceFrame 
+                title="Responder Experience" 
+                badgeText="Rescue Mode"
+              >
+                <ResponderMobilePreview />
+              </MobileDeviceFrame>
+
+              {/* Right Screen: Command Center Telemetry */}
+              <MobileDeviceFrame 
+                title="Screen 7: Command Center" 
+                badgeText="Spatial Dispatch"
+              >
+                <CrisisDispatchScreen />
+              </MobileDeviceFrame>
+            </>
+          ) : (
+            /* Default Dual-Persona Live Sync: Victim Mode (Left) + Responder Mode (Right) */
+            <>
+              <MobileDeviceFrame 
+                title="Persona A: Victim Experience" 
+                badgeText="SOS • Triage • First-Aid"
+              >
+                <VictimMobilePreview />
+              </MobileDeviceFrame>
+
+              <MobileDeviceFrame 
+                title="Persona B: Responder Rescue Flow" 
+                badgeText="Alert • Nav • Medical ID"
+              >
+                <ResponderMobilePreview />
+              </MobileDeviceFrame>
+            </>
+          )}
         </div>
       ) : (
         /* Single Mobile Frame view */

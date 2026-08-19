@@ -3,7 +3,7 @@
    File: src/store/DemoContext.tsx (Medical Emergency Intake & Multimodal)
    ========================================================================== */
 
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { 
   EmergencyScenario, 
   IncidentStatus, 
@@ -14,8 +14,11 @@ import type {
   MedicalConditionId,
   MultimodalInputMode,
   VictimSubScreen,
+  ResponderSubScreen,
   CrisisCategory,
-  BystanderChatMessage
+  BystanderChatMessage,
+  IncidentChatMessage,
+  TimelineEventItem
 } from '../mock/types';
 import { ALL_SCENARIOS, SCENARIO_A, INITIAL_TELEMETRY, MEDICAL_CONDITIONS } from '../mock/scenarios';
 import { soundEngine } from '../utils/audio';
@@ -27,6 +30,37 @@ const INITIAL_AI_CHAT_MESSAGES: BystanderChatMessage[] = [
     text: 'NearHelp Gemini Medical Assistant online. What clinical guidance or first-aid clarification do you need while emergency responders are en-route?',
     timestamp: 'Just now',
     highlightText: 'Clinical Protocol Active'
+  }
+];
+
+const INITIAL_INCIDENT_CHAT_MESSAGES: IncidentChatMessage[] = [
+  {
+    id: 'chat-1',
+    sender: 'system',
+    senderName: 'System Beacon',
+    senderRole: 'NearHelp Dispatch Gateway',
+    text: '🚨 Emergency Incident Created: Level 5 Cardiac Arrest at Godrej Waterside Tower 1. 108 Ambulance Unit WB-01-AMB-4421 dispatched.',
+    timestamp: 'T+00:00',
+    isMilestone: true,
+    badgeColor: 'var(--color-emergency-red-bright)'
+  },
+  {
+    id: 'chat-2',
+    sender: 'victim',
+    senderName: 'Mousumi S. (Bystander)',
+    senderRole: 'On-Scene Bystander',
+    text: 'মাটিতে পড়ে গেছেন, শ্বাস নিচ্ছেন না! খুব দ্রুত কেউ আসুন!',
+    translatedText: 'Collapsed on the floor, not breathing! Please someone come fast!',
+    originalLanguage: 'Bengali',
+    timestamp: 'T+00:04'
+  },
+  {
+    id: 'chat-3',
+    sender: 'dispatcher_108',
+    senderName: 'Control Room 108',
+    senderRole: 'Municipal EMS Dispatcher',
+    text: 'Ambulance dispatched from Salt Lake Sub-Divisional Hospital (ETA 7.5 mins). Dr. Ananya Mukherjee is responding locally (ETA 2.5 mins).',
+    timestamp: 'T+00:09'
   }
 ];
 
@@ -47,6 +81,15 @@ interface DemoContextType {
   completedRagSteps: number[];
   isAiChatDrawerOpen: boolean;
   aiChatMessages: BystanderChatMessage[];
+
+  // Phase 3 Responder Experience Sub-Views & Features
+  responderSubScreen: ResponderSubScreen;
+  activeResponderIndex: number;
+  aedAttached: boolean;
+  responderDeclined: boolean;
+  responderChatMessages: IncidentChatMessage[];
+  timelineEvents: TimelineEventItem[];
+  turnByTurnStepIndex: number;
 
   // Multimodal Medical Intake
   intakeInputMode: MultimodalInputMode;
@@ -96,6 +139,17 @@ interface DemoContextType {
   setAiChatDrawerOpen: (open: boolean) => void;
   sendBystanderQuestion: (question: string) => void;
   resetRagChecklist: () => void;
+
+  // Phase 3 Responder Actions
+  setResponderSubScreen: (subScreen: ResponderSubScreen) => void;
+  setActiveResponderIndex: (index: number) => void;
+  toggleAedAttached: () => void;
+  declineDispatch: () => void;
+  sendResponderChatMessage: (text: string, senderRole?: 'responder' | 'victim' | 'dispatcher_108') => void;
+  setTurnByTurnStepIndex: (index: number) => void;
+  nextTurnByTurnStep: () => void;
+  prevTurnByTurnStep: () => void;
+
   setIntakeInputMode: (mode: MultimodalInputMode) => void;
   toggleVoiceRecording: () => void;
   setTextInputNotes: (text: string) => void;
@@ -136,6 +190,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [completedRagSteps, setCompletedRagSteps] = useState<number[]>([]);
   const [isAiChatDrawerOpen, setIsAiChatDrawerOpen] = useState<boolean>(false);
   const [aiChatMessages, setAiChatMessages] = useState<BystanderChatMessage[]>(INITIAL_AI_CHAT_MESSAGES);
+
+  // Phase 3 Responder Experience Sub-Views & Features
+  const [responderSubScreen, setResponderSubScreenState] = useState<ResponderSubScreen>('ALERT');
+  const [activeResponderIndex, setActiveResponderIndexState] = useState<number>(0);
+  const [aedAttached, setAedAttachedState] = useState<boolean>(false);
+  const [responderDeclined, setResponderDeclined] = useState<boolean>(false);
+  const [responderChatMessages, setResponderChatMessages] = useState<IncidentChatMessage[]>(INITIAL_INCIDENT_CHAT_MESSAGES);
+  const [turnByTurnStepIndex, setTurnByTurnStepIndexState] = useState<number>(0);
 
   // Multimodal Medical Intake state
   const [intakeInputMode, setIntakeInputModeState] = useState<MultimodalInputMode>('PRESETS');
@@ -436,20 +498,146 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSearchRadiusKm(0.5);
   }, []);
 
+  // Phase 3 Responder Actions
+  const setResponderSubScreen = useCallback((subScreen: ResponderSubScreen) => {
+    soundEngine.playClick();
+    setResponderSubScreenState(subScreen);
+  }, []);
+
+  const setActiveResponderIndex = useCallback((index: number) => {
+    soundEngine.playClick();
+    setActiveResponderIndexState(index);
+  }, []);
+
+  const toggleAedAttached = useCallback(() => {
+    soundEngine.playClick();
+    setAedAttachedState(prev => {
+      const next = !prev;
+      if (next) {
+        soundEngine.playSuccessChime();
+        setResponderChatMessages(msgs => [
+          ...msgs,
+          {
+            id: `chat-${Date.now()}`,
+            sender: 'system',
+            senderName: 'Defibrillator Unit',
+            senderRole: 'AED Telemetry Gateway',
+            text: '⚡ Automated External Defibrillator (AED) attached. Analyzing cardiac rhythm... Shock advised & delivered. Resume CPR compressions at 110 BPM.',
+            timestamp: 'Just now',
+            isMilestone: true,
+            badgeColor: 'var(--color-action-amber-bright)'
+          }
+        ]);
+      }
+      return next;
+    });
+  }, []);
+
+  const declineDispatch = useCallback(() => {
+    soundEngine.playClick();
+    setResponderDeclined(true);
+    // Auto-switch to next available responder (Rahul Das)
+    setActiveResponderIndexState(1);
+    setResponderChatMessages(msgs => [
+      ...msgs,
+      {
+        id: `chat-${Date.now()}`,
+        sender: 'system',
+        senderName: 'Dispatch Engine',
+        senderRole: 'PostGIS Spatial Router',
+        text: '⚠️ Primary responder Dr. Ananya Mukherjee unavailable. Auto-rerouting to nearest CPR-verified responder: Rahul Das (650m away, ETA 4.0 mins).',
+        timestamp: 'Just now',
+        isMilestone: true,
+        badgeColor: 'var(--color-action-amber-bright)'
+      }
+    ]);
+  }, []);
+
+  const sendResponderChatMessage = useCallback((text: string, senderRole: 'responder' | 'victim' | 'dispatcher_108' = 'responder') => {
+    soundEngine.playClick();
+    const activeResp = currentScenario.responders[activeResponderIndex] || currentScenario.responders[0];
+    const newMsg: IncidentChatMessage = {
+      id: `chat-${Date.now()}`,
+      sender: senderRole,
+      senderName: senderRole === 'responder' ? activeResp.name : senderRole === 'victim' ? 'Mousumi S. (Bystander)' : 'Control Room 108',
+      senderRole: senderRole === 'responder' ? activeResp.role : senderRole === 'victim' ? 'On-Scene Bystander' : 'Municipal Dispatcher',
+      text: text,
+      timestamp: 'Just now'
+    };
+    setResponderChatMessages(prev => [...prev, newMsg]);
+  }, [currentScenario, activeResponderIndex]);
+
+  const setTurnByTurnStepIndex = useCallback((index: number) => {
+    soundEngine.playClick();
+    setTurnByTurnStepIndexState(index);
+  }, []);
+
+  const nextTurnByTurnStep = useCallback(() => {
+    soundEngine.playClick();
+    setTurnByTurnStepIndexState(prev => Math.min(prev + 1, 3));
+  }, []);
+
+  const prevTurnByTurnStep = useCallback(() => {
+    soundEngine.playClick();
+    setTurnByTurnStepIndexState(prev => Math.max(prev - 1, 0));
+  }, []);
+
   // Responder Actions
   const acceptDispatch = useCallback(() => {
     soundEngine.playSuccessChime();
     setIncidentStatusState('RESPONDER_ACCEPTED');
-  }, []);
+    setResponderSubScreenState('NAVIGATION');
+    const activeResp = currentScenario.responders[activeResponderIndex] || currentScenario.responders[0];
+    setResponderChatMessages(msgs => [
+      ...msgs,
+      {
+        id: `chat-${Date.now()}`,
+        sender: 'responder',
+        senderName: activeResp.name,
+        senderRole: activeResp.role,
+        text: `✅ Dispatch accepted. Navigating to ${currentScenario.streetAddress} (ETA ${activeResp.etaMinutes} mins). Initiating CPR kit preparation.`,
+        timestamp: 'Just now',
+        isMilestone: true,
+        badgeColor: 'var(--color-safe-green-bright)'
+      }
+    ]);
+  }, [currentScenario, activeResponderIndex]);
 
   const simulateArrival = useCallback(() => {
     soundEngine.playSuccessChime();
     setIncidentStatusState('RESPONDER_ARRIVED');
-  }, []);
+    const activeResp = currentScenario.responders[activeResponderIndex] || currentScenario.responders[0];
+    setResponderChatMessages(msgs => [
+      ...msgs,
+      {
+        id: `chat-${Date.now()}`,
+        sender: 'responder',
+        senderName: activeResp.name,
+        senderRole: activeResp.role,
+        text: `📍 Arrived on scene at ${currentScenario.streetAddress}. Commencing chest compressions & vital check.`,
+        timestamp: 'Just now',
+        isMilestone: true,
+        badgeColor: 'var(--color-safe-green-bright)'
+      }
+    ]);
+  }, [currentScenario, activeResponderIndex]);
 
   const handoverTo108 = useCallback(() => {
     soundEngine.playClick();
     setIncidentStatusState('HANDOVER_108');
+    setResponderChatMessages(msgs => [
+      ...msgs,
+      {
+        id: `chat-${Date.now()}`,
+        sender: 'dispatcher_108',
+        senderName: '108 Paramedic Team Leader',
+        senderRole: 'Ambulance WB-01-AMB-4421',
+        text: `🚑 108 Advanced Life Support Unit on scene. Assuming patient care, ROSC achieved. Transferring to AMRI Hospital ICU.`,
+        timestamp: 'Just now',
+        isMilestone: true,
+        badgeColor: 'var(--color-ai-cyan)'
+      }
+    ]);
   }, []);
 
   const resolveEmergency = useCallback(() => {
@@ -459,6 +647,19 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIncidentStatusState('RESOLVED');
     setIsAutoSimulating(false);
     setIsCountingDown(false);
+    setResponderChatMessages(msgs => [
+      ...msgs,
+      {
+        id: `chat-${Date.now()}`,
+        sender: 'system',
+        senderName: 'NearHelp Dispatch Gateway',
+        senderRole: 'Clinical Audit Engine',
+        text: `✨ Incident marked RESOLVED. Total bystander intervention time: 4m 18s. Handover certificate generated under Section 134A Good Samaritan Law.`,
+        timestamp: 'Just now',
+        isMilestone: true,
+        badgeColor: 'var(--color-safe-green-bright)'
+      }
+    ]);
   }, []);
 
   // Reset entire demo cleanly
@@ -474,6 +675,12 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveRagStepIndexState(0);
     setIsAiChatDrawerOpen(false);
     setAiChatMessages(INITIAL_AI_CHAT_MESSAGES);
+    setResponderSubScreenState('ALERT');
+    setActiveResponderIndexState(0);
+    setAedAttachedState(false);
+    setResponderDeclined(false);
+    setResponderChatMessages(INITIAL_INCIDENT_CHAT_MESSAGES);
+    setTurnByTurnStepIndexState(0);
     setElapsedSeconds(0);
     setSearchRadiusKm(0.5);
     setIsAutoSimulating(false);
@@ -483,6 +690,95 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setScreenModeState('GUARDIAN');
     setIsVoiceRecording(false);
   }, []);
+
+  // Milestone Events memo
+  const timelineEvents: TimelineEventItem[] = useMemo(() => {
+    const activeResp = currentScenario.responders[activeResponderIndex] || currentScenario.responders[0];
+    return [
+      {
+        id: 'tl-1',
+        timestampOffset: 'T+00:00',
+        timeIso: '19:20:10',
+        title: 'SOS Beacon Dispatched',
+        description: `Emergency intake generated at ${currentScenario.streetAddress}. Multimodal audio transcript & GPS lock acquired.`,
+        badgeType: 'SOS',
+        author: 'NearHelp Android Client',
+        isComplete: incidentStatus !== 'IDLE' && incidentStatus !== 'COUNTDOWN'
+      },
+      {
+        id: 'tl-2',
+        timestampOffset: 'T+00:03',
+        timeIso: '19:20:13',
+        title: `AI Clinical Triage: ${currentScenario.severityLabel}`,
+        description: `Gemini Clinical Model identified ${currentScenario.reportedSymptoms[0] || 'critical symptoms'}. Survival window: ${currentScenario.survivalWindowMinutes} mins.`,
+        badgeType: 'AI_TRIAGE',
+        author: 'Gemini 1.5 Flash Triage Engine',
+        isComplete: ['AI_TRIAGED', 'SEARCHING_RESPONDERS', 'RESPONDER_ACCEPTED', 'RESPONDER_EN_ROUTE', 'RESPONDER_ARRIVED', 'HANDOVER_108', 'RESOLVED'].includes(incidentStatus)
+      },
+      {
+        id: 'tl-3',
+        timestampOffset: 'T+00:08',
+        timeIso: '19:20:18',
+        title: 'PostGIS Spatial Query Executed',
+        description: `High-priority dispatch beacon transmitted to CPR-verified volunteers within ${searchRadiusKm.toFixed(1)}km radius.`,
+        badgeType: 'DISPATCH',
+        author: 'Spatial Dispatch Engine',
+        isComplete: ['SEARCHING_RESPONDERS', 'RESPONDER_ACCEPTED', 'RESPONDER_EN_ROUTE', 'RESPONDER_ARRIVED', 'HANDOVER_108', 'RESOLVED'].includes(incidentStatus)
+      },
+      {
+        id: 'tl-4',
+        timestampOffset: 'T+00:12',
+        timeIso: '19:20:22',
+        title: `${activeResp.name} Accepted Dispatch`,
+        description: `Turn-by-turn rescue navigation active. ETA ${activeResp.etaMinutes} mins (${activeResp.distanceMeters}m). Encrypted Medical ID unlocked.`,
+        badgeType: 'ACCEPTED',
+        author: activeResp.name,
+        isComplete: ['RESPONDER_ACCEPTED', 'RESPONDER_EN_ROUTE', 'RESPONDER_ARRIVED', 'HANDOVER_108', 'RESOLVED'].includes(incidentStatus)
+      },
+      {
+        id: 'tl-5',
+        timestampOffset: 'T+00:26',
+        timeIso: '19:20:36',
+        title: 'Responder Arrived On-Scene',
+        description: `${activeResp.name} arrived at ${currentScenario.streetAddress}. Commenced active BLS emergency protocol.`,
+        badgeType: 'ARRIVAL',
+        author: 'GPS Geofence Trigger',
+        isComplete: ['RESPONDER_ARRIVED', 'HANDOVER_108', 'RESOLVED'].includes(incidentStatus)
+      },
+      {
+        id: 'tl-6',
+        timestampOffset: 'T+00:34',
+        timeIso: '19:20:44',
+        title: 'Automated External Defibrillator (AED) Deployed',
+        description: aedAttached 
+          ? 'AED electrode pads attached from Webel Bhavan security desk. Rhythm analyzed: shock advised and delivered.'
+          : 'Nearby AED localized at Webel Bhavan Security Desk (180m).',
+        badgeType: 'AED',
+        author: 'Community AED Mesh',
+        isComplete: aedAttached || ['HANDOVER_108', 'RESOLVED'].includes(incidentStatus)
+      },
+      {
+        id: 'tl-7',
+        timestampOffset: 'T+00:45',
+        timeIso: '19:20:55',
+        title: 'Handover to 108 Emergency Paramedics',
+        description: `Incident transferred to Ambulance Unit WB-01-AMB-4421. Patient vital signs stabilized for transport.`,
+        badgeType: 'AMBULANCE',
+        author: '108 Paramedic Team Leader',
+        isComplete: ['HANDOVER_108', 'RESOLVED'].includes(incidentStatus)
+      },
+      {
+        id: 'tl-8',
+        timestampOffset: 'T+01:10',
+        timeIso: '19:21:20',
+        title: 'Rescue Incident Successfully Resolved',
+        description: 'Post-incident clinical handover PDF generated. Volunteer Good Samaritan legal immunity log archived.',
+        badgeType: 'RESOLVED',
+        author: 'System Auto-Audit',
+        isComplete: incidentStatus === 'RESOLVED'
+      }
+    ];
+  }, [currentScenario, activeResponderIndex, incidentStatus, searchRadiusKm, aedAttached]);
 
   // Step advancement
   const advanceStep = useCallback(() => {
@@ -639,6 +935,13 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         completedRagSteps,
         isAiChatDrawerOpen,
         aiChatMessages,
+        responderSubScreen,
+        activeResponderIndex,
+        aedAttached,
+        responderDeclined,
+        responderChatMessages,
+        timelineEvents,
+        turnByTurnStepIndex,
         intakeInputMode,
         voiceTranscript,
         textInputNotes,
@@ -674,6 +977,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAiChatDrawerOpen,
         sendBystanderQuestion,
         resetRagChecklist,
+        setResponderSubScreen,
+        setActiveResponderIndex,
+        toggleAedAttached,
+        declineDispatch,
+        sendResponderChatMessage,
+        setTurnByTurnStepIndex,
+        nextTurnByTurnStep,
+        prevTurnByTurnStep,
         setIntakeInputMode,
         toggleVoiceRecording,
         setTextInputNotes,

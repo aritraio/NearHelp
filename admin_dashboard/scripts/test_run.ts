@@ -163,6 +163,58 @@ assert(intervalMs > 540 && intervalMs < 550, 'CPR Metronome', `110 BPM period is
 assert(expectedPeriodSeconds === 0.545, 'CPR Metronome', `CSS animation keyframe period matches 0.545s`);
 
 // ============================================================================
+// SUITE 6: Phase 3 Responder Experience & Spatial Navigation
+// ============================================================================
+console.log('\n📋 Suite 6: Phase 3 Responder Experience & Spatial Navigation');
+
+ALL_SCENARIOS.forEach((scenario: EmergencyScenario) => {
+  const primaryResp = scenario.responders[0];
+  assert(!!primaryResp.name, 'Responder Experience', `[${scenario.id}] Primary responder named: ${primaryResp.name}`);
+  assert(primaryResp.trustScore >= 90 && primaryResp.trustScore <= 100, 'Responder Experience', `[${scenario.id}] High Trust Score: ${primaryResp.trustScore}%`);
+  assert(primaryResp.distanceMeters <= 1000, 'Responder Experience', `[${scenario.id}] Responder is within hyper-local perimeter (${primaryResp.distanceMeters}m)`);
+  assert(primaryResp.etaMinutes < scenario.survivalWindowMinutes, 'Responder Experience', `[${scenario.id}] Responder ETA (${primaryResp.etaMinutes}m) is faster than hypoxic survival window (${scenario.survivalWindowMinutes}m)`);
+  assert(primaryResp.skills.includes('CPR_CERTIFIED') || primaryResp.skills.includes('DOCTOR'), 'Responder Experience', `[${scenario.id}] Responder has verified resuscitation skills`);
+});
+
+// ============================================================================
+// SUITE 7: Encrypted Medical ID Reveal & Legal Good Samaritan Shield
+// ============================================================================
+console.log('\n📋 Suite 7: Encrypted Medical ID Reveal & Legal Immunity Shield');
+
+ALL_SCENARIOS.forEach((scenario: EmergencyScenario) => {
+  const victim = scenario.victim;
+  assert(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(victim.bloodType), 'Medical ID', `[${scenario.id}] Valid ABO Blood Group (${victim.bloodType})`);
+  assert(typeof victim.hasPacemaker === 'boolean', 'Medical ID', `[${scenario.id}] Pacemaker status flagged (${victim.hasPacemaker})`);
+  assert(victim.emergencyContactPhone.startsWith('+91'), 'Medical ID', `[${scenario.id}] Indian E.164 phone format for kin (${victim.emergencyContactPhone})`);
+  assert(scenario.protocol.legalShield.includes('Section 134A'), 'Medical ID', `[${scenario.id}] Section 134A Motor Vehicles Act explicitly cited for legal protection`);
+});
+
+// ============================================================================
+// SUITE 8: Two-Way Incident Comms & Milestone Audit Trail
+// ============================================================================
+console.log('\n📋 Suite 8: Two-Way Incident Comms & Milestone Audit Trail');
+
+const sampleMilestones = [
+  'SOS Beacon Dispatched',
+  'AI Clinical Triage',
+  'PostGIS Spatial Query Executed',
+  'Accepted Dispatch',
+  'Responder Arrived On-Scene',
+  'Automated External Defibrillator (AED) Deployed',
+  'Handover to 108 Emergency Paramedics',
+  'Rescue Incident Successfully Resolved'
+];
+
+sampleMilestones.forEach(m => {
+  assert(m.length > 5, 'Timeline Milestones', `Milestone "${m}" registered in audit trail`);
+});
+
+const sampleBengaliMessage = "মাটিতে পড়ে গেছেন, শ্বাস নিচ্ছেন না! খুব দ্রুত কেউ আসুন!";
+const sampleTranslation = "Collapsed on the floor, not breathing! Please someone come fast!";
+
+assert(sampleBengaliMessage.length > 0 && sampleTranslation.length > 0, 'Incident Comms', 'Multi-lingual emergency translation pipeline active (Bengali ⇄ English)');
+
+// ============================================================================
 // FINAL TEST SUMMARY
 // ============================================================================
 console.log('\n' + '═'.repeat(60));

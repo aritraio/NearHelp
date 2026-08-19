@@ -259,7 +259,7 @@ export const SCENARIO_B: EmergencyScenario = {
       id: 'resp-201',
       name: 'Amit Kumar',
       role: 'Paramedic / EMT First-Responder',
-      skills: ['EMT', 'FIRST_AIDER'],
+      skills: ['EMT', 'FIRST_AIDER', 'CPR_CERTIFIED'],
       distanceMeters: 310,
       etaMinutes: 1.8,
       trustScore: 97,
@@ -288,7 +288,7 @@ export const SCENARIO_B: EmergencyScenario = {
     title: 'Indian Red Cross & WHO Severe Hemorrhage Control Protocol',
     authority: 'Indian Red Cross Society & Stop the Bleed Initiative',
     disclaimers: 'Direct pressure must be applied immediately. Do not remove penetrating objects.',
-    legalShield: 'Good Samaritan protection applies under Indian Supreme Court 2016 directive.',
+    legalShield: 'Good Samaritan protection applies under Section 134A Motor Vehicles Act & Supreme Court 2016 directive.',
     steps: [
       {
         stepNumber: 1,
@@ -395,7 +395,7 @@ export const SCENARIO_C: EmergencyScenario = {
       id: 'resp-301',
       name: 'Pooja Banerjee',
       role: 'Resident Staff Nurse',
-      skills: ['NURSE', 'FIRST_AIDER'],
+      skills: ['NURSE', 'FIRST_AIDER', 'CPR_CERTIFIED'],
       distanceMeters: 190,
       etaMinutes: 1.5,
       trustScore: 98,

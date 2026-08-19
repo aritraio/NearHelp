@@ -99,16 +99,16 @@ gantt
 
 ### 🛡️ Phase 3: Responder Experience Screens (Thu Evening)
 
-- [ ] 🔴 **Screen 4: High-Priority Emergency Dispatch Alert Modal**
-  - [ ] Full-screen flashing emergency banner with audible tone trigger simulation
-  - [ ] Incident Summary Card: *Victim 420m away (3 mins walking)*, *Incident: Unconscious Male, 52*, *Required Skill: CPR / First-Aid*
-  - [ ] Action buttons: `[ ✅ Accept Dispatch ]` (with instant route calculation) and `[ ❌ Decline (Re-route) ]`
+- [x] 🔴 **Screen 4: High-Priority Emergency Dispatch Alert Modal**
+  - [x] Full-screen flashing emergency banner with audible tone trigger simulation
+  - [x] Incident Summary Card: *Victim 420m away (2.5 mins walking)*, *Incident: Rajesh Sengupta, 54 M (Level 5 Cardiac Arrest)*, *Required Skill: CPR / First-Aid / Doctor*
+  - [x] Action buttons: `[ ✅ Accept Dispatch ]` (with instant route calculation) and `[ ❌ Decline (Re-route) ]`
 
-- [ ] 🔴 **Screen 5: Active Rescue Navigation & Victim Profile**
-  - [ ] Route map showing responder location → victim location with live turn-by-turn simulation
-  - [ ] Encrypted Medical ID Reveal (Blood Type: `O+`, Known Allergies: `Penicillin`, Pacemaker: `Yes`)
-  - [ ] Responder Action Bar: `[ I Have Arrived on Scene ]`, `[ AED Attached ]`, `[ Handover to 108 Ambulance ]`
-  - [ ] Two-way Real-Time Incident Chat & Event Timeline (Automated timestamp milestones)
+- [x] 🔴 **Screen 5: Active Rescue Navigation & Victim Profile**
+  - [x] Route map showing responder location → victim location with live turn-by-turn simulation (SVG Vector Route Map)
+  - [x] Encrypted Medical ID Reveal (Blood Type: `O+`, Known Allergies: `Penicillin`, Pacemaker: `None/Active`, Direct Kin Call & SMS)
+  - [x] Responder Action Bar: `[ I Have Arrived on Scene ]`, `[ AED Attached ]`, `[ Handover to 108 Ambulance ]`, `[ Mark Resolved ]`
+  - [x] Two-way Real-Time Incident Chat & Event Timeline (Automated timestamp milestones, auto-translation Bengali ⇄ English)
 
 ---
 

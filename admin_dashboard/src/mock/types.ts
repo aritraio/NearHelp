@@ -9,6 +9,8 @@ export type PersonaMode = 'VICTIM' | 'RESPONDER' | 'COMMAND_CENTER';
 
 export type VictimSubScreen = 'TRIGGER' | 'TRIAGE' | 'FIRST_AID';
 
+export type ResponderSubScreen = 'ALERT' | 'NAVIGATION' | 'TIMELINE_CHAT';
+
 export type CrisisCategory = 'medical' | 'fire' | 'crime' | 'accident';
 
 export interface BystanderChatMessage {
@@ -18,6 +20,30 @@ export interface BystanderChatMessage {
   timestamp: string;
   isActionable?: boolean;
   highlightText?: string;
+}
+
+export interface IncidentChatMessage {
+  id: string;
+  sender: 'responder' | 'victim' | 'dispatcher_108' | 'system';
+  senderName: string;
+  senderRole: string;
+  text: string;
+  translatedText?: string;
+  originalLanguage?: string;
+  timestamp: string;
+  isMilestone?: boolean;
+  badgeColor?: string;
+}
+
+export interface TimelineEventItem {
+  id: string;
+  timestampOffset: string; // e.g. "T+00:00"
+  timeIso: string; // e.g. "19:24:00"
+  title: string;
+  description: string;
+  badgeType: 'SOS' | 'AI_TRIAGE' | 'DISPATCH' | 'ACCEPTED' | 'ARRIVAL' | 'AED' | 'AMBULANCE' | 'RESOLVED';
+  author: string;
+  isComplete: boolean;
 }
 
 export type ViewLayout = 'MOBILE_FRAME' | 'SPLIT_SCREEN' | 'DESKTOP_FULL';
