@@ -212,10 +212,10 @@ export const ScenarioController: React.FC = () => {
               alignItems: 'center',
               gap: '5px'
             }}
-            title="Screen 2: 16-Category Emergency Matrix"
+            title="Screen 2: Medical Emergency Intake (Multimodal Triage)"
           >
             <Grid size={13} />
-            <span>🚨 Crisis Matrix</span>
+            <span>🩺 Medical Intake</span>
           </button>
 
           <button

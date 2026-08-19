@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NearHelp AI — Data Types & Contracts (Aligned with design.md)
+   NearHelp AI — Data Types & Contracts (Medical Emergency Intake Focus)
    File: src/mock/types.ts
    ========================================================================== */
 
@@ -24,31 +24,26 @@ export type IncidentStatus =
 
 export type SeverityLevel = 1 | 2 | 3 | 4 | 5;
 
-export type CrisisCategoryId = 
-  | 'medical' 
-  | 'police' 
-  | 'fire' 
-  | 'accident'
-  | 'robbery' 
-  | 'kidnapping' 
-  | 'gas_leak' 
-  | 'flood'
-  | 'earthquake' 
-  | 'tsunami' 
-  | 'power_out' 
-  | 'structural'
-  | 'hazmat' 
-  | 'wildfire' 
-  | 'weather' 
-  | 'cyber';
+export type MedicalConditionId = 
+  | 'cardiac_arrest' 
+  | 'severe_bleeding' 
+  | 'respiratory_asthma' 
+  | 'unconscious_seizure' 
+  | 'stroke' 
+  | 'severe_burns' 
+  | 'fracture_trauma' 
+  | 'anaphylaxis_allergy';
 
-export interface CrisisCategoryItem {
-  id: CrisisCategoryId;
+export interface MedicalConditionItem {
+  id: MedicalConditionId;
   label: string;
   emoji: string;
   severity: SeverityLevel;
   description: string;
+  symptoms: string[];
 }
+
+export type MultimodalInputMode = 'VOICE' | 'TEXT' | 'PHOTO' | 'PRESETS';
 
 export type ResponderSkill = 
   | 'CPR_CERTIFIED' 
@@ -127,7 +122,8 @@ export interface EmergencyScenario {
   streetAddress: string;
   subAddress: string;
   coordinates: [number, number]; // [lat, lng]
-  category: CrisisCategoryId;
+  category: 'medical';
+  medicalConditionId: MedicalConditionId;
   severity: SeverityLevel;
   severityLabel: string;
   aiConfidence: number; // e.g. 98.4

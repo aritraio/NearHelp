@@ -1,101 +1,85 @@
 /* ==========================================================================
-   NearHelp AI — Design System Tokens & High-Contrast Emergency Theme
-   File: src/styles/theme.css (Aligned with docs/design.md)
+   NearHelp AI — AMOLED Dark Theme & Emerald Radar Design System
+   File: src/styles/theme.css
    ========================================================================== */
 
 :root {
-  /* --- Guardian Palette (Calm & Safe Zone - Left Screen) --- */
-  --guardian-bg-top: #C8F5DC;
-  --guardian-bg-bottom: #E3FAF0;
-  --guardian-gradient: linear-gradient(180deg, #C8F5DC 0%, #E3FAF0 100%);
-  --guardian-mint-primary: #8EE4B8;
-  --guardian-emerald-accent: #22C55E;
-  --guardian-radar-circle: rgba(72, 187, 120, 0.35);
-  --guardian-radar-sweep: rgba(56, 161, 105, 0.25);
-  --guardian-search-pill: rgba(255, 255, 255, 0.82);
+  /* --- AMOLED Pure Black Theme Palette --- */
+  --bg-amoled: #000000;
+  --bg-base: #000000;
+  --bg-surface-dark: #0c0d10;
+  --bg-card-dark: #121418;
+  --bg-card-elevated: #1a1d24;
+  --bg-card-hover: #222630;
+  --bg-glass-dark: rgba(18, 20, 24, 0.85);
 
-  /* --- Crisis & Alert Palette (High Urgency Matrix - Right Screen) --- */
-  --crisis-surface-bg: #EFF3F6;
-  --emergency-crimson: #E52538;
-  --emergency-crimson-dark: #C2182B;
-  --emergency-crimson-gradient: linear-gradient(135deg, #FF3B30 0%, #D70015 100%);
-  --action-amber: #FF9800;
-  --cancel-pill-green: #34C759;
-  --countdown-badge-red: #E52538;
-  --card-neomorphic-light: #FFFFFF;
-  --card-neomorphic-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-  --card-neomorphic-active: 0 8px 24px rgba(229, 37, 56, 0.28);
+  /* --- Dark Green Guardian Radar Palette --- */
+  --guardian-dark-top: #061910;
+  --guardian-dark-bottom: #020a06;
+  --guardian-dark-gradient: linear-gradient(180deg, #071f14 0%, #030c08 100%);
+  --guardian-emerald-glow: #00e676;
+  --guardian-emerald-bright: #10b981;
+  --guardian-emerald-subtle: rgba(0, 230, 118, 0.12);
+  --guardian-radar-ring: rgba(0, 230, 118, 0.35);
+  --guardian-radar-sweep-cone: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(0, 230, 118, 0) 0deg,
+    rgba(0, 230, 118, 0.08) 270deg,
+    rgba(0, 230, 118, 0.45) 360deg
+  );
+  --guardian-pill-bg: rgba(10, 32, 22, 0.85);
+  --guardian-border: rgba(0, 230, 118, 0.25);
 
-  /* --- Light Theme Text Tokens (Mobile App Frame) --- */
-  --text-primary-dark: #0F172A;
-  --text-secondary-muted: #64748B;
-  --text-disabled-light: #94A3B8;
-
-  /* --- Core Palette (High-Contrast OLED Dark Showcase Panel) --- */
-  --bg-base: #0c0d0e;
-  --bg-primary: #121214;
-  --bg-surface: #1a1b1e;
-  --bg-surface-elevated: #24262b;
-  --bg-surface-hover: #2e3138;
-  --bg-glass: rgba(26, 27, 30, 0.78);
-  --bg-glass-heavy: rgba(18, 18, 20, 0.90);
-  
   /* --- Emergency Severity Tokens --- */
-  --color-emergency-red: #e53935;
-  --color-emergency-red-bright: #ff1744;
-  --color-emergency-red-glow: rgba(255, 23, 68, 0.35);
-  --color-emergency-red-subtle: rgba(229, 57, 53, 0.12);
-  
-  --color-action-amber: #ff9800;
-  --color-action-amber-bright: #ffa726;
-  --color-action-amber-glow: rgba(255, 152, 0, 0.35);
-  --color-action-amber-subtle: rgba(255, 152, 0, 0.12);
+  --emergency-crimson: #ff2a44;
+  --emergency-crimson-dark: #c2182b;
+  --emergency-crimson-glow: rgba(255, 42, 68, 0.4);
+  --emergency-crimson-subtle: rgba(255, 42, 68, 0.14);
+  --emergency-gradient: linear-gradient(135deg, #ff3b4e 0%, #d70020 100%);
 
-  --color-safe-green: #4caf50;
-  --color-safe-green-bright: #00e676;
-  --color-safe-green-glow: rgba(0, 230, 118, 0.35);
-  --color-safe-green-subtle: rgba(76, 175, 80, 0.12);
+  --action-amber: #ffa000;
+  --action-amber-bright: #ffb300;
+  --action-amber-glow: rgba(255, 160, 0, 0.35);
+  --action-amber-subtle: rgba(255, 160, 0, 0.12);
 
-  --color-ai-blue: #2196f3;
-  --color-ai-cyan: #00e5ff;
-  --color-ai-glow: rgba(0, 229, 255, 0.35);
-  --color-ai-subtle: rgba(33, 150, 243, 0.12);
+  --cancel-green: #00e676;
+  --cancel-green-glow: rgba(0, 230, 118, 0.35);
 
-  --color-victim: #ff1744;
-  --color-responder: #00e676;
-  --color-command: #00e5ff;
+  --ai-cyan: #00e5ff;
+  --ai-blue: #2979ff;
+  --ai-cyan-glow: rgba(0, 229, 255, 0.35);
+  --ai-cyan-subtle: rgba(0, 229, 255, 0.12);
 
-  /* --- Text & Content Tokens --- */
+  /* --- Text & Content Tokens (AMOLED High-Contrast) --- */
   --text-primary: #ffffff;
-  --text-secondary: #b0bec5;
-  --text-muted: #78909c;
-  --text-disabled: #455a64;
-  --text-inverse: #0c0d0e;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-disabled: #334155;
+  --text-emerald: #00e676;
 
   /* --- Borders & Outlines --- */
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.16);
-  --border-highlight: rgba(255, 255, 255, 0.28);
-  --border-emergency: rgba(255, 23, 68, 0.4);
-  --border-ai: rgba(0, 229, 255, 0.4);
-  --border-safe: rgba(0, 230, 118, 0.4);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-highlight: rgba(255, 255, 255, 0.25);
+  --border-crimson: rgba(255, 42, 68, 0.4);
+  --border-emerald: rgba(0, 230, 118, 0.35);
+  --border-ai: rgba(0, 229, 255, 0.35);
 
   /* --- Radii & Spacing --- */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
   --radius-xl: 32px;
   --radius-full: 9999px;
 
   /* --- Shadows & Glows --- */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.7);
-  --glow-emergency: 0 0 28px var(--color-emergency-red-glow);
-  --glow-action: 0 0 28px var(--color-action-amber-glow);
-  --glow-safe: 0 0 28px var(--color-safe-green-glow);
-  --glow-ai: 0 0 28px var(--color-ai-glow);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.75);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.9);
+  --glow-crimson: 0 0 28px var(--emergency-crimson-glow);
+  --glow-emerald: 0 0 28px var(--guardian-emerald-subtle);
+  --glow-ai: 0 0 28px var(--ai-cyan-glow);
 
   /* --- Transitions --- */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -110,26 +94,26 @@
 }
 
 /* ==========================================================================
-   Pulse, Radar & Emergency Keyframe Animations
+   Keyframe Animations
    ========================================================================== */
 
 /* 1. SOS Button Breathing Pulse Glow */
 @keyframes sosPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0.75), 0 0 30px rgba(229, 37, 56, 0.4);
+    box-shadow: 0 0 0 0 rgba(255, 42, 68, 0.8), 0 0 30px rgba(255, 42, 68, 0.4);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 22px rgba(229, 37, 56, 0), 0 0 50px rgba(229, 37, 56, 0.7);
+    box-shadow: 0 0 0 20px rgba(255, 42, 68, 0), 0 0 55px rgba(255, 42, 68, 0.7);
     transform: scale(1.03);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0), 0 0 30px rgba(229, 37, 56, 0.4);
+    box-shadow: 0 0 0 0 rgba(255, 42, 68, 0), 0 0 30px rgba(255, 42, 68, 0.4);
     transform: scale(1);
   }
 }
 
-/* 2. 360° Guardian Radar Sweep Rotation (3.5s cycle) */
+/* 2. 360° Guardian Radar Sweep Rotation */
 @keyframes guardianRadarSweep {
   0% {
     transform: rotate(0deg);
@@ -142,16 +126,16 @@
 /* 3. Concentric Radar Pulse Ring */
 @keyframes radarRingPulse {
   0% {
-    transform: scale(0.92);
-    opacity: 0.7;
+    transform: scale(0.95);
+    opacity: 0.65;
   }
   50% {
-    transform: scale(1.04);
+    transform: scale(1.03);
     opacity: 1;
   }
   100% {
-    transform: scale(0.92);
-    opacity: 0.7;
+    transform: scale(0.95);
+    opacity: 0.65;
   }
 }
 
@@ -159,15 +143,15 @@
 @keyframes countdownBadgePulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 42, 68, 0.8);
   }
   50% {
-    transform: scale(1.15);
-    box-shadow: 0 0 0 12px rgba(229, 37, 56, 0);
+    transform: scale(1.14);
+    box-shadow: 0 0 0 14px rgba(255, 42, 68, 0);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(229, 37, 56, 0);
+    box-shadow: 0 0 0 0 rgba(255, 42, 68, 0);
   }
 }
 
@@ -176,13 +160,13 @@
   0%, 100% {
     transform: scale(1);
     opacity: 0.35;
-    background-color: var(--color-emergency-red-subtle);
+    background-color: var(--emergency-crimson-subtle);
   }
   15% {
     transform: scale(1.08);
     opacity: 1;
-    background-color: var(--color-emergency-red);
-    box-shadow: 0 0 35px var(--color-emergency-red-bright);
+    background-color: var(--emergency-crimson);
+    box-shadow: 0 0 35px var(--emergency-crimson);
   }
   40% {
     transform: scale(1);
@@ -190,13 +174,13 @@
   }
 }
 
-/* 6. Audio Waveform Simulator */
+/* 6. Audio Waveform Simulator (Bigger and dynamic) */
 @keyframes audioWaveform {
   0%, 100% {
     height: 6px;
   }
   50% {
-    height: 30px;
+    height: 36px;
   }
 }
 
@@ -243,7 +227,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--color-safe-green-bright);
+  background-color: var(--guardian-emerald-glow);
 }
 
 .telemetry-dot::after {
@@ -254,38 +238,38 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: var(--color-safe-green-bright);
+  background-color: var(--guardian-emerald-glow);
   animation: telemetryPing 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 .telemetry-dot-emergency {
-  background-color: var(--color-emergency-red-bright);
+  background-color: var(--emergency-crimson);
 }
 
 .telemetry-dot-emergency::after {
-  background-color: var(--color-emergency-red-bright);
+  background-color: var(--emergency-crimson);
 }
 
 .telemetry-dot-ai {
-  background-color: var(--color-ai-cyan);
+  background-color: var(--ai-cyan);
 }
 
 .telemetry-dot-ai::after {
-  background-color: var(--color-ai-cyan);
+  background-color: var(--ai-cyan);
 }
 
 .glass-panel {
-  background: var(--bg-glass);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: var(--bg-glass-dark);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
 }
 
 .glass-panel-elevated {
-  background: var(--bg-glass-heavy);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--border-highlight);
+  background: var(--bg-card-elevated);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-medium);
   box-shadow: var(--shadow-lg);
 }

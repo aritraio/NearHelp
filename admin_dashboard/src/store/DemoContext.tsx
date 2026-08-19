@@ -1,6 +1,6 @@
 /* ==========================================================================
    NearHelp AI — Central Demo State Store & Simulation Engine
-   File: src/store/DemoContext.tsx (Updated with design.md specifications)
+   File: src/store/DemoContext.tsx (Medical Emergency Intake & Multimodal)
    ========================================================================== */
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
@@ -11,9 +11,10 @@ import type {
   ScreenMode,
   ViewLayout, 
   SystemTelemetry,
-  CrisisCategoryId
+  MedicalConditionId,
+  MultimodalInputMode
 } from '../mock/types';
-import { ALL_SCENARIOS, SCENARIO_A, INITIAL_TELEMETRY, EMERGENCY_CATEGORIES } from '../mock/scenarios';
+import { ALL_SCENARIOS, SCENARIO_A, INITIAL_TELEMETRY, MEDICAL_CONDITIONS } from '../mock/scenarios';
 import { soundEngine } from '../utils/audio';
 
 interface DemoContextType {
@@ -23,7 +24,15 @@ interface DemoContextType {
   personaMode: PersonaMode;
   viewLayout: ViewLayout;
   incidentStatus: IncidentStatus;
-  selectedCategoryId: CrisisCategoryId;
+  selectedMedicalCondition: MedicalConditionId;
+
+  // Multimodal Medical Intake
+  intakeInputMode: MultimodalInputMode;
+  voiceTranscript: string;
+  textInputNotes: string;
+  isVoiceRecording: boolean;
+  photoAttached: boolean;
+  photoUrl: string | null;
   
   // Guardian & Locality details
   localityName: string;
@@ -56,7 +65,12 @@ interface DemoContextType {
   setPersonaMode: (mode: PersonaMode) => void;
   setViewLayout: (layout: ViewLayout) => void;
   setIncidentStatus: (status: IncidentStatus) => void;
-  selectCategory: (categoryId: CrisisCategoryId) => void;
+  selectMedicalCondition: (conditionId: MedicalConditionId) => void;
+  setIntakeInputMode: (mode: MultimodalInputMode) => void;
+  toggleVoiceRecording: () => void;
+  setTextInputNotes: (text: string) => void;
+  attachSamplePhoto: () => void;
+  removePhoto: () => void;
   startCountdown: () => void;
   cancelCountdown: () => void;
   confirmAddress: () => void;
@@ -82,7 +96,17 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [personaMode, setPersonaModeState] = useState<PersonaMode>('VICTIM');
   const [viewLayout, setViewLayout] = useState<ViewLayout>('SPLIT_SCREEN');
   const [incidentStatus, setIncidentStatusState] = useState<IncidentStatus>('IDLE');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<CrisisCategoryId>('medical');
+  const [selectedMedicalCondition, setSelectedMedicalCondition] = useState<MedicalConditionId>('cardiac_arrest');
+
+  // Multimodal Medical Intake state
+  const [intakeInputMode, setIntakeInputModeState] = useState<MultimodalInputMode>('PRESETS');
+  const [voiceTranscript, setVoiceTranscript] = useState<string>(
+    "Emergency! 54-year-old male collapsed near elevator at Godrej Waterside. Unconscious, not breathing properly, turning blue..."
+  );
+  const [textInputNotes, setTextInputNotesState] = useState<string>('Sudden loss of consciousness, agonal gasping, no pulse detected');
+  const [isVoiceRecording, setIsVoiceRecording] = useState<boolean>(false);
+  const [photoAttached, setPhotoAttached] = useState<boolean>(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   const [localityName, setLocalityName] = useState<string>('China Basin');
   const [safetyIndexScore, setSafetyIndexScore] = useState<number>(91);
@@ -106,6 +130,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const timerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
 
   // Sync mute with sound engine
   const toggleAudioMute = useCallback(() => {
@@ -136,12 +161,16 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const selected = ALL_SCENARIOS.find(s => s.id === id) || SCENARIO_A;
     soundEngine.playClick();
     setCurrentScenarioState(selected);
-    setSelectedCategoryId(selected.category);
+    setSelectedMedicalCondition(selected.medicalConditionId);
     setStreetAddress(selected.streetAddress);
     setSubAddress(selected.subAddress);
     setLocalityName(selected.locationName.split(',')[0] || 'China Basin');
     setSafetyIndexScore(selected.id === 'scenario-a' ? 91 : selected.id === 'scenario-b' ? 84 : 72);
     setOfflineMeshActive(selected.id === 'scenario-c');
+    setVoiceTranscript(selected.transcriptionPreview);
+    setTextInputNotesState(selected.reportedSymptoms.join(' • '));
+    setPhotoAttached(!!selected.multimodalImagePreview);
+    setPhotoUrl(selected.multimodalImagePreview || null);
     
     soundEngine.stopCprMetronome();
     setCprMetronomeActive(false);
@@ -150,6 +179,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSearchRadiusKm(0.5);
     setIsCountingDown(false);
     setCountdownSeconds(3);
+    setIsVoiceRecording(false);
   }, []);
 
   // Screen Mode Switching
@@ -178,19 +208,64 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Category Selection
-  const selectCategory = useCallback((catId: CrisisCategoryId) => {
+  // Medical Condition Selection
+  const selectMedicalCondition = useCallback((conditionId: MedicalConditionId) => {
     soundEngine.playClick();
-    setSelectedCategoryId(catId);
-    const categoryInfo = EMERGENCY_CATEGORIES.find(c => c.id === catId);
-    if (categoryInfo) {
+    setSelectedMedicalCondition(conditionId);
+    const conditionInfo = MEDICAL_CONDITIONS.find(c => c.id === conditionId);
+    if (conditionInfo) {
       setCurrentScenarioState(prev => ({
         ...prev,
-        category: catId,
-        severity: categoryInfo.severity,
-        severityLabel: `Level ${categoryInfo.severity} — ${categoryInfo.label} Emergency`
+        medicalConditionId: conditionId,
+        severity: conditionInfo.severity,
+        severityLabel: `Level ${conditionInfo.severity} — ${conditionInfo.label}`,
+        reportedSymptoms: conditionInfo.symptoms
       }));
+      setTextInputNotesState(conditionInfo.symptoms.join(' • '));
     }
+  }, []);
+
+  // Multimodal Mode
+  const setIntakeInputMode = useCallback((mode: MultimodalInputMode) => {
+    soundEngine.playClick();
+    setIntakeInputModeState(mode);
+  }, []);
+
+  // Voice Recording Toggle
+  const toggleVoiceRecording = useCallback(() => {
+    soundEngine.playClick();
+    setIsVoiceRecording(prev => {
+      const next = !prev;
+      if (next) {
+        soundEngine.playCountdownBeep(880);
+        recordingTimerRef.current = window.setTimeout(() => {
+          setIsVoiceRecording(false);
+          soundEngine.playSuccessChime();
+        }, 4000);
+      } else {
+        if (recordingTimerRef.current) {
+          clearTimeout(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  const setTextInputNotes = useCallback((text: string) => {
+    setTextInputNotesState(text);
+  }, []);
+
+  const attachSamplePhoto = useCallback(() => {
+    soundEngine.playSuccessChime();
+    setPhotoAttached(true);
+    setPhotoUrl('https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=400&q=80');
+  }, []);
+
+  const removePhoto = useCallback(() => {
+    soundEngine.playClick();
+    setPhotoAttached(false);
+    setPhotoUrl(null);
   }, []);
 
   // Trigger SOS Flow
@@ -273,6 +348,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCountdownSeconds(3);
     setPersonaModeState('VICTIM');
     setScreenModeState('GUARDIAN');
+    setIsVoiceRecording(false);
   }, []);
 
   // Step advancement
@@ -341,7 +417,6 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
           soundEngine.playCountdownBeep(750 + (4 - prev) * 120);
           return prev - 1;
         } else {
-          // Trigger SOS when reaches 0
           if (countdownTimerRef.current) {
             clearInterval(countdownTimerRef.current);
             countdownTimerRef.current = null;
@@ -423,7 +498,13 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         personaMode,
         viewLayout,
         incidentStatus,
-        selectedCategoryId,
+        selectedMedicalCondition,
+        intakeInputMode,
+        voiceTranscript,
+        textInputNotes,
+        isVoiceRecording,
+        photoAttached,
+        photoUrl,
         localityName,
         safetyIndexScore,
         streetAddress,
@@ -444,7 +525,12 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setPersonaMode,
         setViewLayout,
         setIncidentStatus: setIncidentStatusState,
-        selectCategory,
+        selectMedicalCondition,
+        setIntakeInputMode,
+        toggleVoiceRecording,
+        setTextInputNotes,
+        attachSamplePhoto,
+        removePhoto,
         startCountdown,
         cancelCountdown,
         confirmAddress,

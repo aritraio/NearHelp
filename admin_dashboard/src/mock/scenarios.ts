@@ -1,31 +1,75 @@
 /* ==========================================================================
-   NearHelp AI — Scenarios & 16-Category Matrix Data (design.md Aligned)
+   NearHelp AI — Medical Emergency Conditions & Kolkata Scenarios Data
    File: src/mock/scenarios.ts
    ========================================================================== */
 
-import type { EmergencyScenario, SystemTelemetry, CrisisCategoryItem } from './types';
+import type { EmergencyScenario, SystemTelemetry, MedicalConditionItem } from './types';
 
-export const EMERGENCY_CATEGORIES: CrisisCategoryItem[] = [
-  // Row 1
-  { id: 'medical', label: 'Medical', emoji: '🩺', severity: 5, description: 'Cardiac arrest, unconsciousness, trauma, respiratory distress' },
-  { id: 'police', label: 'Police', emoji: '👮', severity: 4, description: 'Armed assault, physical threat, active security breach' },
-  { id: 'fire', label: 'Fire', emoji: '🔥', severity: 5, description: 'Building fire, smoke inhalation, electrical fire hazard' },
-  { id: 'accident', label: 'Accident', emoji: '🚗', severity: 4, description: 'Vehicle collision, pedestrian hit, rollover with entrapment' },
-  // Row 2
-  { id: 'robbery', label: 'Robbery', emoji: '🥷', severity: 4, description: 'Active mugging, home invasion, commercial robbery in progress' },
-  { id: 'kidnapping', label: 'Kidnapping', emoji: '🏃', severity: 5, description: 'Abduction in progress, missing vulnerable person, hostage' },
-  { id: 'gas_leak', label: 'Gas Leak', emoji: '⚠️', severity: 4, description: 'LPG/CNG line rupture, asphyxiation danger, explosive risk' },
-  { id: 'flood', label: 'Flood', emoji: '🌊', severity: 3, description: 'Urban flash flood, trapped in rising water, canal overflow' },
-  // Row 3
-  { id: 'earthquake', label: 'Earthquake', emoji: '🏚️', severity: 5, description: 'Structural tremor, building collapse, entrapment under debris' },
-  { id: 'tsunami', label: 'Tsunami', emoji: '🌊', severity: 5, description: 'Coastal surge warning, immediate vertical evacuation required' },
-  { id: 'power_out', label: 'Power out', emoji: '⚡', severity: 2, description: 'Grid blackout, oxygen concentrator failure, trapped in elevator' },
-  { id: 'structural', label: 'Structural', emoji: '🏢', severity: 4, description: 'Balcony/roof collapse, scaffolding failure, deep foundation crack' },
-  // Row 4
-  { id: 'hazmat', label: 'Hazmat', emoji: '🧪', severity: 5, description: 'Toxic chemical spill, industrial acid leak, corrosive vapour' },
-  { id: 'wildfire', label: 'Wildfire', emoji: '🌲', severity: 4, description: 'Rapid perimeter brush fire, smoke evacuation perimeter' },
-  { id: 'weather', label: 'Weather', emoji: '⛈️', severity: 3, description: 'Severe cyclone, supercell lightning strike, gale debris' },
-  { id: 'cyber', label: 'Cyber', emoji: '🔒', severity: 3, description: 'Critical infrastructure ransomware, extortion, device compromise' },
+export const MEDICAL_CONDITIONS: MedicalConditionItem[] = [
+  {
+    id: 'cardiac_arrest',
+    label: 'Cardiac / Chest Pain',
+    emoji: '🫀',
+    severity: 5,
+    description: 'Sudden collapse, unresponsive, chest crushing pain, agonal breathing',
+    symptoms: ['Unresponsive to voice', 'No carotid pulse', 'Gasping respiration', 'Crushing chest pressure']
+  },
+  {
+    id: 'severe_bleeding',
+    label: 'Severe Bleeding',
+    emoji: '🩸',
+    severity: 4,
+    description: 'Pulsatile arterial bleed, deep laceration, hypovolemic shock',
+    symptoms: ['Pulsating bright red blood', 'Open compound wound', 'Dizziness & cold clammy skin', 'Rapid weak pulse']
+  },
+  {
+    id: 'respiratory_asthma',
+    label: 'Breathing / Hypoxia',
+    emoji: '🫁',
+    severity: 5,
+    description: 'Severe bronchospasm, cyanosis (blue lips), choking / foreign body',
+    symptoms: ['Unable to speak full sentences', 'Peripheral cyanosis', 'Stridor / severe wheeze', 'Oxygen saturation < 88%']
+  },
+  {
+    id: 'unconscious_seizure',
+    label: 'Seizure / Fainting',
+    emoji: '⚡',
+    severity: 5,
+    description: 'Grand mal tonic-clonic convulsion, post-ictal coma, syncope',
+    symptoms: ['Generalized violent muscle jerking', 'Foaming at mouth', 'Loss of bladder control', 'Post-seizure unresponsiveness']
+  },
+  {
+    id: 'stroke',
+    label: 'Stroke / Paralysis',
+    emoji: '🧠',
+    severity: 4,
+    description: 'Facial droop, arm weakness, slurred speech (FAST protocol)',
+    symptoms: ['Asymmetrical facial drooping', 'Unilateral arm drift', 'Severe dysarthria / word salad', 'Sudden visual loss']
+  },
+  {
+    id: 'severe_burns',
+    label: 'Severe Burns / Scalds',
+    emoji: '🔥',
+    severity: 3,
+    description: 'Second/third-degree thermal burns, extensive blistered skin',
+    symptoms: ['Blistered charred skin > 10% BSA', 'Severe acute agony', 'Airway smoke inhalation risk', 'Thermal shock risk']
+  },
+  {
+    id: 'fracture_trauma',
+    label: 'Fracture / Head Trauma',
+    emoji: '🦴',
+    severity: 4,
+    description: 'Open bone protrusion, spinal immobilisation, concussion',
+    symptoms: ['Visible bone deformity', 'Loss of consciousness post-impact', 'Cervical spinal tenderness', 'Inability to bear weight']
+  },
+  {
+    id: 'anaphylaxis_allergy',
+    label: 'Anaphylaxis / Poison',
+    emoji: '💊',
+    severity: 5,
+    description: 'Acute systemic allergic reaction, airway swelling, toxin ingestion',
+    symptoms: ['Urticaria / diffuse hives', 'Angioedema of tongue & throat', 'Hypotensive collapse', 'Acute nausea / vomiting']
+  }
 ];
 
 export const SCENARIO_A: EmergencyScenario = {
@@ -38,6 +82,7 @@ export const SCENARIO_A: EmergencyScenario = {
   subAddress: 'DP Block, Sector V, Salt Lake City • Kolkata, WB 700091',
   coordinates: [22.5726, 88.4312],
   category: 'medical',
+  medicalConditionId: 'cardiac_arrest',
   severity: 5,
   severityLabel: 'Level 5 — Critical Life Threat (Suspected Cardiac Arrest)',
   aiConfidence: 98.4,
@@ -48,7 +93,8 @@ export const SCENARIO_A: EmergencyScenario = {
     'No palpable carotid pulse',
     'Gasping / agonal breathing observed'
   ],
-  transcriptionPreview: "Emergency! A man just collapsed near the elevator at Godrej Waterside! He isn't breathing properly, he's turning blue, please send someone immediately!",
+  transcriptionPreview: "Emergency! A 54-year-old male just collapsed near the elevator at Godrej Waterside! He isn't breathing properly, he's turning blue, please send CPR volunteers immediately!",
+  multimodalImagePreview: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=400&q=80',
   victim: {
     name: 'Rajesh Sengupta',
     age: 54,
@@ -176,13 +222,14 @@ export const SCENARIO_A: EmergencyScenario = {
 export const SCENARIO_B: EmergencyScenario = {
   id: 'scenario-b',
   codeName: 'DEMO_TRAUMA_EM_BYPASS',
-  title: 'Severe Arterial Bleed / Road Collision (EM Bypass)',
+  title: 'Severe Arterial Bleed / Femoral Trauma',
   subtitle: 'Level 4 Urgent — Two-Wheeler Collision with Compound Thigh Trauma',
   locationName: 'EM Bypass near Ruby Hospital Crossing, Kolkata',
   streetAddress: '1234 EM Bypass Crossing',
   subAddress: 'Near Ruby Hospital, Sector I, East Kolkata Township • Kolkata, WB 700107',
   coordinates: [22.5135, 88.3986],
-  category: 'accident',
+  category: 'medical',
+  medicalConditionId: 'severe_bleeding',
   severity: 4,
   severityLabel: 'Level 4 — High Urgency (Pulsatile Arterial Hemorrhage)',
   aiConfidence: 92.1,
@@ -194,6 +241,7 @@ export const SCENARIO_B: EmergencyScenario = {
     'Victim conscious but exhibiting hypovolemic shock signs'
   ],
   transcriptionPreview: 'Major accident on EM Bypass right before Ruby crossing! Motorcyclist hit the guardrail, massive bleeding from upper right leg, losing blood very rapidly!',
+  multimodalImagePreview: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=400&q=80',
   victim: {
     name: 'Sourav Roy',
     age: 28,
@@ -310,13 +358,14 @@ export const SCENARIO_B: EmergencyScenario = {
 export const SCENARIO_C: EmergencyScenario = {
   id: 'scenario-c',
   codeName: 'DEMO_OFFLINE_MESH_FALLBACK',
-  title: 'Offline Mesh & Binary SMS Fallback Simulation',
+  title: 'Acute Hypoxia / Asthmatic Bronchospasm',
   subtitle: 'Zero Cellular Data — Emergency Beacon Dispatched via Compressed SMS',
   locationName: 'Basement Parking B2, Sector V, Kolkata (Zero Cellular Signal)',
   streetAddress: 'Basement B2, Block EP & GP',
   subAddress: 'Sector V, Salt Lake City • Kolkata, WB 700091 (No GSM/LTE)',
   coordinates: [22.5720, 88.4305],
   category: 'medical',
+  medicalConditionId: 'respiratory_asthma',
   severity: 5,
   severityLabel: 'Level 5 — Severe Asthmatic Bronchospasm & Hypoxia',
   aiConfidence: 96.0,
@@ -328,6 +377,7 @@ export const SCENARIO_C: EmergencyScenario = {
     'Rescue inhaler exhausted / unavailable'
   ],
   transcriptionPreview: '[OFFLINE ENCODED VOICE] Cannot breathe... severe asthma attack... basement B2... inhaler empty...',
+  multimodalImagePreview: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=400&q=80',
   victim: {
     name: 'Priya Sharma',
     age: 23,

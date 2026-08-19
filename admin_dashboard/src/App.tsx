@@ -47,10 +47,10 @@ const MainContent: React.FC = () => {
             <GuardianRadarScreen />
           </MobileDeviceFrame>
 
-          {/* Right Screen: Crisis Dispatch & 16-Category Matrix */}
+          {/* Right Screen: Medical Emergency Intake & Multimodal Triage */}
           <MobileDeviceFrame 
-            title="Screen 2: Crisis Dispatch (16-Category Matrix)" 
-            badgeText="Triage Engine"
+            title="Screen 2: Medical Emergency Intake" 
+            badgeText="Multimodal Triage"
           >
             <CrisisDispatchScreen />
           </MobileDeviceFrame>
@@ -67,13 +67,13 @@ const MainContent: React.FC = () => {
           <MobileDeviceFrame 
             title={
               screenMode === 'GUARDIAN' ? 'Screen 1: Guardian Radar' : 
-              screenMode === 'CRISIS_MATRIX' ? 'Screen 2: Crisis Dispatch Matrix' : 
+              screenMode === 'CRISIS_MATRIX' ? 'Screen 2: Medical Emergency Intake' : 
               screenMode === 'RESPONDER' ? 'Responder Rescue Navigation' : 
               'NearHelp Mobile Client'
             }
             badgeText={
               screenMode === 'GUARDIAN' ? 'Safe Zone' : 
-              screenMode === 'CRISIS_MATRIX' ? '16 Categories' : 
+              screenMode === 'CRISIS_MATRIX' ? 'Multimodal AI' : 
               screenMode === 'RESPONDER' ? 'Rescue Mode' : 
               'Admin'
             }
