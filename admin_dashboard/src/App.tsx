@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NearHelp AI — Main Application Shell (Aligned with docs/design.md)
+   NearHelp AI — Main Application Shell (Phase 5 Presentation & Tuning)
    File: src/App.tsx
    ========================================================================== */
 
@@ -13,6 +13,7 @@ import { VictimMobilePreview } from './components/victim/VictimMobilePreview';
 import { ResponderMobilePreview } from './components/responder/ResponderMobilePreview';
 import { CommunityGeoMap } from './components/map/CommunityGeoMap';
 import { CommandCenterScreen } from './components/command/CommandCenterScreen';
+import { SlideSyncHUD } from './components/demo/SlideSyncHUD';
 
 const MainContent: React.FC = () => {
   const { screenMode, viewLayout } = useDemoStore();
@@ -179,13 +180,60 @@ const MainContent: React.FC = () => {
   );
 };
 
+const AppShell: React.FC = () => {
+  const { projectorMode, presentationZoom, quickNotification } = useDemoStore();
+
+  return (
+    <div 
+      className={`${projectorMode ? 'projector-mode' : ''} zoom-${presentationZoom}`}
+      style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh',
+        backgroundColor: 'var(--bg-base)',
+        color: 'var(--text-primary)',
+        transition: 'all var(--transition-normal)'
+      }}
+    >
+      <ScenarioController />
+      <MainContent />
+      <SlideSyncHUD />
+
+      {/* Floating Presentation Toast Notification */}
+      {quickNotification && (
+        <div 
+          className="animate-toast"
+          style={{
+            position: 'fixed',
+            top: '72px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1500,
+            padding: '10px 20px',
+            backgroundColor: projectorMode ? '#000' : 'rgba(10, 15, 24, 0.95)',
+            border: `1.5px solid ${projectorMode ? 'var(--color-ai-cyan)' : 'var(--border-ai)'}`,
+            borderRadius: 'var(--radius-full)',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.9)',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            pointerEvents: 'none'
+          }}
+        >
+          <span>{quickNotification}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export function App() {
   return (
     <DemoProvider>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <ScenarioController />
-        <MainContent />
-      </div>
+      <AppShell />
     </DemoProvider>
   );
 }

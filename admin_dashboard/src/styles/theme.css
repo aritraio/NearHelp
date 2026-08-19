@@ -273,3 +273,113 @@
   border: 1px solid var(--border-medium);
   box-shadow: var(--shadow-lg);
 }
+
+/* ==========================================================================
+   Projector High-Contrast Mode & Auditorium Tuning
+   ========================================================================== */
+
+.projector-mode {
+  --bg-base: #000000;
+  --bg-amoled: #000000;
+  --bg-surface-dark: #07080a;
+  --bg-card-dark: #0e1117;
+  --bg-card-elevated: #151922;
+  --bg-card-hover: #1e2430;
+  --bg-glass-dark: rgba(14, 17, 23, 0.95);
+  
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --text-emerald: #00ff88;
+  
+  --border-subtle: rgba(255, 255, 255, 0.18);
+  --border-medium: rgba(255, 255, 255, 0.32);
+  --border-highlight: rgba(255, 255, 255, 0.55);
+  
+  --emergency-crimson: #ff1744;
+  --emergency-crimson-glow: rgba(255, 23, 68, 0.6);
+  --guardian-emerald-glow: #00ff88;
+  --ai-cyan: #00f0ff;
+  --action-amber: #ffb300;
+  
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.projector-mode .glass-panel {
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
+}
+
+.projector-mode .glass-panel-elevated {
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.98);
+}
+
+/* Presentation Zoom Scales */
+.zoom-100 {
+  zoom: 1;
+}
+
+.zoom-110 {
+  zoom: 1.1;
+  transform-origin: top center;
+}
+
+.zoom-125 {
+  zoom: 1.25;
+  transform-origin: top center;
+}
+
+/* Slide HUD Animations */
+@keyframes slideDrawerIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes toastSlide {
+  0% {
+    transform: translate(-50%, -20px);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  85% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -20px);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in {
+  animation: slideDrawerIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeInOverlay 0.2s ease-out forwards;
+}
+
+.animate-toast {
+  animation: toastSlide 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

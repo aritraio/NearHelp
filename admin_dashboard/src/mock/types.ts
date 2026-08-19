@@ -65,6 +65,33 @@ export interface TimelineEventItem {
 
 export type ViewLayout = 'MOBILE_FRAME' | 'SPLIT_SCREEN' | 'DESKTOP_FULL';
 
+export type PresentationZoom = 100 | 110 | 125;
+
+export interface SlideSyncInfo {
+  slideNumber: number;
+  title: string;
+  topicNumber: string;
+  presenter: string;
+  presenterRole: string;
+  duration: string;
+  timeWindow: string;
+  targetPersona: PersonaMode;
+  targetScreen: ScreenMode;
+  targetVictimSubScreen?: VictimSubScreen;
+  targetResponderSubScreen?: ResponderSubScreen;
+  targetScenarioId: 'scenario-a' | 'scenario-b' | 'scenario-c';
+  keyVisual: string;
+  bulletPoints: string[];
+}
+
+export interface ExaminerQaItem {
+  question: string;
+  examinerDoubt: string;
+  coreAnswer: string;
+  technicalMetrics: string;
+  relevantSpeaker: string;
+}
+
 export type IncidentStatus = 
   | 'IDLE'
   | 'COUNTDOWN'

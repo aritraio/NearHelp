@@ -136,20 +136,21 @@ gantt
 
 ### ✨ Phase 5: Demo Switcher, Aesthetics Polish & Projector Tuning (Fri Afternoon)
 
-- [ ] 🔴 **Floating Demo Controller Bar** (Sticky bottom/top toolbar for seamless presenting)
-  - [ ] Fast Persona Toggle: `[ 🧑 Victim Mode ]` | `[ 🚑 Responder Mode ]` | `[ 🛰️ Command Center ]`
-  - [ ] Scenario Preset Buttons:
-    - `[ 🫀 Demo 1: Cardiac Arrest (100% Flow) ]`
-    - `[ 💥 Demo 2: Road Collision ]`
-    - `[ 📵 Demo 3: Offline Mesh/SMS ]`
-  - [ ] State Reset Button (`[ 🔄 Reset Demo ]`) to restart clean for examiners
-  - [ ] Simulated Event Trigger buttons (`Trigger SOS`, `Responder Accept`, `Simulate 108 Handover`)
+- [x] 🔴 **Floating Demo Controller Bar** (Sticky bottom/top toolbar for seamless presenting)
+  - [x] Fast Persona Toggle: `[ 🧑 Victim Mode ]` | `[ 🚑 Responder Mode ]` | `[ 🛰️ Command Center ]` | `[ 🗺️ Live Map ]` | `[ 🛡️ Guardian ]`
+  - [x] Scenario Preset Buttons:
+    - [x] `[ 🫀 Demo 1: Cardiac Arrest (100% Flow) ]`
+    - [x] `[ 💥 Demo 2: Road Collision ]`
+    - [x] `[ 📵 Demo 3: Offline Mesh/SMS ]`
+  - [x] State Reset Button (`[ 🔄 Reset Demo ]`) to restart clean for examiners
+  - [x] Simulated Event Trigger buttons (`Trigger SOS`, `Responder Accept`, `Simulate 108 Handover`, `Direct Milestone Jump`)
 
-- [ ] 🟡 **Visual Polish & Micro-Interactions**
-  - [ ] Glassmorphism overlays (`backdrop-blur-md`, subtle borders `border-white/10`)
-  - [ ] Smooth transition animations between triage states (framer-motion or smooth CSS transitions)
-  - [ ] High contrast text rendering formatted for classroom / auditorium 1080p projectors
-  - [ ] Mobile Frame view toggle (Switch between Desktop Command Center and Mobile Smartphone Frame)
+- [x] 🟡 **Visual Polish & Micro-Interactions**
+  - [x] Glassmorphism overlays (`backdrop-blur-md`, subtle borders `border-white/10`)
+  - [x] Smooth transition animations between triage states (smooth CSS transitions & dynamic island)
+  - [x] High contrast text rendering formatted for classroom / auditorium 1080p projectors (Dedicated `📽️ Projector Mode` + Scale Zoom `100% / 110% / 125%`)
+  - [x] Mobile Frame view toggle (Switch between Desktop Command Center, Dual-Persona Split Screen, and Mobile Smartphone Frame)
+  - [x] Master 8-Slide Presenter HUD & Examiner Defense Assistant modal (`SlideSyncHUD.tsx` with hotkey `S`)
 
 ---
 

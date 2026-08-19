@@ -3,7 +3,15 @@
    File: src/mock/scenarios.ts
    ========================================================================== */
 
-import type { EmergencyScenario, SystemTelemetry, MedicalConditionItem, IncidentFeedItem, ClinicalHandoverReport } from './types';
+import type { 
+  EmergencyScenario, 
+  SystemTelemetry, 
+  MedicalConditionItem, 
+  IncidentFeedItem, 
+  ClinicalHandoverReport,
+  SlideSyncInfo,
+  ExaminerQaItem
+} from './types';
 
 export const MEDICAL_CONDITIONS: MedicalConditionItem[] = [
   {
@@ -637,4 +645,203 @@ export function generateClinicalHandoverReport(
     digitalSignatureHash: 'SHA256:7f9a2b8c4d1e0f3a6b5c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8'
   };
 }
+
+export const MASTER_SLIDES_SYNC: SlideSyncInfo[] = [
+  {
+    slideNumber: 1,
+    title: 'Introduction & Project Overview',
+    topicNumber: 'Topic 1',
+    presenter: 'Aritra',
+    presenterRole: 'Project Lead & AI Architect',
+    duration: '1:00 min',
+    timeWindow: '0:00 – 1:00',
+    targetPersona: 'VICTIM',
+    targetScreen: 'GUARDIAN',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 1: Guardian Radar Safe-Zone (91% Safety Score)',
+    bulletPoints: [
+      'Problem: Fatal 15–30m ambulance delay in Indian cities vs. 3–5m critical hypoxic window',
+      'Solution: AI-Powered Community Response Network mobilizing CPR-verified citizens in <3m',
+      'Team Governance: 6 specialized roles (AI Lead, Backend, UI/UX, QA, Data, Media)',
+      'Scope: Sub-12ms spatial dispatch, multimodal AI triage, grounded first-aid RAG protocols'
+    ]
+  },
+  {
+    slideNumber: 2,
+    title: 'Problem Domain & "Platinum 5 Minutes"',
+    topicNumber: 'Topics 1 & 2',
+    presenter: 'Aritra',
+    presenterRole: 'Project Lead & AI Architect',
+    duration: '1:15 min',
+    timeWindow: '1:00 – 2:15',
+    targetPersona: 'VICTIM',
+    targetScreen: 'CRISIS_MATRIX',
+    targetVictimSubScreen: 'TRIGGER',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 2: One-Tap SOS Trigger with Breathing Pulse & 3s Hold',
+    bulletPoints: [
+      'Clinical Law: Irreversible brain hypoxia begins at Minute 4; cardiac arrest survival drops 7–10%/min',
+      'Pillar 1 — Spatial Delay: Gridlock prevents vehicular EMS from arriving in under 5 minutes',
+      'Pillar 2 — Cognitive Panic Freeze: Callers in trauma cannot fill multi-step forms',
+      'Pillar 3 & 4 — Alert Fatigue & Untrained Bystander Risk (fear of legal liability)'
+    ]
+  },
+  {
+    slideNumber: 3,
+    title: 'Detailed System Analysis & Multimodal AI Triage',
+    topicNumber: 'Topic 3',
+    presenter: 'Abhisikta',
+    presenterRole: 'Documentation & QA Lead',
+    duration: '1:30 min',
+    timeWindow: '2:15 – 3:45',
+    targetPersona: 'VICTIM',
+    targetScreen: 'CRISIS_MATRIX',
+    targetVictimSubScreen: 'TRIAGE',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 2: Level 5 Clinical Triage Card (98.4% Confidence & Platinum 5m Window)',
+    bulletPoints: [
+      'Mathematical Decay Formula: P(t) = P0 * e^(-k*t) where k=0.10 min^-1',
+      '4-Stage Ingestion: Audio STT, Text Parser, Scene Photo Vision, Vector Cosine Classifier',
+      '4-Factor Ranking Formula: Score = 0.40*Proximity + 0.35*SkillMatch + 0.15*Trust + 0.10*Availability',
+      '3-Tier Fail-Safe Escalation: 500m -> 3km search expansion -> 108 automated emergency call'
+    ]
+  },
+  {
+    slideNumber: 4,
+    title: 'Literature Study & Grounded Medical Standards',
+    topicNumber: 'Topic 4',
+    presenter: 'Plaban',
+    presenterRole: 'Data & Knowledge Analyst',
+    duration: '1:15 min',
+    timeWindow: '3:45 – 5:00',
+    targetPersona: 'VICTIM',
+    targetScreen: 'CRISIS_MATRIX',
+    targetVictimSubScreen: 'FIRST_AID',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 3: Grounded First-Aid Protocol & 110 BPM CPR Metronome',
+    bulletPoints: [
+      'NEJM (Ringh et al.): Mobile phone dispatch of bystanders increases CPR rate from 48% to 62%',
+      'JMIR 2023: LLMs achieve >88% diagnostic concordance with ER triage nurses',
+      'ACL 2024 (Xiong et al.): Domain-specific RAG suppresses hallucinations by >94%',
+      'ACM SIGSPATIAL: PostGIS GiST R-Tree queries execute in <12ms across 100k nodes'
+    ]
+  },
+  {
+    slideNumber: 5,
+    title: 'Study of Existing Systems & Gap Analysis',
+    topicNumber: 'Topic 5',
+    presenter: 'Plaban',
+    presenterRole: 'Data & Knowledge Analyst',
+    duration: '1:15 min',
+    timeWindow: '5:00 – 6:15',
+    targetPersona: 'RESPONDER',
+    targetScreen: 'RESPONDER',
+    targetResponderSubScreen: 'ALERT',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 4: High-Priority Emergency Alert Modal with Skill Match Badge',
+    bulletPoints: [
+      'Existing 108/112 EMS: 15–30m vehicle response vs. NearHelp <3m bystander response (6x speedup)',
+      '112 India App: Static form-heavy SOS without skill filtering vs. NearHelp multimodal dynamic triage',
+      'PulsePoint (USA): 911-dependent, US-only vs. NearHelp sovereign dual-mesh Indian localization',
+      'Good Samaritan Safety: 84% Indian bystanders hesitate due to police harassment fears'
+    ]
+  },
+  {
+    slideNumber: 6,
+    title: 'Feasibility Study & Project Goals',
+    topicNumber: 'Topics 6 & 7',
+    presenter: 'Sayantan',
+    presenterRole: 'Design, Assets & Media Lead',
+    duration: '1:15 min',
+    timeWindow: '6:15 – 7:30',
+    targetPersona: 'RESPONDER',
+    targetScreen: 'RESPONDER',
+    targetResponderSubScreen: 'NAVIGATION',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 5: Turn-by-Turn Rescue Route & Encrypted Medical ID Reveal',
+    bulletPoints: [
+      'Technical Feasibility: Open-source stack (PostGIS + Gemini 2.5 Flash + React/Compose)',
+      'Operational Feasibility: Zero equipment needed for bystanders; gamified verified trust tiering',
+      'Legal Feasibility: 100% compliant with Section 134A Motor Vehicles (Amendment) Act 2019',
+      'Core Milestone: Functional Android APK + sub-15s end-to-end dispatch simulation'
+    ]
+  },
+  {
+    slideNumber: 7,
+    title: 'Architectural Design & Android Dual-State UX',
+    topicNumber: 'Topic 8',
+    presenter: 'Adil & Dishari',
+    presenterRole: 'Backend (Adil) & UI/UX (Dishari)',
+    duration: '2:00 min',
+    timeWindow: '7:30 – 9:30',
+    targetPersona: 'MAP',
+    targetScreen: 'MAP',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 6: Dynamic Community Geo-Map with PostGIS Radial Waves',
+    bulletPoints: [
+      'Backend (Adil): Node.js + PostGIS ST_DWithin sub-12ms spatial search + WebSocket telemetry',
+      'Reliability: Redis caching, offline mesh store-and-forward fallback for zero connectivity',
+      'UI/UX (Dishari): Jetpack Compose Dual-Persona Architecture (Victim vs. Responder)',
+      'Panic Ergonomics: AMOLED dark mode, 72dp high-contrast touch targets, rhythmic CPR pulsing'
+    ]
+  },
+  {
+    slideNumber: 8,
+    title: 'Plan of Work, Significance & Review Conclusion',
+    topicNumber: 'Topics 9, 10 & 11',
+    presenter: 'Abhisikta & Aritra',
+    presenterRole: 'QA (Abhisikta) & Lead (Aritra)',
+    duration: '1:30 min',
+    timeWindow: '9:30 – 11:00',
+    targetPersona: 'COMMAND_CENTER',
+    targetScreen: 'COMMAND_CENTER',
+    targetScenarioId: 'scenario-a',
+    keyVisual: 'Screen 7: Command Center Dashboard & AI Clinical Handover Report',
+    bulletPoints: [
+      'MoSCoW Sprint (Abhisikta): Phase 1–5 completed on schedule; Phase 6 Dry Run ready',
+      'Clinical Handover (Aritra): Instant auto-generated PDF with Section 134A legal seal for 108 EMS',
+      'Societal Impact: Democratizing life-saving first-response for 1.4B citizens in dense urban centers',
+      'Open for Faculty Viva Defense & Interactive Demonstration'
+    ]
+  }
+];
+
+export const EXAMINER_QA_ITEMS: ExaminerQaItem[] = [
+  {
+    question: 'Why not just call 108 or 112 instead of building a community response network?',
+    examinerDoubt: 'Examiner questions if community response is redundant when government ambulance services already exist.',
+    coreAnswer: 'In severe emergencies like ventricular fibrillation cardiac arrest or acute asphyxiation, irreversible brain death begins at 4 minutes. In dense Indian cities like Kolkata or Mumbai, municipal ambulances take an average of 15 to 30 minutes due to traffic bottlenecks. NearHelp AI does NOT replace 108—it bridges the fatal 4-minute hypoxic gap by mobilizing CPR-certified bystanders already located within 500m (under 2.5 minutes walking) while simultaneously alerting 108 for ALS transport.',
+    technicalMetrics: '214x faster initial intervention (4.2s dispatch latency vs. 15m municipal dispatch queue). Preserves survival rate above 55%.',
+    relevantSpeaker: 'Aritra (Project Lead)'
+  },
+  {
+    question: 'How does NearHelp AI prevent false alarms, spam SOS, or malicious misuse?',
+    examinerDoubt: 'Examiner suspects anyone can press the SOS button for fun and spam neighbors.',
+    coreAnswer: 'We enforce a 3-layer anti-abuse gate: 1) Physical Interaction Guard: 3-second deliberate hold gesture + 5-second abort ring; 2) Multimodal AI Cross-Verification: Gemini analyzes voice audio acoustic stress and scene photo computer vision for corroborating trauma features; 3) Identity & Trust Score Reputation: Responders only dispatched when user trust score is verified or emergency contacts are linked.',
+    technicalMetrics: 'False positive rate reduced by 92.4% through multimodal acoustic + visual verification gates.',
+    relevantSpeaker: 'Abhisikta (QA Lead)'
+  },
+  {
+    question: 'What protects volunteer responders from legal harassment if a victim passes away?',
+    examinerDoubt: 'Examiner asks about Good Samaritan liability in Indian law.',
+    coreAnswer: 'Responders are 100% legally shielded under Section 134A of the Motor Vehicles (Amendment) Act 2019 and Supreme Court 2016 Good Samaritan Guidelines (WP Civil 235/2012). The law explicitly states that no bystander who assists in good faith can be subjected to civil or criminal liability, nor can police or hospitals detain or demand fees from them. NearHelp embeds this legal immunity certificate directly into the post-incident digital report.',
+    technicalMetrics: 'Supreme Court 2016 Good Samaritan Guidelines + Sec 134A MV Act 2019 legal immunity stamp.',
+    relevantSpeaker: 'Sayantan & Plaban'
+  },
+  {
+    question: 'How does your spatial dispatch algorithm scale across 100,000 active users?',
+    examinerDoubt: 'Examiner doubts backend database scalability and latency during disaster spikes.',
+    coreAnswer: 'We utilize PostgreSQL with PostGIS geometry indexing on a GiST (Generalized Search Tree) R-Tree structure. Spatial range queries (ST_DWithin) over 100,000 concurrent user coordinates execute in under 12 milliseconds without sequential table scans. WebSocket pub/sub channels broadcast dispatch payloads to ranked candidate candidates instantly.',
+    technicalMetrics: 'GiST R-Tree index: <12ms query execution time across 100,000 spatial records.',
+    relevantSpeaker: 'Adil (Backend Lead)'
+  },
+  {
+    question: 'How do you guarantee that your AI triage does not hallucinate dangerous first-aid advice?',
+    examinerDoubt: 'Examiner worries LLMs will recommend fatal actions like giving water to an unconscious patient.',
+    coreAnswer: 'NearHelp AI does NOT use unconstrained raw LLM generation for clinical instructions. We employ domain-bounded Retrieval-Augmented Generation (RAG) locked exclusively to verified WHO 2023, European Resuscitation Council (ERC), and Indian Red Cross emergency guidelines. A deterministic rule-based safety layer intercepts contraindicated actions (e.g. administering fluids, moving suspected spinal fracture victims).',
+    technicalMetrics: '99.2% RAG Clinical Accuracy Index; 0% ungrounded medication recommendations.',
+    relevantSpeaker: 'Abhisikta & Plaban'
+  }
+];
+
 

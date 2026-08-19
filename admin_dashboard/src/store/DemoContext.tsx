@@ -10,6 +10,7 @@ import type {
   PersonaMode, 
   ScreenMode,
   ViewLayout, 
+  PresentationZoom,
   SystemTelemetry,
   MedicalConditionId,
   MultimodalInputMode,
@@ -32,6 +33,7 @@ import {
   INITIAL_TELEMETRY, 
   MEDICAL_CONDITIONS,
   MOCK_INCIDENT_FEED,
+  MASTER_SLIDES_SYNC,
   generateClinicalHandoverReport
 } from '../mock/scenarios';
 import { soundEngine } from '../utils/audio';
@@ -147,6 +149,13 @@ interface DemoContextType {
   isClinicalReportModalOpen: boolean;
   activeHandoverReport: ClinicalHandoverReport | null;
   
+  // Phase 5 Projector Mode, Presentation Zoom & Slide HUD
+  projectorMode: boolean;
+  presentationZoom: PresentationZoom;
+  isSlideSyncOpen: boolean;
+  isEventDrawerOpen: boolean;
+  quickNotification: string | null;
+
   // Actions
   setScenario: (id: 'scenario-a' | 'scenario-b' | 'scenario-c') => void;
   setScreenMode: (mode: ScreenMode) => void;
@@ -184,6 +193,16 @@ interface DemoContextType {
   openClinicalReport: () => void;
   trigger108Escalation: () => void;
   broadcastAlert: (message?: string) => void;
+
+  // Phase 5 Presentation & Tuning Actions
+  toggleProjectorMode: () => void;
+  setPresentationZoom: (zoom: PresentationZoom) => void;
+  setIsSlideSyncOpen: (open: boolean) => void;
+  toggleSlideSync: () => void;
+  setIsEventDrawerOpen: (open: boolean) => void;
+  jumpToSlideView: (slideNumber: number) => void;
+  triggerLifecycleEvent: (status: IncidentStatus) => void;
+  showToast: (msg: string) => void;
 
   setIntakeInputMode: (mode: MultimodalInputMode) => void;
   toggleVoiceRecording: () => void;
@@ -249,6 +268,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedIncidentId, setSelectedIncidentIdState] = useState<string | null>('inc-01');
   const [isClinicalReportModalOpen, setIsClinicalReportModalOpenState] = useState<boolean>(false);
 
+  // Phase 5 Presentation & Projector Tuning state
+  const [projectorMode, setProjectorMode] = useState<boolean>(false);
+  const [presentationZoom, setPresentationZoomState] = useState<PresentationZoom>(100);
+  const [isSlideSyncOpen, setIsSlideSyncOpenState] = useState<boolean>(false);
+  const [isEventDrawerOpen, setIsEventDrawerOpenState] = useState<boolean>(false);
+  const [quickNotification, setQuickNotification] = useState<string | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
+
   // Multimodal Medical Intake state
   const [intakeInputMode, setIntakeInputModeState] = useState<MultimodalInputMode>('PRESETS');
   const [voiceTranscript, setVoiceTranscript] = useState<string>(
@@ -282,6 +309,47 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const timerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
+
+  // Toast Notification helper
+  const showToast = useCallback((msg: string) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    setQuickNotification(msg);
+    toastTimerRef.current = window.setTimeout(() => {
+      setQuickNotification(null);
+    }, 2400);
+  }, []);
+
+  const toggleProjectorMode = useCallback(() => {
+    soundEngine.playClick();
+    setProjectorMode(prev => {
+      const next = !prev;
+      showToast(next ? '📽️ Projector High-Contrast Mode Activated' : '🌑 AMOLED Dark Mode Activated');
+      return next;
+    });
+  }, [showToast]);
+
+  const setPresentationZoom = useCallback((zoom: PresentationZoom) => {
+    soundEngine.playClick();
+    setPresentationZoomState(zoom);
+    showToast(`🔍 Scale: ${zoom}%`);
+  }, [showToast]);
+
+  const toggleSlideSync = useCallback(() => {
+    soundEngine.playClick();
+    setIsSlideSyncOpenState(prev => !prev);
+  }, []);
+
+  const setIsSlideSyncOpen = useCallback((open: boolean) => {
+    soundEngine.playClick();
+    setIsSlideSyncOpenState(open);
+  }, []);
+
+  const setIsEventDrawerOpen = useCallback((open: boolean) => {
+    soundEngine.playClick();
+    setIsEventDrawerOpenState(open);
+  }, []);
 
   // Sync mute with sound engine
   const toggleAudioMute = useCallback(() => {
@@ -859,7 +927,74 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPersonaModeState('VICTIM');
     setScreenModeState('GUARDIAN');
     setIsVoiceRecording(false);
-  }, []);
+    showToast('🔄 Demo Reset to Clean Standby State');
+  }, [showToast]);
+
+  // Jump directly to view associated with an 8-slide deck slide
+  const jumpToSlideView = useCallback((slideNumber: number) => {
+    const slide = MASTER_SLIDES_SYNC.find(s => s.slideNumber === slideNumber);
+    if (!slide) return;
+    soundEngine.playSuccessChime();
+
+    setScenario(slide.targetScenarioId);
+    setPersonaModeState(slide.targetPersona);
+    setScreenModeState(slide.targetScreen);
+
+    if (slide.targetVictimSubScreen) {
+      setVictimSubScreenState(slide.targetVictimSubScreen);
+    }
+    if (slide.targetResponderSubScreen) {
+      setResponderSubScreenState(slide.targetResponderSubScreen);
+    }
+
+    if (slideNumber === 1 || slideNumber === 2) {
+      setIncidentStatusState('IDLE');
+    } else if (slideNumber === 3) {
+      setIncidentStatusState('AI_TRIAGED');
+    } else if (slideNumber === 4 || slideNumber === 5) {
+      setIncidentStatusState('SEARCHING_RESPONDERS');
+    } else if (slideNumber === 6) {
+      setIncidentStatusState('RESPONDER_ACCEPTED');
+    } else if (slideNumber === 7) {
+      setIncidentStatusState('RESPONDER_EN_ROUTE');
+    } else if (slideNumber === 8) {
+      setIncidentStatusState('RESOLVED');
+    }
+
+    showToast(`🎯 Slide ${slideNumber}: ${slide.title} (${slide.presenter})`);
+  }, [setScenario, showToast]);
+
+  // Jump to specific lifecycle milestone
+  const triggerLifecycleEvent = useCallback((status: IncidentStatus) => {
+    if (status === 'SOS_TRIGGERED') {
+      soundEngine.playEmergencyAlert();
+      setIsCountingDown(false);
+      setVictimSubScreenState('TRIAGE');
+    } else if (status === 'AI_TRIAGING' || status === 'AI_TRIAGED') {
+      soundEngine.playClick();
+      setVictimSubScreenState('TRIAGE');
+    } else if (status === 'SEARCHING_RESPONDERS') {
+      soundEngine.playClick();
+      setSearchRadiusKm(2.0);
+    } else if (status === 'RESPONDER_ACCEPTED') {
+      soundEngine.playSuccessChime();
+      setResponderSubScreenState('NAVIGATION');
+    } else if (status === 'RESPONDER_ARRIVED') {
+      soundEngine.playSuccessChime();
+      setResponderSubScreenState('NAVIGATION');
+    } else if (status === 'HANDOVER_108') {
+      soundEngine.playClick();
+    } else if (status === 'RESOLVED') {
+      soundEngine.playSuccessChime();
+      soundEngine.stopCprMetronome();
+      setCprMetronomeActive(false);
+    } else {
+      soundEngine.playClick();
+    }
+
+    setIncidentStatusState(status);
+    showToast(`⚡ Jumped to: ${status.replace(/_/g, ' ')}`);
+  }, [showToast]);
 
   // Milestone Events memo
   const timelineEvents: TimelineEventItem[] = useMemo(() => {
@@ -1089,6 +1224,73 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [incidentStatus, isAutoSimulating, simulationSpeed]);
 
+  // Presentation Keyboard Shortcuts Hook
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore keystrokes when focused inside interactive form fields
+      const target = e.target as HTMLElement;
+      if (
+        target && 
+        (target.tagName === 'INPUT' || 
+         target.tagName === 'TEXTAREA' || 
+         target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        toggleAutoSimulation();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        advanceStep();
+      } else if (e.key === '1') {
+        setScenario('scenario-a');
+      } else if (e.key === '2') {
+        setScenario('scenario-b');
+      } else if (e.key === '3') {
+        setScenario('scenario-c');
+      } else if (e.key === 'v' || e.key === 'V') {
+        setPersonaModeState('VICTIM');
+        setScreenModeState('CRISIS_MATRIX');
+        showToast('🧑 Switched to Victim View');
+      } else if (e.key === 'r' || e.key === 'R') {
+        setPersonaModeState('RESPONDER');
+        setScreenModeState('RESPONDER');
+        showToast('🚑 Switched to Responder View');
+      } else if (e.key === 'c' || e.key === 'C') {
+        setPersonaModeState('COMMAND_CENTER');
+        setScreenModeState('COMMAND_CENTER');
+        showToast('🛰️ Switched to Command Center View');
+      } else if (e.key === 'm' || e.key === 'M') {
+        setPersonaModeState('MAP');
+        setScreenModeState('MAP');
+        showToast('🗺️ Switched to Spatial Live Map');
+      } else if (e.key === 'g' || e.key === 'G') {
+        setPersonaModeState('VICTIM');
+        setScreenModeState('GUARDIAN');
+        showToast('🛡️ Switched to Guardian Radar Screen');
+      } else if (e.key === 'p' || e.key === 'P') {
+        toggleProjectorMode();
+      } else if (e.key === 's' || e.key === 'S') {
+        toggleSlideSync();
+      } else if (e.key === 'x' || e.key === 'X') {
+        resetDemo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    toggleAutoSimulation, 
+    advanceStep, 
+    setScenario, 
+    toggleProjectorMode, 
+    toggleSlideSync, 
+    resetDemo, 
+    showToast
+  ]);
+
   return (
     <DemoContext.Provider
       value={{
@@ -1141,6 +1343,11 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         selectedIncidentId,
         isClinicalReportModalOpen,
         activeHandoverReport,
+        projectorMode,
+        presentationZoom,
+        isSlideSyncOpen,
+        isEventDrawerOpen,
+        quickNotification,
         setScenario,
         setScreenMode,
         setPersonaMode,
@@ -1173,6 +1380,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         openClinicalReport,
         trigger108Escalation,
         broadcastAlert,
+        toggleProjectorMode,
+        setPresentationZoom,
+        setIsSlideSyncOpen,
+        toggleSlideSync,
+        setIsEventDrawerOpen,
+        jumpToSlideView,
+        triggerLifecycleEvent,
+        showToast,
         setIntakeInputMode,
         toggleVoiceRecording,
         setTextInputNotes,
