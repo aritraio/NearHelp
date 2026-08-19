@@ -71,29 +71,29 @@ gantt
 
 ### 🚨 Phase 2: Victim Experience Screens (Thu Morning & Afternoon)
 
-- [ ] 🔴 **Screen 1: One-Tap SOS Trigger Screen**
-  - [ ] Giant central SOS button with radial breathing/pulse glow animation
-  - [ ] 3-second hold / 5-second abort countdown ring with "Cancel (False Alarm)" protection
-  - [ ] Crisis category selector chips (`🩺 Medical`, `🔥 Fire`, `🛡️ Crime`, `🚗 Accident`)
-  - [ ] Multimodal intake simulator bar:
+- [x] 🔴 **Screen 1: One-Tap SOS Trigger Screen**
+  - [x] Giant central SOS button with radial breathing/pulse glow animation
+  - [x] 3-second hold / 5-second abort countdown ring with "Cancel (False Alarm)" protection
+  - [x] Crisis category selector chips (`🩺 Medical`, `🔥 Fire`, `🛡️ Crime`, `🚗 Accident`)
+  - [x] Multimodal intake simulator bar:
     - 🎙️ *Hold to Speak Voice SOS*: Animated audio visualizer waveform + simulated live speech transcript (*"My father collapsed, not breathing..."*)
     - 📸 *Scene Photo Intake*: Image drop/preview with AI bounding-box detection overlay
-  - [ ] Quick-access toggle for *Anonymous Emergency Mode* (privacy bypass)
+  - [x] Quick-access toggle for *Anonymous Emergency Mode* (privacy bypass)
 
-- [ ] 🔴 **Screen 2: Live AI Triage & Active SOS Screen**
-  - [ ] **AI Diagnostic Badge**: *Level 5 — Critical Life Threat (Suspected Cardiac Arrest / Hypoxia)*
-  - [ ] **Clinical Urgency Metrics**: Estimated Survival Window (Platinum 5 Mins Countdown), AI Confidence: `98.4%`
-  - [ ] **3-Tier Spatial Escalation Bar**:
+- [x] 🔴 **Screen 2: Live AI Triage & Active SOS Screen**
+  - [x] **AI Diagnostic Badge**: *Level 5 — Critical Life Threat (Suspected Cardiac Arrest / Hypoxia)*
+  - [x] **Clinical Urgency Metrics**: Estimated Survival Window (Platinum 5 Mins Countdown), AI Confidence: `98.4%`
+  - [x] **3-Tier Spatial Escalation Bar**:
     - `0–30s`: Scanning Community Network (500m → 1.5km)
     - `30–60s`: Auto-Escalation to 108/112 Municipal Ambulance Gateway
     - `Active`: AI Offline/Online Medical Protocol Activated
-  - [ ] **Emergency Contact Status**: SMS & WhatsApp beacon dispatched to family with live GPS tracking link
+  - [x] **Emergency Contact Status**: SMS & WhatsApp beacon dispatched to family with live GPS tracking link
 
-- [ ] 🟡 **Screen 3: Interactive Grounded First-Aid Protocol (RAG Assist)**
-  - [ ] Step-by-Step interactive cards with clear action checklist (e.g. *Step 1: Check Carotid Pulse* → *Step 2: Start 30 Compressions*)
-  - [ ] **Live CPR Rhythm Metronome**: Visual flashing beat indicator + audio click at **110 BPM** (AHA/ERC guidelines)
-  - [ ] Medical Disclaimers & Legal Good Samaritan Act protection badge (Section 134A MV Act)
-  - [ ] Quick AI Assistant Chat Drawer for real-time bystander questions (*"Can I give water?" → "❌ NO. Do not administer liquids..."*)
+- [x] 🟡 **Screen 3: Interactive Grounded First-Aid Protocol (RAG Assist)**
+  - [x] Step-by-Step interactive cards with clear action checklist (e.g. *Step 1: Check Carotid Pulse* → *Step 2: Start 30 Compressions*)
+  - [x] **Live CPR Rhythm Metronome**: Visual flashing beat indicator + audio click at **110 BPM** (AHA/ERC guidelines)
+  - [x] Medical Disclaimers & Legal Good Samaritan Act protection badge (Section 134A MV Act)
+  - [x] Quick AI Assistant Chat Drawer for real-time bystander questions (*"Can I give water?" → "❌ NO. Do not administer liquids..."*)
 
 ---
 

@@ -7,6 +7,19 @@ export type ScreenMode = 'GUARDIAN' | 'CRISIS_MATRIX' | 'RESPONDER' | 'COMMAND_C
 
 export type PersonaMode = 'VICTIM' | 'RESPONDER' | 'COMMAND_CENTER';
 
+export type VictimSubScreen = 'TRIGGER' | 'TRIAGE' | 'FIRST_AID';
+
+export type CrisisCategory = 'medical' | 'fire' | 'crime' | 'accident';
+
+export interface BystanderChatMessage {
+  id: string;
+  sender: 'user' | 'gemini';
+  text: string;
+  timestamp: string;
+  isActionable?: boolean;
+  highlightText?: string;
+}
+
 export type ViewLayout = 'MOBILE_FRAME' | 'SPLIT_SCREEN' | 'DESKTOP_FULL';
 
 export type IncidentStatus = 

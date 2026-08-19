@@ -1,299 +1,107 @@
 /* ==========================================================================
-   NearHelp AI — Victim Mobile Screen Foundation
+   NearHelp AI — Victim Experience Master Container (Screens 1, 2, & 3)
    File: src/components/victim/VictimMobilePreview.tsx
    ========================================================================== */
 
 import React from 'react';
 import { useDemoStore } from '../../store/DemoContext';
-import { 
-  Heart, 
-  Mic, 
-  Camera, 
-  Zap 
-} from 'lucide-react';
+import { SosTriggerScreen } from './SosTriggerScreen';
+import { ActiveTriageScreen } from './ActiveTriageScreen';
+import { FirstAidRagScreen } from './FirstAidRagScreen';
+import type { VictimSubScreen } from '../../mock/types';
+import { Zap, Sparkles, HeartPulse } from 'lucide-react';
+import { soundEngine } from '../../utils/audio';
 
 export const VictimMobilePreview: React.FC = () => {
   const { 
-    currentScenario, 
-    incidentStatus, 
-    elapsedSeconds, 
-    searchRadiusKm,
-    cprMetronomeActive,
-    triggerSos, 
-    cancelSos, 
-    toggleCprMetronome 
+    victimSubScreen, 
+    setVictimSubScreen, 
+    incidentStatus 
   } = useDemoStore();
 
-  const isEmergencyActive = incidentStatus !== 'IDLE';
+  const isEmergencyActive = incidentStatus !== 'IDLE' && incidentStatus !== 'COUNTDOWN';
+
+  const subTabs: { id: VictimSubScreen; label: string; icon: React.FC<{ size?: number; color?: string }> }[] = [
+    { id: 'TRIGGER', label: '1: SOS Intake', icon: Zap },
+    { id: 'TRIAGE', label: '2: AI Triage', icon: Sparkles },
+    { id: 'FIRST_AID', label: '3: RAG Guide', icon: HeartPulse },
+  ];
 
   return (
     <div style={{
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      padding: '16px',
-      gap: '16px',
-      color: 'var(--text-primary)'
+      backgroundColor: '#000000',
+      color: 'var(--text-primary)',
+      overflow: 'hidden'
     }}>
-      {/* Header */}
+      {/* Top Navigation Sub-Tabs Bar (Victim Presentation Flow) */}
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: '10px',
-        borderBottom: '1px solid var(--border-subtle)'
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '4px',
+        backgroundColor: '#0A0C10',
+        padding: '6px 10px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        flexShrink: 0
       }}>
-        <div>
-          <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--color-emergency-red-bright)' }}>
-            NearHelp AI
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-            Community SOS Network
-          </div>
-        </div>
+        {subTabs.map((tab) => {
+          const isActive = victimSubScreen === tab.id;
+          const TabIcon = tab.icon;
+          const isAlertTab = tab.id === 'TRIAGE' && isEmergencyActive;
 
-        <div style={{
-          fontSize: '11px',
-          padding: '3px 8px',
-          borderRadius: 'var(--radius-full)',
-          backgroundColor: isEmergencyActive ? 'rgba(255, 23, 68, 0.2)' : 'rgba(0, 230, 118, 0.15)',
-          color: isEmergencyActive ? 'var(--color-emergency-red-bright)' : 'var(--color-safe-green-bright)',
-          fontWeight: 700,
-          border: `1px solid ${isEmergencyActive ? 'var(--border-emergency)' : 'var(--border-safe)'}`
-        }}>
-          {isEmergencyActive ? 'INCIDENT LIVE' : 'NETWORK READY'}
-        </div>
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                soundEngine.playClick();
+                setVictimSubScreen(tab.id);
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                padding: '6px 4px',
+                borderRadius: '8px',
+                backgroundColor: isActive 
+                  ? (tab.id === 'TRIGGER' ? '#FF2A44' : tab.id === 'TRIAGE' ? 'rgba(0, 229, 255, 0.2)' : 'rgba(0, 230, 118, 0.2)')
+                  : 'transparent',
+                color: isActive 
+                  ? (tab.id === 'TRIGGER' ? '#FFFFFF' : tab.id === 'TRIAGE' ? '#00E5FF' : '#00E676')
+                  : '#94A3B8',
+                fontWeight: isActive ? 800 : 600,
+                fontSize: '10.5px',
+                border: isActive 
+                  ? `1px solid ${tab.id === 'TRIGGER' ? 'rgba(255,255,255,0.3)' : tab.id === 'TRIAGE' ? '#00E5FF' : '#00E676'}`
+                  : '1px solid transparent',
+                boxShadow: isActive ? '0 2px 8px rgba(0, 0, 0, 0.4)' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <TabIcon size={12} color={isActive ? (tab.id === 'TRIGGER' ? '#FFFFFF' : tab.id === 'TRIAGE' ? '#00E5FF' : '#00E676') : '#94A3B8'} />
+              <span>{tab.label}</span>
+              {isAlertTab && (
+                <div style={{
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  backgroundColor: '#FF2A44'
+                }} />
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Medical Problem Chips */}
-      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
-        {[
-          { label: 'Cardiac', active: currentScenario.medicalConditionId === 'cardiac_arrest' },
-          { label: 'Hemorrhage', active: currentScenario.medicalConditionId === 'severe_bleeding' },
-          { label: 'Respiratory', active: currentScenario.medicalConditionId === 'respiratory_asthma' },
-          { label: 'Seizure', active: currentScenario.medicalConditionId === 'unconscious_seizure' },
-        ].map((cat, idx) => (
-          <div
-            key={idx}
-            style={{
-              padding: '6px 10px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '11px',
-              fontWeight: 600,
-              backgroundColor: cat.active ? 'var(--color-emergency-red)' : 'var(--bg-surface)',
-              color: cat.active ? '#ffffff' : 'var(--text-secondary)',
-              border: `1px solid ${cat.active ? 'var(--border-emergency)' : 'var(--border-subtle)'}`,
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {cat.label}
-          </div>
-        ))}
+      {/* Sub-Screen Dynamic Render */}
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        {victimSubScreen === 'TRIGGER' && <SosTriggerScreen />}
+        {victimSubScreen === 'TRIAGE' && <ActiveTriageScreen />}
+        {victimSubScreen === 'FIRST_AID' && <FirstAidRagScreen />}
       </div>
-
-      {/* Central SOS Button or Active Emergency State */}
-      {!isEmergencyActive ? (
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '20px'
-        }}>
-          <button
-            onClick={triggerSos}
-            className="sos-breathing"
-            style={{
-              width: '180px',
-              height: '180px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--color-emergency-red)',
-              color: '#ffffff',
-              boxShadow: 'var(--glow-emergency)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px'
-            }}
-          >
-            <Zap size={44} />
-            <span style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '0.05em' }}>SOS</span>
-            <span style={{ fontSize: '10px', textTransform: 'uppercase', opacity: 0.9 }}>TAP FOR HELP</span>
-          </button>
-
-          <div style={{ textAlign: 'center', maxWidth: '240px' }}>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              1-Tap triggers instant Gemini AI triage and dispatches nearest CPR volunteers within 500m.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          overflowY: 'auto'
-        }}>
-          {/* AI Diagnostic Badge */}
-          <div style={{
-            backgroundColor: 'rgba(255, 23, 68, 0.15)',
-            border: '1px solid var(--border-emergency)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--color-emergency-red-bright)' }}>
-                {currentScenario.severityLabel}
-              </span>
-              <span className="font-mono" style={{ fontSize: '11px', color: 'var(--color-action-amber-bright)', fontWeight: 700 }}>
-                T+{elapsedSeconds}s
-              </span>
-            </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              AI Confidence: <strong>{currentScenario.aiConfidence}%</strong> • Platinum Window: <strong>{currentScenario.survivalWindowMinutes}m</strong>
-            </div>
-          </div>
-
-          {/* Spatial Escalation Bar */}
-          <div style={{
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-md)',
-            padding: '10px 12px'
-          }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-              SPATIAL DISPATCH SCAN
-            </div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-safe-green-bright)' }}>
-              Scanning radius: {searchRadiusKm} km (PostGIS GiST)
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-              {currentScenario.responders.length} verified responders alerted
-            </div>
-          </div>
-
-          {/* CPR Metronome Quick Action */}
-          {currentScenario.category === 'medical' && (
-            <div style={{
-              backgroundColor: 'var(--bg-surface)',
-              border: `1px solid ${cprMetronomeActive ? 'var(--color-emergency-red)' : 'var(--border-subtle)'}`,
-              borderRadius: 'var(--radius-md)',
-              padding: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Heart size={14} color="var(--color-emergency-red-bright)" />
-                  <span>CPR Rhythm Metronome</span>
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>110 Compressions / Min</div>
-              </div>
-
-              <button
-                onClick={toggleCprMetronome}
-                className={cprMetronomeActive ? 'cpr-beat-active' : ''}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  backgroundColor: cprMetronomeActive ? 'var(--color-emergency-red)' : 'var(--bg-surface-elevated)',
-                  color: '#ffffff',
-                  border: '1px solid var(--border-medium)'
-                }}
-              >
-                {cprMetronomeActive ? 'STOP' : 'START BEAT'}
-              </button>
-            </div>
-          )}
-
-          {/* First-Aid Protocol Card */}
-          <div style={{
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px'
-          }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-ai-cyan)', marginBottom: '4px' }}>
-              RAG FIRST-AID GUIDANCE
-            </div>
-            <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>
-              {currentScenario.protocol.steps[0]?.title}
-            </div>
-            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-              {currentScenario.protocol.steps[0]?.actionInstruction}
-            </p>
-          </div>
-
-          {/* Cancel SOS */}
-          <button
-            onClick={cancelSos}
-            style={{
-              marginTop: 'auto',
-              padding: '10px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--bg-surface)',
-              color: 'var(--color-action-amber-bright)',
-              border: '1px solid var(--border-subtle)',
-              fontSize: '12px',
-              fontWeight: 700
-            }}
-          >
-            Cancel SOS (False Alarm)
-          </button>
-        </div>
-      )}
-
-      {/* Multimodal Intake Toolbar */}
-      {!isEmergencyActive && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '8px',
-          marginTop: 'auto'
-        }}>
-          <button
-            style={{
-              padding: '10px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--bg-surface)',
-              border: '1px solid var(--border-subtle)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              fontSize: '12px',
-              color: 'var(--text-secondary)'
-            }}
-          >
-            <Mic size={14} color="var(--color-ai-cyan)" />
-            <span>Hold to Speak</span>
-          </button>
-
-          <button
-            style={{
-              padding: '10px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--bg-surface)',
-              border: '1px solid var(--border-subtle)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              fontSize: '12px',
-              color: 'var(--text-secondary)'
-            }}
-          >
-            <Camera size={14} color="var(--color-action-amber-bright)" />
-            <span>Scene Photo</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 };

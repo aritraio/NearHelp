@@ -12,10 +12,23 @@ import type {
   ViewLayout, 
   SystemTelemetry,
   MedicalConditionId,
-  MultimodalInputMode
+  MultimodalInputMode,
+  VictimSubScreen,
+  CrisisCategory,
+  BystanderChatMessage
 } from '../mock/types';
 import { ALL_SCENARIOS, SCENARIO_A, INITIAL_TELEMETRY, MEDICAL_CONDITIONS } from '../mock/scenarios';
 import { soundEngine } from '../utils/audio';
+
+const INITIAL_AI_CHAT_MESSAGES: BystanderChatMessage[] = [
+  {
+    id: 'msg-1',
+    sender: 'gemini',
+    text: 'NearHelp Gemini Medical Assistant online. What clinical guidance or first-aid clarification do you need while emergency responders are en-route?',
+    timestamp: 'Just now',
+    highlightText: 'Clinical Protocol Active'
+  }
+];
 
 interface DemoContextType {
   // Scenario & Screen Mode
@@ -25,6 +38,15 @@ interface DemoContextType {
   viewLayout: ViewLayout;
   incidentStatus: IncidentStatus;
   selectedMedicalCondition: MedicalConditionId;
+
+  // Phase 2 Victim Experience Sub-Views & Features
+  victimSubScreen: VictimSubScreen;
+  selectedCrisisCategory: CrisisCategory;
+  anonymousEmergencyMode: boolean;
+  activeRagStepIndex: number;
+  completedRagSteps: number[];
+  isAiChatDrawerOpen: boolean;
+  aiChatMessages: BystanderChatMessage[];
 
   // Multimodal Medical Intake
   intakeInputMode: MultimodalInputMode;
@@ -66,6 +88,14 @@ interface DemoContextType {
   setViewLayout: (layout: ViewLayout) => void;
   setIncidentStatus: (status: IncidentStatus) => void;
   selectMedicalCondition: (conditionId: MedicalConditionId) => void;
+  setVictimSubScreen: (subScreen: VictimSubScreen) => void;
+  setSelectedCrisisCategory: (category: CrisisCategory) => void;
+  toggleAnonymousEmergencyMode: () => void;
+  toggleRagStep: (stepNumber: number) => void;
+  setActiveRagStepIndex: (index: number) => void;
+  setAiChatDrawerOpen: (open: boolean) => void;
+  sendBystanderQuestion: (question: string) => void;
+  resetRagChecklist: () => void;
   setIntakeInputMode: (mode: MultimodalInputMode) => void;
   toggleVoiceRecording: () => void;
   setTextInputNotes: (text: string) => void;
@@ -97,6 +127,15 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [viewLayout, setViewLayout] = useState<ViewLayout>('SPLIT_SCREEN');
   const [incidentStatus, setIncidentStatusState] = useState<IncidentStatus>('IDLE');
   const [selectedMedicalCondition, setSelectedMedicalCondition] = useState<MedicalConditionId>('cardiac_arrest');
+
+  // Phase 2 Victim Experience Sub-Views & Features
+  const [victimSubScreen, setVictimSubScreenState] = useState<VictimSubScreen>('TRIGGER');
+  const [selectedCrisisCategory, setSelectedCrisisCategoryState] = useState<CrisisCategory>('medical');
+  const [anonymousEmergencyMode, setAnonymousEmergencyMode] = useState<boolean>(false);
+  const [activeRagStepIndex, setActiveRagStepIndexState] = useState<number>(0);
+  const [completedRagSteps, setCompletedRagSteps] = useState<number[]>([]);
+  const [isAiChatDrawerOpen, setIsAiChatDrawerOpen] = useState<boolean>(false);
+  const [aiChatMessages, setAiChatMessages] = useState<BystanderChatMessage[]>(INITIAL_AI_CHAT_MESSAGES);
 
   // Multimodal Medical Intake state
   const [intakeInputMode, setIntakeInputModeState] = useState<MultimodalInputMode>('PRESETS');
@@ -208,6 +247,91 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Phase 2 Victim Actions
+  const setVictimSubScreen = useCallback((subScreen: VictimSubScreen) => {
+    soundEngine.playClick();
+    setVictimSubScreenState(subScreen);
+  }, []);
+
+  const setSelectedCrisisCategory = useCallback((category: CrisisCategory) => {
+    soundEngine.playClick();
+    setSelectedCrisisCategoryState(category);
+  }, []);
+
+  const toggleAnonymousEmergencyMode = useCallback(() => {
+    soundEngine.playClick();
+    setAnonymousEmergencyMode(prev => !prev);
+  }, []);
+
+  const toggleRagStep = useCallback((stepNumber: number) => {
+    soundEngine.playClick();
+    setCompletedRagSteps(prev => {
+      if (prev.includes(stepNumber)) {
+        return prev.filter(s => s !== stepNumber);
+      } else {
+        soundEngine.playSuccessChime();
+        return [...prev, stepNumber];
+      }
+    });
+  }, []);
+
+  const setActiveRagStepIndex = useCallback((index: number) => {
+    soundEngine.playClick();
+    setActiveRagStepIndexState(index);
+  }, []);
+
+  const setAiChatDrawerOpen = useCallback((open: boolean) => {
+    soundEngine.playClick();
+    setIsAiChatDrawerOpen(open);
+  }, []);
+
+  const resetRagChecklist = useCallback(() => {
+    soundEngine.playClick();
+    setCompletedRagSteps([]);
+    setActiveRagStepIndexState(0);
+  }, []);
+
+  const sendBystanderQuestion = useCallback((questionText: string) => {
+    soundEngine.playClick();
+    const userMsg: BystanderChatMessage = {
+      id: `user-${Date.now()}`,
+      sender: 'user',
+      text: questionText,
+      timestamp: 'Just now'
+    };
+
+    let aiReplyText = "🤖 NearHelp AI Clinical Engine: Ensure the patient is on a flat, firm surface. Check carotid pulse for no more than 10 seconds. If no pulse or agonal breathing, immediately start CPR (30 compressions : 2 breaths).";
+    let highlight = "Grounded Protocol Step";
+
+    const qLower = questionText.toLowerCase();
+    if (qLower.includes('water') || qLower.includes('liquid') || qLower.includes('drink') || qLower.includes('medicine') || qLower.includes('oral')) {
+      aiReplyText = "❌ NO. NEVER administer water, fluids, or oral medications to an unconscious or gasping victim. Doing so can cause fatal airway obstruction and pulmonary aspiration.";
+      highlight = "Contraindicated Action";
+    } else if (qLower.includes('deep') || qLower.includes('compress') || qLower.includes('chest') || qLower.includes('fast') || qLower.includes('rate') || qLower.includes('bpm')) {
+      aiReplyText = "✅ Compress 5 to 6 cm (approx 2 inches) deep at a cadence of 110–120 compressions/minute in the center of the lower sternum. Allow complete recoil between compressions.";
+      highlight = "AHA / IRC Guideline (110 BPM)";
+    } else if (qLower.includes('aed') || qLower.includes('defibrillator') || qLower.includes('shock') || qLower.includes('pad')) {
+      aiReplyText = "⚡ Turn ON the AED immediately upon arrival. Follow voice prompts and adhere electrode pads to the bare chest (upper right / lower left). Stand clear during rhythm analysis and shock.";
+      highlight = "Immediate AED Action";
+    } else if (qLower.includes('rib') || qLower.includes('crack') || qLower.includes('pop') || qLower.includes('break')) {
+      aiReplyText = "⚠️ Costochondral cartilage popping or rib cracking is common during effective adult CPR. DO NOT STOP compressions. Continue CPR immediately; restoring cerebral blood flow is the sole priority.";
+      highlight = "Do Not Stop CPR";
+    } else if (qLower.includes('legal') || qLower.includes('police') || qLower.includes('samaritan') || qLower.includes('liability') || qLower.includes('law')) {
+      aiReplyText = "🛡️ You are 100% legally protected under Section 134A of the Motor Vehicles (Amendment) Act 2019 and Supreme Court 2016 Good Samaritan Guidelines. You cannot be detained, harassed, or held liable.";
+      highlight = "Section 134A MV Act Shield";
+    }
+
+    const aiMsg: BystanderChatMessage = {
+      id: `ai-${Date.now() + 1}`,
+      sender: 'gemini',
+      text: aiReplyText,
+      timestamp: 'Just now',
+      highlightText: highlight
+    };
+
+    setAiChatMessages(prev => [...prev, userMsg, aiMsg]);
+  }, []);
+
   // Medical Condition Selection
   const selectMedicalCondition = useCallback((conditionId: MedicalConditionId) => {
     soundEngine.playClick();
@@ -273,6 +397,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     soundEngine.playEmergencyAlert();
     setIsCountingDown(false);
     setIncidentStatusState('SOS_TRIGGERED');
+    setVictimSubScreenState('TRIAGE');
     setElapsedSeconds(0);
     setIsAutoSimulating(true);
   }, []);
@@ -303,6 +428,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     soundEngine.stopCprMetronome();
     setCprMetronomeActive(false);
     setIncidentStatusState('IDLE');
+    setVictimSubScreenState('TRIGGER');
     setElapsedSeconds(0);
     setIsAutoSimulating(false);
     setIsCountingDown(false);
@@ -341,6 +467,13 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     soundEngine.stopCprMetronome();
     setCprMetronomeActive(false);
     setIncidentStatusState('IDLE');
+    setVictimSubScreenState('TRIGGER');
+    setSelectedCrisisCategoryState('medical');
+    setAnonymousEmergencyMode(false);
+    setCompletedRagSteps([]);
+    setActiveRagStepIndexState(0);
+    setIsAiChatDrawerOpen(false);
+    setAiChatMessages(INITIAL_AI_CHAT_MESSAGES);
     setElapsedSeconds(0);
     setSearchRadiusKm(0.5);
     setIsAutoSimulating(false);
@@ -499,6 +632,13 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         viewLayout,
         incidentStatus,
         selectedMedicalCondition,
+        victimSubScreen,
+        selectedCrisisCategory,
+        anonymousEmergencyMode,
+        activeRagStepIndex,
+        completedRagSteps,
+        isAiChatDrawerOpen,
+        aiChatMessages,
         intakeInputMode,
         voiceTranscript,
         textInputNotes,
@@ -526,6 +666,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setViewLayout,
         setIncidentStatus: setIncidentStatusState,
         selectMedicalCondition,
+        setVictimSubScreen,
+        setSelectedCrisisCategory,
+        toggleAnonymousEmergencyMode,
+        toggleRagStep,
+        setActiveRagStepIndex,
+        setAiChatDrawerOpen,
+        sendBystanderQuestion,
+        resetRagChecklist,
         setIntakeInputMode,
         toggleVoiceRecording,
         setTextInputNotes,

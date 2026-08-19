@@ -9,6 +9,7 @@ import { ScenarioController } from './components/demo/ScenarioController';
 import { MobileDeviceFrame } from './components/demo/MobileDeviceFrame';
 import { Phase1Showcase } from './components/demo/Phase1Showcase';
 import { GuardianRadarScreen } from './components/guardian/GuardianRadarScreen';
+import { VictimMobilePreview } from './components/victim/VictimMobilePreview';
 import { CrisisDispatchScreen } from './components/crisis/CrisisDispatchScreen';
 import { ResponderMobilePreview } from './components/responder/ResponderMobilePreview';
 
@@ -47,12 +48,12 @@ const MainContent: React.FC = () => {
             <GuardianRadarScreen />
           </MobileDeviceFrame>
 
-          {/* Right Screen: Medical Emergency Intake & Multimodal Triage */}
+          {/* Right Screen: Victim Experience (SOS Intake, AI Triage & Grounded First-Aid RAG) */}
           <MobileDeviceFrame 
-            title="Screen 2: Medical Emergency Intake" 
-            badgeText="Multimodal Triage"
+            title="Screen 2: Victim Experience" 
+            badgeText="SOS • Triage • First-Aid"
           >
-            <CrisisDispatchScreen />
+            <VictimMobilePreview />
           </MobileDeviceFrame>
         </div>
       ) : (
@@ -67,19 +68,19 @@ const MainContent: React.FC = () => {
           <MobileDeviceFrame 
             title={
               screenMode === 'GUARDIAN' ? 'Screen 1: Guardian Radar' : 
-              screenMode === 'CRISIS_MATRIX' ? 'Screen 2: Medical Emergency Intake' : 
+              screenMode === 'CRISIS_MATRIX' ? 'Screen 2: Victim Experience' : 
               screenMode === 'RESPONDER' ? 'Responder Rescue Navigation' : 
               'NearHelp Mobile Client'
             }
             badgeText={
               screenMode === 'GUARDIAN' ? 'Safe Zone' : 
-              screenMode === 'CRISIS_MATRIX' ? 'Multimodal AI' : 
+              screenMode === 'CRISIS_MATRIX' ? 'SOS & First-Aid' : 
               screenMode === 'RESPONDER' ? 'Rescue Mode' : 
               'Admin'
             }
           >
             {screenMode === 'GUARDIAN' && <GuardianRadarScreen />}
-            {screenMode === 'CRISIS_MATRIX' && <CrisisDispatchScreen />}
+            {screenMode === 'CRISIS_MATRIX' && <VictimMobilePreview />}
             {screenMode === 'RESPONDER' && <ResponderMobilePreview />}
             {screenMode === 'COMMAND_CENTER' && <CrisisDispatchScreen />}
           </MobileDeviceFrame>
