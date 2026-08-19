@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NearHelp AI — Screen 2: Medical Emergency Intake (AMOLED & Overflow Fixed)
+   NearHelp AI — Screen 2: Medical Emergency Intake (Indian & Clinical UI)
    File: src/components/crisis/CrisisDispatchScreen.tsx
    ========================================================================== */
 
@@ -24,7 +24,15 @@ import {
   Camera,
   Layers,
   Sparkles,
-  Image as ImageIcon
+  Image as ImageIcon,
+  HeartPulse,
+  Droplet,
+  Wind,
+  Activity,
+  Brain,
+  Flame,
+  Bone,
+  AlertCircle
 } from 'lucide-react';
 import { soundEngine } from '../../utils/audio';
 
@@ -75,11 +83,27 @@ export const CrisisDispatchScreen: React.FC = () => {
   const quickSymptoms = [
     'Chest Pain', 
     'Unresponsive', 
-    'Severe Bleed', 
-    'Blue Lips', 
-    'Seizures', 
-    'Head Trauma'
+    'Arterial Bleed', 
+    'Cyanosis', 
+    'Convulsion', 
+    'Open Trauma'
   ];
+
+  const renderConditionIcon = (iconName: string, isSelected: boolean) => {
+    const iconColor = isSelected ? '#FFFFFF' : '#94A3B8';
+    const size = 15;
+    switch (iconName) {
+      case 'HeartPulse': return <HeartPulse size={size} color={iconColor} />;
+      case 'Droplet': return <Droplet size={size} color={iconColor} />;
+      case 'Wind': return <Wind size={size} color={iconColor} />;
+      case 'Activity': return <Activity size={size} color={iconColor} />;
+      case 'Brain': return <Brain size={size} color={iconColor} />;
+      case 'Flame': return <Flame size={size} color={iconColor} />;
+      case 'Bone': return <Bone size={size} color={iconColor} />;
+      case 'AlertCircle': return <AlertCircle size={size} color={iconColor} />;
+      default: return <HeartPulse size={size} color={iconColor} />;
+    }
+  };
 
   return (
     <div style={{
@@ -125,13 +149,13 @@ export const CrisisDispatchScreen: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '3px',
+                gap: '4px',
                 padding: '5px 2px',
                 borderRadius: 'var(--radius-full)',
                 backgroundColor: isActive ? '#1A1E26' : 'transparent',
                 color: isActive ? '#FF2A44' : '#64748B',
                 fontWeight: isActive ? 800 : 500,
-                fontSize: '10.5px',
+                fontSize: '11px',
                 border: isActive ? '1px solid rgba(255, 42, 68, 0.3)' : '1px solid transparent',
                 transition: 'all var(--transition-fast)'
               }}
@@ -143,7 +167,7 @@ export const CrisisDispatchScreen: React.FC = () => {
         })}
       </div>
 
-      {/* 2. Address Verification & Action Card */}
+      {/* 2. Indian Address Verification Card */}
       <div style={{
         backgroundColor: '#0C0E12',
         borderRadius: '14px',
@@ -238,13 +262,13 @@ export const CrisisDispatchScreen: React.FC = () => {
               border: '1px solid rgba(255, 255, 255, 0.08)',
               color: '#94A3B8'
             }}
-            title="Edit Address"
+            title="Edit Pinpoint Location"
           >
             {isEditingAddress ? <Check size={14} color="#00E676" /> : <Edit3 size={13} />}
           </button>
         </div>
 
-        {/* Confirm Address Button */}
+        {/* Confirm Location Button */}
         {!isEmergencyActive && !isCountingDown && (
           <button
             onClick={confirmAddress}
@@ -266,7 +290,7 @@ export const CrisisDispatchScreen: React.FC = () => {
               cursor: 'pointer'
             }}
           >
-            <span>Confirm Address</span>
+            <span>Confirm Location</span>
           </button>
         )}
       </div>
@@ -299,10 +323,10 @@ export const CrisisDispatchScreen: React.FC = () => {
             }}>
               <span style={{ fontSize: '12px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <Heart size={13} color="#FF2A44" />
-                <span>Specify Problem</span>
+                <span>Specify Medical Problem</span>
               </span>
               <span style={{ fontSize: '10px', color: '#00E5FF', fontWeight: 700, backgroundColor: 'rgba(0, 229, 255, 0.12)', padding: '1px 6px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(0, 229, 255, 0.3)' }}>
-                3 Input Modes
+                3 Input Options
               </span>
             </div>
 
@@ -392,7 +416,7 @@ export const CrisisDispatchScreen: React.FC = () => {
                       {isVoiceRecording ? (
                         <>
                           <div className="telemetry-dot telemetry-dot-emergency" style={{ width: '6px', height: '6px' }} />
-                          <span>Listening &amp; Transcribing...</span>
+                          <span>Listening &amp; AI Transcribing...</span>
                         </>
                       ) : (
                         <span>Tap Mic to Speak Medical Emergency</span>
@@ -448,7 +472,7 @@ export const CrisisDispatchScreen: React.FC = () => {
                 <textarea
                   value={textInputNotes}
                   onChange={(e) => setTextInputNotes(e.target.value)}
-                  placeholder="Type patient symptoms..."
+                  placeholder="Type patient symptoms (e.g. collapsed, chest pain, profuse bleeding)..."
                   rows={2}
                   style={{
                     width: '100%',
@@ -596,7 +620,7 @@ export const CrisisDispatchScreen: React.FC = () => {
             )}
           </div>
 
-          {/* Quick Medical Problem Cards (2x4 Grid — Responsive, Compact, Zero Overflow) */}
+          {/* Quick Medical Problem Cards (2x4 Grid — Clean SVG Icons & Zero Emojis) */}
           <div style={{
             backgroundColor: '#0C0E12',
             borderRadius: '14px',
@@ -640,7 +664,7 @@ export const CrisisDispatchScreen: React.FC = () => {
                     }}
                     title={cond.description}
                   >
-                    {/* Emoji Icon Container */}
+                    {/* SVG Icon Container */}
                     <div style={{
                       width: '26px',
                       height: '26px',
@@ -649,13 +673,12 @@ export const CrisisDispatchScreen: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '14px',
                       flexShrink: 0
                     }}>
-                      {cond.emoji}
+                      {renderConditionIcon(cond.iconName, isSelected)}
                     </div>
 
-                    {/* Text Details with strict overflow protection */}
+                    {/* Text Details */}
                     <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
                       <div style={{
                         fontSize: '11px',
@@ -685,7 +708,7 @@ export const CrisisDispatchScreen: React.FC = () => {
             </div>
           </div>
 
-          {/* 4. Dual-Action Countdown Dispatch Slider (Sticky Bottom) */}
+          {/* 4. Dual-Action Countdown Dispatch Slider */}
           <div style={{
             marginTop: 'auto',
             width: '100%',
@@ -839,10 +862,10 @@ export const CrisisDispatchScreen: React.FC = () => {
           }}>
             <div>
               <div style={{ fontSize: '12.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px', color: '#FFFFFF' }}>
-                <Heart size={14} color="#FF2A44" />
+                <HeartPulse size={14} color="#FF2A44" />
                 <span>CPR Rhythm Metronome</span>
               </div>
-              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>110 Compressions / Min (AHA)</div>
+              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>110 Compressions / Min (AHA / IRC)</div>
             </div>
 
             <button
@@ -871,7 +894,7 @@ export const CrisisDispatchScreen: React.FC = () => {
             boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6)'
           }}>
             <div style={{ fontSize: '10px', fontWeight: 800, color: '#00E5FF', marginBottom: '3px' }}>
-              WHO / AHA RAG PROTOCOL
+              IRC / WHO CLINICAL PROTOCOL
             </div>
             <div style={{ fontSize: '12px', fontWeight: 800, marginBottom: '3px', color: '#FFFFFF' }}>
               {currentScenario.protocol.steps[0]?.title}

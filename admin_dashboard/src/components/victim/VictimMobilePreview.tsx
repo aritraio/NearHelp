@@ -68,10 +68,10 @@ export const VictimMobilePreview: React.FC = () => {
       {/* Medical Problem Chips */}
       <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
         {[
-          { label: '🫀 Cardiac', active: currentScenario.medicalConditionId === 'cardiac_arrest' },
-          { label: '🩸 Bleeding', active: currentScenario.medicalConditionId === 'severe_bleeding' },
-          { label: '🫁 Breathing', active: currentScenario.medicalConditionId === 'respiratory_asthma' },
-          { label: '⚡ Seizure', active: currentScenario.medicalConditionId === 'unconscious_seizure' },
+          { label: 'Cardiac', active: currentScenario.medicalConditionId === 'cardiac_arrest' },
+          { label: 'Hemorrhage', active: currentScenario.medicalConditionId === 'severe_bleeding' },
+          { label: 'Respiratory', active: currentScenario.medicalConditionId === 'respiratory_asthma' },
+          { label: 'Seizure', active: currentScenario.medicalConditionId === 'unconscious_seizure' },
         ].map((cat, idx) => (
           <div
             key={idx}

@@ -411,7 +411,7 @@ export const GuardianRadarScreen: React.FC = () => {
           }}>
             <div>
               <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--emergency-crimson)' }}>
-                🚨 SOS ACTIVE — SCANNING 1.5KM
+                SOS ACTIVE — SCANNING 1.5 KM
               </div>
               <div style={{ fontSize: '11px', color: '#94A3B8' }}>
                 {currentScenario.responders.length} nearby responders dispatched

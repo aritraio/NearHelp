@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NearHelp AI — Data Types & Contracts (Medical Emergency Intake Focus)
+   NearHelp AI — Data Types & Contracts (Indian Localization & Clinical Focus)
    File: src/mock/types.ts
    ========================================================================== */
 
@@ -37,7 +37,7 @@ export type MedicalConditionId =
 export interface MedicalConditionItem {
   id: MedicalConditionId;
   label: string;
-  emoji: string;
+  iconName: string;
   severity: SeverityLevel;
   description: string;
   symptoms: string[];

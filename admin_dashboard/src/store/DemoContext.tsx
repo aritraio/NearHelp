@@ -108,10 +108,10 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [photoAttached, setPhotoAttached] = useState<boolean>(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
-  const [localityName, setLocalityName] = useState<string>('China Basin');
+  const [localityName, setLocalityName] = useState<string>('Salt Lake Sector V, Kolkata');
   const [safetyIndexScore, setSafetyIndexScore] = useState<number>(91);
-  const [streetAddress, setStreetAddress] = useState<string>('1234 Mission St');
-  const [subAddress, setSubAddress] = useState<string>('Apt #345B, 27th Floor • San Francisco, CA');
+  const [streetAddress, setStreetAddress] = useState<string>('Godrej Waterside, Tower 1');
+  const [subAddress, setSubAddress] = useState<string>('DP Block, Sector V, Salt Lake City • Kolkata, WB 700091');
 
   const [countdownSeconds, setCountdownSeconds] = useState<number>(3);
   const [isCountingDown, setIsCountingDown] = useState<boolean>(false);
@@ -164,7 +164,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSelectedMedicalCondition(selected.medicalConditionId);
     setStreetAddress(selected.streetAddress);
     setSubAddress(selected.subAddress);
-    setLocalityName(selected.locationName.split(',')[0] || 'China Basin');
+    setLocalityName(selected.locationName.split(',')[0] || 'Salt Lake Sector V');
     setSafetyIndexScore(selected.id === 'scenario-a' ? 91 : selected.id === 'scenario-b' ? 84 : 72);
     setOfflineMeshActive(selected.id === 'scenario-c');
     setVoiceTranscript(selected.transcriptionPreview);

@@ -195,7 +195,7 @@ export const ScenarioController: React.FC = () => {
             title="Screen 1: Guardian Radar & Safe Zone"
           >
             <Radar size={13} />
-            <span>🌿 Guardian Radar</span>
+            <span>Guardian Radar</span>
           </button>
 
           <button
@@ -215,7 +215,7 @@ export const ScenarioController: React.FC = () => {
             title="Screen 2: Medical Emergency Intake (Multimodal Triage)"
           >
             <Grid size={13} />
-            <span>🩺 Medical Intake</span>
+            <span>Medical Intake</span>
           </button>
 
           <button
@@ -235,7 +235,7 @@ export const ScenarioController: React.FC = () => {
             title="Responder Rescue Flow"
           >
             <Ambulance size={13} />
-            <span>🚑 Responder</span>
+            <span>Responder</span>
           </button>
 
           <button
@@ -255,7 +255,7 @@ export const ScenarioController: React.FC = () => {
             title="Command Center Telemetry"
           >
             <Layers size={13} />
-            <span>🛰️ Command</span>
+            <span>Command Center</span>
           </button>
         </div>
 

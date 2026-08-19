@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NearHelp AI — Medical Emergency Conditions & Kolkata Scenarios Data
+   NearHelp AI — Medical Emergency Conditions & Indian Scenarios Data
    File: src/mock/scenarios.ts
    ========================================================================== */
 
@@ -9,91 +9,91 @@ export const MEDICAL_CONDITIONS: MedicalConditionItem[] = [
   {
     id: 'cardiac_arrest',
     label: 'Cardiac / Chest Pain',
-    emoji: '🫀',
+    iconName: 'HeartPulse',
     severity: 5,
-    description: 'Sudden collapse, unresponsive, chest crushing pain, agonal breathing',
-    symptoms: ['Unresponsive to voice', 'No carotid pulse', 'Gasping respiration', 'Crushing chest pressure']
+    description: 'Sudden collapse, unresponsive, chest crushing pressure, agonal breathing',
+    symptoms: ['Unresponsive to verbal stimuli', 'No palpable carotid pulse', 'Agonal gasping respiration', 'Sudden collapse']
   },
   {
     id: 'severe_bleeding',
-    label: 'Severe Bleeding',
-    emoji: '🩸',
+    label: 'Severe Hemorrhage',
+    iconName: 'Droplet',
     severity: 4,
-    description: 'Pulsatile arterial bleed, deep laceration, hypovolemic shock',
-    symptoms: ['Pulsating bright red blood', 'Open compound wound', 'Dizziness & cold clammy skin', 'Rapid weak pulse']
+    description: 'Pulsatile arterial bleed, deep laceration, hypovolemic shock risk',
+    symptoms: ['Pulsating bright red arterial bleed', 'Open compound wound', 'Cold clammy skin & pallor', 'Rapid weak pulse']
   },
   {
     id: 'respiratory_asthma',
-    label: 'Breathing / Hypoxia',
-    emoji: '🫁',
+    label: 'Respiratory Distress',
+    iconName: 'Wind',
     severity: 5,
-    description: 'Severe bronchospasm, cyanosis (blue lips), choking / foreign body',
-    symptoms: ['Unable to speak full sentences', 'Peripheral cyanosis', 'Stridor / severe wheeze', 'Oxygen saturation < 88%']
+    description: 'Severe bronchospasm, peripheral cyanosis, acute hypoxia',
+    symptoms: ['Inability to speak in sentences', 'Peripheral cyanosis (blue lips)', 'Severe expiratory wheezing', 'Oxygen saturation < 88%']
   },
   {
     id: 'unconscious_seizure',
     label: 'Seizure / Fainting',
-    emoji: '⚡',
+    iconName: 'Activity',
     severity: 5,
-    description: 'Grand mal tonic-clonic convulsion, post-ictal coma, syncope',
-    symptoms: ['Generalized violent muscle jerking', 'Foaming at mouth', 'Loss of bladder control', 'Post-seizure unresponsiveness']
+    description: 'Tonic-clonic convulsion, post-ictal unresponsiveness, syncope',
+    symptoms: ['Generalized violent muscle jerking', 'Oral frothing', 'Loss of consciousness', 'Post-ictal unresponsiveness']
   },
   {
     id: 'stroke',
-    label: 'Stroke / Paralysis',
-    emoji: '🧠',
+    label: 'Stroke (FAST Protocol)',
+    iconName: 'Brain',
     severity: 4,
-    description: 'Facial droop, arm weakness, slurred speech (FAST protocol)',
-    symptoms: ['Asymmetrical facial drooping', 'Unilateral arm drift', 'Severe dysarthria / word salad', 'Sudden visual loss']
+    description: 'Facial droop, unilateral arm weakness, slurred speech',
+    symptoms: ['Asymmetrical facial drooping', 'Unilateral arm drift', 'Severe dysarthria / slurred speech', 'Acute visual disturbance']
   },
   {
     id: 'severe_burns',
-    label: 'Severe Burns / Scalds',
-    emoji: '🔥',
+    label: 'Thermal Burns',
+    iconName: 'Flame',
     severity: 3,
     description: 'Second/third-degree thermal burns, extensive blistered skin',
-    symptoms: ['Blistered charred skin > 10% BSA', 'Severe acute agony', 'Airway smoke inhalation risk', 'Thermal shock risk']
+    symptoms: ['Blistered charred skin > 10% BSA', 'Acute thermal trauma', 'Airway smoke inhalation risk', 'Thermal shock risk']
   },
   {
     id: 'fracture_trauma',
-    label: 'Fracture / Head Trauma',
-    emoji: '🦴',
+    label: 'Compound Trauma',
+    iconName: 'Bone',
     severity: 4,
-    description: 'Open bone protrusion, spinal immobilisation, concussion',
-    symptoms: ['Visible bone deformity', 'Loss of consciousness post-impact', 'Cervical spinal tenderness', 'Inability to bear weight']
+    description: 'Open bone protrusion, spinal immobilization needed, impact trauma',
+    symptoms: ['Open fracture with bone protrusion', 'Spinal immobilization indicated', 'Severe limb deformity', 'Inability to bear weight']
   },
   {
     id: 'anaphylaxis_allergy',
-    label: 'Anaphylaxis / Poison',
-    emoji: '💊',
+    label: 'Anaphylactic Shock',
+    iconName: 'AlertCircle',
     severity: 5,
-    description: 'Acute systemic allergic reaction, airway swelling, toxin ingestion',
-    symptoms: ['Urticaria / diffuse hives', 'Angioedema of tongue & throat', 'Hypotensive collapse', 'Acute nausea / vomiting']
+    description: 'Acute systemic allergic reaction, airway swelling, toxin collapse',
+    symptoms: ['Acute diffuse urticaria & hives', 'Laryngeal angioedema', 'Hypotensive collapse', 'Acute dyspnea']
   }
 ];
 
 export const SCENARIO_A: EmergencyScenario = {
   id: 'scenario-a',
   codeName: 'DEMO_CARDIAC_SALT_LAKE',
-  title: 'Critical Cardiac Arrest (Sector V)',
+  title: 'Cardiac Arrest (Salt Lake Sector V)',
   subtitle: 'Level 5 Maximum Urgency — Agonal Breathing & Sudden Collapse',
-  locationName: 'Godrej Waterside, Sector V, Salt Lake, Kolkata',
+  locationName: 'Salt Lake Sector V, Kolkata',
   streetAddress: 'Godrej Waterside, Tower 1',
   subAddress: 'DP Block, Sector V, Salt Lake City • Kolkata, WB 700091',
   coordinates: [22.5726, 88.4312],
   category: 'medical',
   medicalConditionId: 'cardiac_arrest',
   severity: 5,
-  severityLabel: 'Level 5 — Critical Life Threat (Suspected Cardiac Arrest)',
+  severityLabel: 'Level 5 — Critical Life Threat (Cardiac Arrest)',
   aiConfidence: 98.4,
   survivalWindowMinutes: 4.5,
   reportedSymptoms: [
     'Sudden collapse in office lobby',
-    'Unresponsive to voice & tactile stimuli',
-    'No palpable carotid pulse',
-    'Gasping / agonal breathing observed'
+    'Unresponsive to voice and tactile stimuli',
+    'No palpable carotid pulse detected',
+    'Agonal gasping respiration observed'
   ],
-  transcriptionPreview: "Emergency! A 54-year-old male just collapsed near the elevator at Godrej Waterside! He isn't breathing properly, he's turning blue, please send CPR volunteers immediately!",
+  transcriptionPreview: "Emergency at Godrej Waterside Sector V Kolkata! 54-year-old male collapsed near elevator. Unresponsive, not breathing properly, turning blue. Send CPR volunteers immediately!",
   multimodalImagePreview: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=400&q=80',
   victim: {
     name: 'Rajesh Sengupta',
@@ -125,7 +125,7 @@ export const SCENARIO_A: EmergencyScenario = {
     {
       id: 'resp-102',
       name: 'Rahul Das',
-      role: 'Certified Red Cross First-Aider',
+      role: 'Red Cross Certified First-Aider',
       skills: ['CPR_CERTIFIED', 'FIRST_AIDER'],
       distanceMeters: 650,
       etaMinutes: 4.0,
@@ -138,37 +138,37 @@ export const SCENARIO_A: EmergencyScenario = {
     },
   ],
   protocol: {
-    title: 'AHA 2023 Adult Basic Life Support (BLS) & CPR Protocol',
-    authority: 'World Health Organization & American Heart Association (AHA)',
+    title: 'AHA / Indian Resuscitation Council Basic Life Support (BLS) Protocol',
+    authority: 'World Health Organization & Indian Resuscitation Council (IRC)',
     disclaimers: 'Emergency interim bystander protocol. Municipal 108 ambulance dispatched.',
-    legalShield: 'Protected under India Good Samaritan Act (Section 134A Motor Vehicles Act & Supreme Court 2016 Guidelines)',
+    legalShield: 'Protected under India Good Samaritan Law (Section 134A Motor Vehicles Act & Supreme Court 2016 Guidelines)',
     steps: [
       {
         stepNumber: 1,
         title: 'Check Safety & Confirm Unresponsiveness',
         actionInstruction: 'Tap victim firmly on both shoulders and shout "Are you okay?". Check carotid pulse in the neck groove for no more than 10 seconds.',
-        warningNote: 'If no pulse or victim is only gasping, immediately start CPR.',
+        warningNote: 'If no pulse or victim is only gasping, immediately begin CPR.',
         icon: 'AlertCircle',
       },
       {
         stepNumber: 2,
         title: 'Begin High-Quality Chest Compressions',
-        actionInstruction: 'Place the heel of one hand in the center of the chest (lower half of sternum). Interlock fingers. Push hard and fast at a depth of 5–6 cm (2–2.4 inches).',
+        actionInstruction: 'Place the heel of one hand in the center of the chest (lower sternum). Interlock fingers. Push hard and fast at a depth of 5–6 cm.',
         warningNote: 'Maintain a continuous cadence of 110–120 compressions per minute.',
         isCprStep: true,
         beatBpm: 110,
-        icon: 'HeartHandshake',
+        icon: 'HeartPulse',
       },
       {
         stepNumber: 3,
-        title: 'Maintain 30:2 Compression-to-Breath Ratio',
-        actionInstruction: 'Deliver 30 compressions followed by 2 rescue breaths (or provide continuous Hands-Only CPR if untrained). Allow full chest recoil after each push.',
+        title: 'Maintain 30:2 Compressions to Breaths',
+        actionInstruction: 'Deliver 30 compressions followed by 2 rescue breaths (or provide continuous Hands-Only CPR). Allow full chest recoil after each push.',
         icon: 'Activity',
       },
       {
         stepNumber: 4,
         title: 'Retrieve & Apply Nearby Automated Defibrillator (AED)',
-        actionInstruction: 'Send a bystander to fetch the nearest AED from Webel Bhavan security desk (180m). Open AED and adhere pads to bare chest as illustrated.',
+        actionInstruction: 'Dispatch bystander to fetch AED from Webel Bhavan security desk (180m). Adhere electrode pads to bare chest as illustrated on unit.',
         icon: 'Zap',
       },
     ],
@@ -180,14 +180,14 @@ export const SCENARIO_A: EmergencyScenario = {
       distanceKm: 1.8,
       bedAvailability: 14,
       icuAvailability: 3,
-      traumaLevel: 'Level 1 Trauma Center',
+      traumaLevel: 'Level 1 Emergency Center',
       phone: '+91 33 6606 3800',
       lat: 22.5832,
       lng: 88.4125,
     },
     {
       id: 'hosp-2',
-      name: 'Apollo Multispeciality Hospitals',
+      name: 'Apollo Multispeciality Hospitals (EM Bypass)',
       distanceKm: 3.2,
       bedAvailability: 28,
       icuAvailability: 6,
@@ -202,7 +202,7 @@ export const SCENARIO_A: EmergencyScenario = {
       id: 'aed-1',
       locationName: 'Webel Bhavan — Main Ground Lobby Security Desk',
       distanceMeters: 180,
-      accessNotes: 'Open 24/7. Key located in quick-break emergency glass box.',
+      accessNotes: 'Open 24/7. Main ground reception emergency cabinet.',
       isAvailable: true,
       lat: 22.5735,
       lng: 88.4325,
@@ -222,25 +222,25 @@ export const SCENARIO_A: EmergencyScenario = {
 export const SCENARIO_B: EmergencyScenario = {
   id: 'scenario-b',
   codeName: 'DEMO_TRAUMA_EM_BYPASS',
-  title: 'Severe Arterial Bleed / Femoral Trauma',
-  subtitle: 'Level 4 Urgent — Two-Wheeler Collision with Compound Thigh Trauma',
-  locationName: 'EM Bypass near Ruby Hospital Crossing, Kolkata',
+  title: 'Arterial Bleed / Road Trauma (EM Bypass)',
+  subtitle: 'Level 4 Urgent — Two-Wheeler Collision with Compound Femoral Trauma',
+  locationName: 'EM Bypass near Ruby Hospital, Kolkata',
   streetAddress: '1234 EM Bypass Crossing',
   subAddress: 'Near Ruby Hospital, Sector I, East Kolkata Township • Kolkata, WB 700107',
   coordinates: [22.5135, 88.3986],
   category: 'medical',
   medicalConditionId: 'severe_bleeding',
   severity: 4,
-  severityLabel: 'Level 4 — High Urgency (Pulsatile Arterial Hemorrhage)',
+  severityLabel: 'Level 4 — High Urgency (Arterial Hemorrhage)',
   aiConfidence: 92.1,
   survivalWindowMinutes: 8.0,
   reportedSymptoms: [
-    'Motorbike collision with roadside railing',
+    'Motorbike collision near Ruby Hospital crossing',
     'Open compound fracture right femur',
-    'Pulsatile bright red blood flow (femoral artery risk)',
-    'Victim conscious but exhibiting hypovolemic shock signs'
+    'Pulsatile bright red blood flow observed',
+    'Victim exhibiting hypovolemic shock symptoms'
   ],
-  transcriptionPreview: 'Major accident on EM Bypass right before Ruby crossing! Motorcyclist hit the guardrail, massive bleeding from upper right leg, losing blood very rapidly!',
+  transcriptionPreview: 'Accident on EM Bypass right before Ruby crossing Kolkata! Motorcyclist injured, massive bleeding from upper leg. Need immediate first-aid pressure and ambulance!',
   multimodalImagePreview: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=400&q=80',
   victim: {
     name: 'Sourav Roy',
@@ -293,28 +293,28 @@ export const SCENARIO_B: EmergencyScenario = {
       {
         stepNumber: 1,
         title: 'Apply Direct High-Force Pressure',
-        actionInstruction: 'Use sterile gauze or the cleanest available cloth. Press directly on the bleeding wound with maximum upper-body weight.',
+        actionInstruction: 'Use sterile gauze or clean cloth. Press directly on the bleeding wound with maximum upper-body weight.',
         warningNote: 'Do NOT remove blood-soaked cloths; add more layers on top.',
-        icon: 'ShieldAlert',
+        icon: 'AlertCircle',
       },
       {
         stepNumber: 2,
-        title: 'Improvise or Place Commercial Tourniquet',
-        actionInstruction: 'Place tourniquet 2–3 inches above the wound (between wound and heart). Tighten rod/windlass until arterial pulsating bleeding stops completely.',
+        title: 'Improvise or Place Tourniquet',
+        actionInstruction: 'Place tourniquet 2–3 inches above the wound (between wound and heart). Tighten until arterial pulsating bleeding ceases.',
         warningNote: 'Note exact time of tourniquet placement on victim forehead or arm.',
         icon: 'Layers',
       },
       {
         stepNumber: 3,
         title: 'Elevate & Counter Hypovolemic Shock',
-        actionInstruction: 'Lay victim flat. Elevate uninjured legs 12 inches if no spinal trauma suspected. Cover with jacket to preserve body warmth.',
-        icon: 'Thermometer',
+        actionInstruction: 'Lay victim flat. Elevate uninjured legs 12 inches if no spinal trauma suspected. Cover with jacket to preserve core temperature.',
+        icon: 'Activity',
       },
       {
         stepNumber: 4,
         title: '108 Ambulance Transit Handover',
-        actionInstruction: 'Relay vital baseline (pulse, breathing rate, tourniquet timestamp) to approaching ambulance paramedics upon arrival.',
-        icon: 'Truck',
+        actionInstruction: 'Relay vital baseline (pulse, breathing rate, tourniquet timestamp) to approaching 108 paramedics.',
+        icon: 'Navigation',
       },
     ],
   },
@@ -367,16 +367,16 @@ export const SCENARIO_C: EmergencyScenario = {
   category: 'medical',
   medicalConditionId: 'respiratory_asthma',
   severity: 5,
-  severityLabel: 'Level 5 — Severe Asthmatic Bronchospasm & Hypoxia',
+  severityLabel: 'Level 5 — Severe Asthmatic Bronchospasm',
   aiConfidence: 96.0,
   survivalWindowMinutes: 5.0,
   reportedSymptoms: [
     'Acute respiratory distress',
-    'Severe wheezing, inability to speak full words',
-    'Peripheral cyanosis (blue lips)',
-    'Rescue inhaler exhausted / unavailable'
+    'Severe wheezing, inability to speak full sentences',
+    'Peripheral cyanosis observed on lips',
+    'Rescue inhaler missing'
   ],
-  transcriptionPreview: '[OFFLINE ENCODED VOICE] Cannot breathe... severe asthma attack... basement B2... inhaler empty...',
+  transcriptionPreview: '[OFFLINE ENCODED VOICE] Cannot breathe... severe asthma attack... basement B2 Sector V... inhaler empty...',
   multimodalImagePreview: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=400&q=80',
   victim: {
     name: 'Priya Sharma',
@@ -394,7 +394,7 @@ export const SCENARIO_C: EmergencyScenario = {
     {
       id: 'resp-301',
       name: 'Pooja Banerjee',
-      role: 'Resident Medical Nurse',
+      role: 'Resident Staff Nurse',
       skills: ['NURSE', 'FIRST_AIDER'],
       distanceMeters: 190,
       etaMinutes: 1.5,
@@ -407,8 +407,8 @@ export const SCENARIO_C: EmergencyScenario = {
     },
   ],
   protocol: {
-    title: 'Offline Cached RAG Protocol: Acute Hypoxia & Asthma Management',
-    authority: 'Global Initiative for Asthma (GINA) & Red Cross First Aid',
+    title: 'Offline Cached RAG Protocol: Acute Hypoxia Management',
+    authority: 'Global Initiative for Asthma (GINA) & Indian Red Cross',
     disclaimers: 'Self-contained offline vector model execution. Zero external API calls required.',
     legalShield: 'Immunity guaranteed under Section 134A of the Motor Vehicles Act.',
     steps: [
@@ -416,25 +416,25 @@ export const SCENARIO_C: EmergencyScenario = {
         stepNumber: 1,
         title: 'Position Victim Upright & Loosen Clothing',
         actionInstruction: 'Sit the victim comfortably upright, leaning slightly forward. Do NOT allow them to lie flat.',
-        warningNote: 'Lying flat worsens diaphragmatic compression and oxygenation.',
-        icon: 'UserCheck',
+        warningNote: 'Lying flat worsens diaphragmatic compression.',
+        icon: 'Activity',
       },
       {
         stepNumber: 2,
         title: 'Calm & Encourage Pursed-Lip Breathing',
-        actionInstruction: 'Have the victim inhale slowly through nose (2 seconds) and exhale gently through pursed lips (4 seconds).',
+        actionInstruction: 'Have victim inhale slowly through nose (2 seconds) and exhale gently through pursed lips (4 seconds).',
         icon: 'Wind',
       },
       {
         stepNumber: 3,
-        title: 'Locate SABA Inhaler / Spacer from Nearby Responder',
-        actionInstruction: 'Approaching responder Pooja Banerjee is bringing a Salbutamol/Albuterol inhaler with spacer.',
-        icon: 'PlusCircle',
+        title: 'Locate SABA Inhaler / Spacer from Responder',
+        actionInstruction: 'Approaching responder Pooja Banerjee is carrying Salbutamol inhaler with spacer.',
+        icon: 'HeartPulse',
       },
       {
         stepNumber: 4,
         title: 'Mesh SMS Relay Confirmation',
-        actionInstruction: 'Compressed binary packet relayed via peer Bluetooth BLE mesh to ground-level gateway.',
+        actionInstruction: 'Compressed binary packet relayed via peer Bluetooth BLE mesh to ground gateway.',
         icon: 'Radio',
       },
     ],
