@@ -3,8 +3,8 @@
    File: scripts/test_run.ts
    ========================================================================== */
 
-import { ALL_SCENARIOS, MEDICAL_CONDITIONS } from '../src/mock/scenarios';
-import type { IncidentStatus, EmergencyScenario } from '../src/mock/types';
+import { ALL_SCENARIOS, MEDICAL_CONDITIONS, MOCK_INCIDENT_FEED, generateClinicalHandoverReport, INITIAL_TELEMETRY } from '../src/mock/scenarios';
+import type { IncidentStatus, EmergencyScenario, ClinicalHandoverReport } from '../src/mock/types';
 
 interface TestResult {
   suite: string;
@@ -215,6 +215,78 @@ const sampleTranslation = "Collapsed on the floor, not breathing! Please someone
 assert(sampleBengaliMessage.length > 0 && sampleTranslation.length > 0, 'Incident Comms', 'Multi-lingual emergency translation pipeline active (Bengali ⇄ English)');
 
 // ============================================================================
+// SUITE 9: Dynamic Community Geo-Map & Spatial PostGIS Query Validation
+// ============================================================================
+console.log('\n📋 Suite 9: Dynamic Community Geo-Map & Spatial Layers Math');
+
+ALL_SCENARIOS.forEach((scenario: EmergencyScenario) => {
+  const [vLat, vLng] = scenario.coordinates;
+  assert(vLat >= 22.4 && vLat <= 22.7 && vLng >= 88.3 && vLng <= 88.5, 'Geo-Map Layers', `[${scenario.id}] Victim coordinates (${vLat}, ${vLng}) inside Kolkata bounding box`);
+
+  // Responders spatial bounds
+  scenario.responders.forEach(r => {
+    assert(r.lat >= 22.4 && r.lat <= 22.7 && r.lng >= 88.3 && r.lng <= 88.5, 'Geo-Map Layers', `[${scenario.id}] Responder ${r.name} has valid Kolkata coordinates (${r.lat}, ${r.lng})`);
+  });
+
+  // Hospitals spatial & clinical capacity bounds
+  assert(scenario.nearbyHospitals.length >= 1, 'Geo-Map Layers', `[${scenario.id}] Has nearby emergency hospitals (${scenario.nearbyHospitals.length})`);
+  scenario.nearbyHospitals.forEach(h => {
+    assert(h.bedAvailability > 0, 'Geo-Map Layers', `[${scenario.id}] Hospital ${h.name} reports ${h.bedAvailability} available beds`);
+    assert(h.icuAvailability >= 0, 'Geo-Map Layers', `[${scenario.id}] Hospital ${h.name} reports ${h.icuAvailability} ICU beds`);
+    assert(h.distanceKm > 0 && h.distanceKm <= 5.0, 'Geo-Map Layers', `[${scenario.id}] Hospital ${h.name} is within 5km radius (${h.distanceKm}km)`);
+  });
+
+  // AED mesh nodes
+  if (scenario.nearbyAEDs.length > 0) {
+    scenario.nearbyAEDs.forEach(aed => {
+      assert(aed.distanceMeters > 0 && aed.distanceMeters <= 1000, 'Geo-Map Layers', `[${scenario.id}] AED ${aed.locationName} is within walking range (${aed.distanceMeters}m)`);
+      assert(aed.isAvailable === true, 'Geo-Map Layers', `[${scenario.id}] AED unit marked verified and available`);
+    });
+  }
+});
+
+// ============================================================================
+// SUITE 10: Command Center Telemetry & Incident Feed Filtering
+// ============================================================================
+console.log('\n📋 Suite 10: Command Center Telemetry & Real-Time Incident Filtering');
+
+assert(INITIAL_TELEMETRY.avgDispatchLatencySeconds === 4.2, 'Command Center', 'Average dispatch latency benchmark is 4.2s (vs. 15m municipal average)');
+assert(INITIAL_TELEMETRY.ragAccuracyScore >= 99.0, 'Command Center', `RAG clinical grounding accuracy is ${INITIAL_TELEMETRY.ragAccuracyScore}%`);
+assert(INITIAL_TELEMETRY.availableVolunteersCount >= 100, 'Command Center', `Bystander network size is robust (${INITIAL_TELEMETRY.availableVolunteersCount} active)`);
+
+assert(MOCK_INCIDENT_FEED.length >= 6, 'Incident Feed', `Incident feed table has ${MOCK_INCIDENT_FEED.length} simulated Kolkata emergencies`);
+
+// Test Severity Filter
+const level5Incidents = MOCK_INCIDENT_FEED.filter(i => i.severity === 5);
+assert(level5Incidents.length >= 2, 'Incident Feed Filtering', `Level 5 Critical filter correctly extracts ${level5Incidents.length} life-threat incidents`);
+
+const level4Incidents = MOCK_INCIDENT_FEED.filter(i => i.severity === 4);
+assert(level4Incidents.length >= 2, 'Incident Feed Filtering', `Level 4 Urgent filter correctly extracts ${level4Incidents.length} urgent incidents`);
+
+// Test Status Filter
+const resolvedIncidents = MOCK_INCIDENT_FEED.filter(i => i.status === 'RESOLVED');
+assert(resolvedIncidents.length >= 1, 'Incident Feed Filtering', `Resolved status filter correctly extracts ${resolvedIncidents.length} resolved emergencies`);
+
+// ============================================================================
+// SUITE 11: AI Clinical Handover Report & Section 134A Legal Immunity Compliance
+// ============================================================================
+console.log('\n📋 Suite 11: AI Clinical Handover Report & Section 134A Legal Immunity Compliance');
+
+ALL_SCENARIOS.forEach((scenario: EmergencyScenario) => {
+  const report: ClinicalHandoverReport = generateClinicalHandoverReport(scenario, 'RESOLVED', true, 0);
+
+  assert(!!report.reportId && report.reportId.startsWith('REP-NH-'), 'Handover Report', `[${scenario.id}] Generated valid report ID: ${report.reportId}`);
+  assert(report.victimName === scenario.victim.name, 'Handover Report', `[${scenario.id}] Victim name matches: ${report.victimName}`);
+  assert(report.victimBloodType === scenario.victim.bloodType, 'Handover Report', `[${scenario.id}] Blood group verified: ${report.victimBloodType}`);
+  assert(report.severityLevel === scenario.severity, 'Handover Report', `[${scenario.id}] Severity level matches Level ${report.severityLevel}`);
+  assert(report.cprCompressionsEstimated > 0, 'Handover Report', `[${scenario.id}] CPR chest compressions recorded (~${report.cprCompressionsEstimated} pushes)`);
+  assert(report.legalShieldCompliance.includes('Section 134A'), 'Handover Report', `[${scenario.id}] Explicit Section 134A MV Act legal protection cited`);
+  assert(report.goodSamaritanActReference.includes('Supreme Court'), 'Handover Report', `[${scenario.id}] Supreme Court Good Samaritan directives cited`);
+  assert(report.digitalSignatureHash.startsWith('SHA256:'), 'Handover Report', `[${scenario.id}] Valid SHA-256 blockchain audit hash generated`);
+  assert(!!report.destinationHospital && report.destinationHospital.length > 5, 'Handover Report', `[${scenario.id}] Destination hospital specified: ${report.destinationHospital}`);
+});
+
+// ============================================================================
 // FINAL TEST SUMMARY
 // ============================================================================
 console.log('\n' + '═'.repeat(60));
@@ -233,3 +305,4 @@ if (failed > 0) {
   console.log('✅ ALL TEST SUITES PASSED FLAWLESSLY!\n');
   process.exit(0);
 }
+

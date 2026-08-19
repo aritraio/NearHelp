@@ -3,9 +3,26 @@
    File: src/mock/types.ts
    ========================================================================== */
 
-export type ScreenMode = 'GUARDIAN' | 'CRISIS_MATRIX' | 'RESPONDER' | 'COMMAND_CENTER';
+export type ScreenMode = 'GUARDIAN' | 'CRISIS_MATRIX' | 'RESPONDER' | 'MAP' | 'COMMAND_CENTER';
 
-export type PersonaMode = 'VICTIM' | 'RESPONDER' | 'COMMAND_CENTER';
+export type PersonaMode = 'VICTIM' | 'RESPONDER' | 'MAP' | 'COMMAND_CENTER';
+
+export type MapLayerKey = 'victim' | 'responders' | 'hospitals' | 'aeds' | 'postgis_wave' | 'routes';
+
+export interface MapLayerFilters {
+  victim: boolean;
+  responders: boolean;
+  hospitals: boolean;
+  aeds: boolean;
+  postgis_wave: boolean;
+  routes: boolean;
+}
+
+export interface SelectedMapEntity {
+  type: 'victim' | 'responder' | 'hospital' | 'aed';
+  id: string;
+  data: any;
+}
 
 export type VictimSubScreen = 'TRIGGER' | 'TRIAGE' | 'FIRST_AID';
 
@@ -197,3 +214,61 @@ export interface SystemTelemetry {
   websocketConnectionsCount: number;
   safetyIndexScore: number;
 }
+
+export interface IncidentFeedItem {
+  id: string;
+  incidentNumber: string;
+  timestamp: string;
+  timeAgo: string;
+  locationName: string;
+  locality: string;
+  coordinates: [number, number];
+  category: CrisisCategory;
+  conditionTitle: string;
+  severity: SeverityLevel;
+  status: IncidentStatus;
+  responderName?: string;
+  responderRole?: string;
+  responderEta?: number;
+  ambulanceDispatched: boolean;
+  ambulanceUnit?: string;
+  aiConfidence: number;
+  scenarioId?: 'scenario-a' | 'scenario-b' | 'scenario-c';
+}
+
+export interface ClinicalHandoverReport {
+  reportId: string;
+  incidentId: string;
+  incidentCode: string;
+  generatedAt: string;
+  victimName: string;
+  victimAge: number;
+  victimGender: string;
+  victimBloodType: string;
+  victimAllergies: string[];
+  victimMedicalConditions: string[];
+  hasPacemaker: boolean;
+  emergencyLocation: string;
+  emergencyCoordinates: string;
+  severityLevel: SeverityLevel;
+  diagnosticSummary: string;
+  aiConfidenceScore: number;
+  survivalWindowMinutes: number;
+  reportedSymptoms: string[];
+  cprMetronomeUsed: boolean;
+  cprCompressionsEstimated: number;
+  cprDurationSeconds: number;
+  aedDeployed: boolean;
+  aedShocksDelivered: number;
+  responderAssigned: string;
+  responderRole: string;
+  responderArrivalTimeOffset: string;
+  ambulanceUnit: string;
+  handoverParamedicLeader: string;
+  handoverTimestamp: string;
+  destinationHospital: string;
+  legalShieldCompliance: string;
+  goodSamaritanActReference: string;
+  digitalSignatureHash: string;
+}
+

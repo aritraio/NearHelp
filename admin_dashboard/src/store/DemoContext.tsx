@@ -18,9 +18,22 @@ import type {
   CrisisCategory,
   BystanderChatMessage,
   IncidentChatMessage,
-  TimelineEventItem
+  TimelineEventItem,
+  MapLayerKey,
+  MapLayerFilters,
+  SelectedMapEntity,
+  IncidentFeedItem,
+  ClinicalHandoverReport,
+  SeverityLevel
 } from '../mock/types';
-import { ALL_SCENARIOS, SCENARIO_A, INITIAL_TELEMETRY, MEDICAL_CONDITIONS } from '../mock/scenarios';
+import { 
+  ALL_SCENARIOS, 
+  SCENARIO_A, 
+  INITIAL_TELEMETRY, 
+  MEDICAL_CONDITIONS,
+  MOCK_INCIDENT_FEED,
+  generateClinicalHandoverReport
+} from '../mock/scenarios';
 import { soundEngine } from '../utils/audio';
 
 const INITIAL_AI_CHAT_MESSAGES: BystanderChatMessage[] = [
@@ -123,6 +136,16 @@ interface DemoContextType {
   // Telemetry
   telemetry: SystemTelemetry;
   offlineMeshActive: boolean;
+
+  // Phase 4 Map & Command Center Features
+  mapLayerFilters: MapLayerFilters;
+  selectedMapEntity: SelectedMapEntity | null;
+  incidentFeed: IncidentFeedItem[];
+  incidentFilterSeverity: SeverityLevel | 'ALL';
+  incidentFilterStatus: string | 'ALL';
+  selectedIncidentId: string | null;
+  isClinicalReportModalOpen: boolean;
+  activeHandoverReport: ClinicalHandoverReport | null;
   
   // Actions
   setScenario: (id: 'scenario-a' | 'scenario-b' | 'scenario-c') => void;
@@ -149,6 +172,18 @@ interface DemoContextType {
   setTurnByTurnStepIndex: (index: number) => void;
   nextTurnByTurnStep: () => void;
   prevTurnByTurnStep: () => void;
+
+  // Phase 4 Map & Command Center Actions
+  toggleMapLayer: (layerKey: MapLayerKey) => void;
+  resetMapLayers: () => void;
+  setSelectedMapEntity: (entity: SelectedMapEntity | null) => void;
+  setIncidentFilterSeverity: (sev: SeverityLevel | 'ALL') => void;
+  setIncidentFilterStatus: (status: string | 'ALL') => void;
+  setSelectedIncidentId: (id: string | null) => void;
+  setIsClinicalReportModalOpen: (open: boolean) => void;
+  openClinicalReport: () => void;
+  trigger108Escalation: () => void;
+  broadcastAlert: (message?: string) => void;
 
   setIntakeInputMode: (mode: MultimodalInputMode) => void;
   toggleVoiceRecording: () => void;
@@ -198,6 +233,21 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [responderDeclined, setResponderDeclined] = useState<boolean>(false);
   const [responderChatMessages, setResponderChatMessages] = useState<IncidentChatMessage[]>(INITIAL_INCIDENT_CHAT_MESSAGES);
   const [turnByTurnStepIndex, setTurnByTurnStepIndexState] = useState<number>(0);
+
+  // Phase 4 Map & Command Center State
+  const [mapLayerFilters, setMapLayerFilters] = useState<MapLayerFilters>({
+    victim: true,
+    responders: true,
+    hospitals: true,
+    aeds: true,
+    postgis_wave: true,
+    routes: true,
+  });
+  const [selectedMapEntity, setSelectedMapEntityState] = useState<SelectedMapEntity | null>(null);
+  const [incidentFilterSeverity, setIncidentFilterSeverityState] = useState<SeverityLevel | 'ALL'>('ALL');
+  const [incidentFilterStatus, setIncidentFilterStatusState] = useState<string | 'ALL'>('ALL');
+  const [selectedIncidentId, setSelectedIncidentIdState] = useState<string | null>('inc-01');
+  const [isClinicalReportModalOpen, setIsClinicalReportModalOpenState] = useState<boolean>(false);
 
   // Multimodal Medical Intake state
   const [intakeInputMode, setIntakeInputModeState] = useState<MultimodalInputMode>('PRESETS');
@@ -291,6 +341,8 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPersonaModeState('RESPONDER');
     } else if (mode === 'GUARDIAN' || mode === 'CRISIS_MATRIX') {
       setPersonaModeState('VICTIM');
+    } else if (mode === 'MAP') {
+      setPersonaModeState('MAP');
     } else if (mode === 'COMMAND_CENTER') {
       setPersonaModeState('COMMAND_CENTER');
     }
@@ -304,10 +356,128 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setScreenModeState('CRISIS_MATRIX');
     } else if (mode === 'RESPONDER') {
       setScreenModeState('RESPONDER');
+    } else if (mode === 'MAP') {
+      setScreenModeState('MAP');
     } else if (mode === 'COMMAND_CENTER') {
       setScreenModeState('COMMAND_CENTER');
     }
   }, []);
+
+  // Phase 4 Map layer toggles
+  const toggleMapLayer = useCallback((layerKey: MapLayerKey) => {
+    soundEngine.playClick();
+    setMapLayerFilters(prev => ({
+      ...prev,
+      [layerKey]: !prev[layerKey]
+    }));
+  }, []);
+
+  const resetMapLayers = useCallback(() => {
+    soundEngine.playClick();
+    setMapLayerFilters({
+      victim: true,
+      responders: true,
+      hospitals: true,
+      aeds: true,
+      postgis_wave: true,
+      routes: true,
+    });
+  }, []);
+
+  const setSelectedMapEntity = useCallback((entity: SelectedMapEntity | null) => {
+    soundEngine.playClick();
+    setSelectedMapEntityState(entity);
+  }, []);
+
+  const setIncidentFilterSeverity = useCallback((sev: SeverityLevel | 'ALL') => {
+    soundEngine.playClick();
+    setIncidentFilterSeverityState(sev);
+  }, []);
+
+  const setIncidentFilterStatus = useCallback((status: string | 'ALL') => {
+    soundEngine.playClick();
+    setIncidentFilterStatusState(status);
+  }, []);
+
+  const setSelectedIncidentId = useCallback((id: string | null) => {
+    soundEngine.playClick();
+    setSelectedIncidentIdState(id);
+    const matchedItem = MOCK_INCIDENT_FEED.find(i => i.id === id);
+    if (matchedItem && matchedItem.scenarioId) {
+      setScenario(matchedItem.scenarioId);
+    }
+  }, [setScenario]);
+
+  const activeHandoverReport: ClinicalHandoverReport = useMemo(() => {
+    return generateClinicalHandoverReport(currentScenario, incidentStatus, aedAttached, activeResponderIndex);
+  }, [currentScenario, incidentStatus, aedAttached, activeResponderIndex]);
+
+  const openClinicalReport = useCallback(() => {
+    soundEngine.playSuccessChime();
+    setIsClinicalReportModalOpenState(true);
+  }, []);
+
+  const trigger108Escalation = useCallback(() => {
+    soundEngine.playEmergencyAlert();
+    setIncidentStatusState('HANDOVER_108');
+    setResponderChatMessages(msgs => [
+      ...msgs,
+      {
+        id: `chat-${Date.now()}`,
+        sender: 'dispatcher_108',
+        senderName: '108 Paramedic Team Leader',
+        senderRole: 'Ambulance WB-01-AMB-4421',
+        text: `🚑 108 Advanced Life Support Unit on scene. Assuming patient care, ROSC achieved. Transferring to AMRI Hospital ICU.`,
+        timestamp: 'Just now',
+        isMilestone: true,
+        badgeColor: 'var(--color-ai-cyan)'
+      }
+    ]);
+  }, []);
+
+  const broadcastAlert = useCallback((message?: string) => {
+    soundEngine.playEmergencyAlert();
+    const alertText = message || `🚨 High-Priority Spatial Beacon: ${currentScenario.severityLabel} at ${currentScenario.streetAddress}. All nearby responders alerted.`;
+    setResponderChatMessages(msgs => [
+      ...msgs,
+      {
+        id: `chat-${Date.now()}`,
+        sender: 'system',
+        senderName: 'Command Dispatch',
+        senderRole: 'Municipal Priority Broadcast',
+        text: alertText,
+        timestamp: 'Just now',
+        isMilestone: true,
+        badgeColor: 'var(--color-emergency-red-bright)'
+      }
+    ]);
+  }, [currentScenario]);
+
+  const incidentFeed: IncidentFeedItem[] = useMemo(() => {
+    const activeResp = currentScenario.responders[activeResponderIndex] || currentScenario.responders[0];
+    const liveItem: IncidentFeedItem = {
+      id: 'inc-01',
+      incidentNumber: `NH-KOL-${currentScenario.id.toUpperCase()}-01`,
+      timestamp: '19:20:10',
+      timeAgo: `${elapsedSeconds}s ago`,
+      locationName: currentScenario.streetAddress,
+      locality: currentScenario.locationName,
+      coordinates: currentScenario.coordinates,
+      category: currentScenario.category,
+      conditionTitle: `${currentScenario.protocol.title.split(' ')[0]} / ${currentScenario.severityLabel}`,
+      severity: currentScenario.severity,
+      status: incidentStatus,
+      responderName: activeResp.name,
+      responderRole: activeResp.role,
+      responderEta: activeResp.etaMinutes,
+      ambulanceDispatched: ['RESPONDER_ACCEPTED', 'RESPONDER_EN_ROUTE', 'RESPONDER_ARRIVED', 'HANDOVER_108', 'RESOLVED'].includes(incidentStatus),
+      ambulanceUnit: 'WB-01-AMB-4421',
+      aiConfidence: currentScenario.aiConfidence,
+      scenarioId: currentScenario.id
+    };
+
+    return [liveItem, ...MOCK_INCIDENT_FEED.slice(1)];
+  }, [currentScenario, incidentStatus, elapsedSeconds, activeResponderIndex]);
 
   // Phase 2 Victim Actions
   const setVictimSubScreen = useCallback((subScreen: VictimSubScreen) => {
@@ -963,6 +1133,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cprBeatTick,
         telemetry,
         offlineMeshActive,
+        mapLayerFilters,
+        selectedMapEntity,
+        incidentFeed,
+        incidentFilterSeverity,
+        incidentFilterStatus,
+        selectedIncidentId,
+        isClinicalReportModalOpen,
+        activeHandoverReport,
         setScenario,
         setScreenMode,
         setPersonaMode,
@@ -985,6 +1163,16 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setTurnByTurnStepIndex,
         nextTurnByTurnStep,
         prevTurnByTurnStep,
+        toggleMapLayer,
+        resetMapLayers,
+        setSelectedMapEntity,
+        setIncidentFilterSeverity,
+        setIncidentFilterStatus,
+        setSelectedIncidentId,
+        setIsClinicalReportModalOpen: setIsClinicalReportModalOpenState,
+        openClinicalReport,
+        trigger108Escalation,
+        broadcastAlert,
         setIntakeInputMode,
         toggleVoiceRecording,
         setTextInputNotes,

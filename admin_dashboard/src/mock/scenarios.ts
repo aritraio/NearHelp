@@ -3,7 +3,7 @@
    File: src/mock/scenarios.ts
    ========================================================================== */
 
-import type { EmergencyScenario, SystemTelemetry, MedicalConditionItem } from './types';
+import type { EmergencyScenario, SystemTelemetry, MedicalConditionItem, IncidentFeedItem, ClinicalHandoverReport } from './types';
 
 export const MEDICAL_CONDITIONS: MedicalConditionItem[] = [
   {
@@ -471,3 +471,170 @@ export const INITIAL_TELEMETRY: SystemTelemetry = {
   websocketConnectionsCount: 187,
   safetyIndexScore: 91,
 };
+
+export const MOCK_INCIDENT_FEED: IncidentFeedItem[] = [
+  {
+    id: 'inc-01',
+    incidentNumber: 'NH-KOL-0819-01',
+    timestamp: '19:20:10',
+    timeAgo: 'Just now',
+    locationName: 'Godrej Waterside, Tower 1',
+    locality: 'Salt Lake Sector V, Kolkata',
+    coordinates: [22.5726, 88.4312],
+    category: 'medical',
+    conditionTitle: 'Cardiac Arrest / Hypoxia (Level 5)',
+    severity: 5,
+    status: 'SOS_TRIGGERED',
+    responderName: 'Dr. Ananya Mukherjee',
+    responderRole: 'Consultant Cardiologist',
+    responderEta: 2.5,
+    ambulanceDispatched: true,
+    ambulanceUnit: 'WB-01-AMB-4421',
+    aiConfidence: 98.4,
+    scenarioId: 'scenario-a'
+  },
+  {
+    id: 'inc-02',
+    incidentNumber: 'NH-KOL-0819-02',
+    timestamp: '19:16:45',
+    timeAgo: '3m ago',
+    locationName: 'EM Bypass near Ruby Crossing',
+    locality: 'East Kolkata Township',
+    coordinates: [22.5135, 88.3986],
+    category: 'accident',
+    conditionTitle: 'Road Collision & Arterial Bleed (Level 4)',
+    severity: 4,
+    status: 'RESPONDER_EN_ROUTE',
+    responderName: 'Amit Kumar',
+    responderRole: 'Paramedic / EMT',
+    responderEta: 1.8,
+    ambulanceDispatched: true,
+    ambulanceUnit: 'WB-01-AMB-3912',
+    aiConfidence: 92.1,
+    scenarioId: 'scenario-b'
+  },
+  {
+    id: 'inc-03',
+    incidentNumber: 'NH-KOL-0819-03',
+    timestamp: '19:12:00',
+    timeAgo: '8m ago',
+    locationName: 'Basement B2, Block EP & GP',
+    locality: 'Sector V, Salt Lake (BLE Mesh Relay)',
+    coordinates: [22.5720, 88.4305],
+    category: 'medical',
+    conditionTitle: 'Severe Asthmatic Bronchospasm (Level 5)',
+    severity: 5,
+    status: 'RESPONDER_ACCEPTED',
+    responderName: 'Pooja Banerjee',
+    responderRole: 'Staff Nurse',
+    responderEta: 1.5,
+    ambulanceDispatched: true,
+    ambulanceUnit: 'WB-01-AMB-1102',
+    aiConfidence: 96.0,
+    scenarioId: 'scenario-c'
+  },
+  {
+    id: 'inc-04',
+    incidentNumber: 'NH-KOL-0819-04',
+    timestamp: '19:04:30',
+    timeAgo: '15m ago',
+    locationName: 'DLF 1 Food Court, Action Area 1',
+    locality: 'New Town, Kolkata',
+    coordinates: [22.5865, 88.4550],
+    category: 'fire',
+    conditionTitle: 'Second-Degree Thermal Burn (Level 3)',
+    severity: 3,
+    status: 'RESPONDER_ARRIVED',
+    responderName: 'Subhasish Roy',
+    responderRole: 'Red Cross First Aider',
+    responderEta: 0,
+    ambulanceDispatched: false,
+    aiConfidence: 89.5
+  },
+  {
+    id: 'inc-05',
+    incidentNumber: 'NH-KOL-0819-05',
+    timestamp: '18:55:12',
+    timeAgo: '25m ago',
+    locationName: 'Park Circus 7-Point Crossing',
+    locality: 'Park Circus, Kolkata',
+    coordinates: [22.5412, 88.3654],
+    category: 'medical',
+    conditionTitle: 'Tonic-Clonic Convulsion (Level 4)',
+    severity: 4,
+    status: 'HANDOVER_108',
+    responderName: 'Officer Tanmoy Sen',
+    responderRole: 'Traffic Police Resuscitation Unit',
+    responderEta: 0,
+    ambulanceDispatched: true,
+    ambulanceUnit: 'WB-01-AMB-8801',
+    aiConfidence: 94.2
+  },
+  {
+    id: 'inc-06',
+    incidentNumber: 'NH-KOL-0819-06',
+    timestamp: '18:32:00',
+    timeAgo: '48m ago',
+    locationName: 'City Centre 1 Mall',
+    locality: 'DC Block, Salt Lake',
+    coordinates: [22.5898, 88.4082],
+    category: 'accident',
+    conditionTitle: 'Staircase Fall & Sprain Trauma (Level 2)',
+    severity: 2,
+    status: 'RESOLVED',
+    responderName: 'Sneha Majumdar',
+    responderRole: 'Community Bystander Volunteer',
+    responderEta: 0,
+    ambulanceDispatched: false,
+    aiConfidence: 91.0
+  }
+];
+
+export function generateClinicalHandoverReport(
+  scenario: EmergencyScenario,
+  incidentStatus: string,
+  aedAttached: boolean,
+  activeRespIndex: number = 0
+): ClinicalHandoverReport {
+  const activeResp = scenario.responders[activeRespIndex] || scenario.responders[0];
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  return {
+    reportId: `REP-NH-${Math.floor(100000 + Math.random() * 900000)}`,
+    incidentId: scenario.codeName,
+    incidentCode: `NH-KOL-${scenario.id.toUpperCase()}`,
+    generatedAt: `${dateStr} • ${timeStr} IST`,
+    victimName: scenario.victim.name,
+    victimAge: scenario.victim.age,
+    victimGender: scenario.victim.gender,
+    victimBloodType: scenario.victim.bloodType,
+    victimAllergies: scenario.victim.allergies.length > 0 ? scenario.victim.allergies : ['None Documented / NKDA'],
+    victimMedicalConditions: scenario.victim.medicalConditions.length > 0 ? scenario.victim.medicalConditions : ['None Known'],
+    hasPacemaker: scenario.victim.hasPacemaker,
+    emergencyLocation: `${scenario.streetAddress}, ${scenario.subAddress}`,
+    emergencyCoordinates: `${scenario.coordinates[0].toFixed(4)}° N, ${scenario.coordinates[1].toFixed(4)}° E`,
+    severityLevel: scenario.severity,
+    diagnosticSummary: scenario.severityLabel,
+    aiConfidenceScore: scenario.aiConfidence,
+    survivalWindowMinutes: scenario.survivalWindowMinutes,
+    reportedSymptoms: scenario.reportedSymptoms,
+    cprMetronomeUsed: scenario.protocol.steps.some(s => s.isCprStep) || false,
+    cprCompressionsEstimated: scenario.severity === 5 ? 330 : 120,
+    cprDurationSeconds: scenario.severity === 5 ? 180 : 60,
+    aedDeployed: aedAttached || scenario.nearbyAEDs.length > 0,
+    aedShocksDelivered: aedAttached ? 1 : 0,
+    responderAssigned: activeResp.name,
+    responderRole: activeResp.role,
+    responderArrivalTimeOffset: 'T+00:26 (2.5 mins post-intake)',
+    ambulanceUnit: '108 Advanced Life Support (ALS) Unit WB-01-AMB-4421',
+    handoverParamedicLeader: 'Senior Paramedic S. Chatterjee (WB EMS Team 4)',
+    handoverTimestamp: incidentStatus === 'RESOLVED' || incidentStatus === 'HANDOVER_108' ? 'T+00:45 (ROSC Achieved on Scene)' : 'Pending Ambulance Handover',
+    destinationHospital: scenario.nearbyHospitals[0]?.name || 'AMRI Hospital Salt Lake Emergency Trauma Center',
+    legalShieldCompliance: 'Section 134A Motor Vehicles (Amendment) Act 2019 & Supreme Court 2016 Guidelines Fully Applicable',
+    goodSamaritanActReference: 'Supreme Court WP(Civil) 235/2012 — Zero Civil/Criminal Liability for Responders',
+    digitalSignatureHash: 'SHA256:7f9a2b8c4d1e0f3a6b5c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8'
+  };
+}
+

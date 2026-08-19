@@ -10,8 +10,9 @@ import { MobileDeviceFrame } from './components/demo/MobileDeviceFrame';
 import { Phase1Showcase } from './components/demo/Phase1Showcase';
 import { GuardianRadarScreen } from './components/guardian/GuardianRadarScreen';
 import { VictimMobilePreview } from './components/victim/VictimMobilePreview';
-import { CrisisDispatchScreen } from './components/crisis/CrisisDispatchScreen';
 import { ResponderMobilePreview } from './components/responder/ResponderMobilePreview';
+import { CommunityGeoMap } from './components/map/CommunityGeoMap';
+import { CommandCenterScreen } from './components/command/CommandCenterScreen';
 
 const MainContent: React.FC = () => {
   const { screenMode, viewLayout } = useDemoStore();
@@ -24,9 +25,19 @@ const MainContent: React.FC = () => {
       backgroundColor: 'var(--bg-base)',
       position: 'relative'
     }}>
-      {/* View Switcher based on viewLayout & screenMode */}
+      {/* Full Desktop Command Center or Showcase Mode */}
       {viewLayout === 'DESKTOP_FULL' ? (
-        <Phase1Showcase />
+        screenMode === 'COMMAND_CENTER' ? (
+          <div style={{ flex: 1, height: 'calc(100vh - 58px)' }}>
+            <CommandCenterScreen />
+          </div>
+        ) : screenMode === 'MAP' ? (
+          <div style={{ flex: 1, height: 'calc(100vh - 58px)' }}>
+            <CommunityGeoMap />
+          </div>
+        ) : (
+          <Phase1Showcase />
+        )
       ) : viewLayout === 'SPLIT_SCREEN' ? (
         /* Dynamic Dual Persona Split Screen for Showcase Presentations */
         <div style={{
@@ -36,7 +47,7 @@ const MainContent: React.FC = () => {
           gap: '36px',
           padding: '24px 16px',
           flexWrap: 'wrap',
-          maxWidth: '1360px',
+          maxWidth: '1440px',
           margin: '0 auto',
           width: '100%'
         }}>
@@ -58,22 +69,58 @@ const MainContent: React.FC = () => {
                 <VictimMobilePreview />
               </MobileDeviceFrame>
             </>
+          ) : screenMode === 'MAP' ? (
+            <>
+              {/* Left Screen: Dynamic Community Geo-Map */}
+              <MobileDeviceFrame 
+                title="Screen 6: Community Geo-Map" 
+                badgeText="PostGIS Spatial Engine"
+              >
+                <CommunityGeoMap />
+              </MobileDeviceFrame>
+
+              {/* Right Screen: Responder Experience */}
+              <MobileDeviceFrame 
+                title="Persona B: Responder Rescue Flow" 
+                badgeText="Alert • Nav • Medical ID"
+              >
+                <ResponderMobilePreview />
+              </MobileDeviceFrame>
+            </>
           ) : screenMode === 'COMMAND_CENTER' ? (
+            <>
+              {/* Left Screen: Dynamic Community Geo-Map */}
+              <MobileDeviceFrame 
+                title="Screen 6: Community Geo-Map" 
+                badgeText="Live PostGIS Waves"
+              >
+                <CommunityGeoMap />
+              </MobileDeviceFrame>
+
+              {/* Right Screen: Command Center Telemetry & Feeds */}
+              <MobileDeviceFrame 
+                title="Screen 7: Command Center" 
+                badgeText="Incident Feed • Reports"
+              >
+                <CommandCenterScreen />
+              </MobileDeviceFrame>
+            </>
+          ) : screenMode === 'RESPONDER' ? (
             <>
               {/* Left Screen: Responder Experience */}
               <MobileDeviceFrame 
-                title="Responder Experience" 
-                badgeText="Rescue Mode"
+                title="Persona B: Responder Rescue Flow" 
+                badgeText="Alert • Nav • Medical ID"
               >
                 <ResponderMobilePreview />
               </MobileDeviceFrame>
 
-              {/* Right Screen: Command Center Telemetry */}
+              {/* Right Screen: Dynamic Community Geo-Map */}
               <MobileDeviceFrame 
-                title="Screen 7: Command Center" 
+                title="Screen 6: Community Geo-Map" 
                 badgeText="Spatial Dispatch"
               >
-                <CrisisDispatchScreen />
+                <CommunityGeoMap />
               </MobileDeviceFrame>
             </>
           ) : (
@@ -107,21 +154,24 @@ const MainContent: React.FC = () => {
           <MobileDeviceFrame 
             title={
               screenMode === 'GUARDIAN' ? 'Screen 1: Guardian Radar' : 
-              screenMode === 'CRISIS_MATRIX' ? 'Screen 2: Victim Experience' : 
-              screenMode === 'RESPONDER' ? 'Responder Rescue Navigation' : 
-              'NearHelp Mobile Client'
+              screenMode === 'CRISIS_MATRIX' ? 'Screen 2: Victim SOS Intake' : 
+              screenMode === 'RESPONDER' ? 'Screens 4 & 5: Responder Rescue' : 
+              screenMode === 'MAP' ? 'Screen 6: Community Geo-Map' :
+              'Screen 7: Command Center'
             }
             badgeText={
               screenMode === 'GUARDIAN' ? 'Safe Zone' : 
               screenMode === 'CRISIS_MATRIX' ? 'SOS & First-Aid' : 
               screenMode === 'RESPONDER' ? 'Rescue Mode' : 
-              'Admin'
+              screenMode === 'MAP' ? 'PostGIS Spatial' :
+              'Admin Telemetry'
             }
           >
             {screenMode === 'GUARDIAN' && <GuardianRadarScreen />}
             {screenMode === 'CRISIS_MATRIX' && <VictimMobilePreview />}
             {screenMode === 'RESPONDER' && <ResponderMobilePreview />}
-            {screenMode === 'COMMAND_CENTER' && <CrisisDispatchScreen />}
+            {screenMode === 'MAP' && <CommunityGeoMap />}
+            {screenMode === 'COMMAND_CENTER' && <CommandCenterScreen />}
           </MobileDeviceFrame>
         </div>
       )}

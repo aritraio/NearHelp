@@ -114,23 +114,23 @@ gantt
 
 ### 🗺️ Phase 4: Live Map, Dispatch Engine & Command Center (Fri Morning)
 
-- [ ] 🔴 **Screen 6: Dynamic Community Geo-Map**
-  - [ ] Interactive Map component (Leaflet / Mapbox / Canvas-rendered map)
-  - [ ] Animated map layers:
+- [x] 🔴 **Screen 6: Dynamic Community Geo-Map**
+  - [x] Interactive Map component (Leaflet / Mapbox / Canvas / SVG-rendered dark cartography engine)
+  - [x] Animated map layers:
     - 📍 Victim SOS Marker (pulsing red target)
     - 🏃 Nearby Active Responders (with green status beacons & skill badges: CPR, EMT, Doctor)
     - 🏥 Nearby Hospitals & Trauma Centers (with available bed count / distance)
     - ⚡ Nearest Automated External Defibrillator (AED) locations
-  - [ ] Radial dispatch wave animation illustrating PostGIS `ST_DWithin` spatial query
+  - [x] Radial dispatch wave animation illustrating PostGIS `ST_DWithin` spatial query
 
-- [ ] 🟡 **Screen 7: Admin / Emergency Dispatch Command Center**
-  - [ ] Live System Telemetry Banner:
+- [x] 🟡 **Screen 7: Admin / Emergency Dispatch Command Center**
+  - [x] Live System Telemetry Banner:
     - *Active Emergencies*: 3
     - *Network Bystanders Available*: 142
-    - *Average Dispatch Latency*: 4.2s (vs. 15m municipal average)
+    - *Average Dispatch Latency*: 4.2s (vs. 15m municipal average — 214x speedup)
     - *RAG Medical Accuracy Index*: 99.2%
-  - [ ] Real-time incident feed table with live filter by severity (Level 1 to Level 5)
-  - [ ] Post-incident report generator preview (AI auto-generated clinical handover PDF/Markdown)
+  - [x] Real-time incident feed table with live filter by severity (Level 1 to Level 5)
+  - [x] Post-incident report generator preview (AI auto-generated clinical handover PDF/Markdown with Section 134A Good Samaritan Legal Immunity Seal)
 
 ---
 

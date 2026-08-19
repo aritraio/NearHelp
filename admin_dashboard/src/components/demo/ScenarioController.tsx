@@ -22,7 +22,8 @@ import {
   Radar,
   Grid,
   Ambulance, 
-  Layers
+  Layers,
+  Map
 } from 'lucide-react';
 
 export const ScenarioController: React.FC = () => {
@@ -195,7 +196,7 @@ export const ScenarioController: React.FC = () => {
             title="Screen 1: Guardian Radar & Safe Zone"
           >
             <Radar size={13} />
-            <span>Guardian Radar</span>
+            <span>Guardian</span>
           </button>
 
           <button
@@ -212,10 +213,10 @@ export const ScenarioController: React.FC = () => {
               alignItems: 'center',
               gap: '5px'
             }}
-            title="Screen 2: Medical Emergency Intake (Multimodal Triage)"
+            title="Screen 2: Victim SOS Intake & AI Triage"
           >
             <Grid size={13} />
-            <span>Medical Intake</span>
+            <span>Victim SOS</span>
           </button>
 
           <button
@@ -232,10 +233,30 @@ export const ScenarioController: React.FC = () => {
               alignItems: 'center',
               gap: '5px'
             }}
-            title="Responder Rescue Flow"
+            title="Screens 4 & 5: Responder Rescue Navigation & Medical ID"
           >
             <Ambulance size={13} />
             <span>Responder</span>
+          </button>
+
+          <button
+            onClick={() => setScreenMode('MAP')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '12px',
+              fontWeight: screenMode === 'MAP' ? 700 : 500,
+              backgroundColor: screenMode === 'MAP' ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
+              color: screenMode === 'MAP' ? 'var(--color-ai-cyan)' : 'var(--text-secondary)',
+              border: screenMode === 'MAP' ? '1px solid var(--color-ai-cyan)' : '1px solid transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+            title="Screen 6: Dynamic Community Geo-Map (PostGIS Spatial Radial Engine)"
+          >
+            <Map size={13} />
+            <span>Live Map</span>
           </button>
 
           <button
@@ -245,14 +266,14 @@ export const ScenarioController: React.FC = () => {
               borderRadius: 'var(--radius-xs)',
               fontSize: '12px',
               fontWeight: screenMode === 'COMMAND_CENTER' ? 700 : 500,
-              backgroundColor: screenMode === 'COMMAND_CENTER' ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
-              color: screenMode === 'COMMAND_CENTER' ? 'var(--color-ai-cyan)' : 'var(--text-secondary)',
-              border: screenMode === 'COMMAND_CENTER' ? '1px solid var(--color-ai-cyan)' : '1px solid transparent',
+              backgroundColor: screenMode === 'COMMAND_CENTER' ? 'rgba(255, 160, 0, 0.2)' : 'transparent',
+              color: screenMode === 'COMMAND_CENTER' ? 'var(--color-action-amber-bright)' : 'var(--text-secondary)',
+              border: screenMode === 'COMMAND_CENTER' ? '1px solid var(--color-action-amber)' : '1px solid transparent',
               display: 'flex',
               alignItems: 'center',
               gap: '5px'
             }}
-            title="Command Center Telemetry"
+            title="Screen 7: Command Center Telemetry, Incidents & AI Clinical Handover"
           >
             <Layers size={13} />
             <span>Command Center</span>
