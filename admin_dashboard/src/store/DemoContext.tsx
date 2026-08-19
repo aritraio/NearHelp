@@ -11,6 +11,7 @@ import type {
   ScreenMode,
   ViewLayout, 
   PresentationZoom,
+  TourPaceMode,
   SystemTelemetry,
   MedicalConditionId,
   MultimodalInputMode,
@@ -156,6 +157,13 @@ interface DemoContextType {
   isEventDrawerOpen: boolean;
   quickNotification: string | null;
 
+  // Phase 6 Automated Presentation Dry Run Tour
+  isTourActive: boolean;
+  tourSlideIndex: number;
+  tourElapsedSeconds: number;
+  tourPaceMode: TourPaceMode;
+  isTourPaused: boolean;
+
   // Actions
   setScenario: (id: 'scenario-a' | 'scenario-b' | 'scenario-c') => void;
   setScreenMode: (mode: ScreenMode) => void;
@@ -203,6 +211,14 @@ interface DemoContextType {
   jumpToSlideView: (slideNumber: number) => void;
   triggerLifecycleEvent: (status: IncidentStatus) => void;
   showToast: (msg: string) => void;
+
+  // Phase 6 Tour / Rehearsal Actions
+  startTour: (pace?: TourPaceMode) => void;
+  stopTour: () => void;
+  toggleTourPause: () => void;
+  nextTourSlide: () => void;
+  prevTourSlide: () => void;
+  setTourPaceMode: (pace: TourPaceMode) => void;
 
   setIntakeInputMode: (mode: MultimodalInputMode) => void;
   toggleVoiceRecording: () => void;
@@ -275,6 +291,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isEventDrawerOpen, setIsEventDrawerOpenState] = useState<boolean>(false);
   const [quickNotification, setQuickNotification] = useState<string | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+
+  // Phase 6 Automated Presentation Dry Run Tour state
+  const [isTourActive, setIsTourActiveState] = useState<boolean>(false);
+  const [tourSlideIndex, setTourSlideIndexState] = useState<number>(0);
+  const [tourElapsedSeconds, setTourElapsedSeconds] = useState<number>(0);
+  const [tourPaceMode, setTourPaceModeState] = useState<TourPaceMode>('LIGHTNING_60S');
+  const [isTourPaused, setIsTourPausedState] = useState<boolean>(false);
+  const tourTimerRef = useRef<number | null>(null);
 
   // Multimodal Medical Intake state
   const [intakeInputMode, setIntakeInputModeState] = useState<MultimodalInputMode>('PRESETS');
@@ -996,6 +1020,71 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showToast(`⚡ Jumped to: ${status.replace(/_/g, ' ')}`);
   }, [showToast]);
 
+  // Phase 6 Tour helper to get slide duration in seconds
+  const getSlideDuration = useCallback((slideIdx: number, pace: TourPaceMode) => {
+    if (pace === 'LIGHTNING_60S') return 8;
+    if (pace === 'EXPRESS_3M') return 22;
+    const durations = [60, 75, 90, 75, 75, 75, 120, 90];
+    return durations[slideIdx] || 75;
+  }, []);
+
+  // Start Tour
+  const startTour = useCallback((pace: TourPaceMode = 'LIGHTNING_60S') => {
+    soundEngine.playSuccessChime();
+    setTourPaceModeState(pace);
+    setIsTourActiveState(true);
+    setIsTourPausedState(false);
+    setTourSlideIndexState(0);
+    setTourElapsedSeconds(0);
+    jumpToSlideView(1);
+    showToast(`🎬 Review Tour Started (${pace === 'LIGHTNING_60S' ? '60s Lightning' : pace === 'EXPRESS_3M' ? '3m Express' : '11m Full Review'})`);
+  }, [jumpToSlideView, showToast]);
+
+  const stopTour = useCallback(() => {
+    soundEngine.playClick();
+    setIsTourActiveState(false);
+    setIsTourPausedState(false);
+    setTourSlideIndexState(0);
+    setTourElapsedSeconds(0);
+    showToast('⏹️ Review Tour Stopped');
+  }, [showToast]);
+
+  const toggleTourPause = useCallback(() => {
+    soundEngine.playClick();
+    setIsTourPausedState(prev => {
+      const next = !prev;
+      showToast(next ? '⏸️ Tour Paused' : '▶️ Tour Resumed');
+      return next;
+    });
+  }, [showToast]);
+
+  const nextTourSlide = useCallback(() => {
+    soundEngine.playClick();
+    setTourSlideIndexState(curr => {
+      const nextIdx = Math.min(curr + 1, MASTER_SLIDES_SYNC.length - 1);
+      setTourElapsedSeconds(0);
+      jumpToSlideView(nextIdx + 1);
+      return nextIdx;
+    });
+  }, [jumpToSlideView]);
+
+  const prevTourSlide = useCallback(() => {
+    soundEngine.playClick();
+    setTourSlideIndexState(curr => {
+      const prevIdx = Math.max(curr - 1, 0);
+      setTourElapsedSeconds(0);
+      jumpToSlideView(prevIdx + 1);
+      return prevIdx;
+    });
+  }, [jumpToSlideView]);
+
+  const setTourPaceMode = useCallback((pace: TourPaceMode) => {
+    soundEngine.playClick();
+    setTourPaceModeState(pace);
+    setTourElapsedSeconds(0);
+    showToast(`⏱️ Tour Pace: ${pace}`);
+  }, [showToast]);
+
   // Milestone Events memo
   const timelineEvents: TimelineEventItem[] = useMemo(() => {
     const activeResp = currentScenario.responders[activeResponderIndex] || currentScenario.responders[0];
@@ -1224,6 +1313,46 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [incidentStatus, isAutoSimulating, simulationSpeed]);
 
+  // Phase 6 Automated Presentation Dry Run Tour ticker
+  useEffect(() => {
+    if (!isTourActive || isTourPaused) {
+      if (tourTimerRef.current) {
+        clearInterval(tourTimerRef.current);
+        tourTimerRef.current = null;
+      }
+      return;
+    }
+
+    tourTimerRef.current = window.setInterval(() => {
+      setTourElapsedSeconds(prev => {
+        const nextSec = prev + 1;
+        const targetDuration = getSlideDuration(tourSlideIndex, tourPaceMode);
+
+        if (nextSec >= targetDuration) {
+          if (tourSlideIndex < MASTER_SLIDES_SYNC.length - 1) {
+            const nextIdx = tourSlideIndex + 1;
+            setTourSlideIndexState(nextIdx);
+            jumpToSlideView(nextIdx + 1);
+            return 0;
+          } else {
+            soundEngine.playSuccessChime();
+            setIsTourActiveState(false);
+            showToast('🎉 Review Tour Complete! Ready for Examiner Q&A Defense');
+            return 0;
+          }
+        }
+        return nextSec;
+      });
+    }, 1000);
+
+    return () => {
+      if (tourTimerRef.current) {
+        clearInterval(tourTimerRef.current);
+        tourTimerRef.current = null;
+      }
+    };
+  }, [isTourActive, isTourPaused, tourSlideIndex, tourPaceMode, getSlideDuration, jumpToSlideView, showToast]);
+
   // Presentation Keyboard Shortcuts Hook
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1240,10 +1369,23 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (e.code === 'Space') {
         e.preventDefault();
-        toggleAutoSimulation();
+        if (isTourActive) {
+          toggleTourPause();
+        } else {
+          toggleAutoSimulation();
+        }
       } else if (e.code === 'ArrowRight') {
         e.preventDefault();
-        advanceStep();
+        if (isTourActive) {
+          nextTourSlide();
+        } else {
+          advanceStep();
+        }
+      } else if (e.code === 'ArrowLeft') {
+        if (isTourActive) {
+          e.preventDefault();
+          prevTourSlide();
+        }
       } else if (e.key === '1') {
         setScenario('scenario-a');
       } else if (e.key === '2') {
@@ -1274,7 +1416,14 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleProjectorMode();
       } else if (e.key === 's' || e.key === 'S') {
         toggleSlideSync();
+      } else if (e.key === 't' || e.key === 'T') {
+        if (isTourActive) {
+          stopTour();
+        } else {
+          startTour('LIGHTNING_60S');
+        }
       } else if (e.key === 'x' || e.key === 'X') {
+        if (isTourActive) stopTour();
         resetDemo();
       }
     };
@@ -1282,6 +1431,12 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
+    isTourActive,
+    toggleTourPause,
+    nextTourSlide,
+    prevTourSlide,
+    startTour,
+    stopTour,
     toggleAutoSimulation, 
     advanceStep, 
     setScenario, 
@@ -1348,6 +1503,11 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isSlideSyncOpen,
         isEventDrawerOpen,
         quickNotification,
+        isTourActive,
+        tourSlideIndex,
+        tourElapsedSeconds,
+        tourPaceMode,
+        isTourPaused,
         setScenario,
         setScreenMode,
         setPersonaMode,
@@ -1388,6 +1548,12 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         jumpToSlideView,
         triggerLifecycleEvent,
         showToast,
+        startTour,
+        stopTour,
+        toggleTourPause,
+        nextTourSlide,
+        prevTourSlide,
+        setTourPaceMode,
         setIntakeInputMode,
         toggleVoiceRecording,
         setTextInputNotes,

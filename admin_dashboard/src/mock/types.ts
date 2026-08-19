@@ -67,6 +67,8 @@ export type ViewLayout = 'MOBILE_FRAME' | 'SPLIT_SCREEN' | 'DESKTOP_FULL';
 
 export type PresentationZoom = 100 | 110 | 125;
 
+export type TourPaceMode = 'LIGHTNING_60S' | 'EXPRESS_3M' | 'FULL_11M';
+
 export interface SlideSyncInfo {
   slideNumber: number;
   title: string;

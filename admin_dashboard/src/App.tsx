@@ -14,6 +14,7 @@ import { ResponderMobilePreview } from './components/responder/ResponderMobilePr
 import { CommunityGeoMap } from './components/map/CommunityGeoMap';
 import { CommandCenterScreen } from './components/command/CommandCenterScreen';
 import { SlideSyncHUD } from './components/demo/SlideSyncHUD';
+import { DryRunTourModal } from './components/demo/DryRunTourModal';
 
 const MainContent: React.FC = () => {
   const { screenMode, viewLayout } = useDemoStore();
@@ -198,6 +199,7 @@ const AppShell: React.FC = () => {
       <ScenarioController />
       <MainContent />
       <SlideSyncHUD />
+      <DryRunTourModal />
 
       {/* Floating Presentation Toast Notification */}
       {quickNotification && (

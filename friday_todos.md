@@ -156,15 +156,17 @@ gantt
 
 ### 🎤 Phase 6: Team Dry Run & Slide Synchronization (Fri Night)
 
-- [ ] 🔴 **Synchronize Frontend Demo with Master 8 Slides & Speaking Script**:
-  - [ ] **Slide 1 & 2 (Aritra)**: Showcase One-Tap SOS, Problem of 4–6 min hypoxic window vs. instant bystander dispatch.
-  - [ ] **Slide 3 (Abhisikta)**: Showcase Multimodal Intake, AI Triage Severity Level 5 Card, and clinical confidence score.
-  - [ ] **Slide 5 & 6 (Plaban & Sayantan)**: Demonstrate Dual-State UI, AED locator, and Good Samaritan legal safety shield.
-  - [ ] **Slide 7 (Adil & Dishari)**: Demonstrate PostGIS Radial Spatial search animation, WebSocket live GPS tracking stream, and Jetpack Compose design ergonomics.
-  - [ ] **Slide 8 (Aritra & Abhisikta)**: Demonstrate End-to-End Resolution, Post-Incident Summary report, and 108 ambulance handover.
-- [ ] 🔴 **Contingency & Offline Package**:
-  - [ ] Ensure frontend runs 100% offline via local dev server (e.g. `npm run dev` or local build) with zero internet dependency.
-  - [ ] Create pre-recorded 60-second backup video clip in case the projector disconnects.
+- [x] 🔴 **Synchronize Frontend Demo with Master 8 Slides & Speaking Script**:
+  - [x] **Slide 1 & 2 (Aritra)**: Showcase One-Tap SOS, Problem of 4–6 min hypoxic window vs. instant bystander dispatch.
+  - [x] **Slide 3 (Abhisikta)**: Showcase Multimodal Intake, AI Triage Severity Level 5 Card, and clinical confidence score.
+  - [x] **Slide 4 (Plaban)**: Grounded First-Aid Protocol, 110 BPM CPR Metronome, AHA/ERC RAG.
+  - [x] **Slide 5 & 6 (Plaban & Sayantan)**: Demonstrate Dual-State UI, AED locator, and Good Samaritan legal safety shield (Section 134A MV Act).
+  - [x] **Slide 7 (Adil & Dishari)**: Demonstrate PostGIS Radial Spatial search animation (`ST_DWithin`), WebSocket live GPS tracking stream, and Jetpack Compose design ergonomics.
+  - [x] **Slide 8 (Aritra & Abhisikta)**: Demonstrate End-to-End Resolution, Post-Incident Summary report, and 108 ambulance handover.
+- [x] 🔴 **Contingency & Offline Package**:
+  - [x] Ensure frontend runs 100% offline via local dev server (e.g. `npm run dev` or local build) with zero internet dependency.
+  - [x] Master Rehearsal Prompter & Dry Run Tour Mode (`DryRunTourModal.tsx` with hotkey `T` supporting 60s lightning, 3m express, and 11m full review).
+  - [x] Comprehensive dry-run choreography manual created in `Review/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md`.
 
 ---
 

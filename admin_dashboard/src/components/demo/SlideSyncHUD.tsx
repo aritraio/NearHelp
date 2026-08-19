@@ -24,6 +24,7 @@ export const SlideSyncHUD: React.FC = () => {
     isSlideSyncOpen, 
     setIsSlideSyncOpen, 
     jumpToSlideView, 
+    startTour,
     projectorMode 
   } = useDemoStore();
 
@@ -174,6 +175,29 @@ export const SlideSyncHUD: React.FC = () => {
                 <span>Hotkeys</span>
               </button>
             </div>
+
+            <button
+              onClick={() => {
+                setIsSlideSyncOpen(false);
+                startTour('LIGHTNING_60S');
+              }}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-xs)',
+                fontSize: '12px',
+                fontWeight: 700,
+                backgroundColor: 'var(--color-emergency-red)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 0 14px rgba(255, 23, 68, 0.4)'
+              }}
+              title="Launch Automated Rehearsal Tour across all 8 slides"
+            >
+              <Zap size={13} />
+              <span>Start Review Tour</span>
+            </button>
 
             <button
               onClick={() => setIsSlideSyncOpen(false)}

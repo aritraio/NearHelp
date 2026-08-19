@@ -48,6 +48,9 @@ export const ScenarioController: React.FC = () => {
     cprMetronomeActive,
     projectorMode,
     presentationZoom,
+    isTourActive,
+    startTour,
+    stopTour,
     setScenario,
     setScreenMode,
     setPersonaMode,
@@ -557,6 +560,33 @@ export const ScenarioController: React.FC = () => {
           >
             <Presentation size={13} />
             <span>Slide Sync</span>
+          </button>
+
+          {/* Automated Rehearsal Tour Button */}
+          <button
+            onClick={() => {
+              if (isTourActive) {
+                stopTour();
+              } else {
+                startTour('LIGHTNING_60S');
+              }
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '5px 9px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '11px',
+              fontWeight: 700,
+              backgroundColor: isTourActive ? 'var(--color-emergency-red)' : 'var(--bg-surface)',
+              color: isTourActive ? '#fff' : 'var(--color-emergency-red-bright)',
+              border: `1px solid ${isTourActive ? 'var(--color-emergency-red-bright)' : 'var(--border-crimson)'}`
+            }}
+            title="Launch Automated 8-Slide Presentation Rehearsal Tour (Key: T)"
+          >
+            <Zap size={13} />
+            <span>{isTourActive ? 'Stop Tour' : 'Tour'}</span>
           </button>
 
           {/* CPR Metronome Toggle */}
