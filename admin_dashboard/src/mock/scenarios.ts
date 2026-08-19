@@ -410,7 +410,7 @@ export const SCENARIO_C: EmergencyScenario = {
     title: 'Offline Cached RAG Protocol: Acute Hypoxia Management',
     authority: 'Global Initiative for Asthma (GINA) & Indian Red Cross',
     disclaimers: 'Self-contained offline vector model execution. Zero external API calls required.',
-    legalShield: 'Immunity guaranteed under Section 134A of the Motor Vehicles Act.',
+    legalShield: 'Good Samaritan immunity guaranteed under Section 134A of the Motor Vehicles Act & Supreme Court 2016 Guidelines.',
     steps: [
       {
         stepNumber: 1,
