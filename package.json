@@ -1,0 +1,11 @@
+{
+  "name": "nearhelp-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NearHelp AI — AI-Powered Community Emergency Response Network",
+  "scripts": {
+    "dev": "npm --prefix admin_dashboard run dev",
+    "build": "npm --prefix admin_dashboard run build",
+    "preview": "npm --prefix admin_dashboard run preview"
+  }
+}

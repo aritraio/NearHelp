@@ -49,20 +49,20 @@ gantt
 
 ### 🎨 Phase 1: Design System, Tokens & Architecture (Wed Night)
 
-- [ ] 🔴 **Design System Foundations** (`theme.css` / Tailwind / Styling tokens)
-  - [ ] Configure High-Contrast Dark Theme (`#121212` background, `#1E1E1E` card surfaces)
-  - [ ] Implement Color Tokens:
+- [x] 🔴 **Design System Foundations** (`theme.css` / Styling tokens)
+  - [x] Configure High-Contrast Dark Theme (`#121212` background, `#1E1E1E` card surfaces)
+  - [x] Implement Color Tokens:
     - 🚨 Emergency Red (`#E53935` / `#FF1744`) — Primary SOS & Level 5 Alerts
     - ⚠️ Action Amber (`#FF9800`) — Warning / Pending Dispatch / Level 3
     - 🟢 Safe Green (`#4CAF50`) — Verified Badges / Responder Arrived / Level 1
     - 🤖 AI Cyan/Blue (`#2196F3` / `#00E5FF`) — AI Triage & RAG Guidance Cards
-  - [ ] Load modern clean typography (`Inter`, `Plus Jakarta Sans`, or `Roboto`)
-  - [ ] Configure pulsing radar animations & haptic/audio cue utilities
+  - [x] Load modern clean typography (`Inter`, `Plus Jakarta Sans`, `JetBrains Mono`)
+  - [x] Configure pulsing radar animations & haptic/audio cue utilities
 
-- [ ] 🔴 **Demo State Store & Mock Engine** (`store/` or `state/`)
-  - [ ] Create Central Demo State Manager (Active Mode: `VICTIM` | `RESPONDER` | `COMMAND_CENTER`)
-  - [ ] Implement simulated emergency timer & auto-progression hooks (T+0s: SOS triggered → T+5s: AI Triaged → T+12s: Responder Accepted → T+25s: Arrived)
-  - [ ] Pre-configure 3 Complete Realistic Demo Scenarios:
+- [x] 🔴 **Demo State Store & Mock Engine** (`store/` or `state/`)
+  - [x] Create Central Demo State Manager (Active Mode: `VICTIM` | `RESPONDER` | `COMMAND_CENTER`)
+  - [x] Implement simulated emergency timer & auto-progression hooks (T+0s: SOS triggered → T+5s: AI Triaged → T+12s: Responder Accepted → T+25s: Arrived)
+  - [x] Pre-configure 3 Complete Realistic Demo Scenarios:
     - **Scenario A**: *Critical Cardiac Arrest in Salt Lake Sector V* (Level 5, CPR needed, 2 nearby responders)
     - **Scenario B**: *Severe Arterial Bleed / Road Accident on EM Bypass* (Level 4, Tourniquet protocol, Ambulance routed)
     - **Scenario C**: *Offline Fallback Simulation* (Zero network → SMS/Mesh payload packet preview)
