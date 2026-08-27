@@ -166,7 +166,7 @@ gantt
 - [x] 🔴 **Contingency & Offline Package**:
   - [x] Ensure frontend runs 100% offline via local dev server (e.g. `npm run dev` or local build) with zero internet dependency.
   - [x] Master Rehearsal Prompter & Dry Run Tour Mode (`DryRunTourModal.tsx` with hotkey `T` supporting 60s lightning, 3m express, and 11m full review).
-  - [x] Comprehensive dry-run choreography manual created in `Review/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md`.
+  - [x] Comprehensive dry-run choreography manual created in `review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md`.
 
 ---
 
@@ -187,7 +187,7 @@ NearHelp/
 │   │   ├── store/                 # Demo state store (Zustand / React Context / Pinia)
 │   │   └── styles/                # High-contrast dark theme & animations
 │   └── package.json
-└── Review/
+└── review-1/
     ├── 01_PROJECT_REVIEW_REPORT.md
     ├── 02_PRESENTATION_SLIDES.md
     └── 03_TEAM_SPEAKING_SCRIPT.md

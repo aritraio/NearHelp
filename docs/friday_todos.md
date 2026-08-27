@@ -185,7 +185,7 @@ NearHelp/
 │   │   ├── store/                 # Demo state store (Zustand / React Context / Pinia)
 │   │   └── styles/                # High-contrast dark theme & animations
 │   └── package.json
-└── Review/
+└── review-1/
     ├── 01_PROJECT_REVIEW_REPORT.md
     ├── 02_PRESENTATION_SLIDES.md
     └── 03_TEAM_SPEAKING_SCRIPT.md
