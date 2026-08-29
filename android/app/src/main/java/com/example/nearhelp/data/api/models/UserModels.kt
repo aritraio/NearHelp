@@ -75,3 +75,51 @@ data class PhotoUploadResponse(
   @SerializedName("message") val message: String = "Photo uploaded successfully",
   @SerializedName("success") val success: Boolean = true,
 )
+
+@Serializable
+data class SkillClaimRequest(
+  @SerializedName("skill_type") val skillType: String,
+  @SerializedName("certificate_url") val certificateUrl: String? = null,
+  @SerializedName("notes") val notes: String? = null,
+)
+
+@Serializable
+data class SkillVerificationResponse(
+  @SerializedName("id") val id: String,
+  @SerializedName("user_id") val userId: String,
+  @SerializedName("user_name") val userName: String? = null,
+  @SerializedName("user_email") val userEmail: String? = null,
+  @SerializedName("user_phone") val userPhone: String? = null,
+  @SerializedName("skill_type") val skillType: String,
+  @SerializedName("certificate_url") val certificateUrl: String,
+  @SerializedName("status") val status: String = "PENDING",
+  @SerializedName("rejection_reason") val rejectionReason: String? = null,
+  @SerializedName("notes") val notes: String? = null,
+  @SerializedName("reviewed_by") val reviewedBy: String? = null,
+  @SerializedName("submitted_at") val submittedAt: String? = null,
+  @SerializedName("reviewed_at") val reviewedAt: String? = null,
+)
+
+@Serializable
+data class SkillCertificateUploadResponse(
+  @SerializedName("certificate_url") val certificateUrl: String,
+  @SerializedName("filename") val filename: String,
+  @SerializedName("file_type") val fileType: String,
+  @SerializedName("message") val message: String = "Certificate uploaded successfully.",
+  @SerializedName("success") val success: Boolean = true,
+)
+
+@Serializable
+data class SkillVerificationReviewRequest(
+  @SerializedName("action") val action: String? = null,
+  @SerializedName("status") val status: String? = null,
+  @SerializedName("rejection_reason") val rejectionReason: String? = null,
+  @SerializedName("notes") val notes: String? = null,
+)
+
+@Serializable
+data class SkillVerificationListResponse(
+  @SerializedName("total") val total: Int,
+  @SerializedName("verifications") val verifications: List<SkillVerificationResponse> = emptyList(),
+)
+

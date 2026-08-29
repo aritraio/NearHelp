@@ -1,12 +1,15 @@
 """NearHelp AI — Backend API Service Entrypoint."""
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api import api_router
+from app.api.admin import router as admin_compat_router
 from app.api.auth import router as auth_compat_router
 from app.api.users import router as users_compat_router
 from app.core.config import settings
@@ -63,21 +66,21 @@ app.add_middleware(
     ttl_seconds=settings.IDEMPOTENCY_EXPIRE_SECONDS,
 )
 
-import os
-from fastapi.staticfiles import StaticFiles
-
-# Mount static uploads directory for avatar photos
+# Mount static uploads directory for avatar photos and certificate documents
 uploads_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../uploads"))
 os.makedirs(uploads_path, exist_ok=True)
+os.makedirs(os.path.join(uploads_path, "avatars"), exist_ok=True)
+os.makedirs(os.path.join(uploads_path, "certificates"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
 
 # Route Mounts
-# Versioned API routes: /api/v1/auth, /api/v1/users
+# Versioned API routes: /api/v1/auth, /api/v1/users, /api/v1/admin
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-# Direct compatibility aliases: /api/auth, /api/users
+# Direct compatibility aliases: /api/auth, /api/users, /api/admin
 app.include_router(auth_compat_router, prefix="/api/auth")
 app.include_router(users_compat_router, prefix="/api/users")
+app.include_router(admin_compat_router, prefix="/api/admin")
 
 
 @app.get("/health", tags=["Health"])

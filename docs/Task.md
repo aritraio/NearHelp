@@ -108,8 +108,8 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 
 #### Phase 1: MVP Core (Months 1–2)
 - [x] **Module 1 — Authentication & Identity**: Firebase Auth integration, JWT token handling (15-min access + 7-day refresh), OAuth, Phone OTP, anonymous emergency mode, device registration, and idempotency/rate-limit middleware.
-- [ ] **Module 2 — User Profile**: User profile CRUD endpoints, emergency contact schema, encrypted medical data.
-- [ ] **Module 3 — Skill Verification**: Upload flow, admin verification queue, trust score calculation backend.
+- [x] **Module 2 — User Profile**: User profile CRUD endpoints, emergency contact schema, AES-256 encrypted medical data at rest, avatar upload.
+- [x] **Module 3 — Skill Verification**: Upload flow, admin verification queue, trust score increment engine (+5 per verified skill), badge awarding, user notification dispatch.
 - [x] **PostgreSQL + PostGIS Database Infrastructure**: Spatial database container setup (`postgis/postgis:16-3.4` + Redis 7), spatial extension initialized and verified.
 - [ ] **Database Schema & Migrations**: Design tables (`users`, `sos_events`, `responses`, `messages`), GeoAlchemy2 Point geometries, and Alembic migrations.
 - [ ] **Module 8 — Live Tracking Stream**: WebSocket server setup (FastAPI WebSockets) for live GPS streaming between victims and responders.

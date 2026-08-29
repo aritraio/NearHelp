@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import NullPool
 
+import app.models  # noqa: F401 (register models with Base.metadata)
 from app.core.config import settings
 from app.db.base import Base
 

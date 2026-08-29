@@ -7,6 +7,8 @@ import com.example.nearhelp.data.api.models.LanguagePreferencesRequest
 import com.example.nearhelp.data.api.models.MedicalIdResponse
 import com.example.nearhelp.data.api.models.MedicalIdUpdateRequest
 import com.example.nearhelp.data.api.models.MessageResponse
+import com.example.nearhelp.data.api.models.SkillClaimRequest
+import com.example.nearhelp.data.api.models.SkillVerificationResponse
 import com.example.nearhelp.data.api.models.UserProfileUpdateRequest
 import com.example.nearhelp.data.api.models.UserResponse
 import retrofit2.Response
@@ -78,4 +80,16 @@ interface UserApiService {
     @Header("Authorization") bearerToken: String,
     @Body request: LanguagePreferencesRequest,
   ): Response<UserResponse>
+
+  @POST("api/v1/users/me/skills")
+  suspend fun claimSkill(
+    @Header("Authorization") bearerToken: String,
+    @Body request: SkillClaimRequest,
+  ): Response<SkillVerificationResponse>
+
+  @GET("api/v1/users/me/skills")
+  suspend fun listMySkills(
+    @Header("Authorization") bearerToken: String,
+  ): Response<List<SkillVerificationResponse>>
 }
+

@@ -86,6 +86,18 @@ async def get_current_active_user(
     return current_user
 
 
+async def get_current_admin_user(
+    current_user: User = Depends(get_current_active_user),
+) -> User:
+    """Dependency ensuring current authenticated user has administrative (superuser) privileges."""
+    if not getattr(current_user, "is_superuser", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Administrative privileges required to perform this action.",
+        )
+    return current_user
+
+
 async def get_optional_current_user(
     auth_creds: HTTPAuthorizationCredentials | None = Security(security_scheme),
     db: AsyncSession = Depends(get_db),

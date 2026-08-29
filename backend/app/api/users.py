@@ -1,12 +1,17 @@
 """NearHelp AI — User Profile, Encrypted Medical ID & Emergency Contacts API Routes."""
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import MessageResponse
+from app.schemas.skill import (
+    SkillCertificateUploadResponse,
+    SkillClaimRequest,
+    SkillVerificationResponse,
+)
 from app.schemas.user import (
     DeviceRegisterRequest,
     EmergencyContactCreateSchema,
@@ -20,6 +25,7 @@ from app.schemas.user import (
     UserUpdateRequest,
 )
 from app.services.auth_service import AuthService
+from app.services.skill_service import SkillService
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="", tags=["User Profile & Encrypted Medical ID"])
@@ -242,3 +248,73 @@ async def update_fcm_token(
     """Register or refresh the Firebase Cloud Messaging device push token."""
     await AuthService.register_device(db, current_user, req)
     return MessageResponse(message="FCM token registered successfully.", success=True)
+
+
+# ==============================================================================
+# 6. Skill Verification & Certificate Claims (Module 3)
+# ==============================================================================
+@router.post(
+    "/me/skills",
+    response_model=SkillVerificationResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Submit Skill Verification Claim (JSON)",
+)
+async def claim_skill_json(
+    req: SkillClaimRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Submit a new skill claim with an existing certificate URL."""
+    return await SkillService.claim_skill(db, current_user, req)
+
+
+@router.post(
+    "/me/skills/upload",
+    response_model=SkillCertificateUploadResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Upload Certificate Document (PDF or Image)",
+)
+async def upload_certificate_file(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Upload a certificate file (PDF, PNG, JPG, WebP up to 10 MB) to receive a certificate URL."""
+    return await SkillService.upload_certificate(current_user, file)
+
+
+@router.post(
+    "/me/skills/form",
+    response_model=SkillVerificationResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Submit Skill Claim with File Attachment (Multipart Form)",
+)
+async def claim_skill_form(
+    skill_type: str = Form(..., description="Skill name or code e.g. CPR_CERTIFIED"),
+    file: UploadFile = File(..., description="Certificate PDF or image"),
+    notes: str | None = Form(None, description="Optional notes"),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload certificate and submit skill verification claim in one single multipart request."""
+    cert_url, _, _ = await SkillService.save_certificate_file(current_user, file)
+    claim_req = SkillClaimRequest(
+        skill_type=skill_type,
+        certificate_url=cert_url,
+        notes=notes,
+    )
+    return await SkillService.claim_skill(db, current_user, claim_req)
+
+
+@router.get(
+    "/me/skills",
+    response_model=list[SkillVerificationResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List My Skill Verification Requests",
+)
+async def list_my_skills(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve history of all skill verification requests submitted by current user."""
+    return await SkillService.list_user_verifications(db, current_user)
+

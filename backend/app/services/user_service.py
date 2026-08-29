@@ -3,7 +3,6 @@
 import logging
 import os
 import uuid
-from typing import Any
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession

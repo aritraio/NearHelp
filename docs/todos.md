@@ -117,14 +117,14 @@
 
 #### Backend (Adil)
 
-- [ ] 🟡 Implement skill claim endpoint (`POST /api/users/me/skills`)
-- [ ] 🟡 Implement certificate file upload (PDF/image) to cloud storage
-- [ ] 🟡 Build admin verification queue API
-  - [ ] `GET /api/admin/verification-queue`
-  - [ ] `POST /api/admin/verification-queue/{id}/approve`
-  - [ ] `POST /api/admin/verification-queue/{id}/reject`
-- [x] 🟡 Design trust score increment logic (+5 per verified skill: CPR, Doctor, EMT, Nurse)
-- [ ] 🟢 Send notification to user on approval/rejection
+- [x] 🟡 Implement skill claim endpoint (`POST /api/users/me/skills`)
+- [x] 🟡 Implement certificate file upload (PDF/image) to local & static storage (`POST /api/users/me/skills/upload`, `POST /api/users/me/skills/form`)
+- [x] 🟡 Build admin verification queue API
+  - [x] `GET /api/admin/verification-queue`
+  - [x] `POST /api/admin/verification-queue/{id}/approve`
+  - [x] `POST /api/admin/verification-queue/{id}/reject`
+- [x] 🟡 Design trust score increment logic (+5 per verified skill: CPR, Doctor, EMT, Nurse, First Aid)
+- [x] 🟢 Send notification to user on approval/rejection (`NotificationService`)
 
 ---
 

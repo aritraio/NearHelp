@@ -11,6 +11,14 @@ from app.schemas.auth import (
     TokenRefreshRequest,
     TokenResponse,
 )
+from app.schemas.skill import (
+    SkillCertificateUploadResponse,
+    SkillClaimRequest,
+    SkillVerificationListResponse,
+    SkillVerificationResponse,
+    SkillVerificationReviewRequest,
+    TrustScoreUpdateResponse,
+)
 from app.schemas.user import (
     DeviceRegisterRequest,
     EmergencyContactCreateSchema,
@@ -41,9 +49,15 @@ __all__ = [
     "PhoneVerifyRequest",
     "PhotoUploadResponse",
     "RegisterRequest",
+    "SkillCertificateUploadResponse",
+    "SkillClaimRequest",
     "SkillItemSchema",
+    "SkillVerificationListResponse",
+    "SkillVerificationResponse",
+    "SkillVerificationReviewRequest",
     "TokenRefreshRequest",
     "TokenResponse",
+    "TrustScoreUpdateResponse",
     "UserResponse",
     "UserUpdateRequest",
 ]
