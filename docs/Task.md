@@ -166,11 +166,11 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 **Rationale**: Academic project evaluation places heavy weight on SRS, SDD, UML diagrams, and test reports. Abhisikta gets complete ownership of the documentation suite. Since she has her brother to assist her with technical layouts, UML diagrams, and document formatting, assigning her the structured report deliverables leverages her support network to guarantee a high-scoring academic report.
 
 #### Review 1 & Showcase Sprint (Completed ✅)
-- [x] **Master Project Review Report**: Authored comprehensive 366-line formal synopsis in [`review-1/01_PROJECT_REVIEW_REPORT.md`](../review-1/01_PROJECT_REVIEW_REPORT.md).
-- [x] **8-Slide Presentation Deck**: Structured presentation slide outlines in [`review-1/02_PRESENTATION_SLIDES.md`](../review-1/02_PRESENTATION_SLIDES.md).
-- [x] **Team Speaking Script**: Prepared speaker-by-speaker script for all 6 members in [`review-1/03_TEAM_SPEAKING_SCRIPT.md`](../review-1/03_TEAM_SPEAKING_SCRIPT.md).
-- [x] **Examiner Q&A Defense Guide**: Compiled 12 in-depth defense answers for examiners in [`review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md`](../review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md).
-- [x] **Team Dry Run Rehearsal Guide**: Master rehearsal choreography manual in [`review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md`](../review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md).
+- [x] **Master Project Review Report**: Authored comprehensive 366-line formal synopsis in [`archive/review-1/01_PROJECT_REVIEW_REPORT.md`](../archive/review-1/01_PROJECT_REVIEW_REPORT.md).
+- [x] **8-Slide Presentation Deck**: Structured presentation slide outlines in [`archive/review-1/02_PRESENTATION_SLIDES.md`](../archive/review-1/02_PRESENTATION_SLIDES.md).
+- [x] **Team Speaking Script**: Prepared speaker-by-speaker script for all 6 members in [`archive/review-1/03_TEAM_SPEAKING_SCRIPT.md`](../archive/review-1/03_TEAM_SPEAKING_SCRIPT.md).
+- [x] **Examiner Q&A Defense Guide**: Compiled 12 in-depth defense answers for examiners in [`archive/review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md`](../archive/review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md).
+- [x] **Team Dry Run Rehearsal Guide**: Master rehearsal choreography manual in [`archive/review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md`](../archive/review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md).
 
 #### Phase 1: Requirement & Architecture Specs (Months 1–2)
 - [ ] **SRS Document (Software Requirements Specification)**:

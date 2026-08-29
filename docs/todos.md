@@ -25,7 +25,7 @@
 
 ### Repository & Workspace Organization
 
-- [x] 🔴 Set up monorepo directory structure (`/backend`, `/android`, `/ai_service`, `/docs`, `/data`, `/assets`, `/admin_dashboard`, `/review-1`, `/simulator`)
+- [x] 🔴 Set up monorepo directory structure (`/backend`, `/android`, `/ai_service`, `/docs`, `/data`, `/assets`, `/admin_dashboard`, `/archive`, `/simulator`)
 - [x] 🔴 Create root `.gitignore` for Python, Kotlin/Android, environment files, node_modules, and data directories
 - [x] 🔴 Set up master project documentation suite ([`docs/architecture.md`](architecture.md), [`docs/Task.md`](Task.md), [`docs/todos.md`](todos.md), [`docs/proposal.md`](proposal.md), [`docs/UI_GUIDANCE.md`](UI_GUIDANCE.md))
 - [x] 🔴 Build interactive presentation showcase web dashboard ([`admin_dashboard/`](../admin_dashboard/))
@@ -46,7 +46,7 @@
 
 ### Development Environment Documentation
 
-- [x] 🟡 Authored complete Review 1 technical defense package in [`review-1/`](../review-1/)
+- [x] 🟡 Authored complete Review 1 technical defense package in [`archive/review-1/`](../archive/review-1/)
 - [x] 🟡 Write [`CONTRIBUTING.md`](../CONTRIBUTING.md) with setup instructions for each service
 - [x] 🟡 Write local development quickstart guide (integrated into `CONTRIBUTING.md`)
 - [ ] 🟢 Document API contract agreement process between backend, AI service, and Android
@@ -410,11 +410,11 @@
 
 ## 📚 Documentation & Academic Deliverables (Abhisikta)
 
-- [x] 🔴 **Comprehensive Project Review Report** ([`review-1/01_PROJECT_REVIEW_REPORT.md`](../review-1/01_PROJECT_REVIEW_REPORT.md) - 366 lines)
-- [x] 🔴 **8-Slide Presentation Deck** ([`review-1/02_PRESENTATION_SLIDES.md`](../review-1/02_PRESENTATION_SLIDES.md))
-- [x] 🔴 **Team Speaking Script** ([`review-1/03_TEAM_SPEAKING_SCRIPT.md`](../review-1/03_TEAM_SPEAKING_SCRIPT.md))
-- [x] 🔴 **Examiner Q&A Defense Guide** ([`review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md`](../review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md))
-- [x] 🔴 **Team Dry Run Rehearsal Guide** ([`review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md`](../review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md))
+- [x] 🔴 **Comprehensive Project Review Report** ([`archive/review-1/01_PROJECT_REVIEW_REPORT.md`](../archive/review-1/01_PROJECT_REVIEW_REPORT.md) - 366 lines)
+- [x] 🔴 **8-Slide Presentation Deck** ([`archive/review-1/02_PRESENTATION_SLIDES.md`](../archive/review-1/02_PRESENTATION_SLIDES.md))
+- [x] 🔴 **Team Speaking Script** ([`archive/review-1/03_TEAM_SPEAKING_SCRIPT.md`](../archive/review-1/03_TEAM_SPEAKING_SCRIPT.md))
+- [x] 🔴 **Examiner Q&A Defense Guide** ([`archive/review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md`](../archive/review-1/04_EXAMINER_QA_DEFENSE_GUIDE.md))
+- [x] 🔴 **Team Dry Run Rehearsal Guide** ([`archive/review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md`](../archive/review-1/05_TEAM_DRY_RUN_REHEARSAL_GUIDE.md))
 - [ ] 🟡 Formal SRS Document (Software Requirements Specification)
 - [ ] 🟡 Formal SDD Document (Software Design Document with UML Diagrams)
 - [ ] 🟡 Final Project Report & User Manual compilation

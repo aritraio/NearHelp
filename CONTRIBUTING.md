@@ -119,9 +119,9 @@ npm run dev       # Starts Vite dev server at http://localhost:5173
 
 ### 🟣 Documentation & QA (Abhisikta)
 **Owner**: Abhisikta  
-**Path**: `docs/` & `review-1/`
+**Path**: `docs/` & `archive/review-1/`
 
-* Review reports and academic deliverables live in `review-1/`.
+* Review reports and academic deliverables live in `archive/review-1/`.
 * Follow Markdown standards for SRS, SDD, and UML diagrams.
 
 ---
