@@ -31,6 +31,8 @@
 - [x] 🔴 Build interactive presentation showcase web dashboard ([`admin_dashboard/`](../admin_dashboard/))
 - [x] 🔴 Implement automated test suite with 192 unit & integration assertions ([`admin_dashboard/scripts/test_run.ts`](../admin_dashboard/scripts/test_run.ts))
 - [x] 🔴 Set up `docker-compose.yml` for local development (PostgreSQL 16 + PostGIS 3.4, Redis 7, FastAPI backend, AI service)
+- [x] 🔴 Launch and verify Docker containers (`nearhelp_postgis` and `nearhelp_redis` healthy)
+- [x] 🔴 Initialize FastAPI backend local development environment (`uvicorn` live on port `8000` with Swagger UI at `/docs`)
 - [x] 🟡 Create individual `Dockerfile` for backend service ([`backend/Dockerfile`](../backend/Dockerfile))
 - [x] 🟡 Create individual `Dockerfile` for AI service ([`ai_service/Dockerfile`](../ai_service/Dockerfile))
 - [x] 🟡 Set up GitHub Actions CI/CD pipeline ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml))

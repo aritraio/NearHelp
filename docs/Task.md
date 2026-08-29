@@ -76,7 +76,7 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 - [x] **Automated Test Harness**: Created `admin_dashboard/scripts/test_run.ts` with 192 automated assertions covering scenarios, metronome cadence, and spatial math.
 
 #### Phase 1: MVP Core (Months 1–2)
-- [ ] **FastAPI Engine Setup**: Scaffold FastAPI project structure in `ai_service/` and `backend/`, Docker containers, environment configurations, and CI/CD pipelines.
+- [x] **FastAPI Engine Setup**: Scaffolded FastAPI project structure in `ai_service/` and `backend/`, Docker multi-container stack, requirements, `.env.example`, and CI/CD pipeline.
 - [ ] **Module 4 — AI Emergency Detection**: Build prompt pipeline and classification engine for real-time SOS intent extraction (`POST /api/ai/classify`).
 - [ ] **Module 5 — AI Severity Prediction**: Implement LLM-based emergency triage scoring (Level 1–5 severity calculation).
 - [ ] **Module 6 — Smart SOS Engine**: Develop geospatial emergency routing logic and weighted responder ranking algorithm (`score = w1·(1/distance) + w2·(skill) + w3·(trust)`).
@@ -110,7 +110,8 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 - [ ] **Module 1 — Authentication & Identity**: Firebase Auth integration, JWT token handling, anonymous emergency mode.
 - [ ] **Module 2 — User Profile**: User profile CRUD endpoints, emergency contact schema, encrypted medical data.
 - [ ] **Module 3 — Skill Verification**: Upload flow, admin verification queue, trust score calculation backend.
-- [ ] **PostgreSQL + PostGIS Database**: Spatial database setup, spatial indexes (`ST_DWithin`), schema migrations, and indexing in Docker.
+- [x] **PostgreSQL + PostGIS Database Infrastructure**: Spatial database container setup (`postgis/postgis:16-3.4` + Redis 7), spatial extension initialized and verified.
+- [ ] **Database Schema & Migrations**: Design tables (`users`, `sos_events`, `responses`, `messages`), GeoAlchemy2 Point geometries, and Alembic migrations.
 - [ ] **Module 8 — Live Tracking Stream**: WebSocket server setup (FastAPI WebSockets) for live GPS streaming between victims and responders.
 - [ ] **Notification Gateway**: Firebase Cloud Messaging (FCM) push notification integration.
 
