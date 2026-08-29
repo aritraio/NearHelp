@@ -114,19 +114,36 @@ class User(Base):
         JSON,
         default=list,
         nullable=False,
-        doc="Encrypted medical conditions or descriptors",
+        doc="Encrypted medical conditions or descriptors (AES-256-GCM)",
     )
     known_allergies = Column(
         JSON,
         default=list,
         nullable=False,
-        doc="Encrypted known allergies list",
+        doc="Encrypted known allergies list (AES-256-GCM)",
+    )
+    has_pacemaker = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+        doc="Indicates whether user has a cardiac pacemaker fitted",
+    )
+    is_organ_donor = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+        doc="Indicates whether user is a registered organ donor",
+    )
+    medical_notes = Column(
+        String(2048),
+        nullable=True,
+        doc="Encrypted medical notes or physician directives (AES-256-GCM)",
     )
     emergency_contacts = Column(
         JSON,
         default=list,
         nullable=False,
-        doc="List of emergency contacts: [{name, phone, relationship}] (max 5)",
+        doc="List of emergency contacts: [{id, name, phone, relationship, is_primary}] (max 5)",
     )
     languages = Column(
         JSON,

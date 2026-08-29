@@ -6,6 +6,9 @@ import pytest
 from httpx import AsyncClient
 
 
+from app.core.config import settings
+
+
 @pytest.mark.asyncio
 async def test_health_and_root_endpoints(client: AsyncClient):
     """Test health check and root landing endpoints."""
@@ -40,7 +43,7 @@ async def test_register_user_success(client: AsyncClient):
     assert "access_token" in data
     assert "refresh_token" in data
     assert data["token_type"] == "bearer"
-    assert data["expires_in"] == 15 * 60  # 15-minute access token expiry
+    assert data["expires_in"] == settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     user = data["user"]
     assert user["email"] == unique_email

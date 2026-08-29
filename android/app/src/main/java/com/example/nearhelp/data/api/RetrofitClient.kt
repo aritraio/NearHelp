@@ -12,7 +12,8 @@ object RetrofitClient {
   private const val DEFAULT_BASE_URL = "http://10.0.2.2:8000/"
 
   private var baseUrl: String = DEFAULT_BASE_URL
-  private var apiService: AuthApiService? = null
+  private var authApiService: AuthApiService? = null
+  private var userApiService: UserApiService? = null
 
   private val loggingInterceptor by lazy {
     HttpLoggingInterceptor().apply {
@@ -29,24 +30,39 @@ object RetrofitClient {
       .build()
   }
 
-  fun getAuthApiService(customBaseUrl: String? = null): AuthApiService {
+  private fun getRetrofit(customBaseUrl: String? = null): Retrofit {
     val targetUrl = customBaseUrl ?: baseUrl
-    if (apiService == null || baseUrl != targetUrl) {
+    if (baseUrl != targetUrl) {
       baseUrl = targetUrl
-      val retrofit =
-        Retrofit.Builder()
-          .baseUrl(baseUrl)
-          .client(okHttpClient)
-          .addConverterFactory(GsonConverterFactory.create())
-          .build()
-
-      apiService = retrofit.create(AuthApiService::class.java)
+      authApiService = null
+      userApiService = null
     }
-    return apiService!!
+    return Retrofit.Builder()
+      .baseUrl(baseUrl)
+      .client(okHttpClient)
+      .addConverterFactory(GsonConverterFactory.create())
+      .build()
+  }
+
+  fun getAuthApiService(customBaseUrl: String? = null): AuthApiService {
+    val retrofit = getRetrofit(customBaseUrl)
+    if (authApiService == null) {
+      authApiService = retrofit.create(AuthApiService::class.java)
+    }
+    return authApiService!!
+  }
+
+  fun getUserApiService(customBaseUrl: String? = null): UserApiService {
+    val retrofit = getRetrofit(customBaseUrl)
+    if (userApiService == null) {
+      userApiService = retrofit.create(UserApiService::class.java)
+    }
+    return userApiService!!
   }
 
   fun setBaseUrl(newBaseUrl: String) {
     baseUrl = if (newBaseUrl.endsWith("/")) newBaseUrl else "$newBaseUrl/"
-    apiService = null
+    authApiService = null
+    userApiService = null
   }
 }

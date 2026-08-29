@@ -96,18 +96,18 @@
 #### Backend (Adil)
 
 - [x] 🔴 Design schema for User profile and Encrypted Medical ID (Blood Group, Allergies, Pacemaker, Kin Contacts)
-- [ ] 🔴 Implement CRUD endpoints for user profile (`GET /api/users/me`, `PUT /api/users/me`, `PATCH /api/users/me/medical`)
-- [ ] 🟡 Implement AES-256 encryption at rest for `medical_conditions` and `known_allergies`
-- [ ] 🟡 Implement emergency contacts sub-resource endpoints (max 5)
-- [ ] 🟡 Implement profile photo upload (Firebase Storage / S3)
-- [ ] 🟢 Implement language preferences storage (ISO 639-1 codes)
+- [x] 🔴 Implement CRUD endpoints for user profile (`GET /api/v1/users/me`, `PUT /api/v1/users/me`, `PATCH /api/v1/users/me/medical`)
+- [x] 🟡 Implement AES-256 encryption at rest for `medical_conditions`, `known_allergies`, and `medical_notes`
+- [x] 🟡 Implement emergency contacts sub-resource endpoints (max 5)
+- [x] 🟡 Implement profile photo upload (`POST /api/v1/users/me/photo`)
+- [x] 🟢 Implement language preferences storage (ISO 639-1 codes)
 
 #### UI Spec & Prototype (Dishari)
 
 - [x] 🟡 Build Encrypted Medical ID reveal component ([`RescueNavigationScreen.tsx`](../admin_dashboard/src/components/responder/RescueNavigationScreen.tsx))
 - [x] 🟡 Build Emergency Contacts quick call/SMS action triggers
-- [ ] 🟡 Build Native Profile Screen in Jetpack Compose (`android/`)
-- [ ] 🟡 Build Medical ID card view and edit sheets
+- [x] 🟡 Build Native Profile Screen in Jetpack Compose (`android/`)
+- [x] 🟡 Build Medical ID card view and edit sheets
 
 ---
 

@@ -13,6 +13,8 @@ import com.example.nearhelp.ui.auth.screens.PhoneOtpScreen
 import com.example.nearhelp.ui.auth.screens.SignUpScreen
 import com.example.nearhelp.ui.auth.screens.SplashScreen
 import com.example.nearhelp.ui.home.HomeScreen
+import com.example.nearhelp.ui.profile.ProfileScreen
+import com.example.nearhelp.ui.profile.ProfileViewModel
 
 @Composable
 fun MainNavigation(
@@ -85,7 +87,21 @@ fun MainNavigation(
               backStack.clear()
               backStack.add(LoginNavKey)
             },
+            onNavigateToProfile = {
+              backStack.add(ProfileNavKey)
+            },
             viewModel = authViewModel,
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
+
+        entry<ProfileNavKey> {
+          val profileViewModel: ProfileViewModel = viewModel {
+            ProfileViewModel(NearHelpApplication.instance.userRepository)
+          }
+          ProfileScreen(
+            onNavigateBack = { backStack.removeLastOrNull() },
+            viewModel = profileViewModel,
             modifier = Modifier.fillMaxSize(),
           )
         }

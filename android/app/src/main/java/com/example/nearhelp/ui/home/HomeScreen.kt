@@ -68,6 +68,7 @@ import com.example.nearhelp.ui.auth.AuthViewModel
 @Composable
 fun HomeScreen(
   onNavigateToLogin: () -> Unit,
+  onNavigateToProfile: () -> Unit = {},
   viewModel: AuthViewModel,
   modifier: Modifier = Modifier,
 ) {
@@ -129,28 +130,41 @@ fun HomeScreen(
         }
       }
 
-      IconButton(
-        onClick = {
-          viewModel.logout()
-          onNavigateToLogin()
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        if (!isAnonymous) {
+          IconButton(onClick = onNavigateToProfile) {
+            Icon(
+              imageVector = Icons.Default.Person,
+              contentDescription = "Profile & Medical ID",
+              tint = AiCyan,
+            )
+          }
         }
-      ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-          contentDescription = "Sign Out",
-          tint = TextMediumContrast,
-        )
+        IconButton(
+          onClick = {
+            viewModel.logout()
+            onNavigateToLogin()
+          }
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+            contentDescription = "Sign Out",
+            tint = TextMediumContrast,
+          )
+        }
       }
     }
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    // User Profile Status Card
+    // User Profile Status Card (Clickable to view Profile & Medical ID)
     Card(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+        .fillMaxWidth()
+        .clickable(enabled = !isAnonymous) { onNavigateToProfile() },
       colors = CardDefaults.cardColors(containerColor = CardSurface),
       shape = RoundedCornerShape(16.dp),
-      border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder),
+      border = androidx.compose.foundation.BorderStroke(1.dp, if (!isAnonymous) AiCyan.copy(alpha = 0.4f) else SurfaceBorder),
     ) {
       Row(
         modifier = Modifier.padding(16.dp),

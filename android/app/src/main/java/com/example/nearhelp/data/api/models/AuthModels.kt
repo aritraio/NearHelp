@@ -3,12 +3,6 @@ package com.example.nearhelp.data.api.models
 import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class EmergencyContact(
-  @SerializedName("name") val name: String,
-  @SerializedName("phone") val phone: String,
-  @SerializedName("relationship") val relationship: String,
-)
 
 @Serializable
 data class SkillItem(
@@ -31,6 +25,11 @@ data class UserResponse(
   @SerializedName("auth_provider") val authProvider: String = "email",
   @SerializedName("is_anonymous") val isAnonymous: Boolean = false,
   @SerializedName("is_active") val isActive: Boolean = true,
+  @SerializedName("has_pacemaker") val hasPacemaker: Boolean = false,
+  @SerializedName("is_organ_donor") val isOrganDonor: Boolean = false,
+  @SerializedName("medical_notes") val medicalNotes: String? = null,
+  @SerializedName("medical_conditions") val medicalConditions: List<String> = emptyList(),
+  @SerializedName("known_allergies") val knownAllergies: List<String> = emptyList(),
   @SerializedName("trust_score") val trustScore: Double = 50.0,
   @SerializedName("badges") val badges: List<String> = emptyList(),
   @SerializedName("emergency_contacts") val emergencyContacts: List<EmergencyContact> = emptyList(),

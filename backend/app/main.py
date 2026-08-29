@@ -63,6 +63,14 @@ app.add_middleware(
     ttl_seconds=settings.IDEMPOTENCY_EXPIRE_SECONDS,
 )
 
+import os
+from fastapi.staticfiles import StaticFiles
+
+# Mount static uploads directory for avatar photos
+uploads_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../uploads"))
+os.makedirs(uploads_path, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
+
 # Route Mounts
 # Versioned API routes: /api/v1/auth, /api/v1/users
 app.include_router(api_router, prefix=settings.API_V1_STR)
