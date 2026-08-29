@@ -66,17 +66,17 @@
 
 #### Backend (Adil)
 
-- [ ] 🔴 Integrate Firebase Auth SDK with FastAPI
-- [ ] 🔴 Implement JWT token issuance and validation middleware
-  - [ ] Access token generation (15-min expiry)
-  - [ ] Refresh token handling (7-day expiry)
-- [ ] 🔴 Implement email/password registration and login endpoints
-- [ ] 🟡 Implement Google OAuth 2.0 sign-in flow via Firebase
-- [ ] 🟡 Implement phone OTP verification via Firebase Phone Auth
+- [x] 🔴 Integrate Firebase Auth SDK with FastAPI ([`backend/app/services/firebase_service.py`](../backend/app/services/firebase_service.py))
+- [x] 🔴 Implement JWT token issuance and validation middleware ([`backend/app/core/security.py`](../backend/app/core/security.py), [`backend/app/core/dependencies.py`](../backend/app/core/dependencies.py))
+  - [x] Access token generation (15-min expiry)
+  - [x] Refresh token handling (7-day expiry)
+- [x] 🔴 Implement email/password registration and login endpoints ([`backend/app/api/auth.py`](../backend/app/api/auth.py))
+- [x] 🟡 Implement Google OAuth 2.0 sign-in flow via Firebase ([`POST /api/v1/auth/google`](../backend/app/api/auth.py))
+- [x] 🟡 Implement phone OTP verification via Firebase Phone Auth ([`POST /api/v1/auth/phone/verify`](../backend/app/api/auth.py))
 - [x] 🔴 Prototype Anonymous Emergency Mode (temporary disposable session, no PII stored)
-- [ ] 🟡 Implement device registration endpoint (store FCM token per user per device)
-- [ ] 🟡 Write idempotency key middleware for registration/login retries
-- [ ] 🟢 Add rate limiting on auth endpoints
+- [x] 🟡 Implement device registration endpoint (store FCM token per user per device) ([`POST /api/v1/auth/device`](../backend/app/api/auth.py))
+- [x] 🟡 Write idempotency key middleware for registration/login retries ([`backend/app/core/middleware.py`](../backend/app/core/middleware.py))
+- [x] 🟢 Add rate limiting on auth endpoints ([`RateLimitMiddleware`](../backend/app/core/middleware.py))
 
 #### Android UI (Dishari)
 

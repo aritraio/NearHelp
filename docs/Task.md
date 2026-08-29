@@ -107,7 +107,7 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 - [x] **Clinical Handover Reporting**: Dynamic PDF/Markdown clinical handover report generator with SHA-256 digital signature.
 
 #### Phase 1: MVP Core (Months 1–2)
-- [ ] **Module 1 — Authentication & Identity**: Firebase Auth integration, JWT token handling, anonymous emergency mode.
+- [x] **Module 1 — Authentication & Identity**: Firebase Auth integration, JWT token handling (15-min access + 7-day refresh), OAuth, Phone OTP, anonymous emergency mode, device registration, and idempotency/rate-limit middleware.
 - [ ] **Module 2 — User Profile**: User profile CRUD endpoints, emergency contact schema, encrypted medical data.
 - [ ] **Module 3 — Skill Verification**: Upload flow, admin verification queue, trust score calculation backend.
 - [x] **PostgreSQL + PostGIS Database Infrastructure**: Spatial database container setup (`postgis/postgis:16-3.4` + Redis 7), spatial extension initialized and verified.
