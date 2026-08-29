@@ -140,7 +140,7 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 - [x] **Screen 6 — Dynamic Community Geo-Map**: Interactive map with pulsing victim beacon, responder pins, hospital beds, and AED locators.
 
 #### Phase 1: MVP Screens (Months 1–2)
-- [ ] **Module 1 UI — Auth & Onboarding**: Splash screen, Login screen, Sign-up form, and Phone OTP layout in Jetpack Compose (`android/`).
+- [x] **Module 1 UI — Auth & Onboarding**: Splash screen, Login screen, Sign-up form, and Phone OTP layout in Jetpack Compose (`android/`).
 - [ ] **Module 2 UI — Profile & Medical ID**: User details layout, emergency contacts, blood group, and allergy list view.
 - [ ] **Module 6 UI — Main SOS Trigger Screen**: Big SOS trigger button, emergency category selector (Medical, Fire, Crime, Accident), text/voice input area.
 - [ ] **Module 7 UI — Live Map Screen**: Google Maps SDK view integration with markers for user, responders, and nearby hospitals.

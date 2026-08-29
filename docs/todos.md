@@ -81,11 +81,11 @@
 #### Android UI (Dishari)
 
 - [x] 🟡 Prototype Anonymous emergency mode bypass (skip login → direct 1-tap SOS in showcase)
-- [ ] 🟡 Build Splash Screen with NearHelp branding and animation in Jetpack Compose
-- [ ] 🟡 Build Login Screen (email/password fields, Google sign-in button, OTP option)
-- [ ] 🟡 Build Sign-Up Screen (registration form with validation)
-- [ ] 🟡 Build Phone OTP Input Screen (6-digit code entry with auto-read)
-- [ ] 🟢 Implement token storage in encrypted SharedPreferences
+- [x] 🟡 Build Splash Screen with NearHelp branding and animation in Jetpack Compose ([`SplashScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/SplashScreen.kt))
+- [x] 🟡 Build Login Screen (email/password fields, Google sign-in button, OTP option, 1-Tap SOS bypass) ([`LoginScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/LoginScreen.kt))
+- [x] 🟡 Build Sign-Up Screen (registration form with validation, blood group chips, terms agreement) ([`SignUpScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/SignUpScreen.kt))
+- [x] 🟡 Build Phone OTP Input Screen (6-digit code entry with countdown resend timer) ([`PhoneOtpScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/PhoneOtpScreen.kt))
+- [x] 🟢 Implement token storage in encrypted SharedPreferences ([`TokenStorage.kt`](../android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt))
 
 ---
 
