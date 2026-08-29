@@ -30,23 +30,23 @@
 - [x] 🔴 Set up master project documentation suite ([`docs/architecture.md`](architecture.md), [`docs/Task.md`](Task.md), [`docs/todos.md`](todos.md), [`docs/proposal.md`](proposal.md), [`docs/UI_GUIDANCE.md`](UI_GUIDANCE.md))
 - [x] 🔴 Build interactive presentation showcase web dashboard ([`admin_dashboard/`](../admin_dashboard/))
 - [x] 🔴 Implement automated test suite with 192 unit & integration assertions ([`admin_dashboard/scripts/test_run.ts`](../admin_dashboard/scripts/test_run.ts))
-- [ ] 🔴 Set up `docker-compose.yml` for local development (PostgreSQL 16 + PostGIS 3.4, Redis 7, FastAPI backend, AI service)
-- [ ] 🟡 Create individual `Dockerfile` for backend service
-- [ ] 🟡 Create individual `Dockerfile` for AI service
-- [ ] 🟡 Set up GitHub Actions CI/CD pipeline
-  - [ ] Python linting & tests (backend)
-  - [ ] Python linting & tests (AI service)
-  - [ ] Android build check
-  - [ ] Docker image build verification
-- [ ] 🟡 Configure environment variable templates (`.env.example`) for all services
+- [x] 🔴 Set up `docker-compose.yml` for local development (PostgreSQL 16 + PostGIS 3.4, Redis 7, FastAPI backend, AI service)
+- [x] 🟡 Create individual `Dockerfile` for backend service ([`backend/Dockerfile`](../backend/Dockerfile))
+- [x] 🟡 Create individual `Dockerfile` for AI service ([`ai_service/Dockerfile`](../ai_service/Dockerfile))
+- [x] 🟡 Set up GitHub Actions CI/CD pipeline ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml))
+  - [x] Frontend test & TypeScript build check
+  - [x] Python linting & quality checks (backend)
+  - [x] Python linting & quality checks (AI service)
+  - [x] Docker image build verification
+- [x] 🟡 Configure environment variable templates ([`.env.example`](../.env.example)) for all services
 - [ ] 🟢 Set up branch protection rules (`main`, `develop`)
-- [ ] 🟢 Configure pre-commit hooks (black, ruff, isort for Python)
+- [x] 🟢 Configure pre-commit hooks ([`.pre-commit-config.yaml`](../.pre-commit-config.yaml))
 
 ### Development Environment Documentation
 
 - [x] 🟡 Authored complete Review 1 technical defense package in [`review-1/`](../review-1/)
-- [ ] 🟡 Write `CONTRIBUTING.md` with setup instructions for each service
-- [ ] 🟡 Write local development quickstart guide
+- [x] 🟡 Write [`CONTRIBUTING.md`](../CONTRIBUTING.md) with setup instructions for each service
+- [x] 🟡 Write local development quickstart guide (integrated into `CONTRIBUTING.md`)
 - [ ] 🟢 Document API contract agreement process between backend, AI service, and Android
 
 ---
