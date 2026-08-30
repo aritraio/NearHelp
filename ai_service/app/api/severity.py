@@ -1,10 +1,10 @@
 """NearHelp AI — AI Severity Prediction API Endpoints."""
 
 import logging
-from fastapi import APIRouter, HTTPException, status
 
 from app.classifiers.severity_predictor import severity_predictor
 from app.schemas.severity import SeverityRequest, SeverityResponse
+from fastapi import APIRouter, HTTPException, status
 
 logger = logging.getLogger(__name__)
 
@@ -27,5 +27,5 @@ async def predict_severity(request: SeverityRequest) -> SeverityResponse:
         logger.error("Severity prediction error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Severity prediction processing failed: {str(e)}",
+            detail=f"Severity prediction processing failed: {e!s}",
         ) from e

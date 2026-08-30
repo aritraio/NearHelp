@@ -4,7 +4,6 @@ import base64
 import json
 import logging
 import time
-from typing import Any
 
 from app.core.config import settings
 
@@ -63,10 +62,8 @@ class VisionService:
 
                 if response and response.text:
                     clean_text = response.text.strip()
-                    if clean_text.startswith("```json"):
-                        clean_text = clean_text[7:]
-                    if clean_text.endswith("```"):
-                        clean_text = clean_text[:-3]
+                    clean_text = clean_text.removeprefix("```json")
+                    clean_text = clean_text.removesuffix("```")
 
                     data = json.loads(clean_text)
                     latency = (time.perf_counter() - start_time) * 1000.0

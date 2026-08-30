@@ -1,6 +1,7 @@
 """NearHelp AI — Backend AI Pydantic Schemas."""
 
 from typing import Any
+
 from pydantic import BaseModel, Field
 
 

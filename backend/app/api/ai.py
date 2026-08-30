@@ -1,6 +1,7 @@
 """NearHelp AI — AI Emergency Classification & Triage Proxy Endpoints."""
 
 import logging
+
 from fastapi import APIRouter, HTTPException, status
 
 from app.schemas.ai import (
@@ -33,7 +34,7 @@ async def classify_emergency(request: ClassificationRequest) -> ClassificationRe
         logger.error("AI classification endpoint error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Emergency classification failed: {str(e)}",
+            detail=f"Emergency classification failed: {e!s}",
         ) from e
 
 
@@ -53,7 +54,7 @@ async def predict_severity(request: SeverityRequest) -> SeverityResponse:
         logger.error("AI severity prediction endpoint error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Emergency severity prediction failed: {str(e)}",
+            detail=f"Emergency severity prediction failed: {e!s}",
         ) from e
 
 
@@ -72,5 +73,5 @@ async def get_taxonomy() -> TaxonomyResponse:
         logger.error("Failed to retrieve emergency taxonomy: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Taxonomy retrieval failed: {str(e)}",
+            detail=f"Taxonomy retrieval failed: {e!s}",
         ) from e

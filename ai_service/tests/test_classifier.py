@@ -1,13 +1,11 @@
 """NearHelp AI — AI Emergency Detection & Multimodal Classification Test Suite."""
 
 import base64
-import pytest
-from httpx import ASGITransport, AsyncClient
 
-from app.classifiers.crisis_types import CLINICAL_CONDITIONS_MATRIX, CRISIS_TYPES_TAXONOMY
+import pytest
 from app.classifiers.emergency_classifier import emergency_classifier
-from app.main import app
 from app.schemas.classify import ClassificationRequest
+from httpx import AsyncClient
 
 # ==============================================================================
 # 1. 8 CURATED CLINICAL CONDITIONS ACCURACY TESTS

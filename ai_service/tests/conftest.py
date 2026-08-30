@@ -1,10 +1,9 @@
 """NearHelp AI — AI Service Pytest Fixtures."""
 
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-
 from app.classifiers.embedding_service import embedding_service
 from app.main import app
+from httpx import ASGITransport, AsyncClient
 
 
 @pytest_asyncio.fixture(autouse=True)

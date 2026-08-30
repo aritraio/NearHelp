@@ -4,7 +4,6 @@ import hashlib
 import logging
 import math
 import re
-from typing import Any
 
 from app.classifiers.crisis_types import ALL_EMERGENCY_PROFILES, EmergencyProfile
 from app.core.config import settings
@@ -171,7 +170,7 @@ class EmbeddingService:
                     content=text,
                     task_type="classification",
                 )
-                if "embedding" in result and result["embedding"]:
+                if result.get("embedding"):
                     emb = result["embedding"]
                     norm = math.sqrt(sum(x * x for x in emb))
                     if norm > 0:

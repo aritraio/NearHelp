@@ -3,12 +3,7 @@
 import json
 import logging
 import time
-from typing import Any
 
-from app.classifiers.crisis_types import (
-    ALL_EMERGENCY_PROFILES,
-    CLINICAL_CONDITIONS_MATRIX,
-)
 from app.core.config import settings
 from app.schemas.severity import (
     SeverityRequest,
@@ -86,10 +81,8 @@ class SeverityPredictor:
 
         if response and response.text:
             raw = response.text.strip()
-            if raw.startswith("```json"):
-                raw = raw[7:]
-            if raw.endswith("```"):
-                raw = raw[:-3]
+            raw = raw.removeprefix("```json")
+            raw = raw.removesuffix("```")
 
             data = json.loads(raw.strip())
             total_latency_ms = (time.perf_counter() - start_time) * 1000.0
@@ -534,7 +527,7 @@ class SeverityPredictor:
                 + 0.10 * environmental_hazard
             )
 
-        final_score = int(round(max(0.0, min(100.0, weighted_score))))
+        final_score = round(max(0.0, min(100.0, weighted_score)))
 
         # ----------------------------------------------------------------------
         # SEVERITY-TO-ACTION TRIAGE LEVEL MAPPING

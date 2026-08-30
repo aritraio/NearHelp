@@ -1,11 +1,9 @@
 """NearHelp AI — AI Severity Prediction & Clinical Triage Test Suite."""
 
 import pytest
-from httpx import AsyncClient
-
 from app.classifiers.severity_predictor import severity_predictor
 from app.schemas.severity import SeverityRequest
-
+from httpx import AsyncClient
 
 # ==============================================================================
 # 1. LEVEL 5: CRITICAL LIFE THREAT SCENARIOS (SCORE 80–100, RADIUS 3–5 KM)

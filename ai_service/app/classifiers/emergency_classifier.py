@@ -3,7 +3,6 @@
 import logging
 import time
 
-from app.classifiers.crisis_types import ALL_EMERGENCY_PROFILES
 from app.classifiers.embedding_service import embedding_service
 from app.classifiers.speech_service import speech_service
 from app.classifiers.vision_service import vision_service

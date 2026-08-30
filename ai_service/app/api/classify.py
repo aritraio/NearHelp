@@ -1,7 +1,6 @@
 """NearHelp AI — Emergency Classification & Multimodal Triage API Endpoints."""
 
 import logging
-from fastapi import APIRouter, HTTPException, status
 
 from app.classifiers.crisis_types import (
     CLINICAL_CONDITIONS_MATRIX,
@@ -21,6 +20,7 @@ from app.schemas.classify import (
     VisionRequest,
     VisionResponse,
 )
+from fastapi import APIRouter, HTTPException, status
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ async def classify_emergency(request: ClassificationRequest) -> ClassificationRe
         logger.error("Emergency classification error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Classification processing failed: {str(e)}",
+            detail=f"Classification processing failed: {e!s}",
         ) from e
 
 
@@ -116,7 +116,7 @@ async def transcribe_audio(request: TranscribeRequest) -> TranscribeResponse:
         logger.error("Audio transcription error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Speech transcription failed: {str(e)}",
+            detail=f"Speech transcription failed: {e!s}",
         ) from e
 
 
@@ -147,5 +147,5 @@ async def analyze_scene(request: VisionRequest) -> VisionResponse:
         logger.error("Vision scene analysis error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Vision analysis failed: {str(e)}",
+            detail=f"Vision analysis failed: {e!s}",
         ) from e
