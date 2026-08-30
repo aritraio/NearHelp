@@ -29,8 +29,13 @@ async def _create_user(client: AsyncClient, is_superuser: bool = False) -> tuple
 
     if is_superuser:
         # Update user to superuser directly
-        from app.db.session import AsyncSessionLocal
-        async with AsyncSessionLocal() as session:
+        try:
+            from tests.conftest import TestingSessionLocal
+            session_factory = TestingSessionLocal
+        except ImportError:
+            from app.db.session import AsyncSessionLocal
+            session_factory = AsyncSessionLocal
+        async with session_factory() as session:
             stmt = select(User).where(User.id == uuid.UUID(user_info["id"]))
             db_res = await session.execute(stmt)
             db_user = db_res.scalars().first()

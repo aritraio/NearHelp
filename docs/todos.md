@@ -167,16 +167,16 @@
 
 - [x] 🔴 Prototype PostGIS `ST_DWithin` spatial query logic with expanding radial waves (500m → 1.5km → 3km)
 - [x] 🔴 Prototype SOS status lifecycle (`IDLE` → `COUNTDOWN` → `SOS_TRIGGERED` → `AI_TRIAGING` → `RESPONDER_ACCEPTED` → `HANDOVER_108` → `RESOLVED`)
-- [ ] 🔴 Design and apply `sos_events` database schema with PostGIS POINT column in PostgreSQL
-- [ ] 🔴 Implement `POST /api/sos/create` endpoint (idempotent, HTTPS)
-- [ ] 🔴 Create spatial index on user location column (`CREATE INDEX ... USING GIST`)
-- [ ] 🟡 Implement `responses` table and `POST /api/sos/{id}/respond` endpoint
+- [x] 🔴 Design and apply `sos_events` database schema with PostGIS POINT column in PostgreSQL
+- [x] 🔴 Implement `POST /api/sos/create` endpoint (idempotent, HTTPS)
+- [x] 🔴 Create spatial index on user location column (`CREATE INDEX ... USING GIST`)
+- [x] 🟡 Implement `responses` table and `POST /api/sos/{id}/respond` endpoint
 
 #### Responder Ranking (Aritra)
 
 - [x] 🔴 Define weighted scoring formula: `score = w1·(1/distance) + w2·(skill_match) + w3·(reliability_score)`
 - [x] 🟡 Prototype rank ordering for CPR-certified responders vs. distance
-- [ ] 🟡 Tune weights against production test scenarios in `ai_service/`
+- [x] 🟡 Tune weights against production test scenarios in `ai_service/`
 
 #### 3-Layer Escalation (Aritra + Adil)
 

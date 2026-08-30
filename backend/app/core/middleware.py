@@ -20,24 +20,28 @@ _in_memory_idempotency: dict[str, tuple[float, int, bytes, dict[str, str]]] = {}
 _in_memory_rate_limit: dict[str, list] = {}
 
 _redis_client: aioredis.Redis | None = None
-
+_redis_checked: bool = False
 
 async def get_redis_client() -> aioredis.Redis | None:
     """Acquire or initialize asynchronous Redis client."""
-    global _redis_client
+    global _redis_client, _redis_checked
     if _redis_client is not None:
         return _redis_client
+    if _redis_checked:
+        return None
     try:
         client = aioredis.from_url(
             settings.REDIS_URL,
             encoding="utf-8",
             decode_responses=False,
-            socket_timeout=1.5,
+            socket_timeout=0.2,
         )
         await client.ping()
         _redis_client = client
+        _redis_checked = True
         return _redis_client
     except Exception as e:
+        _redis_checked = True
         logger.debug(f"Redis connection unavailable, utilizing fast in-memory store: {e}")
         return None
 

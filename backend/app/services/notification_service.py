@@ -92,3 +92,64 @@ class NotificationService:
             "reason": reason or "",
         }
         return await cls.send_notification(user, title, body, data)
+
+    @classmethod
+    async def send_emergency_dispatch_alert(
+        cls,
+        user_id: Any,
+        sos_event_id: Any,
+        crisis_type: str,
+        severity: str,
+        distance_str: str,
+        eta_str: str,
+        required_skills: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """Dispatch high-priority wake alert to candidate volunteer/responder."""
+        title = f"EMERGENCY ALERT: {crisis_type.upper()} ({severity.upper()}) 🚨"
+        body = f"Nearby emergency ({distance_str} away, ETA {eta_str}). Your immediate assistance is requested."
+        payload = {
+            "user_id": str(user_id),
+            "title": title,
+            "body": body,
+            "data": {
+                "sos_event_id": str(sos_event_id),
+                "crisis_type": crisis_type,
+                "severity": severity,
+                "distance": distance_str,
+                "eta": eta_str,
+                "required_skills": required_skills or [],
+            },
+            "delivered": True,
+        }
+        DISPATCHED_NOTIFICATIONS.append(payload)
+        logger.info(f"Dispatched SOS Alert to responder {user_id} for event {sos_event_id}")
+        return payload
+
+    @classmethod
+    async def send_responder_arrival_notification(
+        cls,
+        victim_id: Any,
+        sos_event_id: Any,
+        responder_name: str,
+        eta_str: str,
+    ) -> dict[str, Any]:
+        """Notify victim that a volunteer responder has accepted the dispatch."""
+        title = "Help is on the Way! 🚑"
+        body = f"{responder_name} has accepted your emergency (ETA {eta_str}). Stay calm."
+        payload = {
+            "user_id": str(victim_id),
+            "title": title,
+            "body": body,
+            "data": {
+                "sos_event_id": str(sos_event_id),
+                "responder_name": responder_name,
+                "eta": eta_str,
+            },
+            "delivered": True,
+        }
+        DISPATCHED_NOTIFICATIONS.append(payload)
+        logger.info(f"Dispatched arrival notice to victim {victim_id} for event {sos_event_id}")
+        return payload
+
+
+notification_service = NotificationService()

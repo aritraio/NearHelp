@@ -63,15 +63,17 @@ async def init_db() -> None:
             # Create all registered tables
             await conn.run_sync(Base.metadata.create_all)
             
-            # Ensure newly added columns exist in users table
+            # Ensure newly added columns and spatial indexes exist in PostgreSQL
             if "postgresql" in settings.DATABASE_URL:
                 try:
                     await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS has_pacemaker BOOLEAN DEFAULT FALSE;"))
                     await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_organ_donor BOOLEAN DEFAULT FALSE;"))
                     await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS medical_notes VARCHAR(2048);"))
+                    await conn.execute(text("CREATE INDEX IF NOT EXISTS idx_users_location ON users USING GIST (location);"))
+                    await conn.execute(text("CREATE INDEX IF NOT EXISTS idx_sos_events_location ON sos_events USING GIST (location);"))
                 except Exception as ex:
-                    logger.debug(f"Column migration check: {ex}")
+                    logger.debug(f"Column/Index migration check: {ex}")
 
-            logger.info("Database tables initialized successfully.")
+            logger.info("Database tables and spatial indexes initialized successfully.")
     except Exception as e:
         logger.error(f"Error during database initialization: {e}")
