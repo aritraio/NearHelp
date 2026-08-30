@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api import api_router
 from app.api.admin import router as admin_compat_router
+from app.api.ai import router as ai_compat_router
 from app.api.auth import router as auth_compat_router
 from app.api.users import router as users_compat_router
 from app.core.config import settings
@@ -74,13 +75,14 @@ os.makedirs(os.path.join(uploads_path, "certificates"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
 
 # Route Mounts
-# Versioned API routes: /api/v1/auth, /api/v1/users, /api/v1/admin
+# Versioned API routes: /api/v1/auth, /api/v1/users, /api/v1/admin, /api/v1/ai
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-# Direct compatibility aliases: /api/auth, /api/users, /api/admin
+# Direct compatibility aliases: /api/auth, /api/users, /api/admin, /api/ai
 app.include_router(auth_compat_router, prefix="/api/auth")
 app.include_router(users_compat_router, prefix="/api/users")
 app.include_router(admin_compat_router, prefix="/api/admin")
+app.include_router(ai_compat_router, prefix="/api/ai")
 
 
 @app.get("/health", tags=["Health"])

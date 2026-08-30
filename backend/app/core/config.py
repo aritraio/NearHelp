@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     RATE_LIMIT_DEFAULT_PER_MINUTE: int = 100
     IDEMPOTENCY_EXPIRE_SECONDS: int = 86400  # 24 hours
 
+    # AI Microservice URL
+    AI_SERVICE_URL: str = "http://localhost:8001"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

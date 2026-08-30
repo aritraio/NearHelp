@@ -1,5 +1,12 @@
 """NearHelp AI — Schemas Registry."""
 
+from app.schemas.ai import (
+    ClassificationRequest,
+    ClassificationResponse,
+    ClinicalConditionItem,
+    CrisisTypeItem,
+    TaxonomyResponse,
+)
 from app.schemas.auth import (
     AnonymousAuthRequest,
     GoogleAuthRequest,
@@ -35,6 +42,10 @@ from app.schemas.user import (
 
 __all__ = [
     "AnonymousAuthRequest",
+    "ClassificationRequest",
+    "ClassificationResponse",
+    "ClinicalConditionItem",
+    "CrisisTypeItem",
     "DeviceRegisterRequest",
     "EmergencyContactCreateSchema",
     "EmergencyContactSchema",
@@ -55,6 +66,7 @@ __all__ = [
     "SkillVerificationListResponse",
     "SkillVerificationResponse",
     "SkillVerificationReviewRequest",
+    "TaxonomyResponse",
     "TokenRefreshRequest",
     "TokenResponse",
     "TrustScoreUpdateResponse",

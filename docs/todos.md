@@ -135,11 +135,11 @@
 - [x] 🔴 Define crisis type taxonomy (Medical, Fire, Crime, Road Accident, Gas Leak)
 - [x] 🔴 Create 8 curated clinical conditions matrix with symptom descriptors
 - [x] 🔴 Prototype text & voice transcript classification schema (`emergency_type`, `sub_type`, `priority`, `confidence`)
-- [ ] 🔴 Implement embedding generation & cosine similarity classification pipeline in `ai_service/`
-- [ ] 🟡 Integrate Google Speech-to-Text API for voice input → text pipeline
-- [ ] 🟡 Integrate Gemini 2.5 Vision for photo input → scene description → text pipeline
+- [x] 🔴 Implement embedding generation & cosine similarity classification pipeline in `ai_service/`
+- [x] 🟡 Integrate Google Speech-to-Text API for voice input → text pipeline
+- [x] 🟡 Integrate Gemini 2.5 Vision for photo input → scene description → text pipeline
 - [x] 🟡 Write automated test suite for classification accuracy against test scenarios ([`test_run.ts`](../admin_dashboard/scripts/test_run.ts))
-- [ ] 🟡 Define and publish API contract for this module (`POST /api/ai/classify`)
+- [x] 🟡 Define and publish API contract for this module (`POST /api/ai/classify`)
 
 ---
 
