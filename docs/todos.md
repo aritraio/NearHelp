@@ -155,7 +155,7 @@
   - [x] Level 1–2 (0–19) → Low Priority / Non-acute
 - [x] 🟡 Implement clinical confidence score (`98.4%`) and reasoning output
 - [x] 🟡 Validate severity prediction test suite in automated test runner
-- [ ] 🔴 Implement live LLM severity prediction endpoint (`POST /api/ai/severity`)
+- [x] 🔴 Implement live LLM severity prediction endpoint (`POST /api/ai/severity`)
 
 ---
 

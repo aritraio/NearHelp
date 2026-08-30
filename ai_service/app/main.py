@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.classify import router as classify_router
+from app.api.severity import router as severity_router
 from app.classifiers.embedding_service import embedding_service
 from app.core.config import settings
 
@@ -47,6 +48,8 @@ app.add_middleware(
 # Canonical and versioned router mounts
 app.include_router(classify_router, prefix="/api/v1")
 app.include_router(classify_router)
+app.include_router(severity_router, prefix="/api/v1")
+app.include_router(severity_router)
 
 
 @app.get("/health", tags=["Health"])

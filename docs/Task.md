@@ -77,8 +77,8 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 
 #### Phase 1: MVP Core (Months 1–2)
 - [x] **FastAPI Engine Setup**: Scaffolded FastAPI project structure in `ai_service/` and `backend/`, Docker multi-container stack, requirements, `.env.example`, and CI/CD pipeline.
-- [ ] **Module 4 — AI Emergency Detection**: Build prompt pipeline and classification engine for real-time SOS intent extraction (`POST /api/ai/classify`).
-- [ ] **Module 5 — AI Severity Prediction**: Implement LLM-based emergency triage scoring (Level 1–5 severity calculation).
+- [x] **Module 4 — AI Emergency Detection**: Build prompt pipeline and classification engine for real-time SOS intent extraction (`POST /api/ai/classify`).
+- [x] **Module 5 — AI Severity Prediction**: Implement LLM-based emergency triage scoring (Level 1–5 severity calculation).
 - [ ] **Module 6 — Smart SOS Engine**: Develop geospatial emergency routing logic and weighted responder ranking algorithm (`score = w1·(1/distance) + w2·(skill) + w3·(trust)`).
 - [ ] **Module 10 & 11 — LangGraph Agent & RAG Pipeline**: Set up vector store (ChromaDB/pgvector), chunking pipeline, and retrieval agent for emergency guidance.
 - [ ] **API Contract Definition**: Define and publish clear OpenAPI/JSON specs for Dishari (Android UI) and Adil (Backend).

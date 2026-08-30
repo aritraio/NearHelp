@@ -6,6 +6,8 @@ from fastapi import APIRouter, HTTPException, status
 from app.schemas.ai import (
     ClassificationRequest,
     ClassificationResponse,
+    SeverityRequest,
+    SeverityResponse,
     TaxonomyResponse,
 )
 from app.services.ai_client import ai_client
@@ -32,6 +34,26 @@ async def classify_emergency(request: ClassificationRequest) -> ClassificationRe
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Emergency classification failed: {str(e)}",
+        ) from e
+
+
+@router.post(
+    "/severity",
+    response_model=SeverityResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Predict Emergency Severity & Clinical Triage Score",
+    description="Proxies emergency severity scoring and Level 1-5 clinical triage evaluation to AI microservice with instant local fallback.",
+)
+async def predict_severity(request: SeverityRequest) -> SeverityResponse:
+    """Predict emergency severity score (0-100), Level 1-5 triage, radius scaling, and 108 auto-dial flags."""
+    try:
+        response = await ai_client.predict_severity(request)
+        return response
+    except Exception as e:
+        logger.error("AI severity prediction endpoint error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Emergency severity prediction failed: {str(e)}",
         ) from e
 
 
