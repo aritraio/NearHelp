@@ -17,6 +17,8 @@ import com.example.nearhelp.ui.map.CommunityGeoMapScreen
 import com.example.nearhelp.ui.map.CommunityGeoMapViewModel
 import com.example.nearhelp.ui.profile.ProfileScreen
 import com.example.nearhelp.ui.profile.ProfileViewModel
+import com.example.nearhelp.ui.tracking.LiveTrackingScreen
+import com.example.nearhelp.ui.tracking.LiveTrackingViewModel
 
 @Composable
 fun MainNavigation(
@@ -95,6 +97,9 @@ fun MainNavigation(
             onNavigateToMap = {
               backStack.add(CommunityMapNavKey)
             },
+            onNavigateToTracking = {
+              backStack.add(LiveTrackingNavKey())
+            },
             viewModel = authViewModel,
             modifier = Modifier.fillMaxSize(),
           )
@@ -115,7 +120,21 @@ fun MainNavigation(
           val mapViewModel: CommunityGeoMapViewModel = viewModel()
           CommunityGeoMapScreen(
             onNavigateBack = { backStack.removeLastOrNull() },
+            onNavigateToTracking = {
+              backStack.add(LiveTrackingNavKey())
+            },
             viewModel = mapViewModel,
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
+
+        entry<LiveTrackingNavKey> {
+          val trackingViewModel: LiveTrackingViewModel = viewModel()
+          val storedToken = NearHelpApplication.instance.authRepository.getStoredAccessToken()
+          LiveTrackingScreen(
+            onNavigateBack = { backStack.removeLastOrNull() },
+            viewModel = trackingViewModel,
+            token = storedToken,
             modifier = Modifier.fillMaxSize(),
           )
         }

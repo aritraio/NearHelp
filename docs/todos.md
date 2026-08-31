@@ -232,7 +232,7 @@
 #### UI Component (Dishari)
 
 - [x] 🟡 Prototype live turn-by-turn navigation simulation and ETA card ([`RescueNavigationScreen.tsx`](../admin_dashboard/src/components/responder/RescueNavigationScreen.tsx))
-- [ ] 🟡 Consume WebSocket stream in Android Jetpack Compose client
+- [x] 🟡 Consume WebSocket stream in Android Jetpack Compose client ([`LiveTrackingScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/tracking/LiveTrackingScreen.kt))
 
 ---
 

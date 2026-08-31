@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Warning
@@ -71,6 +72,7 @@ fun HomeScreen(
   onNavigateToLogin: () -> Unit,
   onNavigateToProfile: () -> Unit = {},
   onNavigateToMap: () -> Unit = {},
+  onNavigateToTracking: () -> Unit = {},
   viewModel: AuthViewModel,
   modifier: Modifier = Modifier,
 ) {
@@ -384,6 +386,84 @@ fun HomeScreen(
           imageVector = Icons.Default.ChevronRight,
           contentDescription = "View Map",
           tint = AiCyan,
+          modifier = Modifier.size(20.dp),
+        )
+      }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    // Active Live Tracking Stream Card (Module 8)
+    Card(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onNavigateToTracking() },
+      colors = CardDefaults.cardColors(containerColor = Color(0xFF0C0D10)),
+      shape = RoundedCornerShape(16.dp),
+      border = androidx.compose.foundation.BorderStroke(1.dp, SafeGreen.copy(alpha = 0.6f)),
+    ) {
+      Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          modifier = Modifier.weight(1f)
+        ) {
+          Box(
+            modifier = Modifier
+              .size(44.dp)
+              .background(SafeGreen.copy(alpha = 0.15f), CircleShape)
+              .border(1.5.dp, SafeGreen, CircleShape),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.Default.Navigation,
+              contentDescription = "Navigation",
+              tint = SafeGreen,
+              modifier = Modifier.size(22.dp),
+            )
+          }
+
+          Spacer(modifier = Modifier.width(12.dp))
+
+          Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text(
+                text = "Live Rescue Navigation",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = TextHighContrast,
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Box(
+                modifier = Modifier
+                  .clip(RoundedCornerShape(4.dp))
+                  .background(SafeGreen.copy(alpha = 0.2f))
+                  .padding(horizontal = 5.dp, vertical = 1.dp)
+              ) {
+                Text(
+                  text = "LIVE WS",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black
+                  ),
+                  color = SafeGreen
+                )
+              }
+            }
+            Text(
+              text = "Turn-by-Turn • ETA Stream • CPR Metronome",
+              style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+              color = TextMediumContrast,
+            )
+          }
+        }
+
+        Icon(
+          imageVector = Icons.Default.ChevronRight,
+          contentDescription = "Open Tracking",
+          tint = SafeGreen,
           modifier = Modifier.size(20.dp),
         )
       }

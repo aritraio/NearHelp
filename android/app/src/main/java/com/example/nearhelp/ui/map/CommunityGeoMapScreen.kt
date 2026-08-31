@@ -102,6 +102,7 @@ import kotlin.math.roundToInt
 @Composable
 fun CommunityGeoMapScreen(
   onNavigateBack: () -> Unit,
+  onNavigateToTracking: () -> Unit = {},
   modifier: Modifier = Modifier,
   viewModel: CommunityGeoMapViewModel = viewModel(),
 ) {
@@ -288,6 +289,38 @@ fun CommunityGeoMapScreen(
             .align(Alignment.BottomEnd)
             .padding(16.dp)
         )
+
+        // Live Navigation Stream Floating Button
+        Surface(
+          onClick = onNavigateToTracking,
+          shape = RoundedCornerShape(24.dp),
+          color = SafeGreen,
+          shadowElevation = 8.dp,
+          modifier = Modifier
+            .align(Alignment.BottomStart)
+            .padding(16.dp)
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Icon(
+              imageVector = Icons.Default.Navigation,
+              contentDescription = "Live Navigation",
+              tint = Color.Black,
+              modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+              text = "Live Stream",
+              style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.Black,
+                fontSize = 12.sp
+              ),
+              color = Color.Black
+            )
+          }
+        }
 
         // PostGIS SQL Query HUD Panel (Collapsible)
         androidx.compose.animation.AnimatedVisibility(
