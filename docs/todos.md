@@ -213,8 +213,8 @@
 #### Backend (Adil)
 
 - [x] 🟡 Define Kolkata regional dataset schemas (Salt Lake Sector V, EM Bypass, hospitals, trauma centers)
-- [ ] 🟡 Implement `GET /api/facilities/nearby` endpoint
-- [ ] 🟢 Seed database with Kolkata hospital & AED data
+- [x] 🟡 Implement `GET /api/facilities/nearby` endpoint ([`facilities.py`](../backend/app/api/facilities.py))
+- [x] 🟢 Seed database with Kolkata hospital & AED data ([`kolkata_facilities.json`](../data/regional/kolkata_facilities.json))
 
 ---
 
@@ -226,8 +226,8 @@
 
 - [x] 🔴 Model real-time GPS coordinate streaming payload
 - [x] 🟡 Model ETA calculation and distance tracking
-- [ ] 🔴 Set up FastAPI WebSockets server (`/ws/tracking/{incident_id}`)
-- [ ] 🟡 Implement connection lifecycle management (reconnect, heartbeat)
+- [x] 🔴 Set up FastAPI WebSockets server (`/ws/tracking/{incident_id}`)
+- [x] 🟡 Implement connection lifecycle management (reconnect, heartbeat)
 
 #### UI Component (Dishari)
 
