@@ -26,9 +26,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Bloodtype
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Warning
@@ -69,6 +70,7 @@ import com.example.nearhelp.ui.auth.AuthViewModel
 fun HomeScreen(
   onNavigateToLogin: () -> Unit,
   onNavigateToProfile: () -> Unit = {},
+  onNavigateToMap: () -> Unit = {},
   viewModel: AuthViewModel,
   modifier: Modifier = Modifier,
 ) {
@@ -131,6 +133,13 @@ fun HomeScreen(
       }
 
       Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = onNavigateToMap) {
+          Icon(
+            imageVector = Icons.Default.Map,
+            contentDescription = "Community Geo-Map",
+            tint = AiCyan,
+          )
+        }
         if (!isAnonymous) {
           IconButton(onClick = onNavigateToProfile) {
             Icon(
@@ -310,6 +319,74 @@ fun HomeScreen(
         style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
         color = TextHighContrast,
       )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Community Geo-Map Live Card
+    Card(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onNavigateToMap() },
+      colors = CardDefaults.cardColors(containerColor = CardSurface),
+      shape = RoundedCornerShape(16.dp),
+      border = androidx.compose.foundation.BorderStroke(1.dp, AiCyan.copy(alpha = 0.5f)),
+    ) {
+      Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          modifier = Modifier.weight(1f)
+        ) {
+          Box(
+            modifier = Modifier
+              .size(44.dp)
+              .background(Color(0xFF0E2536), CircleShape)
+              .border(1.dp, AiCyan, CircleShape),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.Default.Map,
+              contentDescription = "Map",
+              tint = AiCyan,
+              modifier = Modifier.size(22.dp),
+            )
+          }
+
+          Spacer(modifier = Modifier.width(12.dp))
+
+          Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text(
+                text = "Community Geo-Map",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = TextHighContrast,
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Box(
+                modifier = Modifier
+                  .size(6.dp)
+                  .background(SafeGreen, CircleShape)
+              )
+            }
+            Text(
+              text = "Live PostGIS Waves • Responders • Hospitals • AEDs",
+              style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+              color = TextMediumContrast,
+            )
+          }
+        }
+
+        Icon(
+          imageVector = Icons.Default.ChevronRight,
+          contentDescription = "View Map",
+          tint = AiCyan,
+          modifier = Modifier.size(20.dp),
+        )
+      }
     }
 
     Spacer(modifier = Modifier.height(24.dp))

@@ -9,3 +9,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object PhoneOtpNavKey : NavKey
 @Serializable data object HomeNavKey : NavKey
 @Serializable data object ProfileNavKey : NavKey
+@Serializable data object CommunityMapNavKey : NavKey

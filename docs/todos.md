@@ -208,7 +208,7 @@
 - [x] 🟡 Display facility markers (hospitals with live bed & ICU count, verified AED locators)
 - [x] 🟡 Implement toggle layers for responders, hospitals, and AEDs
 - [x] 🟡 Render expanding PostGIS radial query dispatch circle animation
-- [ ] 🔴 Implement native Google Maps SDK view in Jetpack Compose (`android/`)
+- [x] 🔴 Implement native Google Maps SDK view in Jetpack Compose ([`CommunityGeoMapScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/map/CommunityGeoMapScreen.kt))
 
 #### Backend (Adil)
 
