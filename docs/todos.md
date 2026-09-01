@@ -268,17 +268,17 @@
 #### RAG Pipeline (Aritra)
 
 - [x] 🔴 Prototype RAG retrieval logic and prompt guardrails for OHCA cardiac arrest and trauma bleed
-- [ ] 🔴 Set up vector store (ChromaDB / pgvector) in `ai_service/`
-- [ ] 🔴 Implement document chunking pipeline (passage-level chunking)
-- [ ] 🔴 Implement embedding generation & semantic search
-- [ ] 🟡 Implement hallucination guardrails (no unverified medication, no surgical directives)
+- [x] 🔴 Set up vector store (ChromaDB / pgvector) in `ai_service/` ([`store.py`](../ai_service/app/rag/store.py))
+- [x] 🔴 Implement document chunking pipeline (passage-level chunking) ([`chunker.py`](../ai_service/app/rag/chunker.py))
+- [x] 🔴 Implement embedding generation & semantic search ([`retriever.py`](../ai_service/app/rag/retriever.py), [`rag.py`](../ai_service/app/api/rag.py))
+- [x] 🟡 Implement hallucination guardrails (no unverified medication, no surgical directives) ([`guardrails.py`](../ai_service/app/rag/guardrails.py))
 
 #### Data Curation (Plaban)
 
 - [x] 🔴 Curate baseline first-aid protocols for Cardiac Arrest, Road Accident, and Trauma
-- [ ] 🔴 Download and catalog official WHO First Aid guidelines into `data/protocols/`
-- [ ] 🔴 Download and catalog Red Cross emergency protocols
-- [ ] 🟡 Download and catalog NDMA Disaster Response guidelines & AHA CPR guides
+- [x] 🔴 Download and catalog official WHO First Aid guidelines into `data/protocols/` ([`who_first_aid_guidelines.json`](../data/protocols/who_first_aid_guidelines.json), [`who_trauma_care.md`](../data/protocols/who_trauma_care.md))
+- [x] 🔴 Download and catalog Red Cross emergency protocols ([`red_cross_emergency_protocols.json`](../data/protocols/red_cross_emergency_protocols.json), [`red_cross_first_aid.md`](../data/protocols/red_cross_first_aid.md))
+- [x] 🟡 Download and catalog NDMA Disaster Response guidelines & AHA CPR guides ([`ndma_disaster_guidelines.json`](../data/protocols/ndma_disaster_guidelines.json), [`aha_cpr_ecc_guidelines.json`](../data/protocols/aha_cpr_ecc_guidelines.json), [`aiims_poison_protocols.json`](../data/protocols/aiims_poison_protocols.json))
 
 ---
 

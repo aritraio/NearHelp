@@ -1,0 +1,186 @@
+{
+  "document_id": "aha_cpr_ecc_guidelines_2020",
+  "title": "AHA Guidelines for CPR and ECC & Indian Resuscitation Council BLS Guidelines",
+  "organization": "American Heart Association (AHA) & Indian Resuscitation Council (IRC)",
+  "authority": "American Heart Association, International Liaison Committee on Resuscitation (ILCOR) & Indian Resuscitation Council",
+  "version": "2020.1",
+  "license": "Public Resuscitation Science Standard",
+  "source_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+  "statutory_shield": "Section 134A Motor Vehicles (Amendment) Act 2019 & Supreme Court Good Samaritan Judgment",
+  "protocols": [
+    {
+      "condition_id": "cardiac_arrest",
+      "condition_label": "Out-of-Hospital Cardiac Arrest (OHCA)",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "AHA 2020 & IRC Adult Basic Life Support (BLS) Protocol",
+      "section": "AHA Part 3: Adult Basic Life Support §3.2 & IRC Lay Responder Guideline §2",
+      "cpr_bpm": 110,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Confirm Unresponsiveness & Absence of Normal Breathing",
+          "action_instruction": "Tap victim's collarbone or shoulders firmly and shout 'Are you okay?'. Check chest for normal breathing for no more than 10 seconds. Agonal gasping (occasional snoring/gurgling breaths) is a sign of cardiac arrest, not normal breathing.",
+          "warning_note": "If unresponsive and not breathing normally or only gasping, immediately assume cardiac arrest.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Call 108 Emergency Ambulance & Request an AED",
+          "action_instruction": "Direct a specific bystander: 'You in the blue shirt, call 108 immediately and bring an AED (defibrillator) if nearby!'. Put phone on speaker.",
+          "warning_note": "Do not leave the victim unattended if other bystanders are present.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Begin High-Quality Chest Compressions (110 BPM Metronome Cadence)",
+          "action_instruction": "Place heel of one hand in the center of the victim's chest (lower half of breastbone/sternum). Interlock other hand on top. Lock elbows straight. Push hard and fast at a rhythmic cadence of 100–120 compressions per minute (110 BPM target). Push down at least 2 inches (5 cm) but no more than 2.4 inches (6 cm). Allow full chest recoil between every compression.",
+          "warning_note": "Rib crack sensations may occur in elderly patients; do NOT stop CPR compressions. Continuous circulation is vital for brain survival.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Deploy Automated External Defibrillator (AED) Immediately on Arrival",
+          "action_instruction": "Turn on AED. Follow spoken prompts. Wipe chest dry. Apply one pad on upper right chest below collarbone, other pad on lower left ribcage below armpit. Plug in pad connector. Clear the victim while AED analyzes heart rhythm. If shock is advised, ensure no one touches victim, shout 'CLEAR!', and press shock button. Immediately resume CPR compressions starting with chest compressions.",
+          "warning_note": "Never remove AED pads or turn off AED once attached; continue CPR until paramedic handover.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_ORAL_FLUIDS_UNRESPONSIVE",
+          "warning_title": "Strictly No Oral Fluids or Medicines",
+          "warning_message": "Pouring water or putting tablets into an unconscious person's mouth causes immediate airway flooding and drowning of the lungs.",
+          "action_directive": "Withhold all fluids and oral medications; keep hands on the chest for compressions."
+        },
+        {
+          "flag": "NO_INTERRUPTIONS_IN_CPR",
+          "warning_title": "Do Not Stop Compressions For >10 Seconds",
+          "warning_message": "Pausing chest compressions causes coronary perfusion pressure to drop to zero, leading to irreversible brain death.",
+          "action_directive": "Minimize all pauses in chest compressions to less than 10 seconds."
+        }
+      ]
+    },
+    {
+      "condition_id": "pediatric_cpr",
+      "condition_label": "Pediatric & Infant Cardiac Arrest",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "AHA Pediatric Basic Life Support (PBLS) Protocol",
+      "section": "AHA Part 4: Pediatric Basic and Advanced Life Support §4.1",
+      "cpr_bpm": 110,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Check Responsiveness and Pulse (Brachial in Infants, Carotid/Femoral in Children)",
+          "action_instruction": "Tap infant's foot or child's shoulder. Check for breathing and pulse (brachial inside upper arm for infants < 1 year). If no pulse or heart rate < 60/min with poor perfusion, begin CPR.",
+          "warning_note": "In children, cardiac arrest is most commonly respiratory/asphyxial in origin.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Deliver 2 Rescue Breaths Over 1 Second Each",
+          "action_instruction": "Open airway using gentle head-tilt chin-lift (avoid hyperextension in infants). Cover infant's mouth AND nose with your mouth. Deliver 2 gentle rescue breaths just until chest visibly rises.",
+          "warning_note": "Do not blow forcefully; pediatric lungs are delicate.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Deliver Compressions at 110 BPM (15:2 Ratio for 2 Rescuers, 30:2 for 1 Rescuer)",
+          "action_instruction": "For infants (< 1 yr): Use 2 fingers in center of chest or 2-thumb encircling hands technique. Compress 1.5 inches (4 cm) deep. For children (1 yr to puberty): Use 1 or 2 hands on lower sternum, compressing 2 inches (5 cm) deep. Maintain 100-120 BPM cadence.",
+          "warning_note": "Ensure complete chest recoil after every compression.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Apply Pediatric AED Pads if Available",
+          "action_instruction": "Use pediatric dose attenuator pads if child is < 8 years old. If pediatric pads are unavailable, use standard adult AED pads ensuring pads do not touch each other (place one on center of chest, one on center of upper back if necessary).",
+          "warning_note": "Do not delay CPR if AED is not immediately present.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_OVER_VENTILATION",
+          "warning_title": "Do Not Over-Inflate Pediatric Airway",
+          "warning_message": "Excessive ventilation pressure causes tension pneumothorax and gastric distension, reducing cardiac output.",
+          "action_directive": "Give gentle breaths until visible chest rise only."
+        }
+      ]
+    },
+    {
+      "condition_id": "asthma_anaphylaxis",
+      "condition_label": "Acute Severe Asthma & Allergic Anaphylaxis",
+      "crisis_type": "medical",
+      "severity_level": 4,
+      "priority": "high",
+      "protocol_name": "GINA 2023 & WAO Anaphylaxis Emergency Guidelines",
+      "section": "GINA Strategy §4 & World Allergy Organization Epinephrine Protocol",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Assist with Patient's Own Prescribed Rescue Inhaler or Epipen",
+          "action_instruction": "For acute asthma: Assist victim to take 4 to 6 puffs of their prescribed Salbutamol/Albuterol blue inhaler (ideally through a spacer). Repeat every 4 minutes if wheezing continues. For Anaphylaxis (facial swelling, hives, throat tightness): Assist victim in administering their prescribed Epinephrine Auto-Injector (EpiPen) into the outer mid-thigh muscle and hold for 3 seconds.",
+          "warning_note": "Only assist with the patient's own doctor-prescribed emergency devices. Do not administer unverified prescription drugs.",
+          "is_contraindication": false,
+          "is_medication_restricted": true,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Position Upright for Asthma / Lay Flat for Anaphylaxis",
+          "action_instruction": "Asthma: Sit the person upright leaning slightly forward (tripod position) with arms supported. Anaphylaxis: Lay the person flat with legs elevated (unless having severe breathing difficulty, in which case semi-sitting is allowed).",
+          "warning_note": "Do not allow an anaphylaxis patient to stand up suddenly; sudden standing causes empty ventricle syndrome and death.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Loosen Constrictive Clothing and Ensure Fresh Airflow",
+          "action_instruction": "Loosen tight neck collars, ties, and belts. Ensure surrounding crowds stand back to maximize oxygenation and calm the patient.",
+          "warning_note": "Panic exacerbates bronchospasm.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Call 108 Emergency Ambulance for Deterioration",
+          "action_instruction": "If victim becomes silent, cyanotic (blue lips/fingers), exhausted, or confused, call 108 immediately. Prepare to initiate CPR if unresponsiveness ensues.",
+          "warning_note": "A quiet chest in severe asthma ('silent chest') indicates total airway collapse and impending respiratory arrest.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_SEDATIVES_IN_ASTHMA",
+          "warning_title": "Strictly No Sedatives or Sleeping Pills",
+          "warning_message": "Administering sedatives or cough syrups to an acute asthma patient suppresses respiratory drive and causes fatal respiratory arrest.",
+          "action_directive": "Never give sedatives, tranquilizers, or antihistamines during acute bronchospastic crisis."
+        }
+      ]
+    }
+  ]
+}

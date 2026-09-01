@@ -1,0 +1,316 @@
+{
+  "document_id": "red_cross_emergency_protocols_2023",
+  "title": "Indian Red Cross Society & IFRC First Aid Emergency Protocols",
+  "organization": "Indian Red Cross Society & International Federation of Red Cross (IFRC)",
+  "authority": "Indian Red Cross Society & Ministry of Health and Family Welfare (MoHFW), Govt of India",
+  "version": "2023.2",
+  "license": "Public Humanitarian Protocol",
+  "source_url": "https://www.indianredcross.org",
+  "statutory_shield": "Section 134A Motor Vehicles (Amendment) Act 2019 & Supreme Court Good Samaritan Judgment",
+  "protocols": [
+    {
+      "condition_id": "snakebite",
+      "condition_label": "Venomous Snakebite (India's Big Four)",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "National Snakebite Protocol & Red Cross Emergency Guide",
+      "section": "MoHFW Protocol §3: Pre-Hospital Management of Ophitoxaemia & Big Four Envenomation",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Reassure Victim and Enforce Strict Physical Immobilization",
+          "action_instruction": "Keep the victim completely calm, still, and lying down. Muscle movement, walking, or panic rapidly pumps snake venom through the lymphatic system into central circulation.",
+          "warning_note": "Do not let the victim walk or exert any muscle.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Immobilize the Bitten Limb with a Rigid Splint (Pressure Immobilization Technique)",
+          "action_instruction": "Apply a broad bandage over the bite area and immobilize the entire bitten arm or leg with a rigid splint at or slightly below heart level. Keep bandage snug like an ankle sprain wrap (do not occlude arterial pulse).",
+          "warning_note": "Ensure distal pulses (radial or pedal) remain easily palpable.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Remove Rings, Anklets, and Constrictive Bands Immediately",
+          "action_instruction": "Quickly remove all jewelry, rings, toe rings, tight bracelets, and tight clothing from the bitten limb before severe swelling sets in.",
+          "warning_note": "Swelling occurs rapidly with viper bites and causes severe gangrene if rings are left on.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Immediate Transport to Hospital Stocked with Polyvalent Anti-Snake Venom (ASV)",
+          "action_instruction": "Transport victim immediately on a stretcher in an ALS ambulance (call 108) to the nearest designated hospital with Polyvalent ASV and ventilator support. Note snake characteristics if seen safely, but do not attempt to catch or kill the snake.",
+          "warning_note": "Polyvalent ASV is the ONLY definitive antidote for venomous snakebite.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_TOURNIQUET_ON_SNAKEBITE",
+          "warning_title": "Strictly Do Not Apply Tight Arterial Tourniquets",
+          "warning_message": "Tight arterial tourniquets cause massive localized venom pooling, severe tissue necrosis, compartment syndrome, and limb amputation.",
+          "action_directive": "Use gentle splinting and snug crepe bandage only; never tie tight ropes, wires, or tourniquets."
+        },
+        {
+          "flag": "NO_INCISION_OR_SUCTION",
+          "warning_title": "Do Not Cut, Bleed, Burn, or Suck the Bite",
+          "warning_message": "Cutting the bite mark severs tendons, accelerates deep venom absorption, causes fatal hemorrhage, and introduces severe infection.",
+          "action_directive": "Never make incisions, suck venom with mouth/devices, or apply electric shocks, ice, or herbal pastes."
+        },
+        {
+          "flag": "NO_HERBAL_OR_ORAL_POTIONS",
+          "warning_title": "Do Not Administer Traditional / Herbal Concoctions",
+          "warning_message": "Traditional herbal mixtures cause acute kidney injury, delay life-saving ASV administration, and trigger lethal aspiration.",
+          "action_directive": "Rely exclusively on rapid hospital transfer for hospital-administered Polyvalent ASV."
+        }
+      ]
+    },
+    {
+      "condition_id": "heatstroke",
+      "condition_label": "Severe Heatstroke & Hyperthermia",
+      "crisis_type": "medical",
+      "severity_level": 4,
+      "priority": "high",
+      "protocol_name": "Indian Red Cross & NDMA Heat Action Plan Protocol",
+      "section": "Guideline 6.2: Rapid Active Evaporative Cooling and Fluid Management",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Move to Cool Shaded Environment Immediately",
+          "action_instruction": "Move victim out of direct sunlight into an air-conditioned room or deep shade. Lay them flat and elevate legs slightly if conscious.",
+          "warning_note": "Remove excess layers of heavy clothing.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Initiate Rapid Evaporative Cooling",
+          "action_instruction": "Spray or sponge lukewarm/cool water over the entire body while fanning continuously. Place cold wet packs in armpits, groin, and neck where major blood vessels run.",
+          "warning_note": "Target core temperature reduction to below 38.5°C.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Hydration Protocol (Conscious Alert Victims ONLY)",
+          "action_instruction": "If the victim is fully alert, oriented, and able to swallow normally, offer cool water with Oral Rehydration Salts (ORS) or electrolyte solution in small, frequent sips.",
+          "warning_note": "Never force fluids into drowsy, confused, or semi-conscious victims.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Monitor Neurological Status & Call 108",
+          "action_instruction": "If altered mental status, confusion, seizures, or unconsciousness persist, place victim in lateral recovery position and arrange emergency ALS transport.",
+          "warning_note": "Heatstroke is a medical emergency with high mortality if cooling is delayed.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_ORAL_FLUIDS_IF_DROWSY",
+          "warning_title": "No Oral Fluids If Drowsy or Disoriented",
+          "warning_message": "Giving water to an altered or drowsy heatstroke victim causes immediate pulmonary aspiration and asphyxiation.",
+          "action_directive": "Give fluids only if victim is 100% awake, alert, and sitting upright."
+        },
+        {
+          "flag": "NO_ICE_BATH_SHIVERING",
+          "warning_title": "Avoid Extreme Shivering-Inducing Cold",
+          "warning_message": "Freezing ice water immersion causes intense peripheral vasoconstriction and shivering, which spikes metabolic heat production.",
+          "action_directive": "Use evaporative cooling (water spray + fanning)."
+        }
+      ]
+    },
+    {
+      "condition_id": "electrocution",
+      "condition_label": "High-Voltage Electrical Shock & Electrocution",
+      "crisis_type": "accident",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "Indian Red Cross Electrical Hazard Response",
+      "section": "Guideline 8.1: Safe Isolation, Arc Flash Burns & Post-Shock Cardiac Arrest",
+      "cpr_bpm": 110,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Break Electrical Contact Safely Before Touching Victim",
+          "action_instruction": "Do NOT touch the victim directly with bare hands while they are in contact with the current. Switch off the main circuit breaker immediately. If unable to turn off power, use a dry, clean non-conductive object (dry wooden broomstick, dry PVC pipe) to push the wire away.",
+          "warning_note": "For high-voltage outdoor lines (>1000V), keep a distance of at least 10 meters and call the electrical power grid utility immediately.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Assess Responsiveness and Breathing (Check for Ventricular Fibrillation)",
+          "action_instruction": "Electric current frequently triggers ventricular fibrillation (VF). Check for pulse/breathing. If unresponsive and not breathing, begin CPR chest compressions at 110 BPM immediately.",
+          "warning_note": "Request an Automated External Defibrillator (AED) urgently.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Treat Entry and Exit Burn Wounds",
+          "action_instruction": "Inspect skin for entry burns (usually hands/head) and exit burns (usually feet/groin). Cool burns with clean running water and cover with sterile dry dressings.",
+          "warning_note": "Internal electrical pathway injury is often much more severe than visible surface burns.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Continuous Observation for Arrhythmias",
+          "action_instruction": "All electrical shock victims require 12-lead ECG telemetry in an emergency hospital, even if they appear uninjured.",
+          "warning_note": "Delayed lethal cardiac arrhythmias can occur hours after shock.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_DIRECT_CONTACT_ENERGIZED",
+          "warning_title": "Do Not Touch Victim While Energized",
+          "warning_message": "Conducting electric current through rescuer causes immediate secondary electrocution and fatal cardiac arrest.",
+          "action_directive": "Ensure electrical source is isolated before touching victim."
+        }
+      ]
+    },
+    {
+      "condition_id": "seizure",
+      "condition_label": "Convulsive Seizures & Status Epilepticus",
+      "crisis_type": "medical",
+      "severity_level": 4,
+      "priority": "high",
+      "protocol_name": "ILAE & Indian Red Cross Seizure First Aid Protocol",
+      "section": "Protocol: Generalized Tonic-Clonic Seizures and Recovery Positioning",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Clear Hazard Zone & Cushion Head",
+          "action_instruction": "Protect victim from injury. Move away sharp furniture, hard objects, glass, and vehicles. Place a soft folded jacket or pillow under their head.",
+          "warning_note": "Do not restrain victim's limbs or attempt to hold them down forcefully.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Never Force Objects into Mouth",
+          "action_instruction": "Leave mouth completely clear. Do NOT insert spoons, sticks, keys, cloth, fingers, or liquids into the mouth. People cannot swallow their tongue during a seizure.",
+          "warning_note": "Forcing objects into teeth causes jaw fractures, broken teeth, and fatal airway obstruction.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Time the Seizure Duration",
+          "action_instruction": "Check your watch. If the convulsion lasts longer than 5 minutes, or if a second seizure starts without the person regaining consciousness, call 108 immediately (Status Epilepticus).",
+          "warning_note": "Prolonged seizures cause severe brain hypoxia and status epilepticus.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Roll into Lateral Recovery Position Post-Convulsion",
+          "action_instruction": "Once active jerking stops, gently roll victim onto their side in recovery position with chin tilted up. This allows saliva, vomit, and mucus to drain freely and keeps the airway open.",
+          "warning_note": "Stay with the person until they are fully awake and reoriented.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_OBJECTS_IN_MOUTH",
+          "warning_title": "Strictly Nothing Inside the Mouth",
+          "warning_message": "Inserting spoons, keys, fingers, or water into a convulsing person's mouth causes broken teeth, crushed fingers, and asphyxiation.",
+          "action_directive": "Never place anything between the teeth."
+        },
+        {
+          "flag": "NO_PHYSICAL_RESTRAINT",
+          "warning_title": "Do Not Forcibly Restrain Convulsions",
+          "warning_message": "Holding limbs down during clonic muscle spasms causes bone fractures, joint dislocations, and muscle tears.",
+          "action_directive": "Let the seizure run its natural course while padding surroundings."
+        }
+      ]
+    },
+    {
+      "condition_id": "stroke",
+      "condition_label": "Acute Ischemic Stroke & Golden Hour Triage",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "American Stroke Association & Indian Stroke Association Protocol",
+      "section": "Section 1.2: Pre-Hospital FAST Screening & Golden Hour Neuroprotection",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Conduct FAST Clinical Screening",
+          "action_instruction": "Check: F (Face drooping - ask to smile), A (Arm weakness - ask to raise both arms), S (Speech slurring - ask to repeat a simple phrase), T (Time - record exact time symptom onset started).",
+          "warning_note": "Even 1 positive sign indicates acute cerebrovascular stroke.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Call 108 Emergency and Request Comprehensive Stroke-Ready Center",
+          "action_instruction": "Request immediate ALS transport to a stroke-ready hospital equipped with 24/7 CT/MRI imaging and IV Thrombolysis (tPA) capabilities.",
+          "warning_note": "Golden Hour IV thrombolysis window is within 4.5 hours of symptom onset.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Position with Head Elevated 30 Degrees",
+          "action_instruction": "Position victim in semi-sitting or recovery position with head elevated approximately 30 degrees to reduce intracranial pressure and prevent aspiration.",
+          "warning_note": "Loosen tight neckwear or collars.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Zero Oral Intake (Nil By Mouth)",
+          "action_instruction": "Do NOT give any food, water, tea, or medication (including aspirin or blood pressure tablets). Dysphagia is present in over 70% of acute strokes.",
+          "warning_note": "Aspirin is strictly contraindicated before CT scan rules out hemorrhagic stroke.",
+          "is_contraindication": true,
+          "is_medication_restricted": true,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_ORAL_MEDS_OR_ASPIRIN_STROKE",
+          "warning_title": "Do Not Give Aspirin or BP Medications",
+          "warning_message": "Giving aspirin before non-contrast head CT rules out intracerebral hemorrhage can turn a small hemorrhagic stroke into a fatal brain bleed.",
+          "action_directive": "Withhold all oral medications and fluids."
+        }
+      ]
+    }
+  ]
+}

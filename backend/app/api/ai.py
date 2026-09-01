@@ -11,6 +11,11 @@ from app.schemas.ai import (
     ClassificationResponse,
     ClinicalHandoverSummary,
     GroundedProtocolResponse,
+    RAGQueryRequest,
+    RAGQueryResponse,
+    RAGSearchRequest,
+    RAGSearchResponse,
+    RAGStatsResponse,
     SeverityRequest,
     SeverityResponse,
     TaxonomyResponse,
@@ -155,4 +160,64 @@ async def generate_handover_endpoint(request: AgentChatRequest) -> ClinicalHando
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Handover generation failed: {e!s}",
+        ) from e
+
+
+# ==============================================================================
+# RAG KNOWLEDGE BASE PROXY ENDPOINTS (MODULE 11)
+# ==============================================================================
+
+@router.post(
+    "/rag/search",
+    response_model=RAGSearchResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Semantic Search across Verified Clinical Protocols",
+    description="Proxies semantic vector search of WHO, Red Cross, NDMA, and AHA protocols with hybrid re-ranking.",
+)
+async def rag_search_endpoint(request: RAGSearchRequest) -> RAGSearchResponse:
+    """Execute hybrid semantic search over clinical protocol vector store."""
+    try:
+        return await ai_client.rag_search(request)
+    except Exception as e:
+        logger.error("RAG search endpoint error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"RAG search failed: {e!s}",
+        ) from e
+
+
+@router.post(
+    "/rag/query",
+    response_model=RAGQueryResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Generate Grounded First-Aid Guidance with Safety Guardrails",
+    description="Proxies end-to-end RAG grounded guidance generation with citation enforcement and hallucination guardrails.",
+)
+async def rag_query_endpoint(request: RAGQueryRequest) -> RAGQueryResponse:
+    """Execute end-to-end RAG question answering."""
+    try:
+        return await ai_client.rag_query(request)
+    except Exception as e:
+        logger.error("RAG query endpoint error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"RAG query failed: {e!s}",
+        ) from e
+
+
+@router.get(
+    "/rag/stats",
+    response_model=RAGStatsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get RAG Vector Store Corpus Statistics",
+)
+async def rag_stats_endpoint() -> RAGStatsResponse:
+    """Retrieve vector store corpus size and index statistics."""
+    try:
+        return await ai_client.get_rag_stats()
+    except Exception as e:
+        logger.error("Failed to fetch RAG stats: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"RAG stats retrieval failed: {e!s}",
         ) from e

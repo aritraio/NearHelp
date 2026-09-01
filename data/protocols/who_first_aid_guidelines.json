@@ -1,0 +1,316 @@
+{
+  "document_id": "who_first_aid_guidelines_2023",
+  "title": "WHO Guidelines for Essential Trauma Care & Basic Life Support",
+  "organization": "World Health Organization (WHO)",
+  "authority": "World Health Organization & American College of Surgeons Committee on Trauma",
+  "version": "2023.1",
+  "license": "Public Health Emergency Protocol",
+  "source_url": "https://www.who.int/emergencies/trauma-care",
+  "statutory_shield": "Protection of Good Samaritans under Section 134A of Motor Vehicles (Amendment) Act 2019",
+  "protocols": [
+    {
+      "condition_id": "severe_bleeding",
+      "condition_label": "Severe Bleeding & Hemorrhagic Shock",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "WHO Stop The Bleed & Severe Trauma Hemorrhage Control",
+      "section": "Guideline 4.1: Direct Pressure, Wound Packing & Arterial Tourniquet Protocol",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Apply Firm Continuous Direct Pressure",
+          "action_instruction": "Cover the bleeding wound immediately with clean gauze, cloth, or bare gloved hands. Push down directly and hard on the bleeding vessel without lifting to check.",
+          "warning_note": "Do not release pressure or remove soaked dressings; layer additional cloths on top.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Pack Deep Cavity Wounds (Junctional Hemorrhage)",
+          "action_instruction": "For deep wounds in groin, armpit, or neck, tightly pack hemostatic gauze or clean cloth directly into the wound cavity until full, then hold firm continuous pressure for at least 3 minutes.",
+          "warning_note": "Do not pack wounds inside chest or abdomen; apply flat direct pressure only.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": true
+        },
+        {
+          "step_number": 3,
+          "title": "Deploy Arterial Tourniquet for Extremity Bleeding",
+          "action_instruction": "If bleeding from an arm or leg does not stop with direct pressure or is spurting bright red blood, place an arterial tourniquet 2 to 3 inches above the wound (never over a joint). Tighten the windlass until bleeding stops completely.",
+          "warning_note": "Record the exact application time on the tourniquet. Never loosen or remove a tourniquet once applied; only hospital surgeons may release it.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Prevent Hypothermia and Elevate Extremity",
+          "action_instruction": "Keep the victim warm with a thermal blanket or dry jackets. If bone is not fractured, gently elevate the bleeding limb above heart level.",
+          "warning_note": "Trauma victims with hypothermia lose blood clotting ability rapidly.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_ORAL_FLUIDS",
+          "warning_title": "Do Not Give Food or Fluids",
+          "warning_message": "Victims in hemorrhagic shock or preparing for emergency surgery have compromised airways and high aspiration risk.",
+          "action_directive": "Strictly withhold all water, tea, and oral medicine."
+        },
+        {
+          "flag": "NO_SURGICAL_EXPLORATION",
+          "warning_title": "Do Not Probe or Cut Wound",
+          "warning_message": "Blindly probing, cutting, or attempting to clamp vessels in field conditions worsens hemorrhage and damages nerves.",
+          "action_directive": "Never make surgical incisions or probe bleeding cavities."
+        }
+      ]
+    },
+    {
+      "condition_id": "choking_adult",
+      "condition_label": "Choking / Acute Airway Obstruction",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "WHO / ERC Airway Obstruction Relief Protocol",
+      "section": "Guideline 2.4: Foreign Body Airway Obstruction (FBAO) Management",
+      "cpr_bpm": 110,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Assess Obstruction Severity",
+          "action_instruction": "Ask the victim 'Are you choking?'. If the person can cough forcefully or speak, encourage continuous coughing. If they cannot speak, breathe, or cough (silent choking with universal choking sign), intervene immediately.",
+          "warning_note": "Do not slap the back while victim is coughing effectively.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Deliver 5 Firm Back Blows",
+          "action_instruction": "Stand slightly behind the victim. Support their chest with one hand and lean them forward. Deliver 5 sharp, separate blows between the shoulder blades with the heel of your other hand.",
+          "warning_note": "Check after each blow if the obstruction is dislodged.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Perform 5 Abdominal Thrusts (Heimlich Maneuver)",
+          "action_instruction": "If back blows fail, stand behind the victim, wrap arms around the waist. Make a fist with thumb side against the abdomen just above the navel and below the rib cage. Grasp fist with other hand and pull sharply inward and upward 5 times.",
+          "warning_note": "For pregnant women or obese individuals, use chest thrusts over the lower breastbone instead of abdominal thrusts.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Unconscious Choking Resuscitation",
+          "action_instruction": "If victim becomes unconscious, support them to the ground. Call 108 emergency ambulance immediately and begin CPR chest compressions at 110 BPM. Each time opening airway, look for the object and sweep out ONLY if clearly visible.",
+          "warning_note": "Never perform blind finger sweeps; it can push objects deeper into the larynx.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_BLIND_FINGER_SWEEP",
+          "warning_title": "No Blind Finger Sweeps",
+          "warning_message": "Sweeping fingers blindly inside a choking victim's mouth can lodge foreign bodies deeper into the trachea.",
+          "action_directive": "Only extract an object if clearly visible and loose."
+        },
+        {
+          "flag": "NO_FIELD_TRACHEOTOMY",
+          "warning_title": "Do Not Cut Windpipe (No Tracheostomy)",
+          "warning_message": "Attempting emergency cricothyroidotomy or surgical incisions without surgical training causes fatal vascular injury.",
+          "action_directive": "Never attempt surgical airway creation in the field; continue chest compressions and ventilations."
+        }
+      ]
+    },
+    {
+      "condition_id": "burns_scalds",
+      "condition_label": "Severe Thermal Burns & Chemical Scalds",
+      "crisis_type": "fire",
+      "severity_level": 4,
+      "priority": "high",
+      "protocol_name": "WHO / British Burn Association First Aid Protocol",
+      "section": "Guideline 7.2: Pre-Hospital Cooling and Burn Wound Management",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Stop the Burning Process & Remove from Source",
+          "action_instruction": "Ensure bystander safety. Extinguish flames (Drop and Roll). Disconnect electrical sources or brush off dry chemical powders before irrigation.",
+          "warning_note": "Do not touch live electrical cables or step into water near downed wires.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Cool with Clean Running Water for 20 Minutes",
+          "action_instruction": "Immediately cool the burn wound with cool running tap water (15–20°C) for a full 20 minutes. Begin cooling within 3 hours of injury.",
+          "warning_note": "Never use ice, iced water, butter, toothpaste, turmeric, or unverified home remedies; ice causes tissue necrosis.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Remove Jewelry and Constrictive Clothing",
+          "action_instruction": "Gently remove rings, watches, bracelets, and loose clothing before swelling occurs. Do not peel off clothing that is melted or adhered to burned skin.",
+          "warning_note": "Cut around stuck fabric rather than pulling.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Cover with Clean Plastic Cling Film or Sterile Dressing",
+          "action_instruction": "Cover the cooled burn loosely with layers of clean transparent plastic wrap (cling film) or a sterile non-adherent dressing. Keep the victim warm.",
+          "warning_note": "Do not wrap cling film tightly around limbs (avoid tourniquet effect as tissues swell).",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_ICE_ON_BURNS",
+          "warning_title": "Do Not Apply Ice or Freezing Packs",
+          "warning_message": "Ice causes severe vasoconstriction, deepens tissue ischemia, and risks systemic hypothermia.",
+          "action_directive": "Use only cool running tap water for 20 minutes."
+        },
+        {
+          "flag": "NO_TOPICAL_GREASES",
+          "warning_title": "Do Not Apply Ointments, Toothpaste, or Butter",
+          "warning_message": "Greasy substances trap heat within tissues and cause severe microbial wound infections.",
+          "action_directive": "Keep wound clean and covered with dry cling film; do not apply unverified ointments."
+        }
+      ]
+    },
+    {
+      "condition_id": "fracture_spinal",
+      "condition_label": "Major Fractures & Spinal Trauma",
+      "crisis_type": "accident",
+      "severity_level": 4,
+      "priority": "high",
+      "protocol_name": "WHO Essential Trauma Care / ATLS Spinal Immobilization",
+      "section": "Guideline 5.3: Pre-Hospital Cervical Spine Control & Splinting in Situ",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Manual In-Line Cervical Spine Stabilization",
+          "action_instruction": "In high-energy collisions, falls from height, or road traffic accidents, assume spinal cord injury. Kneel at victim's head, hold head firmly with both hands in neutral alignment, and instruct victim not to move.",
+          "warning_note": "Never tilt, rotate, or bend the neck or spine.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Splint Fractured Limbs in Position Found",
+          "action_instruction": "Immobilize the joint above and below any suspected bone fracture using rigid splints, rolled blankets, or cardboard. Secure with bandages without cutting off distal circulation.",
+          "warning_note": "Check pulse, skin warmth, and sensation in fingers/toes before and after splinting.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Manage Open Fractures (Compound Bone Protrusions)",
+          "action_instruction": "If bone protrudes through the skin, cover with a sterile, moist dressing. Control surrounding bleeding with direct pressure around the bone.",
+          "warning_note": "Never attempt to push the protruding bone back inside the skin.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": true
+        },
+        {
+          "step_number": 4,
+          "title": "Stabilize Impaled Objects in Situ",
+          "action_instruction": "If a pole, knife, rebar, or glass is embedded in the body, stabilize it with bulky dressings on both sides and tape securely in place.",
+          "warning_note": "Never remove or pull out an impaled object; it is tamponading torn blood vessels.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": true
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_BONE_REDUCTION",
+          "warning_title": "Do Not Push Bones In or Align Fractures",
+          "warning_message": "Attempting field reduction of bone fractures causes severe neurovascular transection, fat embolism, and permanent paralysis.",
+          "action_directive": "Splint the limb exactly in the position found."
+        },
+        {
+          "flag": "NO_OBJECT_REMOVAL",
+          "warning_title": "Do Not Pull Out Impaled Objects",
+          "warning_message": "Removing impaled objects unplugs major arteries, causing catastrophic fatal hemorrhage within seconds.",
+          "action_directive": "Stabilize the object with bulky padding in situ."
+        }
+      ]
+    },
+    {
+      "condition_id": "drowning_submersion",
+      "condition_label": "Drowning & Cold Water Submersion",
+      "crisis_type": "accident",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "WHO Drowning Resuscitation Protocol",
+      "section": "Guideline 3.1: Hypoxic Cardiac Arrest & Ventilation-First Resuscitation",
+      "cpr_bpm": 110,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Safe Rescue Without Endangering Rescuer",
+          "action_instruction": "Reach or throw a flotation device or rope. Do not enter water unless trained. Remove victim horizontally from water to avoid sudden cardiovascular collapse.",
+          "warning_note": "Rescuer safety is paramount.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Deliver 5 Initial Rescue Breaths First",
+          "action_instruction": "Drowning causes hypoxic arrest. If victim is unresponsive and not breathing, immediately open airway and give 5 rescue breaths before chest compressions.",
+          "warning_note": "Do not attempt to drain water from lungs with abdominal thrusts.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Continue 30:2 CPR at 110 BPM",
+          "action_instruction": "Perform cycles of 30 chest compressions (110 BPM) followed by 2 rescue breaths. Continue until AED arrives or spontaneous breathing returns.",
+          "warning_note": "Wipe chest dry before attaching AED pads.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Remove Wet Clothes & Rewarm",
+          "action_instruction": "Strip wet clothing, dry the skin, and cover with dry blankets and insulation from cold ground.",
+          "warning_note": "Handle gently to prevent triggering ventricular fibrillation in hypothermic hearts.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_WATER_DRAINING_THRUSTS",
+          "warning_title": "Do Not Use Abdominal Thrusts to Drain Water",
+          "warning_message": "Abdominal thrusts cause gastric regurgitation and massive aspiration of stomach contents into the lungs.",
+          "action_directive": "Proceed directly to rescue breathing and chest compressions."
+        }
+      ]
+    }
+  ]
+}

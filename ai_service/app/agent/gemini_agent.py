@@ -34,6 +34,10 @@ logger = logging.getLogger(__name__)
 # GEMINI 2.5 CLIENT WRAPPER (GOOGLE-GENAI SDK WITH RESILIENT FALLBACK)
 # ==============================================================================
 
+from app.rag.guardrails import hallucination_guardrails
+from app.rag.retriever import rag_retriever
+
+
 class GeminiEmergencyLLM:
     """Gemini 2.5 interface with clinical citation enforcement and safety prompts."""
 
@@ -66,18 +70,24 @@ class GeminiEmergencyLLM:
         language: str = "en",
     ) -> tuple[str, str, list[CitationItem]]:
         """Call Gemini 2.5 or return deterministic clinical grounded guidance with citations."""
-        # 1. Deterministic Grounded Clinical Response Matching
-        q_lower = user_query.lower()
-        citations: list[CitationItem] = list(protocol.citations)
-        highlight = "Grounded Protocol Step"
+        # 1. Pre-execution Clinical Guardrail Check
+        guardrail_result = hallucination_guardrails.inspect_query(user_query, condition_id)
+        if not guardrail_result.passed and guardrail_result.override_reply:
+            citations = list(protocol.citations)
+            citations.append(CITATIONS_CATALOG["good_samaritan_134a"])
+            return guardrail_result.override_reply, guardrail_result.highlight_tag or "Clinical Contraindication Alert", citations
 
-        # Check for specific clinical Q&A patterns first
+        # 2. Check for passed contraindications
+        citations: list[CitationItem] = list(protocol.citations)
         if contraindications:
             contra = contraindications[0]
             reply = f"❌ {contra.warning_title.upper()}.\n\n{contra.warning_message}\n\n👉 ACTION DIRECTIVE: {contra.action_directive}\n\n[Source: {citations[0].source} • {citations[0].section}]"
-            highlight = "Clinical Contraindication Alert"
-            return reply, highlight, citations
+            return reply, "Clinical Contraindication Alert", citations
 
+        q_lower = user_query.lower()
+        highlight = "Grounded Protocol Step"
+
+        # 3. Deterministic Grounded Clinical Response Matching
         if any(k in q_lower for k in ["water", "liquid", "drink", "milk", "tea", "chai", "jal", "pani", "জল", "পানি"]):
             reply = "❌ NO. NEVER administer water, oral fluids, or medications to an unconscious or gasping victim. Doing so can enter the trachea and cause fatal pulmonary aspiration.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
             highlight = "Contraindicated Action"
@@ -119,12 +129,26 @@ class GeminiEmergencyLLM:
             highlight = "Seizure Safety"
             return reply, highlight, citations
 
-        # If live Gemini client is present, query with clinical prompt
+        # 4. Hybrid RAG Retrieval for Dynamic Question Answering
+        rag_passages = await rag_retriever.retrieve(
+            query=user_query,
+            condition_id=condition_id,
+            top_k=3,
+        )
+        if rag_passages:
+            for p in rag_passages:
+                if p.citation not in citations:
+                    citations.append(p.citation)
+
+        # 5. If live Gemini client is present, query with clinical RAG prompt
         if self._client:
             try:
+                rag_context = rag_retriever.format_context_for_prompt(rag_passages)
                 system_prompt = (
                     "You are NearHelp AI, an emergency crisis assistant providing real-time evidence-based first-aid. "
-                    f"Current condition: {protocol.condition_label}. Severity Level: {protocol.severity_level}/5. "
+                    f"Current condition: {protocol.condition_label}. Severity Level: {protocol.severity_level}/5.\n\n"
+                    "GROUNDED CLINICAL PROTOCOL CONTEXT:\n"
+                    f"{rag_context}\n\n"
                     "Rules: 1. Keep guidance direct, urgent, and concise. "
                     "2. Enforce evidence citations in square brackets like [Source: AHA CPR Guidelines 2020 §3.2] or [Source: Section 134A MV Act 2019]. "
                     "3. Enforce strict contraindications (No oral fluids to unconscious; No moving spinal trauma victims; Never stop CPR for cracked ribs). "
@@ -137,9 +161,21 @@ class GeminiEmergencyLLM:
                     contents=prompt,
                 )
                 if response and response.text:
-                    return response.text.strip(), "Gemini 2.5 Clinical Response", citations
+                    raw_text = response.text.strip()
+                    sanitized_res = hallucination_guardrails.sanitize_llm_response(raw_text, citations)
+                    return (
+                        sanitized_res.sanitized_text or raw_text,
+                        sanitized_res.highlight_tag or "Gemini 2.5 Clinical Response",
+                        citations,
+                    )
             except Exception as e:
                 logger.warning("Gemini 2.5 API invocation failed (%s). Falling back to grounded protocol step.", e)
+
+        # 6. Default: If RAG retrieved a strong relevant passage, use it
+        if rag_passages and rag_passages[0].confidence_score > 0.45:
+            top_p = rag_passages[0]
+            reply = f"📋 {top_p.title.upper()}\n\n{top_p.content}\n\n[Source: {top_p.citation.source} • {top_p.citation.section}]"
+            return reply, f"Grounded Protocol ({top_p.condition_label})", citations
 
         # Default: Grounded current step instruction
         step_idx = min(current_step, len(protocol.steps) - 1)

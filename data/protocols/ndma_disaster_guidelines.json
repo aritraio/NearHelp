@@ -1,0 +1,180 @@
+{
+  "document_id": "ndma_disaster_guidelines_2023",
+  "title": "National Disaster Management Authority (NDMA) Disaster Response Guidelines",
+  "organization": "National Disaster Management Authority (NDMA), Govt of India",
+  "authority": "NDMA, Ministry of Home Affairs, Govt of India & National Disaster Response Force (NDRF)",
+  "version": "2023.3",
+  "license": "Government Open Data Emergency Standard",
+  "source_url": "https://ndma.gov.in",
+  "statutory_shield": "Disaster Management Act 2005 & Section 134A Motor Vehicles (Amendment) Act 2019",
+  "protocols": [
+    {
+      "condition_id": "building_collapse",
+      "condition_label": "Structural Building Collapse & Crush Injury",
+      "crisis_type": "natural_disaster",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "NDMA & NDRF Urban Search and Rescue (USAR) Protocol",
+      "section": "NDMA USAR Guidelines §5: Extrication Precautions & Crush Syndrome Management",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Establish Structural Scene Safety & Gas/Power Shutoff",
+          "action_instruction": "Assess for secondary structural collapses, falling debris, live broken electrical lines, and severed gas pipes before entering. Cut off main utilities if accessible safely from the perimeter.",
+          "warning_note": "Do not enter unstable rubble piles without NDRF/Fire Department shoring equipment.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Protect Trapped Victims from Dust & Smoke Inhalation",
+          "action_instruction": "Cover victim's nose and mouth with a damp cloth or particulate mask to filter pulverized concrete dust and silica. Clear dust and debris from victim's face and airway.",
+          "warning_note": "Pulverized concrete causes acute toxic pneumonitis and airway obstruction.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Crush Injury Syndrome Precaution (Prolonged Compression > 1 Hour)",
+          "action_instruction": "When a heavy beam, slab, or wall has compressed a limb for over 1 hour, releasing the weight suddenly floods the circulation with toxic potassium, myoglobin, and lactic acid (Reperfusion Shock & Cardiac Arrest). If ALS paramedics are arriving, coordinate IV saline hydration BEFORE lifting the slab. If ALS is delayed and limb was crushed > 2 hours, apply a tourniquet just above the crushed zone before lifting.",
+          "warning_note": "Sudden uncoordinated extrication of heavily crushed limbs can trigger fatal ventricular fibrillation within minutes.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Cervical Spine Support & Thermal Insulation",
+          "action_instruction": "Immobilize head and neck while extricating victim onto a rigid backboard. Wrap with warm thermal blankets to prevent hypothermia.",
+          "warning_note": "Handle gently to prevent dislodging bone fragments or worsening internal trauma.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_UNPREPARED_CRUSH_RELEASE",
+          "warning_title": "Do Not Release Prolonged Crush Without Preparation",
+          "warning_message": "Abrupt release of limbs compressed > 1-2 hours without medical readiness releases massive hyperkalemia and causes immediate cardiac arrest (Crush Syndrome).",
+          "action_directive": "Coordinate with 108 ALS paramedics for IV fluid loading prior to lifting heavy debris."
+        }
+      ]
+    },
+    {
+      "condition_id": "gas_leak",
+      "condition_label": "Toxic Chemical & LPG Gas Leak",
+      "crisis_type": "gas_leak",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "NDMA Hazardous Materials (HAZMAT) & Gas Leak Protocol",
+      "section": "NDMA Chemical Disaster Guidelines §4: Household LPG & Industrial Vapor Release",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Evacuate Upwind and Crosswind Immediately",
+          "action_instruction": "Move all persons immediately away from the leak in an upwind (against the wind direction) or crosswind direction. Dense gases (LPG, Chlorine) sink and pool in low-lying basements, pits, and drains.",
+          "warning_note": "Never walk into or downwind of a visible vapor cloud or odor plume.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Strict No-Ignition / No-Electrical-Switch Rule",
+          "action_instruction": "Do NOT operate any light switches, electrical appliances, doorbells, elevators, flashlights, or mobile phones inside or near the gas area. Do not strike matches or lighters. A microscopic electrical spark can ignite an explosive fuel-air mixture.",
+          "warning_note": "Even unplugging an appliance or toggling a light switch creates an ignition spark.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Protect Airway with Damp Cloth",
+          "action_instruction": "Breathe through a clean wet cloth, towel, or handkerchief placed firmly over nose and mouth. Water absorbs and traps water-soluble chemical vapors (such as ammonia and chlorine).",
+          "warning_note": "Do not take deep breaths while in the contaminated zone.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Ventilate Area and Shut Valve from Outside",
+          "action_instruction": "If safe to do so without entering a dense gas cloud, turn off the main cylinder pressure regulator valve and open all external windows and doors. Call Fire Services (101) and Emergency (108/112).",
+          "warning_note": "If whistling, hissing, or high pressure roar is heard, evacuate area to at least 100 meters immediately.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_ELECTRICAL_SWITCH_GAS",
+          "warning_title": "Strictly No Electrical Switches or Open Flames",
+          "warning_message": "Operating electrical toggles, doorbells, or mobile phones inside an explosive gas atmosphere causes instantaneous vapor cloud explosions.",
+          "action_directive": "Do not touch switches; leave switches exactly in their current state and evacuate."
+        }
+      ]
+    },
+    {
+      "condition_id": "flood_water_hazard",
+      "condition_label": "Urban Flooding & Swift-Water Hazards",
+      "crisis_type": "natural_disaster",
+      "severity_level": 4,
+      "priority": "high",
+      "protocol_name": "NDMA Urban Flood Safety Guidelines",
+      "section": "NDMA Flood Manual §3: Inundation Safety, Electrocution & Waterborne Hazards",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Avoid Walking or Driving Through Moving Floodwater",
+          "action_instruction": "Never drive or walk through flooded streets. Just 15 cm (6 inches) of fast-moving water can knock an adult down, and 30 cm (12 inches) can sweep away a car.",
+          "warning_note": "Submerged open manholes and washed-away road surfaces are invisible under murky water.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Watch for Electrocution from Downed Power Lines",
+          "action_instruction": "Stay clear of submerged electrical poles, transformers, streetlights, and downed wires. Water conducts electricity over large distances.",
+          "warning_note": "If you feel tingling in water, stop immediately, turn around, and hop on one foot or shuffle feet together away from the source.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Move to Upper Floors / Elevated Ground",
+          "action_instruction": "Evacuate vertically to upper floors of sturdy concrete buildings or designated NDRF flood shelters. Take emergency dry food, clean drinking water, flashlight, and medication.",
+          "warning_note": "Do not climb into closed attics where rising water can trap you; ensure roof access.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Disinfect and Boil Water",
+          "action_instruction": "Do not drink floodwater or tap water from flooded mains without boiling for at least 1 minute or using chlorine purification tablets.",
+          "warning_note": "Floodwaters contain raw sewage, toxic runoff, and lethal waterborne pathogens (leptospirosis, cholera).",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_DRINKING_FLOODWATER",
+          "warning_title": "Do Not Consume Unpurified Floodwater",
+          "warning_message": "Flood runoff causes severe acute gastroenteritis, leptospirosis, cholera, and toxic poisoning.",
+          "action_directive": "Consume only sealed bottled or rigorously boiled water."
+        }
+      ]
+    }
+  ]
+}

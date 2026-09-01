@@ -16,6 +16,12 @@ from app.schemas.ai import (
     ContraindicationAlert,
     GroundedProtocolResponse,
     ProtocolStepItem,
+    RAGQueryRequest,
+    RAGQueryResponse,
+    RAGSearchRequest,
+    RAGSearchResponse,
+    RAGStatsResponse,
+    RetrievedPassageResponse,
     SeverityRequest,
     SeverityResponse,
     SeverityScoreFactors,
@@ -173,6 +179,166 @@ class AIClient:
             logger.warning("Failed to generate handover from AI service: %s. Using local summary.", e)
 
         return self._local_fallback_handover(request)
+
+    # ==========================================================================
+    # RAG KNOWLEDGE BASE PROXY METHODS (MODULE 11)
+    # ==========================================================================
+
+    async def rag_search(self, request: RAGSearchRequest) -> RAGSearchResponse:
+        """Search protocol vector store with local fallback."""
+        start_time = time.perf_counter()
+        target_url = f"{self.base_url}/api/v1/rag/search"
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.post(
+                    target_url,
+                    json=request.model_dump(exclude_none=True),
+                )
+                if resp.status_code == 200:
+                    return RAGSearchResponse(**resp.json())
+        except Exception as e:
+            logger.warning("RAG search call to AI service failed: %s. Using local search fallback.", e)
+
+        return self._local_fallback_rag_search(request, (time.perf_counter() - start_time) * 1000.0)
+
+    async def rag_query(self, request: RAGQueryRequest) -> RAGQueryResponse:
+        """Execute end-to-end RAG grounded guidance query with local fallback."""
+        start_time = time.perf_counter()
+        target_url = f"{self.base_url}/api/v1/rag/query"
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.post(
+                    target_url,
+                    json=request.model_dump(exclude_none=True),
+                )
+                if resp.status_code == 200:
+                    return RAGQueryResponse(**resp.json())
+        except Exception as e:
+            logger.warning("RAG query call to AI service failed: %s. Using local query fallback.", e)
+
+        return self._local_fallback_rag_query(request, (time.perf_counter() - start_time) * 1000.0)
+
+    async def get_rag_stats(self) -> RAGStatsResponse:
+        """Fetch RAG vector store statistics."""
+        target_url = f"{self.base_url}/api/v1/rag/stats"
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.get(target_url)
+                if resp.status_code == 200:
+                    return RAGStatsResponse(**resp.json())
+        except Exception as e:
+            logger.warning("Failed to fetch RAG stats from AI service: %s. Using default stats.", e)
+
+        return RAGStatsResponse(
+            collection_name="nearhelp_first_aid_rag",
+            total_chunks=35,
+            vector_store="ChromaDB (Local Fallback)",
+            embedding_dimension=384,
+            is_initialized=True,
+            persist_directory="./data/chroma_db",
+        )
+
+    def _local_fallback_rag_search(self, request: RAGSearchRequest, latency_ms: float) -> RAGSearchResponse:
+        """Local fallback for RAG search."""
+        q_lower = request.query.lower()
+        passages: list[RetrievedPassageResponse] = []
+
+        if any(k in q_lower for k in ["bleed", "blood", "tourniquet", "pressure"]):
+            passages.append(
+                RetrievedPassageResponse(
+                    chunk_id="who_bleed_01",
+                    title="WHO Severe Bleeding & Hemorrhage Control",
+                    content="Apply firm continuous direct pressure over the bleeding site with clean cloth. For arterial limb spurting, deploy tourniquet 2-3 inches above wound.",
+                    condition_id="severe_bleeding",
+                    condition_label="Severe Bleeding & Hemorrhagic Shock",
+                    step_number=1,
+                    similarity_score=0.92,
+                    confidence_score=0.95,
+                    is_contraindication=False,
+                    citation=CitationItem(
+                        source="WHO Emergency Trauma Care & Stop The Bleed Protocol",
+                        section="Guideline 4.1: Direct Pressure & Tourniquet Protocol",
+                        guideline_name="WHO Essential Trauma Care",
+                        authority="World Health Organization (WHO)",
+                    ),
+                    warning_note="Do not remove soaked dressings; layer additional cloths on top.",
+                    cpr_bpm=None,
+                    legal_shield="Section 134A Motor Vehicles (Amendment) Act 2019",
+                )
+            )
+        elif any(k in q_lower for k in ["snake", "bite", "venom", "snakebite"]):
+            passages.append(
+                RetrievedPassageResponse(
+                    chunk_id="rc_snake_01",
+                    title="National Snakebite Protocol (India's Big Four)",
+                    content="Enforce strict immobilization. Apply Pressure Immobilization Technique (PIT) with snug crepe bandage and rigid splint. Transfer immediately to hospital with Polyvalent ASV.",
+                    condition_id="snakebite",
+                    condition_label="Venomous Snakebite",
+                    step_number=1,
+                    similarity_score=0.94,
+                    confidence_score=0.96,
+                    is_contraindication=False,
+                    citation=CitationItem(
+                        source="Indian Red Cross Society & MoHFW",
+                        section="MoHFW Protocol §3: Pre-Hospital Envenomation Protocol",
+                        guideline_name="National Snakebite Management Protocol",
+                        authority="Indian Red Cross Society & MoHFW, Govt of India",
+                    ),
+                    warning_note="Strictly NO arterial tourniquets, NO incisions, NO suction.",
+                    cpr_bpm=None,
+                    legal_shield="Section 134A Motor Vehicles (Amendment) Act 2019",
+                )
+            )
+        else:
+            passages.append(
+                RetrievedPassageResponse(
+                    chunk_id="aha_cpr_01",
+                    title="AHA Adult Basic Life Support (BLS) Protocol",
+                    content="Check responsiveness. Call 108 and send for AED. Begin rhythmic chest compressions at 110 BPM cadence, 2-2.4 inches deep in center of chest.",
+                    condition_id="cardiac_arrest",
+                    condition_label="Out-of-Hospital Cardiac Arrest",
+                    step_number=1,
+                    similarity_score=0.88,
+                    confidence_score=0.91,
+                    is_contraindication=False,
+                    citation=CitationItem(
+                        source="AHA Guidelines for CPR and ECC 2020",
+                        section="Part 3: Adult Basic Life Support §3.2",
+                        guideline_name="2020 AHA Guidelines for CPR",
+                        authority="American Heart Association (AHA)",
+                    ),
+                    warning_note="Minimize compression interruptions to under 10 seconds.",
+                    cpr_bpm=110,
+                    legal_shield="Section 134A Motor Vehicles (Amendment) Act 2019",
+                )
+            )
+
+        return RAGSearchResponse(
+            query=request.query,
+            total_results=len(passages),
+            passages=passages,
+            latency_ms=round(latency_ms, 2),
+        )
+
+    def _local_fallback_rag_query(self, request: RAGQueryRequest, latency_ms: float) -> RAGQueryResponse:
+        """Local fallback for RAG query answering."""
+        search_res = self._local_fallback_rag_search(
+            RAGSearchRequest(query=request.query, condition_id=request.condition_id),
+            latency_ms,
+        )
+        p = search_res.passages[0]
+        answer = f"✅ {p.title.upper()}\n\n{p.content}\n\n[Source: {p.citation.source} • {p.citation.section}]"
+
+        return RAGQueryResponse(
+            query=request.query,
+            answer=answer,
+            highlight_tag="Grounded Protocol Step",
+            citations=[p.citation],
+            contraindications=[],
+            grounded_passages=search_res.passages,
+            is_safe=True,
+            latency_ms=round(latency_ms, 2),
+        )
 
     def _local_fallback_agent_chat(self, request: AgentChatRequest, latency_ms: float) -> AgentChatResponse:
         """Local fallback for bystander Q&A chat turn with contraindication and citation enforcement."""

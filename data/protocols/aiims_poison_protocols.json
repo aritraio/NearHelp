@@ -1,0 +1,130 @@
+{
+  "document_id": "aiims_poison_protocols_2023",
+  "title": "AIIMS National Poisons Information Centre Emergency Protocols",
+  "organization": "All India Institute of Medical Sciences (AIIMS) & Indian Council of Medical Research (ICMR)",
+  "authority": "AIIMS National Poisons Information Centre & Ministry of Health and Family Welfare (MoHFW)",
+  "version": "2023.1",
+  "license": "National Toxicology Guidance",
+  "source_url": "https://www.aiims.edu/en/poison-info.html",
+  "statutory_shield": "Section 134A Motor Vehicles (Amendment) Act 2019 & Supreme Court Good Samaritan Judgment",
+  "protocols": [
+    {
+      "condition_id": "poisoning_caustic",
+      "condition_label": "Acute Poisoning & Caustic / Acid Ingestion",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "AIIMS Emergency Toxicology & Chemical Ingestion Protocol",
+      "section": "NPIC Manual §2: Corrosive Ingestions, Hydrocarbon Aspiration & Decontamination",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Never Induce Vomiting (Emesis Contraindicated)",
+          "action_instruction": "Do NOT give salt water, mustard, or stick fingers down the throat to induce vomiting. Ingested acids, alkalis (drain cleaners, bleach), and hydrocarbons (kerosene, petrol) cause double corrosive burning and fatal chemical pneumonitis if vomited back up through the esophagus and airway.",
+          "warning_note": "Inducing vomiting in corrosive or hydrocarbon ingestion causes catastrophic esophageal rupture and chemical asphyxiation.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Rinse Mouth and Wipe Skin Decontamination",
+          "action_instruction": "Rinse mouth thoroughly with plain cool water and spit it out. Strip all poison-splashed clothing immediately and wash skin with abundant soap and running water for at least 15 minutes.",
+          "warning_note": "Rescuers must wear rubber gloves to avoid secondary poisoning.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Preserve Container / Label for Hospital Identification",
+          "action_instruction": "Safely place the poison bottle, chemical container, blister pack, or plant sample in a sealed plastic bag and bring it with the victim to the emergency department. Take a clear photo of the chemical label.",
+          "warning_note": "Do not taste or smell the substance.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Position in Lateral Recovery Position and Dispatch 108",
+          "action_instruction": "Place drowsy or vomiting victims onto their left side in recovery position to prevent vomit from choking the airway. Call 108 immediately and state the specific poison name if known.",
+          "warning_note": "Continuous airway observation is mandatory.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_INDUCED_VOMITING_CORROSIVE",
+          "warning_title": "Strictly Do Not Induce Vomiting",
+          "warning_message": "Vomiting corrosives causes secondary burning of the vocal cords and pharynx, mediastinitis, and fatal aspiration pneumonia.",
+          "action_directive": "Never administer emetics (salt water, ipecac) or induce gagging."
+        },
+        {
+          "flag": "NO_CHEMICAL_NEUTRALIZATION",
+          "warning_title": "Do Not Attempt Chemical Neutralization",
+          "warning_message": "Giving vinegar/lemon to neutralize alkalis or baking soda to neutralize acids triggers massive exothermic chemical heat release, causing deep internal thermal burns.",
+          "action_directive": "Never attempt to neutralize acids or alkalis with opposing chemicals."
+        }
+      ]
+    },
+    {
+      "condition_id": "organophosphate_pesticide",
+      "condition_label": "Organophosphate & Agricultural Pesticide Poisoning",
+      "crisis_type": "medical",
+      "severity_level": 5,
+      "priority": "critical",
+      "protocol_name": "AIIMS / ICMR Organophosphate Emergency Management Protocol",
+      "section": "NPIC Protocol §4: Cholinergic Crisis Decontamination & ALS Dispatch",
+      "cpr_bpm": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "title": "Rescuer Self-Protection & Complete Dermal Decontamination",
+          "action_instruction": "Organophosphates (malathion, chlorpyrifos) absorb rapidly through skin. Rescuers must wear nitrile gloves and mask. Immediately strip all victim clothing and wash body twice with copious soap and water.",
+          "warning_note": "Bag contaminated clothing in double plastic bags.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 2,
+          "title": "Maintain Clear Airway and Suction Secretions",
+          "action_instruction": "Organophosphate poisoning causes massive bronchial secretions, frothing at mouth, pinpoint pupils, and bradycardia (SLUDGE syndrome). Position victim in lateral recovery position and wipe frothing saliva continuously.",
+          "warning_note": "Watch for sudden respiratory muscle paralysis.",
+          "is_contraindication": false,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 3,
+          "title": "Call 108 Emergency Ambulance for Immediate Atropine Administration",
+          "action_instruction": "Alert 108 dispatcher that victim has severe organophosphate pesticide poisoning requiring immediate high-dose IV Atropine and Pralidoxime (2-PAM) in hospital.",
+          "warning_note": "Atropine is a hospital/paramedic administered antidote.",
+          "is_contraindication": false,
+          "is_medication_restricted": true,
+          "is_surgical_restricted": false
+        },
+        {
+          "step_number": 4,
+          "title": "Prepare for CPR if Asphyxiation Occurs",
+          "action_instruction": "If breathing stops, perform chest compressions. Use a bag-valve-mask with barrier filter for ventilations; avoid direct mouth-to-mouth on pesticide-covered victims to avoid rescuer poisoning.",
+          "warning_note": "Never do unprotected mouth-to-mouth resuscitation on a victim who ingested pesticides.",
+          "is_contraindication": true,
+          "is_medication_restricted": false,
+          "is_surgical_restricted": false
+        }
+      ],
+      "contraindications": [
+        {
+          "flag": "NO_BARE_MOUTH_TO_MOUTH_PESTICIDE",
+          "warning_title": "No Direct Mouth-to-Mouth Resuscitation",
+          "warning_message": "Direct mouth contact with organophosphate residue causes fatal cyanide-like toxicity in the rescuer.",
+          "action_directive": "Use bag-valve mask, pocket mask with one-way filter, or hands-only CPR."
+        }
+      ]
+    }
+  ]
+}
