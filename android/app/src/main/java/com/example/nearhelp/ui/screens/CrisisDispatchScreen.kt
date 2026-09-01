@@ -21,7 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Emergency
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Link
@@ -135,7 +135,7 @@ fun CrisisDispatchScreen(
                     onClick = { activeTab = CrisisTab.SHARING }
                 )
                 SegmentedPill(
-                    icon = Icons.Default.Chat,
+                    icon = Icons.AutoMirrored.Filled.Chat,
                     label = "Message",
                     isSelected = activeTab == CrisisTab.MESSAGE,
                     onClick = {

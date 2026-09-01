@@ -133,7 +133,7 @@ fun EmergencyCategoryGrid(
                                 onCategorySelected(category.id)
                             }
                             .padding(vertical = 8.dp, horizontal = 2.dp),
-                        horizontalAlignment = Alignment.CenterVertically,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         // Icon Container Badge
