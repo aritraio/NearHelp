@@ -47,10 +47,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -114,12 +114,13 @@ fun SignUpScreen(
                 }
                 Text(
                     text = "Create Profile",
+                    fontFamily = FontFamily.SansSerif,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color(0xFF0F172A),
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // Header
             AuthHeader(
@@ -128,7 +129,7 @@ fun SignUpScreen(
                 showLogo = false,
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Error Box
             if (uiState is AuthUiState.Error) {
@@ -138,35 +139,42 @@ fun SignUpScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFFFFEBEE))
-                        .border(1.dp, EmergencyCrimson.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                        .border(1.dp, EmergencyCrimson.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                         .padding(14.dp),
                 ) {
                     Text(
                         text = errorMsg,
                         color = Color(0xFFB71C1C),
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
             }
 
             // Name Input
             OutlinedTextField(
                 value = signUpForm.name,
                 onValueChange = { viewModel.onSignUpNameChanged(it) },
-                label = { Text("Full Name *") },
-                placeholder = { Text("e.g. John Doe") },
+                label = { Text("Full Name *", fontFamily = FontFamily.SansSerif) },
+                placeholder = { Text("e.g. John Doe", fontFamily = FontFamily.SansSerif) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Name Icon",
                         tint = if (signUpForm.nameError != null) EmergencyCrimson else Color(0xFF64748B),
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 isError = signUpForm.nameError != null,
                 supportingText = {
                     if (signUpForm.nameError != null) {
-                        Text(text = signUpForm.nameError!!, color = EmergencyCrimson)
+                        Text(
+                            text = signUpForm.nameError!!,
+                            color = EmergencyCrimson,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 12.sp,
+                        )
                     }
                 },
                 singleLine = true,
@@ -177,12 +185,15 @@ fun SignUpScreen(
                     unfocusedBorderColor = Color(0xFFCBD5E1),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
+                    cursorColor = EmergencyCrimson,
                     focusedTextColor = Color(0xFF0F172A),
                     unfocusedTextColor = Color(0xFF0F172A),
+                    focusedLabelColor = EmergencyCrimson,
+                    unfocusedLabelColor = Color(0xFF64748B),
+                    focusedPlaceholderColor = Color(0xFF94A3B8),
+                    unfocusedPlaceholderColor = Color(0xFF94A3B8),
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(3.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x0A000000)),
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -191,19 +202,25 @@ fun SignUpScreen(
             OutlinedTextField(
                 value = signUpForm.email,
                 onValueChange = { viewModel.onSignUpEmailChanged(it) },
-                label = { Text("Email Address *") },
-                placeholder = { Text("name@example.com") },
+                label = { Text("Email Address *", fontFamily = FontFamily.SansSerif) },
+                placeholder = { Text("name@example.com", fontFamily = FontFamily.SansSerif) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Email Icon",
                         tint = if (signUpForm.emailError != null) EmergencyCrimson else Color(0xFF64748B),
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 isError = signUpForm.emailError != null,
                 supportingText = {
                     if (signUpForm.emailError != null) {
-                        Text(text = signUpForm.emailError!!, color = EmergencyCrimson)
+                        Text(
+                            text = signUpForm.emailError!!,
+                            color = EmergencyCrimson,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 12.sp,
+                        )
                     }
                 },
                 singleLine = true,
@@ -217,12 +234,15 @@ fun SignUpScreen(
                     unfocusedBorderColor = Color(0xFFCBD5E1),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
+                    cursorColor = EmergencyCrimson,
                     focusedTextColor = Color(0xFF0F172A),
                     unfocusedTextColor = Color(0xFF0F172A),
+                    focusedLabelColor = EmergencyCrimson,
+                    unfocusedLabelColor = Color(0xFF64748B),
+                    focusedPlaceholderColor = Color(0xFF94A3B8),
+                    unfocusedPlaceholderColor = Color(0xFF94A3B8),
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(3.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x0A000000)),
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -231,13 +251,14 @@ fun SignUpScreen(
             OutlinedTextField(
                 value = signUpForm.password,
                 onValueChange = { viewModel.onSignUpPasswordChanged(it) },
-                label = { Text("Password (min 6 characters) *") },
-                placeholder = { Text("••••••••") },
+                label = { Text("Password (min 6 characters) *", fontFamily = FontFamily.SansSerif) },
+                placeholder = { Text("••••••••", fontFamily = FontFamily.SansSerif) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Password Icon",
                         tint = if (signUpForm.passwordError != null) EmergencyCrimson else Color(0xFF64748B),
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 trailingIcon = {
@@ -246,6 +267,7 @@ fun SignUpScreen(
                             imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
                             tint = Color(0xFF64748B),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 },
@@ -253,7 +275,12 @@ fun SignUpScreen(
                 isError = signUpForm.passwordError != null,
                 supportingText = {
                     if (signUpForm.passwordError != null) {
-                        Text(text = signUpForm.passwordError!!, color = EmergencyCrimson)
+                        Text(
+                            text = signUpForm.passwordError!!,
+                            color = EmergencyCrimson,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 12.sp,
+                        )
                     }
                 },
                 singleLine = true,
@@ -267,12 +294,15 @@ fun SignUpScreen(
                     unfocusedBorderColor = Color(0xFFCBD5E1),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
+                    cursorColor = EmergencyCrimson,
                     focusedTextColor = Color(0xFF0F172A),
                     unfocusedTextColor = Color(0xFF0F172A),
+                    focusedLabelColor = EmergencyCrimson,
+                    unfocusedLabelColor = Color(0xFF64748B),
+                    focusedPlaceholderColor = Color(0xFF94A3B8),
+                    unfocusedPlaceholderColor = Color(0xFF94A3B8),
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(3.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x0A000000)),
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -281,19 +311,25 @@ fun SignUpScreen(
             OutlinedTextField(
                 value = signUpForm.phone,
                 onValueChange = { viewModel.onSignUpPhoneChanged(it) },
-                label = { Text("Phone Number (Optional for SMS / OTP)") },
-                placeholder = { Text("+919876543210") },
+                label = { Text("Phone Number (Optional for SMS / OTP)", fontFamily = FontFamily.SansSerif) },
+                placeholder = { Text("+919876543210", fontFamily = FontFamily.SansSerif) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Phone,
                         contentDescription = "Phone Icon",
                         tint = Color(0xFF64748B),
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 isError = signUpForm.phoneError != null,
                 supportingText = {
                     if (signUpForm.phoneError != null) {
-                        Text(text = signUpForm.phoneError!!, color = EmergencyCrimson)
+                        Text(
+                            text = signUpForm.phoneError!!,
+                            color = EmergencyCrimson,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 12.sp,
+                        )
                     }
                 },
                 singleLine = true,
@@ -307,12 +343,15 @@ fun SignUpScreen(
                     unfocusedBorderColor = Color(0xFFCBD5E1),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
+                    cursorColor = EmergencyCrimson,
                     focusedTextColor = Color(0xFF0F172A),
                     unfocusedTextColor = Color(0xFF0F172A),
+                    focusedLabelColor = EmergencyCrimson,
+                    unfocusedLabelColor = Color(0xFF64748B),
+                    focusedPlaceholderColor = Color(0xFF94A3B8),
+                    unfocusedPlaceholderColor = Color(0xFF94A3B8),
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(3.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x0A000000)),
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -329,10 +368,10 @@ fun SignUpScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(2.dp, RoundedCornerShape(12.dp), ambientColor = Color(0x0A000000))
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(Color.White)
-                    .padding(8.dp),
+                    .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(16.dp))
+                    .padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(
@@ -346,12 +385,13 @@ fun SignUpScreen(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "I agree to NearHelp Emergency Response terms and Good Samaritan protocols (India 2016).",
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+                    fontFamily = FontFamily.SansSerif,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
                     color = Color(0xFF475569),
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Sign Up Action Button
             Button(
@@ -362,13 +402,15 @@ fun SignUpScreen(
                 enabled = !isLoading && signUpForm.isValid,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
-                    .shadow(6.dp, RoundedCornerShape(24.dp), ambientColor = Color(0x33E52538)),
-                shape = RoundedCornerShape(24.dp),
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = EmergencyCrimson,
                     contentColor = Color.White,
+                    disabledContainerColor = Color(0xFFE2E8F0),
+                    disabledContentColor = Color(0xFF94A3B8),
                 ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 2.dp),
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -379,6 +421,7 @@ fun SignUpScreen(
                 } else {
                     Text(
                         text = "Create Account",
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
@@ -396,14 +439,18 @@ fun SignUpScreen(
             ) {
                 Text(
                     text = "Already have an account?",
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.SansSerif,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                     color = Color(0xFF64748B),
                 )
+                Spacer(modifier = Modifier.width(4.dp))
                 TextButton(onClick = onNavigateToLogin) {
                     Text(
                         text = "Sign In",
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
                             color = EmergencyCrimson,
                         ),
                     )
@@ -412,4 +459,5 @@ fun SignUpScreen(
         }
     }
 }
+
 

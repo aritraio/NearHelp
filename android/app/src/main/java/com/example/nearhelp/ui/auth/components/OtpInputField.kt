@@ -16,8 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -64,7 +64,6 @@ fun OtpInputField(
                     Box(
                         modifier = Modifier
                             .size(48.dp)
-                            .shadow(2.dp, RoundedCornerShape(14.dp), ambientColor = Color(0x0A000000))
                             .clip(RoundedCornerShape(14.dp))
                             .background(Color.White)
                             .border(
@@ -76,6 +75,7 @@ fun OtpInputField(
                     ) {
                         Text(
                             text = char,
+                            fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
@@ -90,4 +90,5 @@ fun OtpInputField(
         modifier = modifier.fillMaxWidth(),
     )
 }
+
 

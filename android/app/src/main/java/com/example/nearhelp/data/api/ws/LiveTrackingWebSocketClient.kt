@@ -55,7 +55,26 @@ class LiveTrackingWebSocketClient(
   private var webSocket: WebSocket? = null
   private var currentIncidentId: String? = null
   private var currentToken: String? = null
-  private var currentBaseWsUrl: String = "ws://10.0.2.2:8000"
+
+  private fun isRunningOnEmulator(): Boolean {
+    return (android.os.Build.FINGERPRINT.startsWith("generic")
+        || android.os.Build.FINGERPRINT.startsWith("unknown")
+        || android.os.Build.MODEL.contains("google_sdk")
+        || android.os.Build.MODEL.contains("Emulator")
+        || android.os.Build.MODEL.contains("Android SDK built for x86")
+        || android.os.Build.MANUFACTURER.contains("Genymotion")
+        || (android.os.Build.BRAND.startsWith("generic") && android.os.Build.DEVICE.startsWith("generic"))
+        || "google_sdk" == android.os.Build.PRODUCT)
+  }
+
+  private val defaultWsUrl: String
+    get() = if (isRunningOnEmulator()) "ws://10.0.2.2:8000" else "ws://127.0.0.1:8000"
+
+  private var currentBaseWsUrl: String? = null
+
+  private fun getEffectiveWsUrl(): String {
+    return currentBaseWsUrl ?: defaultWsUrl
+  }
 
   private val _connectionStatus = MutableStateFlow(ConnectionStatus.DISCONNECTED)
   val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
@@ -86,11 +105,12 @@ class LiveTrackingWebSocketClient(
     _connectionStatus.value = ConnectionStatus.CONNECTING
 
     val wsUrl = buildString {
-      append("$currentBaseWsUrl/ws/tracking/$incidentId")
+      append("${getEffectiveWsUrl()}/ws/tracking/$incidentId")
       if (!token.isNullOrBlank()) {
         append("?token=$token")
       }
     }
+
 
     logI("Connecting to WebSocket URL: $wsUrl")
 

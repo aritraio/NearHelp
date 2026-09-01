@@ -32,20 +32,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nearhelp.theme.EmergencyCrimson
-import com.example.nearhelp.theme.EmergencyCrimsonDark
 
 /**
- * High-visibility, pulsing 1-Tap Anonymous Emergency Bypass Button
- * adhering to the Zero-Barrier SOS design principle in UI_GUIDANCE.md & design.md.
+ * High-visibility 1-Tap Anonymous Emergency Bypass Button
+ * adhering to the Zero-Barrier SOS design principle in design.md.
  */
 @Composable
 fun EmergencyButton(
@@ -57,9 +56,9 @@ fun EmergencyButton(
     val infiniteTransition = rememberInfiniteTransition(label = "EmergencyPulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.03f,
+        targetValue = 1.02f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
+            animation = tween(1400, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse,
         ),
         label = "ButtonPulseScale",
@@ -72,13 +71,8 @@ fun EmergencyButton(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .scale(pulseScale)
-                .shadow(
-                    elevation = 8.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    ambientColor = Color(0x33E52538),
-                    spotColor = Color(0x66E52538)
-                )
+                .scale(if (!isLoading) pulseScale else 1f)
+                .clip(RoundedCornerShape(16.dp))
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
@@ -86,14 +80,13 @@ fun EmergencyButton(
                             EmergencyCrimson,
                             Color(0xFFD70015),
                         )
-                    ),
-                    shape = RoundedCornerShape(24.dp)
+                    )
                 )
                 .clickable(enabled = !isLoading) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onClick()
                 }
-                .padding(vertical = 16.dp, horizontal = 20.dp),
+                .padding(vertical = 14.dp, horizontal = 20.dp),
             contentAlignment = Alignment.Center,
         ) {
             if (isLoading) {
@@ -110,6 +103,7 @@ fun EmergencyButton(
                     Text(
                         text = "Initiating Emergency Mode...",
                         color = Color.White,
+                        fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
                     )
@@ -129,14 +123,16 @@ fun EmergencyButton(
                     Column {
                         Text(
                             text = "1-TAP EMERGENCY SOS",
+                            fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp,
                             ),
                             color = Color.White,
                         )
                         Text(
                             text = "Skip login · Instant anonymous triage",
+                            fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Normal,
@@ -148,7 +144,7 @@ fun EmergencyButton(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -163,10 +159,12 @@ fun EmergencyButton(
             Spacer(modifier = Modifier.width(5.dp))
             Text(
                 text = "No account required for active emergencies",
+                fontFamily = FontFamily.SansSerif,
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.5.sp),
                 color = Color(0xFF64748B),
             )
         }
     }
 }
+
 

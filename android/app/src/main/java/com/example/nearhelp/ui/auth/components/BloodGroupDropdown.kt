@@ -19,10 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +42,7 @@ fun BloodGroupSelector(
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "Blood Group (For Emergency Medical ID)",
+            fontFamily = FontFamily.SansSerif,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
@@ -65,11 +66,6 @@ fun BloodGroupSelector(
 
                 Box(
                     modifier = Modifier
-                        .shadow(
-                            elevation = if (isSelected) 4.dp else 1.dp,
-                            shape = RoundedCornerShape(12.dp),
-                            ambientColor = if (isSelected) Color(0x33E52538) else Color(0x0A000000)
-                        )
                         .clip(RoundedCornerShape(12.dp))
                         .background(backgroundColor)
                         .border(1.dp, borderColor, RoundedCornerShape(12.dp))
@@ -82,6 +78,7 @@ fun BloodGroupSelector(
                 ) {
                     Text(
                         text = bloodGroup,
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             fontSize = 13.sp,
@@ -93,4 +90,5 @@ fun BloodGroupSelector(
         }
     }
 }
+
 

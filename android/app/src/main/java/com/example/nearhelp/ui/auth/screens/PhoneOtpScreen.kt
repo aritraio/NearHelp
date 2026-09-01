@@ -41,10 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -109,34 +109,36 @@ fun PhoneOtpScreen(
                 }
                 Text(
                     text = "Phone Verification",
+                    fontFamily = FontFamily.SansSerif,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color(0xFF0F172A),
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Icon Circle
             Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .shadow(8.dp, CircleShape, ambientColor = Color(0x18000000))
+                    .size(76.dp)
                     .clip(CircleShape)
-                    .background(Color.White),
+                    .background(Color.White)
+                    .border(1.dp, Color(0xFFCBD5E1), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = if (isOtpSent) Icons.Default.Sms else Icons.Default.Phone,
                     contentDescription = "Phone verification",
                     tint = EmergencyCrimson,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(34.dp),
                 )
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = if (isOtpSent) "Enter Verification Code" else "Phone OTP Sign-In",
+                fontFamily = FontFamily.SansSerif,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp
@@ -153,6 +155,7 @@ fun PhoneOtpScreen(
                 } else {
                     "Enter your mobile number with country code to receive an instant verification code"
                 },
+                fontFamily = FontFamily.SansSerif,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 13.5.sp,
                     lineHeight = 18.sp
@@ -161,7 +164,7 @@ fun PhoneOtpScreen(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Error Alert Box
             if (uiState is AuthUiState.Error) {
@@ -171,16 +174,17 @@ fun PhoneOtpScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFFFFEBEE))
-                        .border(1.dp, EmergencyCrimson.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                        .border(1.dp, EmergencyCrimson.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                         .padding(14.dp),
                 ) {
                     Text(
                         text = errorMsg,
                         color = Color(0xFFB71C1C),
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
             }
 
             if (!isOtpSent) {
@@ -188,21 +192,32 @@ fun PhoneOtpScreen(
                 OutlinedTextField(
                     value = otpForm.phoneNumber,
                     onValueChange = { viewModel.onOtpPhoneNumberChanged(it) },
-                    label = { Text("Mobile Number (with country code)") },
-                    placeholder = { Text("+919876543210") },
+                    label = { Text("Mobile Number (with country code)", fontFamily = FontFamily.SansSerif) },
+                    placeholder = { Text("+919876543210", fontFamily = FontFamily.SansSerif) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Phone,
                             contentDescription = "Phone",
                             tint = Color(0xFF64748B),
+                            modifier = Modifier.size(20.dp),
                         )
                     },
                     isError = otpForm.phoneError != null,
                     supportingText = {
                         if (otpForm.phoneError != null) {
-                            Text(text = otpForm.phoneError!!, color = EmergencyCrimson)
+                            Text(
+                                text = otpForm.phoneError!!,
+                                color = EmergencyCrimson,
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 12.sp,
+                            )
                         } else {
-                            Text(text = "e.g. +91 98765 43210 for India", color = Color(0xFF64748B))
+                            Text(
+                                text = "e.g. +91 98765 43210 for India",
+                                color = Color(0xFF64748B),
+                                fontFamily = FontFamily.SansSerif,
+                                fontSize = 12.sp,
+                            )
                         }
                     },
                     singleLine = true,
@@ -216,15 +231,18 @@ fun PhoneOtpScreen(
                         unfocusedBorderColor = Color(0xFFCBD5E1),
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
+                        cursorColor = EmergencyCrimson,
                         focusedTextColor = Color(0xFF0F172A),
                         unfocusedTextColor = Color(0xFF0F172A),
+                        focusedLabelColor = EmergencyCrimson,
+                        unfocusedLabelColor = Color(0xFF64748B),
+                        focusedPlaceholderColor = Color(0xFF94A3B8),
+                        unfocusedPlaceholderColor = Color(0xFF94A3B8),
                     ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(3.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x0A000000)),
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
                     onClick = {
@@ -234,13 +252,15 @@ fun PhoneOtpScreen(
                     enabled = !isLoading && otpForm.phoneNumber.length >= 8,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp)
-                        .shadow(6.dp, RoundedCornerShape(24.dp), ambientColor = Color(0x33E52538)),
-                    shape = RoundedCornerShape(24.dp),
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = EmergencyCrimson,
                         contentColor = Color.White,
+                        disabledContainerColor = Color(0xFFE2E8F0),
+                        disabledContentColor = Color(0xFF94A3B8),
                     ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 2.dp),
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
@@ -251,6 +271,7 @@ fun PhoneOtpScreen(
                     } else {
                         Text(
                             text = "Send Verification OTP",
+                            fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
@@ -271,11 +292,12 @@ fun PhoneOtpScreen(
                     Text(
                         text = otpForm.otpError!!,
                         color = EmergencyCrimson,
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Resend Timer Row
                 Row(
@@ -286,6 +308,7 @@ fun PhoneOtpScreen(
                     TextButton(onClick = { isOtpSent = false }) {
                         Text(
                             text = "Change Number",
+                            fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF64748B)),
                         )
                     }
@@ -294,6 +317,7 @@ fun PhoneOtpScreen(
                         TextButton(onClick = { viewModel.sendOtp() }) {
                             Text(
                                 text = "Resend Code",
+                                fontFamily = FontFamily.SansSerif,
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = EmergencyCrimson,
@@ -303,13 +327,14 @@ fun PhoneOtpScreen(
                     } else {
                         Text(
                             text = "Resend in ${otpForm.resendCooldownSeconds}s",
+                            fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF94A3B8),
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Verify Button
                 Button(
@@ -320,13 +345,15 @@ fun PhoneOtpScreen(
                     enabled = !isLoading && otpForm.otpCode.length >= 4,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp)
-                        .shadow(6.dp, RoundedCornerShape(24.dp), ambientColor = Color(0x33E52538)),
-                    shape = RoundedCornerShape(24.dp),
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = EmergencyCrimson,
                         contentColor = Color.White,
+                        disabledContainerColor = Color(0xFFE2E8F0),
+                        disabledContentColor = Color(0xFF94A3B8),
                     ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 2.dp),
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
@@ -337,6 +364,7 @@ fun PhoneOtpScreen(
                     } else {
                         Text(
                             text = "Verify & Proceed",
+                            fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
@@ -348,4 +376,5 @@ fun PhoneOtpScreen(
         }
     }
 }
+
 

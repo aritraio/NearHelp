@@ -1,5 +1,6 @@
 package com.example.nearhelp.data.api
 
+import android.os.Build
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -8,10 +9,23 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-  // Android emulator points to host machine via 10.0.2.2
-  private const val DEFAULT_BASE_URL = "http://10.0.2.2:8000/"
+  private fun isRunningOnEmulator(): Boolean {
+    return (Build.FINGERPRINT.startsWith("generic")
+        || Build.FINGERPRINT.startsWith("unknown")
+        || Build.MODEL.contains("google_sdk")
+        || Build.MODEL.contains("Emulator")
+        || Build.MODEL.contains("Android SDK built for x86")
+        || Build.MANUFACTURER.contains("Genymotion")
+        || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+        || "google_sdk" == Build.PRODUCT)
+  }
 
-  private var baseUrl: String = DEFAULT_BASE_URL
+  // Android emulator points to host machine via 10.0.2.2
+  // Physical devices via ADB reverse use 127.0.0.1:8000 or LAN IP
+  private val DEFAULT_BASE_URL: String
+    get() = if (isRunningOnEmulator()) "http://10.0.2.2:8000/" else "http://127.0.0.1:8000/"
+
+  private var baseUrl: String? = null
   private var authApiService: AuthApiService? = null
   private var userApiService: UserApiService? = null
   private var routingApiService: RoutingApiService? = null
@@ -32,8 +46,12 @@ object RetrofitClient {
       .build()
   }
 
+  fun getEffectiveBaseUrl(): String {
+    return baseUrl ?: DEFAULT_BASE_URL
+  }
+
   private fun getRetrofit(customBaseUrl: String? = null): Retrofit {
-    val targetUrl = customBaseUrl ?: baseUrl
+    val targetUrl = customBaseUrl ?: getEffectiveBaseUrl()
     if (baseUrl != targetUrl) {
       baseUrl = targetUrl
       authApiService = null
@@ -42,7 +60,7 @@ object RetrofitClient {
       aiAgentApiService = null
     }
     return Retrofit.Builder()
-      .baseUrl(baseUrl)
+      .baseUrl(getEffectiveBaseUrl())
       .client(okHttpClient)
       .addConverterFactory(GsonConverterFactory.create())
       .build()
@@ -88,3 +106,4 @@ object RetrofitClient {
     aiAgentApiService = null
   }
 }
+

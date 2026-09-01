@@ -36,9 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -129,7 +129,7 @@ fun SplashScreen(
                 Box(
                     modifier = Modifier
                         .size(92.dp)
-                        .shadow(12.dp, CircleShape, ambientColor = Color(0x33000000))
+                        .clip(CircleShape)
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
@@ -156,6 +156,7 @@ fun SplashScreen(
             // App Title
             Text(
                 text = "NearHelp",
+                fontFamily = FontFamily.SansSerif,
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Black,
                     fontSize = 36.sp,
@@ -170,6 +171,7 @@ fun SplashScreen(
             // Tagline
             Text(
                 text = "Instant Response · AI Triage · Community Lifesaver",
+                fontFamily = FontFamily.SansSerif,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium,
                     fontSize = 13.5.sp,
@@ -178,12 +180,11 @@ fun SplashScreen(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Protection Badge
             Row(
                 modifier = Modifier
-                    .shadow(3.dp, RoundedCornerShape(20.dp), ambientColor = Color(0x0A000000))
                     .clip(RoundedCornerShape(20.dp))
                     .background(Color.White.copy(alpha = 0.85f))
                     .border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(20.dp))
@@ -199,6 +200,7 @@ fun SplashScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Good Samaritan Law Protected",
+                    fontFamily = FontFamily.SansSerif,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.5.sp,
@@ -211,6 +213,7 @@ fun SplashScreen(
         // Bottom Version Footer
         Text(
             text = "NearHelp AI v1.0 · Calm Guardian & Crisis Dispatch",
+            fontFamily = FontFamily.SansSerif,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
@@ -222,4 +225,5 @@ fun SplashScreen(
         )
     }
 }
+
 

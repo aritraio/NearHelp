@@ -45,10 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -85,7 +85,9 @@ fun LoginScreen(
         }
     }
 
-    val isLoading = uiState is AuthUiState.Loading
+    val isAuthLoading = uiState is AuthUiState.Loading
+    val isEmergencyLoading = isAuthLoading && (uiState as? AuthUiState.Loading)?.message?.contains("Emergency", ignoreCase = true) == true
+    val isLoginLoading = isAuthLoading && !isEmergencyLoading
 
     Box(
         modifier = modifier
@@ -96,10 +98,10 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 28.dp),
+                .padding(horizontal = 24.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Branding Header
             AuthHeader(
@@ -107,15 +109,15 @@ fun LoginScreen(
                 subtitle = "Sign in to access emergency response network & verified profile",
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // 1-Tap Anonymous Emergency Access Bypass
             EmergencyButton(
-                isLoading = isLoading && (uiState as? AuthUiState.Loading)?.message?.contains("Emergency") == true,
+                isLoading = isEmergencyLoading,
                 onClick = { viewModel.bypassAnonymousEmergency() },
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Or Divider
             Row(
@@ -125,12 +127,14 @@ fun LoginScreen(
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
                     color = Color(0xFFCBD5E1),
+                    thickness = 1.dp,
                 )
                 Text(
                     text = "OR SIGN IN WITH CREDENTIALS",
                     style = MaterialTheme.typography.labelSmall.copy(
+                        fontFamily = FontFamily.SansSerif,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         letterSpacing = 0.5.sp,
                     ),
                     color = Color(0xFF64748B),
@@ -139,10 +143,11 @@ fun LoginScreen(
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
                     color = Color(0xFFCBD5E1),
+                    thickness = 1.dp,
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Error Message Card
             if (uiState is AuthUiState.Error) {
@@ -152,35 +157,42 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFFFFEBEE))
-                        .border(1.dp, EmergencyCrimson.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                        .border(1.dp, EmergencyCrimson.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                         .padding(14.dp),
                 ) {
                     Text(
                         text = errorMsg,
                         color = Color(0xFFB71C1C),
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
             }
 
             // Email Input Field
             OutlinedTextField(
                 value = loginForm.email,
                 onValueChange = { viewModel.onLoginEmailChanged(it) },
-                label = { Text("Email Address") },
-                placeholder = { Text("name@example.com") },
+                label = { Text("Email Address", fontFamily = FontFamily.SansSerif) },
+                placeholder = { Text("name@example.com", fontFamily = FontFamily.SansSerif) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Email Icon",
                         tint = if (loginForm.emailError != null) EmergencyCrimson else Color(0xFF64748B),
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 isError = loginForm.emailError != null,
                 supportingText = {
                     if (loginForm.emailError != null) {
-                        Text(text = loginForm.emailError!!, color = EmergencyCrimson)
+                        Text(
+                            text = loginForm.emailError!!,
+                            color = EmergencyCrimson,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 12.sp,
+                        )
                     }
                 },
                 singleLine = true,
@@ -194,27 +206,31 @@ fun LoginScreen(
                     unfocusedBorderColor = Color(0xFFCBD5E1),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
+                    cursorColor = EmergencyCrimson,
                     focusedTextColor = Color(0xFF0F172A),
                     unfocusedTextColor = Color(0xFF0F172A),
+                    focusedLabelColor = EmergencyCrimson,
+                    unfocusedLabelColor = Color(0xFF64748B),
+                    focusedPlaceholderColor = Color(0xFF94A3B8),
+                    unfocusedPlaceholderColor = Color(0xFF94A3B8),
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(4.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x0D000000)),
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Password Input Field
             OutlinedTextField(
                 value = loginForm.password,
                 onValueChange = { viewModel.onLoginPasswordChanged(it) },
-                label = { Text("Password") },
-                placeholder = { Text("••••••••") },
+                label = { Text("Password", fontFamily = FontFamily.SansSerif) },
+                placeholder = { Text("••••••••", fontFamily = FontFamily.SansSerif) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Password Icon",
                         tint = if (loginForm.passwordError != null) EmergencyCrimson else Color(0xFF64748B),
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 trailingIcon = {
@@ -223,6 +239,7 @@ fun LoginScreen(
                             imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
                             tint = Color(0xFF64748B),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 },
@@ -230,7 +247,12 @@ fun LoginScreen(
                 isError = loginForm.passwordError != null,
                 supportingText = {
                     if (loginForm.passwordError != null) {
-                        Text(text = loginForm.passwordError!!, color = EmergencyCrimson)
+                        Text(
+                            text = loginForm.passwordError!!,
+                            color = EmergencyCrimson,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 12.sp,
+                        )
                     }
                 },
                 singleLine = true,
@@ -248,15 +270,18 @@ fun LoginScreen(
                     unfocusedBorderColor = Color(0xFFCBD5E1),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
+                    cursorColor = EmergencyCrimson,
                     focusedTextColor = Color(0xFF0F172A),
                     unfocusedTextColor = Color(0xFF0F172A),
+                    focusedLabelColor = EmergencyCrimson,
+                    unfocusedLabelColor = Color(0xFF64748B),
+                    focusedPlaceholderColor = Color(0xFF94A3B8),
+                    unfocusedPlaceholderColor = Color(0xFF94A3B8),
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(4.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x0D000000)),
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Sign In Button
             Button(
@@ -264,18 +289,20 @@ fun LoginScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.login()
                 },
-                enabled = !isLoading,
+                enabled = !isAuthLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
-                    .shadow(6.dp, RoundedCornerShape(24.dp), ambientColor = Color(0x33E52538)),
-                shape = RoundedCornerShape(24.dp),
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = EmergencyCrimson,
                     contentColor = Color.White,
+                    disabledContainerColor = Color(0xFFE2E8F0),
+                    disabledContentColor = Color(0xFF94A3B8),
                 ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 2.dp),
             ) {
-                if (isLoading && (uiState as? AuthUiState.Loading)?.message?.contains("Signing into") == true) {
+                if (isLoginLoading) {
                     CircularProgressIndicator(
                         color = Color.White,
                         modifier = Modifier.size(22.dp),
@@ -284,6 +311,7 @@ fun LoginScreen(
                 } else {
                     Text(
                         text = "Sign In",
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
@@ -299,14 +327,13 @@ fun LoginScreen(
                 onClick = onNavigateToPhoneOtp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .shadow(2.dp, RoundedCornerShape(24.dp), ambientColor = Color(0x0A000000)),
-                shape = RoundedCornerShape(24.dp),
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF0F172A),
                 ),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBD5E1)),
             ) {
                 Icon(
                     imageVector = Icons.Default.Phone,
@@ -317,9 +344,11 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = "Sign in with Phone OTP",
+                    fontFamily = FontFamily.SansSerif,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF0F172A)
+                        fontSize = 14.5.sp,
+                        color = Color(0xFF0F172A),
                     ),
                 )
             }
@@ -333,33 +362,36 @@ fun LoginScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .shadow(2.dp, RoundedCornerShape(24.dp), ambientColor = Color(0x0A000000)),
-                shape = RoundedCornerShape(24.dp),
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF0F172A),
                 ),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBD5E1)),
             ) {
                 Text(
                     text = "G",
+                    fontFamily = FontFamily.SansSerif,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Black,
+                        fontSize = 16.sp,
                         color = Color(0xFF4285F4),
                     ),
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = "Continue with Google",
+                    fontFamily = FontFamily.SansSerif,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF0F172A)
+                        fontSize = 14.5.sp,
+                        color = Color(0xFF0F172A),
                     ),
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Don't have an account link
             Row(
@@ -368,14 +400,18 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Don't have an account?",
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.SansSerif,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                     color = Color(0xFF64748B),
                 )
+                Spacer(modifier = Modifier.width(4.dp))
                 TextButton(onClick = onNavigateToSignUp) {
                     Text(
                         text = "Sign Up",
+                        fontFamily = FontFamily.SansSerif,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
                             color = EmergencyCrimson,
                         ),
                     )
@@ -384,4 +420,5 @@ fun LoginScreen(
         }
     }
 }
+
 
