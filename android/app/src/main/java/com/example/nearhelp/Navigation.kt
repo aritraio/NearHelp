@@ -89,6 +89,33 @@ fun MainNavigation(
           )
         }
 
+        entry<GuardianRadarNavKey> {
+          com.example.nearhelp.ui.screens.GuardianRadarScreen(
+            onTriggerSos = { backStack.add(CrisisDispatchNavKey) },
+            onNavigateToProfile = { backStack.add(ProfileNavKey) },
+            onNavigateToMap = { backStack.add(CommunityMapNavKey) },
+            onNavigateToTracking = { backStack.add(LiveTrackingNavKey()) },
+            onNavigateToAssistant = { backStack.add(AiCrisisAssistantNavKey()) },
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
+
+        entry<CrisisDispatchNavKey> {
+          com.example.nearhelp.ui.screens.CrisisDispatchScreen(
+            onCancel = { backStack.removeLastOrNull() },
+            onSosDispatched = {
+              backStack.add(LiveTrackingNavKey())
+            },
+            onNavigateToAssistant = {
+              backStack.add(AiCrisisAssistantNavKey())
+            },
+            onNavigateToMap = {
+              backStack.add(CommunityMapNavKey())
+            },
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
+
         entry<HomeNavKey> {
           HomeScreen(
             onNavigateToLogin = {

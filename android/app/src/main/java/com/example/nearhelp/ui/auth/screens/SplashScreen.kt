@@ -36,187 +36,190 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nearhelp.theme.AiCyan
-import com.example.nearhelp.theme.DarkBackground
-import com.example.nearhelp.theme.EmergencyRed
-import com.example.nearhelp.theme.EmergencyRedDark
-import com.example.nearhelp.theme.EmergencyRedGlow
-import com.example.nearhelp.theme.SafeGreen
-import com.example.nearhelp.theme.TextHighContrast
-import com.example.nearhelp.theme.TextMediumContrast
-import com.example.nearhelp.theme.TextMuted
+import com.example.nearhelp.theme.EmergencyCrimson
+import com.example.nearhelp.theme.GuardianBgBottom
+import com.example.nearhelp.theme.GuardianBgTop
+import com.example.nearhelp.theme.MintPrimary
 import com.example.nearhelp.ui.auth.AuthViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-  onNavigateToLogin: () -> Unit,
-  onNavigateToHome: () -> Unit,
-  viewModel: AuthViewModel,
-  modifier: Modifier = Modifier,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    viewModel: AuthViewModel,
+    modifier: Modifier = Modifier,
 ) {
-  val logoScale = remember { Animatable(0.6f) }
-  val logoAlpha = remember { Animatable(0f) }
+    val logoScale = remember { Animatable(0.7f) }
+    val logoAlpha = remember { Animatable(0f) }
 
-  val infiniteTransition = rememberInfiniteTransition(label = "SplashRadarPulse")
-  val pulseRingScale by infiniteTransition.animateFloat(
-    initialValue = 1f,
-    targetValue = 1.45f,
-    animationSpec = infiniteRepeatable(
-      animation = tween(1500, easing = FastOutSlowInEasing),
-      repeatMode = RepeatMode.Reverse,
-    ),
-    label = "SplashPulseRing",
-  )
-
-  LaunchedEffect(Unit) {
-    logoAlpha.animateTo(1f, animationSpec = tween(700))
-    logoScale.animateTo(1f, animationSpec = tween(700, easing = FastOutSlowInEasing))
-
-    delay(1400)
-    if (viewModel.checkExistingSession()) {
-      onNavigateToHome()
-    } else {
-      onNavigateToLogin()
-    }
-  }
-
-  Box(
-    modifier = modifier
-      .fillMaxSize()
-      .background(
-        brush = Brush.verticalGradient(
-          colors = listOf(
-            DarkBackground,
-            Color(0xFF1A1A1A),
-            DarkBackground,
-          )
-        )
-      ),
-    contentAlignment = Alignment.Center,
-  ) {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier
-        .scale(logoScale.value)
-        .alpha(logoAlpha.value)
-        .padding(24.dp),
-    ) {
-      // Animated Pulsing Shield Logo
-      Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.size(140.dp),
-      ) {
-        // Outer pulsing ring
-        Box(
-          modifier = Modifier
-            .size(130.dp)
-            .scale(pulseRingScale)
-            .background(EmergencyRedGlow, CircleShape)
-        )
-
-        // Mid glow ring
-        Box(
-          modifier = Modifier
-            .size(110.dp)
-            .background(EmergencyRed.copy(alpha = 0.25f), CircleShape)
-            .border(1.5.dp, AiCyan.copy(alpha = 0.4f), CircleShape)
-        )
-
-        // Center Shield Circle
-        Box(
-          modifier = Modifier
-            .size(90.dp)
-            .background(
-              brush = Brush.radialGradient(
-                colors = listOf(EmergencyRed, EmergencyRedDark)
-              ),
-              shape = CircleShape,
-            )
-            .border(2.5.dp, Color.White.copy(alpha = 0.8f), CircleShape),
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector = Icons.Default.Shield,
-            contentDescription = "NearHelp Logo",
-            tint = Color.White,
-            modifier = Modifier.size(52.dp),
-          )
-        }
-      }
-
-      Spacer(modifier = Modifier.height(28.dp))
-
-      // App Title
-      Text(
-        text = "NearHelp AI",
-        style = MaterialTheme.typography.headlineLarge.copy(
-          fontWeight = FontWeight.Black,
-          fontSize = 34.sp,
-          letterSpacing = 1.sp,
+    val infiniteTransition = rememberInfiniteTransition(label = "SplashRadarPulse")
+    val pulseRingScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
         ),
-        color = TextHighContrast,
-        textAlign = TextAlign.Center,
-      )
-
-      Spacer(modifier = Modifier.height(8.dp))
-
-      // Tagline
-      Text(
-        text = "Instant Response · AI Triage · Community Lifesaver",
-        style = MaterialTheme.typography.bodyMedium.copy(
-          fontWeight = FontWeight.Medium,
-          fontSize = 13.sp,
-          letterSpacing = 0.5.sp,
-        ),
-        color = TextMediumContrast,
-        textAlign = TextAlign.Center,
-      )
-
-      Spacer(modifier = Modifier.height(32.dp))
-
-      // Protection Badge
-      Row(
-        modifier = Modifier
-          .clip(RoundedCornerShape(20.dp))
-          .background(Color(0xFF222222))
-          .border(1.dp, SafeGreen.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
-          .padding(horizontal = 14.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Icon(
-          imageVector = Icons.Default.LocalHospital,
-          contentDescription = "Good Samaritan",
-          tint = SafeGreen,
-          modifier = Modifier.size(16.dp),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-          text = "Good Samaritan Law Protected",
-          style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 11.sp,
-          ),
-          color = SafeGreen,
-        )
-      }
-    }
-
-    // Bottom Version Footer
-    Text(
-      text = "NearHelp AI v1.0 · Phase 1 MVP",
-      style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-      color = TextMuted,
-      modifier = Modifier
-        .align(Alignment.BottomCenter)
-        .padding(bottom = 32.dp),
+        label = "SplashPulseRing",
     )
-  }
+
+    LaunchedEffect(Unit) {
+        logoAlpha.animateTo(1f, animationSpec = tween(600))
+        logoScale.animateTo(1f, animationSpec = tween(600, easing = FastOutSlowInEasing))
+
+        delay(1400)
+        if (viewModel.checkExistingSession()) {
+            onNavigateToHome()
+        } else {
+            onNavigateToLogin()
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        GuardianBgTop,
+                        GuardianBgBottom,
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .scale(logoScale.value)
+                .alpha(logoAlpha.value)
+                .padding(24.dp),
+        ) {
+            // Animated Pulsing Shield Logo
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(150.dp),
+            ) {
+                // Outer pulsing ring
+                Box(
+                    modifier = Modifier
+                        .size(140.dp)
+                        .scale(pulseRingScale)
+                        .background(MintPrimary.copy(alpha = 0.35f), CircleShape)
+                )
+
+                // Mid glow ring
+                Box(
+                    modifier = Modifier
+                        .size(116.dp)
+                        .background(Color.White.copy(alpha = 0.5f), CircleShape)
+                        .border(1.5.dp, MintPrimary.copy(alpha = 0.6f), CircleShape)
+                )
+
+                // Center Shield Circle
+                Box(
+                    modifier = Modifier
+                        .size(92.dp)
+                        .shadow(12.dp, CircleShape, ambientColor = Color(0x33000000))
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFFFF3B30),
+                                    EmergencyCrimson,
+                                )
+                            ),
+                            shape = CircleShape,
+                        )
+                        .border(3.dp, Color.White, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = "NearHelp Logo",
+                        tint = Color.White,
+                        modifier = Modifier.size(52.dp),
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // App Title
+            Text(
+                text = "NearHelp",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontWeight = FontWeight.Black,
+                    fontSize = 36.sp,
+                    letterSpacing = (-0.5).sp,
+                ),
+                color = Color(0xFF0F172A),
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Tagline
+            Text(
+                text = "Instant Response · AI Triage · Community Lifesaver",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 13.5.sp,
+                ),
+                color = Color(0xFF334155),
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Protection Badge
+            Row(
+                modifier = Modifier
+                    .shadow(3.dp, RoundedCornerShape(20.dp), ambientColor = Color(0x0A000000))
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White.copy(alpha = 0.85f))
+                    .border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocalHospital,
+                    contentDescription = "Good Samaritan",
+                    tint = Color(0xFF059669),
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Good Samaritan Law Protected",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.5.sp,
+                    ),
+                    color = Color(0xFF065F46),
+                )
+            }
+        }
+
+        // Bottom Version Footer
+        Text(
+            text = "NearHelp AI v1.0 · Calm Guardian & Crisis Dispatch",
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+            color = Color(0xFF64748B),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 32.dp),
+        )
+    }
 }
+
