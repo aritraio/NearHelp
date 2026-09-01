@@ -4,8 +4,7 @@
   "private": true,
   "description": "NearHelp AI — AI-Powered Community Emergency Response Network",
   "scripts": {
-    "dev": "npm --prefix admin_dashboard run dev",
-    "build": "npm --prefix admin_dashboard run build",
-    "preview": "npm --prefix admin_dashboard run preview"
+    "test:backend": "pytest backend/tests",
+    "test:ai": "pytest ai_service/tests"
   }
 }

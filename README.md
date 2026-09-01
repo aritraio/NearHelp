@@ -45,7 +45,6 @@ NearHelp/
 ├── android/                        # Android Client (Kotlin + Jetpack Compose)
 ├── backend/                        # Backend API Service (FastAPI + PostgreSQL/PostGIS)
 ├── ai_service/                     # AI Microservice (Gemini 2.5 + RAG + LangGraph)
-├── admin_dashboard/                # Admin Web Panel (Next.js / React)
 ├── simulator/                      # Digital Twin Simulator (Locust + Load Testing)
 ├── data/                           # Emergency Protocols & Kolkata Regional JSON Data
 │   ├── protocols/                  # WHO, Red Cross, NDMA PDFs

@@ -44,14 +44,12 @@ cp .env.example .env
 # 3. Start the core database & cache containers
 docker compose up -d db redis
 
-# 4. (Optional) Start all backend and AI services in Docker
+# 4. Start backend and AI services
 docker compose up -d
 
-# 5. Launch the showcase admin dashboard
-cd admin_dashboard
-npm install
-npm test          # Runs 192 automated unit/integration tests
-npm run dev       # Starts Vite dev server at http://localhost:5173
+# 5. Verify backend & AI services
+curl http://localhost:8000/docs
+curl http://localhost:8001/docs
 ```
 
 ---

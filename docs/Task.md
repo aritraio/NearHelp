@@ -73,15 +73,15 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 - [x] **AI Severity & Triage Simulation**: Level 1–5 triage urgency engine, Platinum 5-min hypoxia countdown, and 98.4% clinical confidence badge.
 - [x] **RAG Clinical Grounding & Q&A Assistant**: Bystander AI assistant drawer with strict contraindication guardrails (e.g. "NEVER administer water") and AHA/ERC protocols.
 - [x] **SlideSyncHUD & Rehearsal Prompter**: Built `SlideSyncHUD.tsx` (hotkey `S`) and `DryRunTourModal.tsx` (hotkey `T`) for synchronized 8-slide examiner defense.
-- [x] **Automated Test Harness**: Created `admin_dashboard/scripts/test_run.ts` with 192 automated assertions covering scenarios, metronome cadence, and spatial math.
+- [x] **Automated Test Harness**: Production test suites with 162 automated assertions across backend and AI microservice (`pytest backend/tests`, `pytest ai_service/tests`).
 
 #### Phase 1: MVP Core (Months 1–2)
 - [x] **FastAPI Engine Setup**: Scaffolded FastAPI project structure in `ai_service/` and `backend/`, Docker multi-container stack, requirements, `.env.example`, and CI/CD pipeline.
 - [x] **Module 4 — AI Emergency Detection**: Build prompt pipeline and classification engine for real-time SOS intent extraction (`POST /api/ai/classify`).
 - [x] **Module 5 — AI Severity Prediction**: Implement LLM-based emergency triage scoring (Level 1–5 severity calculation).
-- [ ] **Module 6 — Smart SOS Engine**: Develop geospatial emergency routing logic and weighted responder ranking algorithm (`score = w1·(1/distance) + w2·(skill) + w3·(trust)`).
-- [ ] **Module 10 & 11 — LangGraph Agent & RAG Pipeline**: Set up vector store (ChromaDB/pgvector), chunking pipeline, and retrieval agent for emergency guidance.
-- [ ] **API Contract Definition**: Define and publish clear OpenAPI/JSON specs for Dishari (Android UI) and Adil (Backend).
+- [x] **Module 6 — Smart SOS Engine**: Develop geospatial emergency routing logic and weighted responder ranking algorithm (`score = w1·(1/distance) + w2·(skill) + w3·(trust)`).
+- [x] **Module 10 & 11 — LangGraph Agent & RAG Pipeline**: Set up vector store (ChromaDB/pgvector), chunking pipeline, and retrieval agent for emergency guidance.
+- [x] **API Contract Definition**: Define and publish clear OpenAPI/JSON specs for Dishari (Android UI) and Adil (Backend).
 
 #### Phase 2: System Enhancement (Month 3)
 - [ ] **Module 12 — AI Translation**: Multilingual message translation for emergency context using Gemini API (Bengali ⇄ English).
