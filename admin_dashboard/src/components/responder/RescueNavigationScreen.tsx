@@ -75,6 +75,7 @@ export const RescueNavigationScreen: React.FC = () => {
   const [medicalIdUnlocked, setMedicalIdUnlocked] = useState<boolean>(true);
   const [callToastActive, setCallToastActive] = useState<boolean>(false);
   const [smsToastActive, setSmsToastActive] = useState<boolean>(false);
+  const [selectedRouteType, setSelectedRouteType] = useState<'DETOUR' | 'PRIMARY' | 'AED_PICKUP'>('DETOUR');
 
   const activeResponder = currentScenario.responders[activeResponderIndex] || currentScenario.responders[0];
   const currentStep = NAVIGATION_STEPS[turnByTurnStepIndex] || NAVIGATION_STEPS[0];
@@ -195,6 +196,66 @@ export const RescueNavigationScreen: React.FC = () => {
             <ChevronRight size={14} />
           </button>
         </div>
+      </div>
+
+      {/* 1B. Multi-Route Detour Switcher */}
+      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+        <button
+          onClick={() => setSelectedRouteType('DETOUR')}
+          style={{
+            flex: 1,
+            padding: '6px 8px',
+            borderRadius: 'var(--radius-xs)',
+            backgroundColor: selectedRouteType === 'DETOUR' ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${selectedRouteType === 'DETOUR' ? '#00E5FF' : 'rgba(255,255,255,0.1)'}`,
+            color: selectedRouteType === 'DETOUR' ? '#00E5FF' : '#94A3B8',
+            fontSize: '10px',
+            fontWeight: 800,
+            cursor: 'pointer',
+            textAlign: 'left'
+          }}
+        >
+          <div>⚡ AI Detour (1.8m)</div>
+          <div style={{ fontSize: '8.5px', color: '#00E676' }}>Saves 1.8m • Bypasses Flood</div>
+        </button>
+
+        <button
+          onClick={() => setSelectedRouteType('PRIMARY')}
+          style={{
+            flex: 1,
+            padding: '6px 8px',
+            borderRadius: 'var(--radius-xs)',
+            backgroundColor: selectedRouteType === 'PRIMARY' ? 'rgba(255, 42, 68, 0.15)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${selectedRouteType === 'PRIMARY' ? '#FF2A44' : 'rgba(255,255,255,0.1)'}`,
+            color: selectedRouteType === 'PRIMARY' ? '#FF2A44' : '#94A3B8',
+            fontSize: '10px',
+            fontWeight: 800,
+            cursor: 'pointer',
+            textAlign: 'left'
+          }}
+        >
+          <div>🚗 Main Arterial (2.5m)</div>
+          <div style={{ fontSize: '8.5px', color: '#FF2A44' }}>⚠️ Heavy Traffic (+210s)</div>
+        </button>
+
+        <button
+          onClick={() => setSelectedRouteType('AED_PICKUP')}
+          style={{
+            flex: 1,
+            padding: '6px 8px',
+            borderRadius: 'var(--radius-xs)',
+            backgroundColor: selectedRouteType === 'AED_PICKUP' ? 'rgba(0, 230, 118, 0.15)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${selectedRouteType === 'AED_PICKUP' ? '#00E676' : 'rgba(255,255,255,0.1)'}`,
+            color: selectedRouteType === 'AED_PICKUP' ? '#00E676' : '#94A3B8',
+            fontSize: '10px',
+            fontWeight: 800,
+            cursor: 'pointer',
+            textAlign: 'left'
+          }}
+        >
+          <div>🏥 AED Pickup (2.8m)</div>
+          <div style={{ fontSize: '8.5px', color: '#00E676' }}>+45s Pickup Waypoint</div>
+        </button>
       </div>
 
       {/* 2. Interactive SVG Vector Route Map */}

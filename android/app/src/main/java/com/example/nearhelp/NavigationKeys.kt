@@ -11,3 +11,5 @@ import kotlinx.serialization.Serializable
 @Serializable data object ProfileNavKey : NavKey
 @Serializable data object CommunityMapNavKey : NavKey
 @Serializable data class LiveTrackingNavKey(val incidentId: String = "KOL-SOS-8821") : NavKey
+@Serializable data class RescueNavigationNavKey(val incidentId: String = "KOL-SOS-8821") : NavKey
+

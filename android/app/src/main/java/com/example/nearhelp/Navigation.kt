@@ -15,6 +15,8 @@ import com.example.nearhelp.ui.auth.screens.SplashScreen
 import com.example.nearhelp.ui.home.HomeScreen
 import com.example.nearhelp.ui.map.CommunityGeoMapScreen
 import com.example.nearhelp.ui.map.CommunityGeoMapViewModel
+import com.example.nearhelp.ui.navigation.RescueNavigationScreen
+import com.example.nearhelp.ui.navigation.RescueNavigationViewModel
 import com.example.nearhelp.ui.profile.ProfileScreen
 import com.example.nearhelp.ui.profile.ProfileViewModel
 import com.example.nearhelp.ui.tracking.LiveTrackingScreen
@@ -123,6 +125,9 @@ fun MainNavigation(
             onNavigateToTracking = {
               backStack.add(LiveTrackingNavKey())
             },
+            onNavigateToNavigation = {
+              backStack.add(RescueNavigationNavKey())
+            },
             viewModel = mapViewModel,
             modifier = Modifier.fillMaxSize(),
           )
@@ -133,7 +138,23 @@ fun MainNavigation(
           val storedToken = NearHelpApplication.instance.authRepository.getStoredAccessToken()
           LiveTrackingScreen(
             onNavigateBack = { backStack.removeLastOrNull() },
+            onNavigateToNavigation = {
+              backStack.add(RescueNavigationNavKey())
+            },
             viewModel = trackingViewModel,
+            token = storedToken,
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
+
+        entry<RescueNavigationNavKey> {
+          val navViewModel: RescueNavigationViewModel = viewModel {
+            RescueNavigationViewModel(NearHelpApplication.instance.routingRepository)
+          }
+          val storedToken = NearHelpApplication.instance.authRepository.getStoredAccessToken()
+          RescueNavigationScreen(
+            onNavigateBack = { backStack.removeLastOrNull() },
+            viewModel = navViewModel,
             token = storedToken,
             modifier = Modifier.fillMaxSize(),
           )
@@ -141,3 +162,4 @@ fun MainNavigation(
       },
   )
 }
+

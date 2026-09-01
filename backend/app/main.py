@@ -13,6 +13,7 @@ from app.api.admin import router as admin_compat_router
 from app.api.ai import router as ai_compat_router
 from app.api.auth import router as auth_compat_router
 from app.api.facilities import router as facilities_compat_router
+from app.api.routing import router as routing_compat_router
 from app.api.sos import router as sos_compat_router
 from app.api.tracking_ws import router as tracking_router
 from app.api.users import router as users_compat_router
@@ -88,6 +89,7 @@ app.include_router(admin_compat_router, prefix="/api/admin")
 app.include_router(ai_compat_router, prefix="/api/ai")
 app.include_router(sos_compat_router, prefix="/api/sos")
 app.include_router(facilities_compat_router, prefix="/api/facilities")
+app.include_router(routing_compat_router, prefix="/api/routing")
 app.include_router(tracking_router)
 
 

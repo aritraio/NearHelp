@@ -8,6 +8,8 @@ import com.example.nearhelp.data.repository.IAuthRepository
 
 import com.example.nearhelp.data.repository.IUserRepository
 import com.example.nearhelp.data.repository.UserRepository
+import com.example.nearhelp.data.repository.IRoutingRepository
+import com.example.nearhelp.data.repository.RoutingRepository
 
 class NearHelpApplication : Application() {
 
@@ -20,6 +22,9 @@ class NearHelpApplication : Application() {
   lateinit var userRepository: IUserRepository
     private set
 
+  lateinit var routingRepository: IRoutingRepository
+    private set
+
   override fun onCreate() {
     super.onCreate()
     instance = this
@@ -27,8 +32,10 @@ class NearHelpApplication : Application() {
     tokenStorage = TokenStorage(this)
     val authApiService = RetrofitClient.getAuthApiService()
     val userApiService = RetrofitClient.getUserApiService()
+    val routingApiService = RetrofitClient.getRoutingApiService()
     authRepository = AuthRepository(authApiService, tokenStorage)
     userRepository = UserRepository(userApiService, tokenStorage)
+    routingRepository = RoutingRepository(routingApiService)
   }
 
   companion object {

@@ -87,6 +87,7 @@ import com.example.nearhelp.theme.TextMuted
 @Composable
 fun LiveTrackingScreen(
   onNavigateBack: () -> Unit,
+  onNavigateToNavigation: () -> Unit = {},
   viewModel: LiveTrackingViewModel,
   incidentId: String = "KOL-SOS-8821",
   token: String? = null,
@@ -387,6 +388,58 @@ fun LiveTrackingScreen(
               modifier = Modifier.size(16.dp)
             )
           }
+        }
+      }
+    }
+
+    // 2B. Full AI Navigation & Detour Routing Launch Banner
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(10.dp))
+        .background(Brush.horizontalGradient(listOf(Color(0xFF0F1A24), Color(0xFF162330))))
+        .border(1.dp, AiCyan.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+        .clickable { onNavigateToNavigation() }
+        .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          Box(
+            modifier = Modifier
+              .size(28.dp)
+              .clip(CircleShape)
+              .background(AiCyan.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+          ) {
+            Icon(Icons.Default.Navigation, contentDescription = "Nav", tint = AiCyan, modifier = Modifier.size(15.dp))
+          }
+          Column {
+            Text(
+              text = "⚡ AI Detour & Traffic Rescue Routing",
+              fontSize = 11.5.sp,
+              fontWeight = FontWeight.Bold,
+              color = Color.White
+            )
+            Text(
+              text = "Dynamic traffic bypass • AED waypoint • Turn HUD",
+              fontSize = 10.sp,
+              color = TextMediumContrast
+            )
+          }
+        }
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+          Text(text = "Open", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = AiCyan)
+          Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = AiCyan, modifier = Modifier.size(14.dp))
         }
       }
     }

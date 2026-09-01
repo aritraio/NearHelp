@@ -240,9 +240,9 @@
 
 **Owner**: Aritra (routing logic) · Dishari (UI)
 
-- [x] 🟡 Model route calculation and turn-by-turn directions in showcase
-- [ ] 🟡 Integrate Google Directions API for production route calculation in Android app
-- [ ] 🟢 Implement detour and traffic consideration logic
+- [x] 🟡 Model route calculation and turn-by-turn directions in showcase ([`RescueNavigationScreen.tsx`](../admin_dashboard/src/components/responder/RescueNavigationScreen.tsx))
+- [x] 🟡 Integrate Google Directions & Routes API for production route calculation in Android app ([`RoutingService.py`](../backend/app/services/routing_service.py), [`RescueNavigationScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/navigation/RescueNavigationScreen.kt))
+- [x] 🟢 Implement detour and traffic consideration logic ([`routing_service.py`](../backend/app/services/routing_service.py), [`RescueNavigationViewModel.kt`](../android/app/src/main/java/com/example/nearhelp/ui/navigation/RescueNavigationViewModel.kt))
 
 ---
 

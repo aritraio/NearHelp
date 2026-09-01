@@ -103,6 +103,7 @@ import kotlin.math.roundToInt
 fun CommunityGeoMapScreen(
   onNavigateBack: () -> Unit,
   onNavigateToTracking: () -> Unit = {},
+  onNavigateToNavigation: () -> Unit = {},
   modifier: Modifier = Modifier,
   viewModel: CommunityGeoMapViewModel = viewModel(),
 ) {
@@ -290,35 +291,67 @@ fun CommunityGeoMapScreen(
             .padding(16.dp)
         )
 
-        // Live Navigation Stream Floating Button
-        Surface(
-          onClick = onNavigateToTracking,
-          shape = RoundedCornerShape(24.dp),
-          color = SafeGreen,
-          shadowElevation = 8.dp,
+        // Live Navigation Stream & AI Rescue Navigation Floating Buttons
+        Row(
           modifier = Modifier
             .align(Alignment.BottomStart)
-            .padding(16.dp)
+            .padding(16.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-          Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+          Surface(
+            onClick = onNavigateToTracking,
+            shape = RoundedCornerShape(24.dp),
+            color = SafeGreen,
+            shadowElevation = 8.dp
           ) {
-            Icon(
-              imageVector = Icons.Default.Navigation,
-              contentDescription = "Live Navigation",
-              tint = Color.Black,
-              modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-              text = "Live Stream",
-              style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Black,
-                fontSize = 12.sp
-              ),
-              color = Color.Black
-            )
+            Row(
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Icon(
+                imageVector = Icons.Default.Navigation,
+                contentDescription = "Live Stream",
+                tint = Color.Black,
+                modifier = Modifier.size(16.dp)
+              )
+              Spacer(modifier = Modifier.width(5.dp))
+              Text(
+                text = "Live Stream",
+                style = MaterialTheme.typography.labelMedium.copy(
+                  fontWeight = FontWeight.Black,
+                  fontSize = 11.5.sp
+                ),
+                color = Color.Black
+              )
+            }
+          }
+
+          Surface(
+            onClick = onNavigateToNavigation,
+            shape = RoundedCornerShape(24.dp),
+            color = AiCyan,
+            shadowElevation = 8.dp
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Icon(
+                imageVector = Icons.Default.Directions,
+                contentDescription = "AI Navigation",
+                tint = Color.Black,
+                modifier = Modifier.size(16.dp)
+              )
+              Spacer(modifier = Modifier.width(5.dp))
+              Text(
+                text = "AI Detour Nav",
+                style = MaterialTheme.typography.labelMedium.copy(
+                  fontWeight = FontWeight.Black,
+                  fontSize = 11.5.sp
+                ),
+                color = Color.Black
+              )
+            }
           }
         }
 
@@ -351,7 +384,8 @@ fun CommunityGeoMapScreen(
       uiState.selectedEntity?.let { entity ->
         EntityDetailsBottomSheet(
           entity = entity,
-          onDismiss = { viewModel.clearSelectedEntity() }
+          onDismiss = { viewModel.clearSelectedEntity() },
+          onNavigateToNavigation = onNavigateToNavigation
         )
       }
     }
@@ -930,6 +964,7 @@ private fun PostGisSqlHudCard(
 private fun EntityDetailsBottomSheet(
   entity: SelectedMapEntity,
   onDismiss: () -> Unit,
+  onNavigateToNavigation: () -> Unit = {},
 ) {
   Card(
     shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
@@ -1057,14 +1092,17 @@ private fun EntityDetailsBottomSheet(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
       ) {
         Button(
-          onClick = onDismiss,
+          onClick = {
+            onDismiss()
+            onNavigateToNavigation()
+          },
           modifier = Modifier.weight(1f),
           colors = ButtonDefaults.buttonColors(containerColor = SafeGreen),
           shape = RoundedCornerShape(10.dp)
         ) {
           Icon(Icons.Default.Directions, contentDescription = "Directions", tint = Color.Black, modifier = Modifier.size(16.dp))
           Spacer(modifier = Modifier.width(6.dp))
-          Text("Route Assist", color = Color.Black, fontWeight = FontWeight.Bold)
+          Text("AI Navigation", color = Color.Black, fontWeight = FontWeight.Bold)
         }
 
         OutlinedButton(
@@ -1081,3 +1119,4 @@ private fun EntityDetailsBottomSheet(
     }
   }
 }
+
