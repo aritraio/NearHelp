@@ -73,6 +73,7 @@ fun HomeScreen(
   onNavigateToProfile: () -> Unit = {},
   onNavigateToMap: () -> Unit = {},
   onNavigateToTracking: () -> Unit = {},
+  onNavigateToAssistant: () -> Unit = {},
   viewModel: AuthViewModel,
   modifier: Modifier = Modifier,
 ) {
@@ -464,6 +465,84 @@ fun HomeScreen(
           imageVector = Icons.Default.ChevronRight,
           contentDescription = "Open Tracking",
           tint = SafeGreen,
+          modifier = Modifier.size(20.dp),
+        )
+      }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    // AI Crisis Assistant Card (Module 10)
+    Card(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onNavigateToAssistant() },
+      colors = CardDefaults.cardColors(containerColor = Color(0xFF140D12)),
+      shape = RoundedCornerShape(16.dp),
+      border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFF4081).copy(alpha = 0.6f)),
+    ) {
+      Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          modifier = Modifier.weight(1f)
+        ) {
+          Box(
+            modifier = Modifier
+              .size(44.dp)
+              .background(Color(0xFFFF4081).copy(alpha = 0.15f), CircleShape)
+              .border(1.5.dp, Color(0xFFFF4081), CircleShape),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.Default.Shield,
+              contentDescription = "AI Crisis Assistant",
+              tint = Color(0xFFFF4081),
+              modifier = Modifier.size(22.dp),
+            )
+          }
+
+          Spacer(modifier = Modifier.width(12.dp))
+
+          Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text(
+                text = "AI Crisis Assistant",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = TextHighContrast,
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Box(
+                modifier = Modifier
+                  .clip(RoundedCornerShape(4.dp))
+                  .background(Color(0xFFFF4081).copy(alpha = 0.2f))
+                  .padding(horizontal = 5.dp, vertical = 1.dp)
+              ) {
+                Text(
+                  text = "110 BPM CPR",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black
+                  ),
+                  color = Color(0xFFFF4081)
+                )
+              }
+            }
+            Text(
+              text = "AHA Protocol • Q&A Assistant • Sec 134A Shield",
+              style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+              color = TextMediumContrast,
+            )
+          }
+        }
+
+        Icon(
+          imageVector = Icons.Default.ChevronRight,
+          contentDescription = "Open Assistant",
+          tint = Color(0xFFFF4081),
           modifier = Modifier.size(20.dp),
         )
       }

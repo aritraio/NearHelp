@@ -3,6 +3,8 @@
 import logging
 from contextlib import asynccontextmanager
 
+from app.api.agent import router as agent_router
+from app.api.agent_ws import router as agent_ws_router
 from app.api.classify import router as classify_router
 from app.api.severity import router as severity_router
 from app.classifiers.embedding_service import embedding_service
@@ -49,6 +51,10 @@ app.include_router(classify_router, prefix="/api/v1")
 app.include_router(classify_router)
 app.include_router(severity_router, prefix="/api/v1")
 app.include_router(severity_router)
+app.include_router(agent_router, prefix="/api/v1")
+app.include_router(agent_router)
+app.include_router(agent_ws_router, prefix="/api/v1")
+app.include_router(agent_ws_router)
 
 
 @app.get("/health", tags=["Health"])

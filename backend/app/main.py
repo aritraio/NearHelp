@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api import api_router
 from app.api.admin import router as admin_compat_router
 from app.api.ai import router as ai_compat_router
+from app.api.ai_ws import router as ai_ws_router
 from app.api.auth import router as auth_compat_router
 from app.api.facilities import router as facilities_compat_router
 from app.api.routing import router as routing_compat_router
@@ -91,6 +92,7 @@ app.include_router(sos_compat_router, prefix="/api/sos")
 app.include_router(facilities_compat_router, prefix="/api/facilities")
 app.include_router(routing_compat_router, prefix="/api/routing")
 app.include_router(tracking_router)
+app.include_router(ai_ws_router)
 
 
 @app.get("/health", tags=["Health"])

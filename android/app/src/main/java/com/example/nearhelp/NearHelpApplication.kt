@@ -3,13 +3,14 @@ package com.example.nearhelp
 import android.app.Application
 import com.example.nearhelp.data.api.RetrofitClient
 import com.example.nearhelp.data.local.TokenStorage
+import com.example.nearhelp.data.repository.AiAgentRepository
 import com.example.nearhelp.data.repository.AuthRepository
+import com.example.nearhelp.data.repository.IAiAgentRepository
 import com.example.nearhelp.data.repository.IAuthRepository
-
-import com.example.nearhelp.data.repository.IUserRepository
-import com.example.nearhelp.data.repository.UserRepository
 import com.example.nearhelp.data.repository.IRoutingRepository
+import com.example.nearhelp.data.repository.IUserRepository
 import com.example.nearhelp.data.repository.RoutingRepository
+import com.example.nearhelp.data.repository.UserRepository
 
 class NearHelpApplication : Application() {
 
@@ -25,6 +26,9 @@ class NearHelpApplication : Application() {
   lateinit var routingRepository: IRoutingRepository
     private set
 
+  lateinit var aiAgentRepository: IAiAgentRepository
+    private set
+
   override fun onCreate() {
     super.onCreate()
     instance = this
@@ -33,9 +37,11 @@ class NearHelpApplication : Application() {
     val authApiService = RetrofitClient.getAuthApiService()
     val userApiService = RetrofitClient.getUserApiService()
     val routingApiService = RetrofitClient.getRoutingApiService()
+    val aiAgentApiService = RetrofitClient.getAiAgentApiService()
     authRepository = AuthRepository(authApiService, tokenStorage)
     userRepository = UserRepository(userApiService, tokenStorage)
     routingRepository = RoutingRepository(routingApiService)
+    aiAgentRepository = AiAgentRepository(aiAgentApiService)
   }
 
   companion object {

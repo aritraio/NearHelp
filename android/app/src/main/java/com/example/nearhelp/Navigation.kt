@@ -7,6 +7,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.example.nearhelp.ui.assistant.AiCrisisAssistantScreen
+import com.example.nearhelp.ui.assistant.AiCrisisAssistantViewModel
 import com.example.nearhelp.ui.auth.AuthViewModel
 import com.example.nearhelp.ui.auth.screens.LoginScreen
 import com.example.nearhelp.ui.auth.screens.PhoneOtpScreen
@@ -102,6 +104,9 @@ fun MainNavigation(
             onNavigateToTracking = {
               backStack.add(LiveTrackingNavKey())
             },
+            onNavigateToAssistant = {
+              backStack.add(AiCrisisAssistantNavKey())
+            },
             viewModel = authViewModel,
             modifier = Modifier.fillMaxSize(),
           )
@@ -156,6 +161,19 @@ fun MainNavigation(
             onNavigateBack = { backStack.removeLastOrNull() },
             viewModel = navViewModel,
             token = storedToken,
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
+
+        entry<AiCrisisAssistantNavKey> {
+          val assistantViewModel: AiCrisisAssistantViewModel = viewModel {
+            AiCrisisAssistantViewModel(NearHelpApplication.instance.aiAgentRepository)
+          }
+          AiCrisisAssistantScreen(
+            onNavigateBack = { backStack.removeLastOrNull() },
+            viewModel = assistantViewModel,
+            conditionId = "cardiac_arrest",
+            sessionId = "KOL-SOS-8821",
             modifier = Modifier.fillMaxSize(),
           )
         }

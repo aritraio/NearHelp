@@ -251,13 +251,13 @@
 **Owner**: Aritra
 
 - [x] 🔴 Design emergency state machine (Understand emergency → Triage → Step-by-Step Guidance → Handover)
-- [x] 🔴 Implement Grounded First-Aid Protocol Screen ([`FirstAidRagScreen.tsx`](../admin_dashboard/src/components/victim/FirstAidRagScreen.tsx))
+- [x] 🔴 Implement Grounded First-Aid Protocol Screen ([`FirstAidRagScreen.tsx`](../admin_dashboard/src/components/victim/FirstAidRagScreen.tsx), [`AiCrisisAssistantScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantScreen.kt))
 - [x] 🔴 Implement AHA/ERC **110 BPM CPR Rhythm Metronome** (visual pulse + audio click at 545.45ms period)
 - [x] 🔴 Implement Bystander AI Assistant Q&A Chat Drawer with clinical contraindication guardrails
 - [x] 🔴 Implement Section 134A Motor Vehicles (Amendment) Act 2019 legal immunity badge
-- [ ] 🔴 Set up LangGraph agent orchestration framework in `ai_service/`
-- [ ] 🔴 Integrate Gemini 2.5 LLM with citation enforcement
-- [ ] 🟡 Implement production WebSocket endpoint (`/ws/ai/chat`)
+- [x] 🔴 Set up LangGraph agent orchestration framework in `ai_service/` ([`gemini_agent.py`](../ai_service/app/agent/gemini_agent.py), [`state.py`](../ai_service/app/agent/state.py), [`knowledge.py`](../ai_service/app/agent/knowledge.py))
+- [x] 🔴 Integrate Gemini 2.5 LLM with citation enforcement ([`gemini_agent.py`](../ai_service/app/agent/gemini_agent.py), [`knowledge.py`](../ai_service/app/agent/knowledge.py))
+- [x] 🟡 Implement production WebSocket endpoint (`/ws/ai/chat`) ([`agent_ws.py`](../ai_service/app/api/agent_ws.py), [`ai_ws.py`](../backend/app/api/ai_ws.py))
 
 ---
 

@@ -15,6 +15,7 @@ object RetrofitClient {
   private var authApiService: AuthApiService? = null
   private var userApiService: UserApiService? = null
   private var routingApiService: RoutingApiService? = null
+  private var aiAgentApiService: AiAgentApiService? = null
 
   private val loggingInterceptor by lazy {
     HttpLoggingInterceptor().apply {
@@ -38,6 +39,7 @@ object RetrofitClient {
       authApiService = null
       userApiService = null
       routingApiService = null
+      aiAgentApiService = null
     }
     return Retrofit.Builder()
       .baseUrl(baseUrl)
@@ -70,10 +72,19 @@ object RetrofitClient {
     return routingApiService!!
   }
 
+  fun getAiAgentApiService(customBaseUrl: String? = null): AiAgentApiService {
+    val retrofit = getRetrofit(customBaseUrl)
+    if (aiAgentApiService == null) {
+      aiAgentApiService = retrofit.create(AiAgentApiService::class.java)
+    }
+    return aiAgentApiService!!
+  }
+
   fun setBaseUrl(newBaseUrl: String) {
     baseUrl = if (newBaseUrl.endsWith("/")) newBaseUrl else "$newBaseUrl/"
     authApiService = null
     userApiService = null
     routingApiService = null
+    aiAgentApiService = null
   }
 }

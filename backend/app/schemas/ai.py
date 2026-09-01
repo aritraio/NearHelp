@@ -354,3 +354,144 @@ class SeverityResponse(BaseModel):
         description="Total AI severity assessment inference and scoring latency in milliseconds",
         examples=[24.6],
     )
+
+
+# ==============================================================================
+# EMERGENCY CRISIS ASSISTANT AGENT SCHEMAS
+# ==============================================================================
+
+class CitationItem(BaseModel):
+    """Evidence-based clinical or statutory citation."""
+
+    source: str = Field(..., description="Organization or Act (e.g. 'AHA CPR Guidelines 2020', 'Motor Vehicles Act 2019')")
+    section: str = Field(..., description="Specific section, clause, or paragraph (e.g. 'Part 3: Adult Basic Life Support §3.2', 'Section 134A')")
+    guideline_name: str = Field(..., description="Full guideline or statute name")
+    authority: str = Field(..., description="Issuing authority (e.g. 'American Heart Association', 'Ministry of Road Transport & Highways')")
+    url: str | None = Field(default=None, description="Optional reference documentation URL")
+
+
+class ContraindicationAlert(BaseModel):
+    """Clinical contraindication or life-safety warning detected in context."""
+
+    flag: str = Field(..., description="Identifier for contraindication (e.g. 'NO_ORAL_FLUIDS', 'SPINAL_IMMOBILIZATION')")
+    severity: str = Field(default="CRITICAL")
+    warning_title: str = Field(..., description="Short prominent alert title")
+    warning_message: str = Field(..., description="Clinical rationale and danger explanation")
+    action_directive: str = Field(..., description="Immediate DO / DO NOT instruction")
+
+
+class ProtocolStepItem(BaseModel):
+    """Actionable step in an evidence-based first-aid protocol."""
+
+    step_number: int = Field(..., description="1-indexed sequence number")
+    title: str = Field(..., description="Step headline")
+    action_instruction: str = Field(..., description="Detailed bystander instruction")
+    warning_note: str | None = Field(default=None, description="Critical warning or precaution")
+    is_cpr_step: bool = Field(default=False, description="Whether this step involves CPR rhythm compressions")
+    beat_bpm: int | None = Field(default=None, description="Target cadence (e.g. 110 BPM)")
+    icon: str = Field(default="AlertCircle", description="Lucide icon identifier")
+
+
+class GroundedProtocolResponse(BaseModel):
+    """Full grounded first-aid protocol response."""
+
+    condition_id: str
+    condition_label: str
+    crisis_type: str
+    severity_level: int
+    priority: str
+    protocol_title: str
+    authority: str
+    disclaimers: str
+    legal_shield: str
+    recommended_radius_km: float
+    emergency_number: str
+    cpr_bpm: int | None = None
+    steps: list[ProtocolStepItem]
+    citations: list[CitationItem]
+
+
+class AgentInitRequest(BaseModel):
+    """Request to start or reset an AI emergency agent session."""
+
+    session_id: str = Field(..., description="Unique session or incident identifier")
+    condition_id: str = Field(default="cardiac_arrest", description="Emergency condition identifier")
+    role: str = Field(default="bystander")
+    language: str = Field(default="en")
+    initial_text: str | None = None
+
+
+class AgentChatRequest(BaseModel):
+    """Request for dialogue turn with the emergency agent."""
+
+    session_id: str = Field(..., description="Active session ID")
+    text: str = Field(..., description="Bystander query or emergency update")
+    role: str = Field(default="bystander")
+    language: str = Field(default="en")
+    current_step_index: int = Field(default=0)
+    completed_steps: list[int] = Field(default_factory=list)
+
+
+class AgentChatResponse(BaseModel):
+    """Agent response containing grounded response, citations, and contraindication alerts."""
+
+    session_id: str
+    reply_text: str
+    highlight_text: str
+    triage_state: str
+    condition_id: str
+    severity_level: int
+    priority: str
+    current_step_index: int
+    completed_steps: list[int]
+    cpr_metronome_active: bool
+    cpr_bpm: int
+    citations: list[CitationItem]
+    contraindications: list[ContraindicationAlert]
+    legal_shield_applied: bool = True
+    suggested_quick_questions: list[str] = Field(default_factory=list)
+    processing_time_ms: float = 0.0
+
+
+class StepProgressRequest(BaseModel):
+    """Request to toggle or advance protocol step completion."""
+
+    session_id: str
+    step_number: int
+    completed: bool = True
+
+
+class StepProgressResponse(BaseModel):
+    """Updated protocol progress status."""
+
+    session_id: str
+    completed_steps: list[int]
+    total_steps: int
+    progress_percentage: int
+    current_step_index: int
+    all_completed: bool
+
+
+class ClinicalHandoverSummary(BaseModel):
+    """Structured clinical handover report for arriving paramedics and 108 ALS teams."""
+
+    report_id: str
+    session_id: str
+    incident_code: str
+    generated_at: str
+    victim_profile: dict[str, Any]
+    emergency_location: str
+    severity_level: int
+    diagnostic_summary: str
+    ai_confidence_score: float
+    reported_symptoms: list[str]
+    cpr_metronome_used: bool
+    cpr_compressions_estimated: int
+    cpr_duration_seconds: int
+    aed_deployed: bool
+    aed_shocks_delivered: int
+    completed_protocol_steps: list[str]
+    citations: list[CitationItem]
+    destination_hospital: str
+    legal_shield_compliance: str
+    digital_signature_hash: str
