@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
+    android:width="48dp"
+    android:height="48dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-
-    <!-- Guardian Shield Outer Soft Glow -->
-    <path
-        android:pathData="M 54,23 C 45.5,23 35.5,25.8 29.5,27.5 C 27,28.8 27,42 27,52.5 C 27,65.5 40,78.5 54,86 C 68,78.5 81,65.5 81,52.5 C 81,42 81,28.8 78.5,27.5 C 72.5,25.8 62.5,23 54,23 Z"
-        android:strokeWidth="3.5"
-        android:strokeAlpha="0.25"
-        android:strokeColor="#10B981"
-        android:fillColor="#00000000" />
 
     <!-- Guardian Shield Translucent Glass Body -->
     <path android:pathData="M 54,25 C 46.5,25 37.5,27.5 32,29 C 30,30 30,42 30,52 C 30,64 42,76 54,83 C 66,76 78,64 78,52 C 78,42 78,30 76,29 C 70.5,27.5 61.5,25 54,25 Z">
@@ -23,73 +15,43 @@
                 android:endX="54"
                 android:endY="83"
                 android:type="linear">
-                <item android:color="#2E22C55E" android:offset="0.0" />
-                <item android:color="#1A10B981" android:offset="0.5" />
-                <item android:color="#0D064E3B" android:offset="1.0" />
+                <item android:color="#3322C55E" android:offset="0.0" />
+                <item android:color="#2010B981" android:offset="0.5" />
+                <item android:color="#10064E3B" android:offset="1.0" />
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- Radar Sweep Beam (45-degree translucent scan sector) -->
-    <path android:pathData="M 54,54 L 70.26,37.74 A 23,23 0 0,0 54,31 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:startX="54"
-                android:startY="54"
-                android:endX="66"
-                android:endY="34"
-                android:type="linear">
-                <item android:color="#5034D399" android:offset="0.0" />
-                <item android:color="#0034D399" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
-
-    <!-- Radar Range Ring 3 (Outer Ring - 23dp radius) -->
+    <!-- Radar Range Ring 3 (Outer) -->
     <path
         android:pathData="M 54,31 A 23,23 0 1,0 54,77 A 23,23 0 1,0 54,31 Z"
-        android:strokeWidth="1.4"
+        android:strokeWidth="1.5"
         android:strokeAlpha="0.55"
         android:strokeColor="#34D399"
         android:fillColor="#00000000" />
 
-    <!-- Radar Range Ring 2 (Middle Ring - 15.5dp radius) -->
+    <!-- Radar Range Ring 2 (Middle) -->
     <path
         android:pathData="M 54,38.5 A 15.5,15.5 0 1,0 54,69.5 A 15.5,15.5 0 1,0 54,38.5 Z"
-        android:strokeWidth="1.4"
+        android:strokeWidth="1.5"
         android:strokeAlpha="0.75"
         android:strokeColor="#6EE7B7"
         android:fillColor="#00000000" />
 
-    <!-- Radar Range Ring 1 (Inner Ring - 9dp radius) -->
+    <!-- Radar Range Ring 1 (Inner) -->
     <path
         android:pathData="M 54,45 A 9,9 0 1,0 54,63 A 9,9 0 1,0 54,45 Z"
-        android:strokeWidth="1.5"
+        android:strokeWidth="1.6"
         android:strokeAlpha="0.9"
         android:strokeColor="#A7F3D0"
         android:fillColor="#00000000" />
 
-    <!-- Guardian Shield Perimeter Bevel / Rim -->
+    <!-- Guardian Shield Perimeter Bevel -->
     <path
         android:pathData="M 54,25 C 46.5,25 37.5,27.5 32,29 C 30,30 30,42 30,52 C 30,64 42,76 54,83 C 66,76 78,64 78,52 C 78,42 78,30 76,29 C 70.5,27.5 61.5,25 54,25 Z"
-        android:strokeWidth="2.2"
+        android:strokeWidth="2.4"
         android:strokeColor="#8EE4B8"
         android:fillColor="#00000000" />
-
-    <!-- Glassmorphic Top Inner Sheen -->
-    <path android:pathData="M 54,26.5 C 47.5,26.5 39,28.8 33.5,30.2 C 32,31 32,38 32,46 C 38,44.5 46,43 54,43 C 62,43 70,44.5 76,46 C 76,38 76,31 74.5,30.2 C 69,28.8 60.5,26.5 54,26.5 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:startX="54"
-                android:startY="26"
-                android:endX="54"
-                android:endY="46"
-                android:type="linear">
-                <item android:color="#4DFFFFFF" android:offset="0.0" />
-                <item android:color="#00FFFFFF" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
 
     <!-- Emergency Cross Glow Aura -->
     <path
@@ -111,11 +73,6 @@
             </gradient>
         </aapt:attr>
     </path>
-
-    <!-- Cross Top Specular Highlight -->
-    <path
-        android:pathData="M 53.5,43.5 L 54.5,43.5 C 55.3,43.5 56,44.2 56,45 L 56,51.5 L 52,51.5 L 52,45 C 52,44.2 52.7,43.5 53.5,43.5 Z"
-        android:fillColor="#40FFFFFF" />
 
     <!-- Center Active Beacon Pinpoint Dot -->
     <path

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Guardian Shield Rim Outline -->
+    <path
+        android:pathData="M 54,25 C 46.5,25 37.5,27.5 32,29 C 30,30 30,42 30,52 C 30,64 42,76 54,83 C 66,76 78,64 78,52 C 78,42 78,30 76,29 C 70.5,27.5 61.5,25 54,25 Z"
+        android:strokeWidth="2.8"
+        android:strokeColor="#FFFFFFFF"
+        android:fillColor="#00000000" />
+
+    <!-- Radar Range Ring 3 -->
+    <path
+        android:pathData="M 54,31 A 23,23 0 1,0 54,77 A 23,23 0 1,0 54,31 Z"
+        android:strokeWidth="1.6"
+        android:strokeAlpha="0.6"
+        android:strokeColor="#FFFFFFFF"
+        android:fillColor="#00000000" />
+
+    <!-- Radar Range Ring 2 -->
+    <path
+        android:pathData="M 54,38.5 A 15.5,15.5 0 1,0 54,69.5 A 15.5,15.5 0 1,0 54,38.5 Z"
+        android:strokeWidth="1.6"
+        android:strokeAlpha="0.8"
+        android:strokeColor="#FFFFFFFF"
+        android:fillColor="#00000000" />
+
+    <!-- Radar Range Ring 1 -->
+    <path
+        android:pathData="M 54,45 A 9,9 0 1,0 54,63 A 9,9 0 1,0 54,45 Z"
+        android:strokeWidth="1.6"
+        android:strokeColor="#FFFFFFFF"
+        android:fillColor="#00000000" />
+
+    <!-- Center Cross -->
+    <path
+        android:pathData="M 52,45 C 52,44.2 52.7,43.5 53.5,43.5 L 54.5,43.5 C 55.3,43.5 56,44.2 56,45 L 56,51.5 L 62.5,51.5 C 63.3,51.5 64,52.2 64,53 L 64,55 C 64,55.8 63.3,56.5 62.5,56.5 L 56,56.5 L 56,63 C 56,63.8 55.3,64.5 54.5,64.5 L 53.5,64.5 C 52.7,64.5 52,63.8 52,63 L 52,56.5 L 45.5,56.5 C 44.7,56.5 44,55.8 44,55 L 44,53 C 44,52.2 44.7,51.5 45.5,51.5 L 52,51.5 Z"
+        android:fillColor="#FFFFFFFF" />
+</vector>
