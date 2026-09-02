@@ -1,5 +1,8 @@
 package com.example.nearhelp.ui.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -28,12 +31,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,11 +58,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nearhelp.data.location.LocationHelper
+import com.example.nearhelp.theme.EmergencyCrimson
 import com.example.nearhelp.theme.GuardianBgBottom
 import com.example.nearhelp.theme.GuardianBgTop
 import com.example.nearhelp.theme.ThemeManager
@@ -66,13 +79,13 @@ import kotlinx.coroutines.launch
  *
  * Implements the flagship Guardian screen:
  * - Ambient gradient (Light: Mint Green, Dark: Midnight Emerald)
- * - Top Active Protection status chip + 1-tap Theme Toggle switch
- * - Locality Safety Header: "China Basin" • "Safety Index 91%"
+ * - Top Active Protection status chip + 1-tap Theme Toggle switch + Map/Profile icons
+ * - Real-time Locality Safety Header (Live Reverse Geocoding & GPS coordinate telemetry)
  * - 360° Radar Canvas with concentric range rings and voice AI mic
- * - Slide to exit slider in between Radar and HOLD FOR SOS
- * - Bottom "HOLD FOR SOS" (3s hold trigger with progress ring)
- * - "CHECK IN" with chevron indicators ⌄⌄
- * - Live Geodetic Telemetry readout (37.7749° N 122.39632° W)
+ * - Big vibrant Red "HOLD FOR SOS" trigger (with progress ring on press)
+ * - "CHECK IN" with chevron indicators ⌄
+ * - Live Geodetic Telemetry readout (formatted latitude/longitude)
+ * - Bottom Slide-To-Exit Pill
  */
 @Composable
 fun GuardianRadarScreen(
@@ -82,11 +95,12 @@ fun GuardianRadarScreen(
     onNavigateToProfile: () -> Unit,
     onVoiceSosClick: () -> Unit,
     modifier: Modifier = Modifier,
-    localityName: String = "China Basin",
-    safetyIndex: Int = 91,
-    coordinatesText: String = "37.7749° N 122.39632° W",
+    localityName: String? = null,
+    safetyIndex: Int? = null,
+    coordinatesText: String? = null,
     isAnonymous: Boolean = false
 ) {
+    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     var checkInStatus by remember { mutableStateOf<String?>(null) }
@@ -103,9 +117,43 @@ fun GuardianRadarScreen(
     val telemetryTextColor = if (isDark) Color(0xFF94A3B8) else Color(0xFF475569)
     val badgeBgColor = if (isDark) Color(0x33FFFFFF) else Color(0xCCFFFFFF)
     val badgeTextColor = if (isDark) Color(0xFFF1F5F9) else Color(0xFF0F172A)
-    val sosBgColor = if (isDark) Color(0x33FFFFFF) else Color(0x26000000)
-    val sosTextColor = if (isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A)
     val checkInTextColor = if (isDark) Color(0xFF94A3B8) else Color(0xFF334155)
+
+    // Real-time GPS Location Provider
+    val locationHelper = remember { LocationHelper(context) }
+    val locationState by locationHelper.locationState.collectAsState()
+
+    // Runtime Permission Request for Location
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        ) {
+            locationHelper.startLocationUpdates()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        if (locationHelper.hasLocationPermission()) {
+            locationHelper.startLocationUpdates()
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+        onDispose {
+            locationHelper.stopLocationUpdates()
+        }
+    }
+
+    // Effective Display Values (Real-time GPS takes priority unless overridden)
+    val displayLocality = localityName ?: locationState.localityName
+    val displaySafetyIndex = safetyIndex ?: locationState.safetyIndex
+    val displayCoordinates = coordinatesText ?: locationState.coordinatesText
 
     // Hold-for-SOS Progress State
     val holdProgress = remember { Animatable(0f) }
@@ -140,7 +188,7 @@ fun GuardianRadarScreen(
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Top Bar: Active Protection Badge + 1-Tap Theme Toggle Switch
+            // 1. Top Bar: Active Protection Badge + Map/Profile + Theme Toggle Switch
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -170,37 +218,87 @@ fun GuardianRadarScreen(
                     )
                 }
 
-                // 1-Tap Responsive Theme Toggle Switch
-                ThemeToggleSwitch(
-                    isDarkMode = isDark,
-                    onToggle = { ThemeManager.toggleTheme() }
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onNavigateToMap,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .shadow(elevation = 4.dp, shape = CircleShape, ambientColor = Color(0x18000000))
+                            .background(badgeBgColor, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Map,
+                            contentDescription = "Community Map",
+                            tint = badgeTextColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    if (!isAnonymous) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = onNavigateToProfile,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .shadow(elevation = 4.dp, shape = CircleShape, ambientColor = Color(0x18000000))
+                                .background(badgeBgColor, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Profile & Medical ID",
+                                tint = badgeTextColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+                    // 1-Tap Responsive Theme Toggle Switch
+                    ThemeToggleSwitch(
+                        isDarkMode = isDark,
+                        onToggle = { ThemeManager.toggleTheme() }
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // 2. Locality Safety Header & Index
+            // 2. Real-time Locality Safety Header & Index
             Text(
-                text = localityName,
+                text = displayLocality,
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
+                    fontSize = 28.sp,
+                    lineHeight = 34.sp
                 ),
                 color = titleTextColor,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = "Safety Index $safetyIndex%",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp
-                ),
-                color = safetyTextColor,
-                textAlign = TextAlign.Center
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Live GPS",
+                    tint = Color(0xFF10B981),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Safety Index $displaySafetyIndex%",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
+                    ),
+                    color = safetyTextColor,
+                    textAlign = TextAlign.Center
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -210,23 +308,30 @@ fun GuardianRadarScreen(
                 modifier = Modifier.padding(vertical = 4.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 4. Slide to Exit Pill (Positioned in between Radar and HOLD FOR SOS)
-            SlideToExitPill(
-                onExit = onExit,
-                label = "Slide to exit",
-                modifier = Modifier.width(240.dp)
-            )
-
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 5. Hold For SOS Interactive Button with 3s Radial Fill
+            // 4. Big Red HOLD FOR SOS Interactive Button with Radial Fill & Pulse
             Box(
                 modifier = Modifier
-                    .scale(if (isHolding) 1.05f else 1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .scale(if (isHolding) 1.03f else pulseScale)
+                    .shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(32.dp),
+                        spotColor = EmergencyCrimson,
+                        ambientColor = Color(0x4DE52538)
+                    )
                     .clip(RoundedCornerShape(32.dp))
-                    .background(sosBgColor)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(0xFFFF2E4D),
+                                Color(0xFFE52538),
+                                Color(0xFFC2182B)
+                            )
+                        )
+                    )
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onPress = {
@@ -253,35 +358,46 @@ fun GuardianRadarScreen(
                             }
                         )
                     }
-                    .padding(horizontal = 28.dp, vertical = 14.dp),
+                    .padding(vertical = 18.dp, horizontal = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     if (isHolding) {
                         CircularProgressIndicator(
                             progress = { holdProgress.value },
-                            modifier = Modifier.size(20.dp),
-                            color = Color(0xFFE52538),
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
                             strokeWidth = 3.dp,
-                            trackColor = Color(0x33E52538)
+                            trackColor = Color(0x66FFFFFF)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.FlashOn,
+                            contentDescription = "SOS Flash",
+                            tint = Color.White,
+                            modifier = Modifier.size(26.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                     }
                     Text(
-                        text = "HOLD FOR SOS",
+                        text = if (isHolding) "RELEASE TO CANCEL" else "HOLD FOR SOS",
                         style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 19.sp,
-                            letterSpacing = 1.5.sp
+                            fontWeight = FontWeight.Black,
+                            fontSize = 20.sp,
+                            letterSpacing = 2.sp
                         ),
-                        color = sosTextColor
+                        color = Color.White
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // 6. Check-in trigger with double chevron
+            // 5. Check-in trigger with double chevron
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -289,7 +405,7 @@ fun GuardianRadarScreen(
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         checkInStatus = "Status ping sent to guardian contacts ✓"
                     }
-                    .padding(8.dp)
+                    .padding(6.dp)
             ) {
                 Text(
                     text = "CHECK IN",
@@ -317,11 +433,11 @@ fun GuardianRadarScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // 7. Live Geodetic Telemetry Display
+            // 6. Live Geodetic Telemetry Display
             Text(
-                text = coordinatesText,
+                text = displayCoordinates,
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
@@ -330,7 +446,16 @@ fun GuardianRadarScreen(
                 color = telemetryTextColor
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 7. Bottom: Slide To Exit Button
+            SlideToExitPill(
+                onExit = onExit,
+                label = "Slide to exit",
+                modifier = Modifier
+                    .width(260.dp)
+                    .padding(bottom = 12.dp)
+            )
         }
     }
 }
