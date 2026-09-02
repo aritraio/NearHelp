@@ -17,9 +17,17 @@ from app.db.base import Base
 
 logger = logging.getLogger(__name__)
 
+def _get_async_url(raw_url: str) -> str:
+    url = raw_url.strip()
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    return url
+
 # Asynchronous SQLAlchemy Engine with NullPool for robust event loop lifecycle
 async_engine = create_async_engine(
-    settings.DATABASE_URL,
+    _get_async_url(settings.DATABASE_URL),
     echo=False,
     future=True,
     poolclass=NullPool,
