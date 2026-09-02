@@ -31,6 +31,10 @@ async_engine = create_async_engine(
     echo=False,
     future=True,
     poolclass=NullPool,
+    connect_args={
+        "statement_cache_size": 0,
+        "prepared_statement_cache_size": 0,
+    } if "sqlite" not in settings.DATABASE_URL else {},
 )
 
 # Async Session Factory
