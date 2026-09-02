@@ -1,5 +1,9 @@
 package com.example.nearhelp.ui.auth.screens
 
+import android.accounts.AccountManager
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +25,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -67,7 +70,7 @@ import com.example.nearhelp.ui.auth.components.EmergencyButton
 @Composable
 fun LoginScreen(
     onNavigateToSignUp: () -> Unit,
-    onNavigateToPhoneOtp: () -> Unit,
+    onNavigateToPhoneOtp: () -> Unit = {},
     onNavigateToHome: () -> Unit,
     viewModel: AuthViewModel,
     modifier: Modifier = Modifier,
@@ -78,6 +81,19 @@ fun LoginScreen(
 
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val googleAccountPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val accountName = result.data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+            if (!accountName.isNullOrBlank()) {
+                viewModel.loginWithGoogle(accountName)
+            } else {
+                viewModel.loginWithGoogle("google_oauth_mock_id_token_demo")
+            }
+        }
+    }
+
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
             onNavigateToHome()
@@ -87,7 +103,8 @@ fun LoginScreen(
 
     val isAuthLoading = uiState is AuthUiState.Loading
     val isEmergencyLoading = isAuthLoading && (uiState as? AuthUiState.Loading)?.message?.contains("Emergency", ignoreCase = true) == true
-    val isLoginLoading = isAuthLoading && !isEmergencyLoading
+    val isGoogleLoading = isAuthLoading && (uiState as? AuthUiState.Loading)?.message?.contains("Google", ignoreCase = true) == true
+    val isEmailLoginLoading = isAuthLoading && !isEmergencyLoading && !isGoogleLoading
 
     Box(
         modifier = modifier
@@ -289,7 +306,7 @@ fun LoginScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.login()
                 },
-                enabled = !isAuthLoading,
+                enabled = !isAuthLoading && loginForm.isValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -302,7 +319,7 @@ fun LoginScreen(
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 2.dp),
             ) {
-                if (isLoginLoading) {
+                if (isEmailLoginLoading) {
                     CircularProgressIndicator(
                         color = Color.White,
                         modifier = Modifier.size(22.dp),
@@ -322,44 +339,26 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Phone OTP Button
-            OutlinedButton(
-                onClick = onNavigateToPhoneOtp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF0F172A),
-                ),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBD5E1)),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Phone,
-                    contentDescription = "Phone OTP",
-                    tint = Color(0xFF0F172A),
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = "Sign in with Phone OTP",
-                    fontFamily = FontFamily.SansSerif,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.5.sp,
-                        color = Color(0xFF0F172A),
-                    ),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             // Google Sign-In Button
             OutlinedButton(
                 onClick = {
-                    viewModel.loginWithGoogle("google_oauth_mock_id_token_demo")
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    try {
+                        val intent = AccountManager.newChooseAccountIntent(
+                            null,
+                            null,
+                            arrayOf("com.google"),
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                        googleAccountPickerLauncher.launch(intent)
+                    } catch (_: Exception) {
+                        viewModel.loginWithGoogle("google_oauth_mock_id_token_demo")
+                    }
                 },
+                enabled = !isAuthLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -367,28 +366,38 @@ fun LoginScreen(
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF0F172A),
+                    disabledContainerColor = Color(0xFFF1F5F9),
+                    disabledContentColor = Color(0xFF94A3B8),
                 ),
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBD5E1)),
             ) {
-                Text(
-                    text = "G",
-                    fontFamily = FontFamily.SansSerif,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Black,
-                        fontSize = 16.sp,
+                if (isGoogleLoading) {
+                    CircularProgressIndicator(
                         color = Color(0xFF4285F4),
-                    ),
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = "Continue with Google",
-                    fontFamily = FontFamily.SansSerif,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.5.sp,
-                        color = Color(0xFF0F172A),
-                    ),
-                )
+                        modifier = Modifier.size(22.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text(
+                        text = "G",
+                        fontFamily = FontFamily.SansSerif,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 16.sp,
+                            color = Color(0xFF4285F4),
+                        ),
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Continue with Google",
+                        fontFamily = FontFamily.SansSerif,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.5.sp,
+                            color = Color(0xFF0F172A),
+                        ),
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))

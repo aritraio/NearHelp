@@ -1,5 +1,6 @@
 package com.example.nearhelp.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -7,9 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -23,11 +21,12 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -38,15 +37,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nearhelp.theme.ThemeManager
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
- * Top Slide-To-Exit Pill Slider
+ * Slide-To-Exit Pill Slider
  *
  * Implements the Guardian disarm gesture:
- * - Translucent glass pill (`#FFFFFFCC`)
- * - Dark circular thumb button (`#0F172A`) containing `>`
+ * - Translucent glass pill (Light: `#FFFFFFCC`, Dark: `#1E293B`)
+ * - Circular thumb button containing `>`
  * - Horizontal swipe gesture with spring snap-back physics
  */
 @Composable
@@ -58,12 +58,34 @@ fun SlideToExitPill(
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val dragOffset = remember { Animatable(0f) }
+    val isDark = ThemeManager.isDarkMode
+
+    val pillBgColor by animateColorAsState(
+        targetValue = if (isDark) Color(0xFF1E293B) else Color(0xCCFFFFFF),
+        label = "SlidePillBg"
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (isDark) Color(0xFF94A3B8) else Color(0xFF475569),
+        label = "SlidePillLabel"
+    )
+    val thumbBgColor by animateColorAsState(
+        targetValue = if (isDark) Color(0xFF10B981) else Color(0xFF0F172A),
+        label = "SlidePillThumbBg"
+    )
+    val thumbIconColor by animateColorAsState(
+        targetValue = if (isDark) Color(0xFF061A13) else Color.White,
+        label = "SlidePillThumbIcon"
+    )
 
     BoxWithConstraints(
         modifier = modifier
             .height(52.dp)
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(100.dp), ambientColor = Color(0x18000000))
-            .background(Color(0xCCFFFFFF), RoundedCornerShape(100.dp))
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(100.dp),
+                ambientColor = if (isDark) Color(0x33000000) else Color(0x18000000)
+            )
+            .background(pillBgColor, RoundedCornerShape(100.dp))
             .padding(4.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -78,20 +100,24 @@ fun SlideToExitPill(
         ) {
             Text(
                 text = label,
-                color = Color(0xFF475569),
+                color = labelColor,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.3.sp
             )
         }
 
-        // Draggable Dark Thumb Button
+        // Draggable Thumb Button
         Box(
             modifier = Modifier
                 .offset { IntOffset(dragOffset.value.roundToInt(), 0) }
-                .size(42.dp)
-                .shadow(elevation = 4.dp, shape = CircleShape, ambientColor = Color(0x33000000))
-                .background(Color(0xFF0F172A), CircleShape)
+                .size(44.dp)
+                .shadow(
+                    elevation = 4.dp,
+                    shape = CircleShape,
+                    ambientColor = Color(0x33000000)
+                )
+                .background(thumbBgColor, CircleShape)
                 .pointerInput(maxDragPx) {
                     detectHorizontalDragGestures(
                         onDragEnd = {
@@ -129,7 +155,7 @@ fun SlideToExitPill(
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "Slide to exit thumb",
-                tint = Color.White,
+                tint = thumbIconColor,
                 modifier = Modifier.size(24.dp)
             )
         }

@@ -35,6 +35,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 
+import com.example.nearhelp.theme.ThemeManager
+
 /**
  * 360° Interactive Radar Map Visualizer
  *
@@ -51,6 +53,7 @@ fun GuardianRadarView(
 ) {
     val haptic = LocalHapticFeedback.current
     val infiniteTransition = rememberInfiniteTransition(label = "GuardianRadarSweep")
+    val isDark = ThemeManager.isDarkMode
 
     // Continuous 360-degree rotation for radar beam
     val angle by infiniteTransition.animateFloat(
@@ -74,6 +77,13 @@ fun GuardianRadarView(
         label = "RadarPulseScale"
     )
 
+    val ringColor = if (isDark) Color(0x6634D399) else Color(0x4D48BB78)
+    val mapColor = if (isDark) Color(0x2634D399) else Color(0x1834C759)
+    val streetColor = if (isDark) Color(0x3334D399) else Color(0x2034C759)
+    val echoColor = if (isDark) Color(0x3834D399) else Color(0x2634C759)
+    val micBgColor = if (isDark) Color(0xFF0F172A) else Color(0xF5FFFFFF)
+    val micIconTint = if (isDark) Color(0xFF34D399) else Color(0xFF0F172A)
+
     Box(
         modifier = modifier
             .size(300.dp)
@@ -95,18 +105,18 @@ fun GuardianRadarView(
             }
             drawPath(
                 path = mapPath,
-                color = Color(0x1834C759)
+                color = mapColor
             )
 
             // Street lines underlay
             drawLine(
-                color = Color(0x2034C759),
+                color = streetColor,
                 start = Offset(center.x - maxRadius * 0.85f, center.y + maxRadius * 0.2f),
                 end = Offset(center.x + maxRadius * 0.85f, center.y - maxRadius * 0.3f),
                 strokeWidth = 2.5f
             )
             drawLine(
-                color = Color(0x2034C759),
+                color = streetColor,
                 start = Offset(center.x - maxRadius * 0.3f, center.y - maxRadius * 0.85f),
                 end = Offset(center.x + maxRadius * 0.4f, center.y + maxRadius * 0.85f),
                 strokeWidth = 2f
@@ -116,7 +126,7 @@ fun GuardianRadarView(
             val rings = listOf(0.35f, 0.65f, 0.95f)
             rings.forEach { ratio ->
                 drawCircle(
-                    color = Color(0x4D48BB78),
+                    color = ringColor,
                     radius = maxRadius * ratio,
                     center = center,
                     style = Stroke(width = 1.5.dp.toPx())
@@ -125,7 +135,7 @@ fun GuardianRadarView(
 
             // Pulsing Range Echo Ring
             drawCircle(
-                color = Color(0x2634C759),
+                color = echoColor,
                 radius = maxRadius * 0.65f * pulseScale,
                 center = center,
                 style = Stroke(width = 2.dp.toPx())
@@ -134,12 +144,21 @@ fun GuardianRadarView(
             // 3. Radar Sweep Beam Cone
             rotate(degrees = angle, pivot = center) {
                 val sweepBrush = Brush.sweepGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        Color(0x0534C759),
-                        Color(0x2034C759),
-                        Color(0x7534C759)
-                    ),
+                    colors = if (isDark) {
+                        listOf(
+                            Color.Transparent,
+                            Color(0x0834D399),
+                            Color(0x3034D399),
+                            Color(0x9510B981)
+                        )
+                    } else {
+                        listOf(
+                            Color.Transparent,
+                            Color(0x0534C759),
+                            Color(0x2034C759),
+                            Color(0x7534C759)
+                        )
+                    },
                     center = center
                 )
                 drawCircle(
@@ -158,10 +177,10 @@ fun GuardianRadarView(
                 .shadow(
                     elevation = 10.dp,
                     shape = CircleShape,
-                    ambientColor = Color(0x2E000000),
-                    spotColor = Color(0x3334C759)
+                    ambientColor = if (isDark) Color(0x66000000) else Color(0x2E000000),
+                    spotColor = Color(0x5534D399)
                 )
-                .background(Color(0xF5FFFFFF), CircleShape)
+                .background(micBgColor, CircleShape)
                 .clickable {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onVoiceSosClick()
@@ -172,7 +191,7 @@ fun GuardianRadarView(
             Icon(
                 imageVector = Icons.Default.Mic,
                 contentDescription = "AI Voice SOS Triage",
-                tint = Color(0xFF0F172A),
+                tint = micIconTint,
                 modifier = Modifier.size(30.dp)
             )
         }

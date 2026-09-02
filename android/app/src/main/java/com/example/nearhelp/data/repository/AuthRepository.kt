@@ -44,7 +44,7 @@ class AuthRepository(
         )
         Result.success(tokenResponse)
       } else {
-        val errorMsg = response.errorBody()?.string() ?: "Registration failed (${response.code()})"
+        val errorMsg = parseErrorBody(response.errorBody()?.string(), "Registration failed (${response.code()})")
         Result.failure(Exception(errorMsg))
       }
     } catch (e: Exception) {
@@ -71,7 +71,7 @@ class AuthRepository(
         )
         Result.success(tokenResponse)
       } else {
-        val errorMsg = response.errorBody()?.string() ?: "Login failed (${response.code()})"
+        val errorMsg = parseErrorBody(response.errorBody()?.string(), "Login failed (${response.code()})")
         Result.failure(Exception(errorMsg))
       }
     } catch (e: Exception) {
@@ -94,7 +94,7 @@ class AuthRepository(
         )
         Result.success(tokenResponse)
       } else {
-        val errorMsg = response.errorBody()?.string() ?: "Google sign-in failed (${response.code()})"
+        val errorMsg = parseErrorBody(response.errorBody()?.string(), "Google sign-in failed (${response.code()})")
         Result.failure(Exception(errorMsg))
       }
     } catch (e: Exception) {
@@ -111,7 +111,7 @@ class AuthRepository(
       if (response.isSuccessful && response.body() != null) {
         Result.success(response.body()!!)
       } else {
-        val errorMsg = response.errorBody()?.string() ?: "Failed to send OTP (${response.code()})"
+        val errorMsg = parseErrorBody(response.errorBody()?.string(), "Failed to send OTP (${response.code()})")
         Result.failure(Exception(errorMsg))
       }
     } catch (e: Exception) {
@@ -140,7 +140,7 @@ class AuthRepository(
         )
         Result.success(tokenResponse)
       } else {
-        val errorMsg = response.errorBody()?.string() ?: "OTP verification failed (${response.code()})"
+        val errorMsg = parseErrorBody(response.errorBody()?.string(), "Phone verification failed (${response.code()})")
         Result.failure(Exception(errorMsg))
       }
     } catch (e: Exception) {
@@ -165,7 +165,7 @@ class AuthRepository(
         )
         Result.success(tokenResponse)
       } else {
-        val errorMsg = response.errorBody()?.string() ?: "Emergency bypass failed (${response.code()})"
+        val errorMsg = parseErrorBody(response.errorBody()?.string(), "Emergency bypass failed (${response.code()})")
         Result.failure(Exception(errorMsg))
       }
     } catch (e: Exception) {
@@ -183,10 +183,25 @@ class AuthRepository(
       if (response.isSuccessful && response.body() != null) {
         Result.success(response.body()!!)
       } else {
-        Result.failure(Exception("Failed to fetch user (${response.code()})"))
+        val errorMsg = parseErrorBody(response.errorBody()?.string(), "Failed to fetch user (${response.code()})")
+        Result.failure(Exception(errorMsg))
       }
     } catch (e: Exception) {
       Result.failure(e)
+    }
+  }
+
+  private fun parseErrorBody(raw: String?, defaultMsg: String): String {
+    if (raw.isNullOrBlank()) return defaultMsg
+    return try {
+      val json = com.google.gson.JsonParser.parseString(raw).asJsonObject
+      when {
+        json.has("detail") -> json.get("detail").asString
+        json.has("message") -> json.get("message").asString
+        else -> raw
+      }
+    } catch (_: Exception) {
+      raw
     }
   }
 
