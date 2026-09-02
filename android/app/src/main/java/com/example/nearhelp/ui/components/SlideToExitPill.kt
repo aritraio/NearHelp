@@ -52,7 +52,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SlideToExitPill(
     onExit: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.width(240.dp),
     label: String = "Slide to exit"
 ) {
     val haptic = LocalHapticFeedback.current
@@ -61,8 +61,7 @@ fun SlideToExitPill(
 
     BoxWithConstraints(
         modifier = modifier
-            .width(220.dp)
-            .height(50.dp)
+            .height(52.dp)
             .shadow(elevation = 6.dp, shape = RoundedCornerShape(100.dp), ambientColor = Color(0x18000000))
             .background(Color(0xCCFFFFFF), RoundedCornerShape(100.dp))
             .padding(4.dp),
