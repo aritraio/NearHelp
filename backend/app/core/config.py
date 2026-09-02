@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     # Firebase Authentication & FCM
     FIREBASE_PROJECT_ID: str = "nearhelp-ai"
     FIREBASE_CREDENTIALS_PATH: str = "./firebase_service_account.json"
+    FIREBASE_CREDENTIALS_JSON: str = ""
     FCM_SERVER_KEY: str = ""
 
     # Rate Limiting & Resilience
@@ -54,6 +55,20 @@ class Settings(BaseSettings):
 
     # AI Microservice URL
     AI_SERVICE_URL: str = "http://localhost:8001"
+
+    from pydantic import model_validator
+
+    @model_validator(mode="after")
+    def validate_db_urls(self) -> "Settings":
+        if self.DATABASE_URL:
+            if self.DATABASE_URL.startswith("postgres://"):
+                self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif self.DATABASE_URL.startswith("postgresql://") and not self.DATABASE_URL.startswith("postgresql+"):
+                self.DATABASE_URL = self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if self.DATABASE_SYNC_URL:
+            if self.DATABASE_SYNC_URL.startswith("postgres://"):
+                self.DATABASE_SYNC_URL = self.DATABASE_SYNC_URL.replace("postgres://", "postgresql://", 1)
+        return self
 
     model_config = SettingsConfigDict(
         env_file=("../.env", ".env"),

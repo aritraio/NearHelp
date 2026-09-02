@@ -1,5 +1,4 @@
-"""NearHelp AI — Firebase Authentication Admin Service."""
-
+import json
 import logging
 import os
 from typing import Any
@@ -22,7 +21,16 @@ def init_firebase() -> bool:
         return True
 
     try:
-        if os.path.exists(settings.FIREBASE_CREDENTIALS_PATH):
+        if settings.FIREBASE_CREDENTIALS_JSON and settings.FIREBASE_CREDENTIALS_JSON.strip():
+            cred_dict = json.loads(settings.FIREBASE_CREDENTIALS_JSON)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred, {
+                "projectId": settings.FIREBASE_PROJECT_ID or cred_dict.get("project_id"),
+            })
+            _firebase_initialized = True
+            logger.info("Firebase Admin SDK initialized from FIREBASE_CREDENTIALS_JSON.")
+            return True
+        elif os.path.exists(settings.FIREBASE_CREDENTIALS_PATH):
             cred = credentials.Certificate(settings.FIREBASE_CREDENTIALS_PATH)
             firebase_admin.initialize_app(cred, {
                 "projectId": settings.FIREBASE_PROJECT_ID,
@@ -88,6 +96,12 @@ def verify_firebase_id_token(id_token: str) -> dict[str, Any]:
             }
 
     # Live Firebase verification
+    if not _firebase_initialized:
+        raise ValueError(
+            "Google/Phone authentication requires Firebase credentials on the server. "
+            "Please use Email & Password Sign Up / Login, or add FIREBASE_CREDENTIALS_JSON to your server environment variables."
+        )
+
     try:
         decoded_token = auth.verify_id_token(id_token)
         return decoded_token
