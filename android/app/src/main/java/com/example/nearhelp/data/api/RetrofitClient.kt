@@ -20,10 +20,11 @@ object RetrofitClient {
         || "google_sdk" == Build.PRODUCT)
   }
 
-  // Android emulator points to host machine via 10.0.2.2
-  // Physical devices via ADB reverse use 127.0.0.1:8000 or LAN IP
+  const val PRODUCTION_BASE_URL: String = "https://nearhelp-backend-7sfj.onrender.com/"
+
+  // Production cloud backend (Render + Supabase PostGIS)
   private val DEFAULT_BASE_URL: String
-    get() = if (isRunningOnEmulator()) "http://10.0.2.2:8000/" else "http://127.0.0.1:8000/"
+    get() = PRODUCTION_BASE_URL
 
   private var baseUrl: String? = null
   private var authApiService: AuthApiService? = null

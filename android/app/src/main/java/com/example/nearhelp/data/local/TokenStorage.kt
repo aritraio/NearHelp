@@ -93,6 +93,12 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
 
   override fun getFcmToken(): String? = sharedPreferences.getString(KEY_FCM_TOKEN, null)
 
+  fun saveServerBaseUrl(url: String) {
+    sharedPreferences.edit().putString(KEY_SERVER_BASE_URL, url).apply()
+  }
+
+  fun getServerBaseUrl(): String? = sharedPreferences.getString(KEY_SERVER_BASE_URL, null)
+
   override fun clear() {
     sharedPreferences.edit().clear().apply()
   }
@@ -111,5 +117,6 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     private const val KEY_IS_ANONYMOUS = "is_anonymous"
     private const val KEY_AUTH_PROVIDER = "auth_provider"
     private const val KEY_FCM_TOKEN = "fcm_token"
+    private const val KEY_SERVER_BASE_URL = "server_base_url"
   }
 }

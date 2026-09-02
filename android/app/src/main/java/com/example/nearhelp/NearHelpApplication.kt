@@ -34,6 +34,11 @@ class NearHelpApplication : Application() {
     instance = this
 
     tokenStorage = TokenStorage(this)
+    val savedServerUrl = tokenStorage.getServerBaseUrl()
+    if (!savedServerUrl.isNullOrBlank()) {
+      RetrofitClient.setBaseUrl(savedServerUrl)
+    }
+
     val authApiService = RetrofitClient.getAuthApiService()
     val userApiService = RetrofitClient.getUserApiService()
     val routingApiService = RetrofitClient.getRoutingApiService()

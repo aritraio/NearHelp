@@ -67,8 +67,12 @@ class LiveTrackingWebSocketClient(
         || "google_sdk" == android.os.Build.PRODUCT)
   }
 
+  companion object {
+    const val DEFAULT_PRODUCTION_WS_URL: String = "wss://nearhelp-backend-7sfj.onrender.com"
+  }
+
   private val defaultWsUrl: String
-    get() = if (isRunningOnEmulator()) "ws://10.0.2.2:8000" else "ws://127.0.0.1:8000"
+    get() = DEFAULT_PRODUCTION_WS_URL
 
   private var currentBaseWsUrl: String? = null
 
