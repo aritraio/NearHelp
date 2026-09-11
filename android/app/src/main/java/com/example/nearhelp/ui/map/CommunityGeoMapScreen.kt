@@ -1,104 +1,76 @@
 package com.example.nearhelp.ui.map
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Directions
-import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.nearhelp.theme.ActionAmber
-import com.example.nearhelp.theme.AiCyan
-import com.example.nearhelp.theme.CardSurface
-import com.example.nearhelp.theme.CardSurfaceVariant
-import com.example.nearhelp.theme.DarkBackground
-import com.example.nearhelp.theme.EmergencyRed
-import com.example.nearhelp.theme.EmergencyRedContainer
-import com.example.nearhelp.theme.EmergencyRedGlow
-import com.example.nearhelp.theme.SafeGreen
-import com.example.nearhelp.theme.SurfaceBorder
-import com.example.nearhelp.theme.TextHighContrast
-import com.example.nearhelp.theme.TextMediumContrast
-import com.example.nearhelp.theme.TextMuted
-import kotlin.math.roundToInt
+import com.example.nearhelp.theme.VictimBackground
+import com.example.nearhelp.theme.VictimBlueBorder
+import com.example.nearhelp.theme.VictimBlueCard
+import com.example.nearhelp.theme.VictimBorder
+import com.example.nearhelp.theme.VictimGreenBorder
+import com.example.nearhelp.theme.VictimGreenCard
+import com.example.nearhelp.theme.VictimOrangeBorder
+import com.example.nearhelp.theme.VictimOrangeCard
+import com.example.nearhelp.theme.VictimPinkBorder
+import com.example.nearhelp.theme.VictimPinkCard
+import com.example.nearhelp.theme.VictimPrimary
+import com.example.nearhelp.theme.VictimTextDark
+import com.example.nearhelp.theme.VictimTextMuted
+import com.example.nearhelp.ui.victim.MapPlaceholder
+import com.example.nearhelp.ui.victim.SectionHeader
+import com.example.nearhelp.ui.victim.VictimBottomNavBar
+import com.example.nearhelp.ui.victim.VictimNavTab
+import com.example.nearhelp.ui.victim.VictimShapes
 
+/**
+ * Victim Nearby Help — light redesign (mockup Nearby Help):
+ * search, map with hospital pins, category chips, hospital list,
+ * immediate-help banner. Preserves ViewModel contract.
+ */
 @Composable
 fun CommunityGeoMapScreen(
   onNavigateBack: () -> Unit,
@@ -108,1015 +80,172 @@ fun CommunityGeoMapScreen(
   viewModel: CommunityGeoMapViewModel = viewModel(),
 ) {
   val uiState by viewModel.uiState.collectAsState()
+  var query by remember { mutableStateOf("") }
+  var selectedChip by remember { mutableStateOf("Hospitals") }
 
-  // Pulsing animation for victim beacon & PostGIS wave
-  val infiniteTransition = rememberInfiniteTransition(label = "GeoMapPulse")
-  val pulseScale by infiniteTransition.animateFloat(
-    initialValue = 0.85f,
-    targetValue = 1.45f,
-    animationSpec = infiniteRepeatable(
-      animation = tween(1800, easing = FastOutSlowInEasing),
-      repeatMode = RepeatMode.Restart,
-    ),
-    label = "BeaconPulseScale",
-  )
-
-  val pulseAlpha by infiniteTransition.animateFloat(
-    initialValue = 0.8f,
-    targetValue = 0.0f,
-    animationSpec = infiniteRepeatable(
-      animation = tween(1800, easing = FastOutSlowInEasing),
-      repeatMode = RepeatMode.Restart,
-    ),
-    label = "BeaconPulseAlpha",
-  )
-
-  Box(
-    modifier = modifier
-      .fillMaxSize()
-      .background(DarkBackground)
-  ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-      // 1. Top Telemetry Header Bar
-      GeoMapTopBar(
-        incident = uiState.incident,
-        showSqlHud = uiState.showSqlHud,
-        onNavigateBack = onNavigateBack,
-        onToggleSqlHud = { viewModel.toggleSqlHud() },
-      )
-
-      // 2. Map Layer Chips Bar
-      GeoMapLayerChipsBar(
-        enabledLayers = uiState.enabledLayers,
-        responderCount = uiState.incident.responders.size,
-        hospitalCount = uiState.incident.hospitals.size,
-        aedCount = uiState.incident.aeds.size,
-        searchRadiusKm = uiState.incident.searchRadiusKm,
-        onToggleLayer = { viewModel.toggleLayer(it) },
-      )
-
-      // 3. Main Interactive Map Canvas Viewport
-      Box(
-        modifier = Modifier
-          .fillMaxWidth()
-          .weight(1f)
-      ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-          val canvasWidth = constraints.maxWidth.toFloat()
-          val canvasHeight = constraints.maxHeight.toFloat()
-          val centerX = canvasWidth / 2f + uiState.panOffsetX
-          val centerY = canvasHeight / 2f + uiState.panOffsetY
-          val zoom = uiState.zoomLevel
-
-          // Background Canvas with Cartography Grid, PostGIS waves, and Rescue Routes
-          Canvas(
-            modifier = Modifier
-              .fillMaxSize()
-              .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
-                  change.consume()
-                  viewModel.updatePan(dragAmount.x, dragAmount.y)
-                }
-              }
-              .pointerInput(Unit) {
-                detectTapGestures {
-                  viewModel.clearSelectedEntity()
-                }
-              }
-          ) {
-            drawCartographyBase(
-              centerX = centerX,
-              centerY = centerY,
-              zoom = zoom,
-            )
-
-            // Draw PostGIS Radar Wave
-            if (uiState.enabledLayers.contains(MapLayerKey.POSTGIS_WAVE)) {
-              drawPostGisRadarWave(
-                centerX = centerX,
-                centerY = centerY,
-                radiusPx = (uiState.incident.searchRadiusKm.toFloat() * 140f) * zoom,
-                pulseScale = pulseScale,
-                pulseAlpha = pulseAlpha,
-              )
-            }
-
-            // Draw Rescue Routes
-            if (uiState.enabledLayers.contains(MapLayerKey.ROUTES)) {
-              drawRescueRoutes(
-                centerX = centerX,
-                centerY = centerY,
-                zoom = zoom,
-                incident = uiState.incident,
-                activeResponderIndex = uiState.activeResponderIndex,
-              )
-            }
-          }
-
-          // Interactive Marker Overlay Elements
-          // A. Victim Beacon Marker
-          if (uiState.enabledLayers.contains(MapLayerKey.VICTIM)) {
-            VictimBeaconMarker(
-              centerX = centerX,
-              centerY = centerY,
-              pulseScale = pulseScale,
-              pulseAlpha = pulseAlpha,
-              onClick = {
-                viewModel.selectEntity(SelectedMapEntity.VictimEntity())
-              }
-            )
-          }
-
-          // B. Responder Beacon Markers
-          if (uiState.enabledLayers.contains(MapLayerKey.RESPONDERS)) {
-            uiState.incident.responders.forEachIndexed { index, resp ->
-              val offsetX = centerX + ((resp.lng - uiState.incident.lng) * 28000f * zoom).toFloat()
-              val offsetY = centerY - ((resp.lat - uiState.incident.lat) * 28000f * zoom).toFloat()
-
-              ResponderBeaconMarker(
-                responder = resp,
-                offsetX = offsetX,
-                offsetY = offsetY,
-                isSelected = index == uiState.activeResponderIndex,
-                onClick = {
-                  viewModel.setActiveResponder(index)
-                  viewModel.selectEntity(SelectedMapEntity.ResponderEntity(resp))
-                }
-              )
-            }
-          }
-
-          // C. Hospital Markers
-          if (uiState.enabledLayers.contains(MapLayerKey.HOSPITALS)) {
-            uiState.incident.hospitals.forEach { hospital ->
-              val offsetX = centerX + ((hospital.lng - uiState.incident.lng) * 18000f * zoom).toFloat()
-              val offsetY = centerY - ((hospital.lat - uiState.incident.lat) * 18000f * zoom).toFloat()
-
-              HospitalBeaconMarker(
-                hospital = hospital,
-                offsetX = offsetX,
-                offsetY = offsetY,
-                onClick = {
-                  viewModel.selectEntity(SelectedMapEntity.HospitalEntity(hospital))
-                }
-              )
-            }
-          }
-
-          // D. AED Markers
-          if (uiState.enabledLayers.contains(MapLayerKey.AEDS)) {
-            uiState.incident.aeds.forEach { aed ->
-              val offsetX = centerX + ((aed.lng - uiState.incident.lng) * 32000f * zoom).toFloat()
-              val offsetY = centerY - ((aed.lat - uiState.incident.lat) * 32000f * zoom).toFloat()
-
-              AedBeaconMarker(
-                aed = aed,
-                offsetX = offsetX,
-                offsetY = offsetY,
-                onClick = {
-                  viewModel.selectEntity(SelectedMapEntity.AedEntity(aed))
-                }
-              )
-            }
-          }
-        }
-
-        // Floating Map Controls (Zoom In, Zoom Out, Recenter)
-        FloatingMapControls(
-          onZoomIn = { viewModel.zoomIn() },
-          onZoomOut = { viewModel.zoomOut() },
-          onRecenter = { viewModel.resetView() },
-          modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(16.dp)
-        )
-
-        // Live Navigation Stream & AI Rescue Navigation Floating Buttons
-        Row(
-          modifier = Modifier
-            .align(Alignment.BottomStart)
-            .padding(16.dp),
-          horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-          Surface(
-            onClick = onNavigateToTracking,
-            shape = RoundedCornerShape(24.dp),
-            color = SafeGreen,
-            shadowElevation = 8.dp
-          ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Icon(
-                imageVector = Icons.Default.Navigation,
-                contentDescription = "Live Stream",
-                tint = Color.Black,
-                modifier = Modifier.size(16.dp)
-              )
-              Spacer(modifier = Modifier.width(5.dp))
-              Text(
-                text = "Live Stream",
-                style = MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.Black,
-                  fontSize = 11.5.sp
-                ),
-                color = Color.Black
-              )
-            }
-          }
-
-          Surface(
-            onClick = onNavigateToNavigation,
-            shape = RoundedCornerShape(24.dp),
-            color = AiCyan,
-            shadowElevation = 8.dp
-          ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Icon(
-                imageVector = Icons.Default.Directions,
-                contentDescription = "AI Navigation",
-                tint = Color.Black,
-                modifier = Modifier.size(16.dp)
-              )
-              Spacer(modifier = Modifier.width(5.dp))
-              Text(
-                text = "AI Detour Nav",
-                style = MaterialTheme.typography.labelMedium.copy(
-                  fontWeight = FontWeight.Black,
-                  fontSize = 11.5.sp
-                ),
-                color = Color.Black
-              )
-            }
-          }
-        }
-
-        // PostGIS SQL Query HUD Panel (Collapsible)
-        androidx.compose.animation.AnimatedVisibility(
-          visible = uiState.showSqlHud,
-          enter = fadeIn() + expandVertically(),
-          exit = fadeOut() + shrinkVertically(),
-          modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(12.dp)
-        ) {
-          PostGisSqlHudCard(
-            querySnippet = uiState.postgisQuerySnippet,
-            onClose = { viewModel.toggleSqlHud() }
-          )
-        }
-      }
-    }
-
-    // 4. Interactive Bottom Sheet for Selected Entity
-    AnimatedVisibility(
-      visible = uiState.selectedEntity != null,
-      enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-      exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-      modifier = Modifier
-        .align(Alignment.BottomCenter)
-        .fillMaxWidth()
-    ) {
-      uiState.selectedEntity?.let { entity ->
-        EntityDetailsBottomSheet(
-          entity = entity,
-          onDismiss = { viewModel.clearSelectedEntity() },
-          onNavigateToNavigation = onNavigateToNavigation
-        )
-      }
-    }
-  }
-}
-
-// --------------------------------------------------------------------------
-// TOP TELEMETRY BAR
-// --------------------------------------------------------------------------
-@Composable
-private fun GeoMapTopBar(
-  incident: SpatialIncident,
-  showSqlHud: Boolean,
-  onNavigateBack: () -> Unit,
-  onToggleSqlHud: () -> Unit,
-) {
-  Row(
-    modifier = Modifier
-      .fillMaxWidth()
-      .background(Color(0xFF090B10))
-      .border(1.dp, SurfaceBorder)
-      .padding(horizontal = 12.dp, vertical = 8.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceBetween,
-  ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      IconButton(onClick = onNavigateBack, modifier = Modifier.size(36.dp)) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = "Back",
-          tint = TextHighContrast,
-        )
-      }
-      Spacer(modifier = Modifier.width(6.dp))
-      Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Box(
-            modifier = Modifier
-              .size(8.dp)
-              .background(EmergencyRed, CircleShape)
-          )
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            text = "Kolkata Spatial Dispatch Engine",
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = TextHighContrast,
-          )
-        }
-        Text(
-          text = "Salt Lake Sec V • ${incident.lat}°N, ${incident.lng}°E • GPS ±2.8m",
-          style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.5.sp, fontFamily = FontFamily.Monospace),
-          color = AiCyan,
-        )
-      }
-    }
-
-    // SQL Toggle Button
-    OutlinedButton(
-      onClick = onToggleSqlHud,
-      shape = RoundedCornerShape(8.dp),
-      contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-      colors = ButtonDefaults.outlinedButtonColors(
-        containerColor = if (showSqlHud) AiCyan.copy(alpha = 0.15f) else Color.Transparent,
-        contentColor = if (showSqlHud) AiCyan else TextMediumContrast,
-      ),
-      border = androidx.compose.foundation.BorderStroke(
-        1.dp,
-        if (showSqlHud) AiCyan else SurfaceBorder
-      ),
-    ) {
-      Icon(imageVector = Icons.Default.Code, contentDescription = "SQL", modifier = Modifier.size(14.dp))
-      Spacer(modifier = Modifier.width(4.dp))
-      Text("PostGIS", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-    }
-  }
-}
-
-// --------------------------------------------------------------------------
-// LAYER CHIPS BAR
-// --------------------------------------------------------------------------
-@Composable
-private fun GeoMapLayerChipsBar(
-  enabledLayers: Set<MapLayerKey>,
-  responderCount: Int,
-  hospitalCount: Int,
-  aedCount: Int,
-  searchRadiusKm: Double,
-  onToggleLayer: (MapLayerKey) -> Unit,
-) {
-  Row(
-    modifier = Modifier
-      .fillMaxWidth()
-      .background(Color(0xFF0F1218))
-      .border(1.dp, SurfaceBorder.copy(alpha = 0.4f))
-      .horizontalScroll(rememberScrollState())
-      .padding(horizontal = 12.dp, vertical = 6.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
-  ) {
-    MapLayerKey.entries.forEach { layer ->
-      val isEnabled = enabledLayers.contains(layer)
-      val labelText = when (layer) {
-        MapLayerKey.VICTIM -> "📍 Victim SOS"
-        MapLayerKey.RESPONDERS -> "🏃 Responders ($responderCount)"
-        MapLayerKey.HOSPITALS -> "🏥 Hospitals ($hospitalCount)"
-        MapLayerKey.AEDS -> "⚡ AEDs ($aedCount)"
-        MapLayerKey.POSTGIS_WAVE -> "🌊 PostGIS (${searchRadiusKm}km)"
-        MapLayerKey.ROUTES -> "🛤️ Rescue Routes"
-      }
-      val activeColor = when (layer) {
-        MapLayerKey.VICTIM -> EmergencyRed
-        MapLayerKey.RESPONDERS -> SafeGreen
-        MapLayerKey.HOSPITALS -> AiCyan
-        MapLayerKey.AEDS -> ActionAmber
-        MapLayerKey.POSTGIS_WAVE -> AiCyan
-        MapLayerKey.ROUTES -> SafeGreen
-      }
-
-      Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = if (isEnabled) activeColor.copy(alpha = 0.18f) else Color(0xFF161922),
-        border = androidx.compose.foundation.BorderStroke(
-          1.dp,
-          if (isEnabled) activeColor.copy(alpha = 0.8f) else SurfaceBorder
-        ),
-        modifier = Modifier.clickable { onToggleLayer(layer) }
-      ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Box(
-            modifier = Modifier
-              .size(6.dp)
-              .background(if (isEnabled) activeColor else Color.Gray, CircleShape)
-          )
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            text = labelText,
-            color = if (isEnabled) activeColor else TextMediumContrast,
-            fontSize = 11.sp,
-            fontWeight = if (isEnabled) FontWeight.Bold else FontWeight.Medium
-          )
-        }
-      }
-    }
-  }
-}
-
-// --------------------------------------------------------------------------
-// CANVAS DRAWING EXTENSIONS (Kolkata Cartography, Waves, Polyline Routes)
-// --------------------------------------------------------------------------
-private fun DrawScope.drawCartographyBase(
-  centerX: Float,
-  centerY: Float,
-  zoom: Float,
-) {
-  // Grid background lines
-  val step = 40f * zoom
-  var x = 0f
-  while (x < size.width) {
-    drawLine(
-      color = Color(0xFF1E2430).copy(alpha = 0.35f),
-      start = Offset(x, 0f),
-      end = Offset(x, size.height),
-      strokeWidth = 1f
+  val hospitals = uiState.incident.hospitals.map {
+    Triple(it.name.ifBlank { "Hospital" }, "${it.distanceKm} km • Open 24 hours", it.bedAvailability)
+  }.ifEmpty {
+    listOf(
+      Triple("AMRI Hospital", "1.8 km • Open 24 hours", 38),
+      Triple("Apollo Hospital", "3.2 km • Open 24 hours", 42),
+      Triple("Fortis Hospital", "4.6 km • Open 24 hours", 51),
     )
-    x += step
-  }
-  var y = 0f
-  while (y < size.height) {
-    drawLine(
-      color = Color(0xFF1E2430).copy(alpha = 0.35f),
-      start = Offset(0f, y),
-      end = Offset(size.width, y),
-      strokeWidth = 1f
-    )
-    y += step
-  }
+  }.filter { query.isBlank() || it.first.contains(query, ignoreCase = true) }
 
-  // Salt Lake Wetlands Water body
-  val waterPath = Path().apply {
-    moveTo(size.width * 0.75f, 0f)
-    quadraticTo(size.width * 0.85f, size.height * 0.35f, size.width * 0.95f, size.height)
-    lineTo(size.width, size.height)
-    lineTo(size.width, 0f)
-    close()
-  }
-  drawPath(
-    path = waterPath,
-    color = Color(0xFF071B2B).copy(alpha = 0.8f)
-  )
-
-  // Sector V Arterial Main Roads
-  drawLine(
-    color = Color(0xFF1C2433),
-    start = Offset(0f, centerY - 80f * zoom),
-    end = Offset(size.width, centerY - 80f * zoom),
-    strokeWidth = 14f * zoom
-  )
-  drawLine(
-    color = Color(0xFF2E384D),
-    start = Offset(0f, centerY - 80f * zoom),
-    end = Offset(size.width, centerY - 80f * zoom),
-    strokeWidth = 2f * zoom,
-    pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
-  )
-
-  // Vertical Ring Road
-  drawLine(
-    color = Color(0xFF1C2433),
-    start = Offset(centerX, 0f),
-    end = Offset(centerX, size.height),
-    strokeWidth = 12f * zoom
-  )
-  drawLine(
-    color = Color(0xFF2E384D),
-    start = Offset(centerX, 0f),
-    end = Offset(centerX, size.height),
-    strokeWidth = 2f * zoom,
-    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f)
-  )
-
-  // Tech Park Block Polygons (Godrej Waterside, DP Block, DLF)
-  drawRect(
-    color = Color(0xFF0F1522),
-    topLeft = Offset(centerX + 20f * zoom, centerY - 60f * zoom),
-    size = Size(140f * zoom, 100f * zoom)
-  )
-  drawRect(
-    color = Color(0xFF253347),
-    topLeft = Offset(centerX + 20f * zoom, centerY - 60f * zoom),
-    size = Size(140f * zoom, 100f * zoom),
-    style = Stroke(width = 1.5f * zoom)
-  )
-
-  drawRect(
-    color = Color(0xFF0D121B),
-    topLeft = Offset(centerX - 170f * zoom, centerY - 60f * zoom),
-    size = Size(140f * zoom, 100f * zoom)
-  )
-  drawRect(
-    color = Color(0xFF1C2738),
-    topLeft = Offset(centerX - 170f * zoom, centerY - 60f * zoom),
-    size = Size(140f * zoom, 100f * zoom),
-    style = Stroke(width = 1.2f * zoom)
-  )
-}
-
-private fun DrawScope.drawPostGisRadarWave(
-  centerX: Float,
-  centerY: Float,
-  radiusPx: Float,
-  pulseScale: Float,
-  pulseAlpha: Float,
-) {
-  val victimCenter = Offset(centerX, centerY)
-
-  // Search boundary dashed circle
-  drawCircle(
-    color = AiCyan.copy(alpha = 0.12f),
-    radius = radiusPx,
-    center = victimCenter,
-  )
-  drawCircle(
-    color = AiCyan.copy(alpha = 0.8f),
-    radius = radiusPx,
-    center = victimCenter,
-    style = Stroke(
-      width = 2f,
-      pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
-    )
-  )
-
-  // Expanding radar pulse wave
-  drawCircle(
-    color = AiCyan.copy(alpha = pulseAlpha * 0.6f),
-    radius = radiusPx * pulseScale,
-    center = victimCenter,
-    style = Stroke(width = 2f)
-  )
-
-  // Concentric inner ring
-  drawCircle(
-    color = AiCyan.copy(alpha = 0.35f),
-    radius = radiusPx * 0.45f,
-    center = victimCenter,
-    style = Stroke(width = 1.2f)
-  )
-}
-
-private fun DrawScope.drawRescueRoutes(
-  centerX: Float,
-  centerY: Float,
-  zoom: Float,
-  incident: SpatialIncident,
-  activeResponderIndex: Int,
-) {
-  val victimPos = Offset(centerX, centerY)
-
-  incident.responders.forEachIndexed { index, resp ->
-    val respPos = Offset(
-      centerX + ((resp.lng - incident.lng) * 28000f * zoom).toFloat(),
-      centerY - ((resp.lat - incident.lat) * 28000f * zoom).toFloat()
-    )
-    val isSelected = index == activeResponderIndex
-
-    val routePath = Path().apply {
-      moveTo(respPos.x, respPos.y)
-      val controlX = (respPos.x + victimPos.x) / 2f + (if (index == 0) 30f * zoom else -30f * zoom)
-      val controlY = (respPos.y + victimPos.y) / 2f
-      quadraticTo(controlX, controlY, victimPos.x, victimPos.y)
-    }
-
-    drawPath(
-      path = routePath,
-      color = if (isSelected) SafeGreen else SafeGreen.copy(alpha = 0.45f),
-      style = Stroke(
-        width = if (isSelected) 3.5f * zoom else 2f * zoom,
-        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f)
-      )
-    )
-  }
-}
-
-// --------------------------------------------------------------------------
-// BEACON MARKERS (Victim, Responders, Hospitals, AEDs)
-// --------------------------------------------------------------------------
-@Composable
-private fun VictimBeaconMarker(
-  centerX: Float,
-  centerY: Float,
-  pulseScale: Float,
-  pulseAlpha: Float,
-  onClick: () -> Unit,
-) {
-  Box(
-    modifier = Modifier
-      .offset { IntOffset((centerX - 24.dp.toPx()).roundToInt(), (centerY - 24.dp.toPx()).roundToInt()) }
-      .size(48.dp)
-      .clickable { onClick() },
-    contentAlignment = Alignment.Center
-  ) {
-    // Outer breathing pulse
-    Box(
-      modifier = Modifier
-        .size(44.dp * pulseScale)
-        .background(EmergencyRedGlow.copy(alpha = pulseAlpha), CircleShape)
-    )
-
-    // Inner Pin
-    Box(
-      modifier = Modifier
-        .size(32.dp)
-        .background(EmergencyRed, CircleShape)
-        .border(2.dp, Color.White, CircleShape),
-      contentAlignment = Alignment.Center
-    ) {
-      Icon(
-        imageVector = Icons.Default.Warning,
-        contentDescription = "SOS Beacon",
-        tint = Color.White,
-        modifier = Modifier.size(18.dp)
-      )
-    }
-  }
-}
-
-@Composable
-private fun ResponderBeaconMarker(
-  responder: ResponderMarker,
-  offsetX: Float,
-  offsetY: Float,
-  isSelected: Boolean,
-  onClick: () -> Unit,
-) {
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = Modifier
-      .offset { IntOffset((offsetX - 32.dp.toPx()).roundToInt(), (offsetY - 32.dp.toPx()).roundToInt()) }
-      .clickable { onClick() }
-  ) {
-    // Responder Badge Pill
-    Surface(
-      shape = RoundedCornerShape(8.dp),
-      color = if (isSelected) SafeGreen else Color(0xFF10281A),
-      border = androidx.compose.foundation.BorderStroke(1.dp, SafeGreen),
-      modifier = Modifier.padding(bottom = 2.dp)
-    ) {
-      Row(
-        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Text(
-          text = "${responder.name.split(' ').first()} • ${responder.etaMinutes}m",
-          fontSize = 9.sp,
-          fontWeight = FontWeight.Bold,
-          color = if (isSelected) Color.Black else SafeGreen
-        )
-      }
-    }
-
-    // Pin Head Icon
-    Box(
-      modifier = Modifier
-        .size(26.dp)
-        .background(if (isSelected) SafeGreen else Color(0xFF0F3B20), CircleShape)
-        .border(1.5.dp, SafeGreen, CircleShape),
-      contentAlignment = Alignment.Center
-    ) {
-      Icon(
-        imageVector = if (responder.isDoctor) Icons.Default.LocalHospital else Icons.Default.Person,
-        contentDescription = responder.name,
-        tint = if (isSelected) Color.Black else SafeGreen,
-        modifier = Modifier.size(15.dp)
-      )
-    }
-  }
-}
-
-@Composable
-private fun HospitalBeaconMarker(
-  hospital: HospitalMarker,
-  offsetX: Float,
-  offsetY: Float,
-  onClick: () -> Unit,
-) {
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = Modifier
-      .offset { IntOffset((offsetX - 36.dp.toPx()).roundToInt(), (offsetY - 28.dp.toPx()).roundToInt()) }
-      .clickable { onClick() }
-  ) {
-    Surface(
-      shape = RoundedCornerShape(8.dp),
-      color = Color(0xFF0C2433),
-      border = androidx.compose.foundation.BorderStroke(1.dp, AiCyan.copy(alpha = 0.7f)),
-      modifier = Modifier.padding(bottom = 2.dp)
-    ) {
-      Text(
-        text = "${hospital.name.split(' ').first()} (${hospital.bedAvailability} Beds)",
-        fontSize = 8.5.sp,
-        fontWeight = FontWeight.Bold,
-        color = AiCyan,
-        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-      )
-    }
-
-    Box(
-      modifier = Modifier
-        .size(24.dp)
-        .background(Color(0xFF081C2B), CircleShape)
-        .border(1.5.dp, AiCyan, CircleShape),
-      contentAlignment = Alignment.Center
-    ) {
-      Icon(
-        imageVector = Icons.Default.LocalHospital,
-        contentDescription = hospital.name,
-        tint = AiCyan,
-        modifier = Modifier.size(14.dp)
-      )
-    }
-  }
-}
-
-@Composable
-private fun AedBeaconMarker(
-  aed: AedMarker,
-  offsetX: Float,
-  offsetY: Float,
-  onClick: () -> Unit,
-) {
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = Modifier
-      .offset { IntOffset((offsetX - 24.dp.toPx()).roundToInt(), (offsetY - 24.dp.toPx()).roundToInt()) }
-      .clickable { onClick() }
-  ) {
-    Box(
-      modifier = Modifier
-        .size(22.dp)
-        .background(Color(0xFF332005), CircleShape)
-        .border(1.5.dp, ActionAmber, CircleShape),
-      contentAlignment = Alignment.Center
-    ) {
-      Icon(
-        imageVector = Icons.Default.FlashOn,
-        contentDescription = aed.buildingName,
-        tint = ActionAmber,
-        modifier = Modifier.size(13.dp)
-      )
-    }
-  }
-}
-
-// --------------------------------------------------------------------------
-// FLOATING CONTROLS & SQL HUD
-// --------------------------------------------------------------------------
-@Composable
-private fun FloatingMapControls(
-  onZoomIn: () -> Unit,
-  onZoomOut: () -> Unit,
-  onRecenter: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  Card(
-    shape = RoundedCornerShape(12.dp),
-    colors = CardDefaults.cardColors(containerColor = Color(0xFF141722).copy(alpha = 0.92f)),
-    border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder),
-    modifier = modifier
-  ) {
+  Column(modifier = modifier.fillMaxSize().background(VictimBackground)) {
     Column(
-      modifier = Modifier.padding(4.dp),
-      verticalArrangement = Arrangement.spacedBy(4.dp)
+      modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 10.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      IconButton(onClick = onZoomIn, modifier = Modifier.size(34.dp)) {
-        Icon(Icons.Default.Add, contentDescription = "Zoom In", tint = TextHighContrast, modifier = Modifier.size(18.dp))
+      // Brand row
+      Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(VictimPrimary), contentAlignment = Alignment.Center) {
+          Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Row(modifier = Modifier.weight(1f)) {
+          Text(text = "Near", fontWeight = FontWeight.Black, fontSize = 21.sp, color = VictimTextDark)
+          Text(text = "Help", fontWeight = FontWeight.Black, fontSize = 21.sp, color = VictimPrimary)
+        }
+        Box(modifier = Modifier.size(38.dp).clip(CircleShape).background(VictimPinkCard).clickable { onNavigateBack() }, contentAlignment = Alignment.Center) {
+          Icon(imageVector = Icons.Default.Person, contentDescription = "Profile", tint = VictimTextDark, modifier = Modifier.size(19.dp))
+        }
       }
-      IconButton(onClick = onZoomOut, modifier = Modifier.size(34.dp)) {
-        Icon(Icons.Default.Remove, contentDescription = "Zoom Out", tint = TextHighContrast, modifier = Modifier.size(18.dp))
-      }
-      IconButton(onClick = onRecenter, modifier = Modifier.size(34.dp)) {
-        Icon(Icons.Default.MyLocation, contentDescription = "Recenter", tint = AiCyan, modifier = Modifier.size(18.dp))
-      }
-    }
-  }
-}
 
-@Composable
-private fun PostGisSqlHudCard(
-  querySnippet: String,
-  onClose: () -> Unit,
-) {
-  Card(
-    shape = RoundedCornerShape(12.dp),
-    colors = CardDefaults.cardColors(containerColor = Color(0xFF0A0F18).copy(alpha = 0.95f)),
-    border = androidx.compose.foundation.BorderStroke(1.dp, AiCyan.copy(alpha = 0.4f)),
-    modifier = Modifier.width(310.dp)
-  ) {
-    Column(modifier = Modifier.padding(10.dp)) {
-      Row(
+      Column {
+        Text(text = "Nearby Help", fontSize = 29.sp, fontWeight = FontWeight.Black, color = VictimTextDark)
+        Text(text = "Find hospitals and emergency support around you.", fontSize = 14.sp, color = VictimTextMuted)
+      }
+
+      OutlinedTextField(
+        value = query, onValueChange = { query = it },
+        placeholder = { Text("Search hospitals, clinics, first aid...", fontSize = 14.sp, color = VictimTextMuted) },
+        leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = VictimTextDark) },
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(16.dp),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+          focusedBorderColor = VictimBorder, unfocusedBorderColor = VictimBorder,
+          focusedContainerColor = Color(0xFFF8FAFC), unfocusedContainerColor = Color(0xFFF8FAFC),
+          focusedTextColor = VictimTextDark, unfocusedTextColor = VictimTextDark,
+        ),
+      )
+
+      MapPlaceholder(modifier = Modifier.height(210.dp)) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          // You dot
+          Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(modifier = Modifier.size(52.dp).clip(CircleShape).background(Color(0xFF2563EB).copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
+              Box(modifier = Modifier.size(20.dp).clip(CircleShape).background(Color(0xFF2563EB)).border(3.dp, Color.White, CircleShape))
+            }
+            Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.White).border(1.dp, VictimBorder, RoundedCornerShape(8.dp)).padding(horizontal = 10.dp, vertical = 3.dp)) {
+              Text(text = "You", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
+            }
+          }
+          HospitalPin(label = "AMRI Hospital", dist = "1.8 km", modifier = Modifier.align(Alignment.TopStart).padding(start = 24.dp, top = 26.dp))
+          HospitalPin(label = "Apollo Hospital", dist = "3.2 km", modifier = Modifier.align(Alignment.BottomStart).padding(start = 18.dp, bottom = 26.dp))
+          HospitalPin(label = "Fortis Hospital", dist = "4.6 km", modifier = Modifier.align(Alignment.CenterEnd).padding(end = 14.dp))
+          Box(modifier = Modifier.align(Alignment.TopEnd).padding(10.dp).size(42.dp).clip(CircleShape).background(Color.White).border(1.dp, VictimBorder, CircleShape), contentAlignment = Alignment.Center) {
+            Icon(imageVector = Icons.Default.MyLocation, contentDescription = null, tint = VictimTextDark, modifier = Modifier.size(20.dp))
+          }
+        }
+      }
+
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        MapChip(label = "Hospitals", bg = VictimPinkCard, border = VictimPinkBorder, icon = Icons.Default.LocalHospital, selected = selectedChip == "Hospitals", onClick = { selectedChip = "Hospitals" }, modifier = Modifier.weight(1f))
+        MapChip(label = "First Aid Centres", bg = VictimBlueCard, border = VictimBlueBorder, icon = Icons.Default.Add, selected = selectedChip == "First Aid Centres", onClick = { selectedChip = "First Aid Centres" }, modifier = Modifier.weight(1f))
+        MapChip(label = "Pharmacies", bg = VictimGreenCard, border = VictimGreenBorder, icon = Icons.Default.LocalHospital, selected = selectedChip == "Pharmacies", onClick = { selectedChip = "Pharmacies" }, modifier = Modifier.weight(1f))
+        MapChip(label = "Other Support", bg = VictimOrangeCard, border = VictimOrangeBorder, icon = Icons.Default.LocationOn, selected = selectedChip == "Other Support", onClick = { selectedChip = "Other Support" }, modifier = Modifier.weight(1f))
+      }
+
+      SectionHeader(title = "Nearby Hospitals", actionLabel = "View all", onAction = {})
+      hospitals.forEach { (name, meta, _) ->
+        Row(
+          modifier = Modifier.fillMaxWidth().clip(VictimShapes.Card16).background(Color.White)
+            .border(1.dp, VictimBorder, VictimShapes.Card16).padding(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Box(modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFE8EEF3)), contentAlignment = Alignment.Center) {
+            Icon(imageVector = Icons.Default.LocalHospital, contentDescription = null, tint = VictimTextMuted, modifier = Modifier.size(28.dp))
+          }
+          Spacer(modifier = Modifier.width(10.dp))
+          Column(modifier = Modifier.weight(1f)) {
+            Text(text = name, fontSize = 15.5.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
+            Row {
+              Text(text = meta.substringBefore(" •"), fontSize = 13.sp, color = VictimTextMuted)
+              Text(text = " • ", fontSize = 13.sp, color = VictimTextMuted)
+              Text(text = "Open 24 hours", fontSize = 13.sp, color = Color(0xFF22C55E), fontWeight = FontWeight.SemiBold)
+            }
+          }
+          Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onNavigateToNavigation() }) {
+            Box(modifier = Modifier.size(38.dp).clip(CircleShape).background(VictimBlueCard), contentAlignment = Alignment.Center) {
+              Icon(imageVector = Icons.Default.Navigation, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(18.dp))
+            }
+            Text(text = "Directions", fontSize = 11.sp, color = VictimTextMuted)
+          }
+          Spacer(modifier = Modifier.width(10.dp))
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(modifier = Modifier.size(38.dp).clip(CircleShape).background(VictimBlueCard), contentAlignment = Alignment.Center) {
+              Icon(imageVector = Icons.Default.Call, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(18.dp))
+            }
+            Text(text = "Call", fontSize = 11.sp, color = VictimTextMuted)
+          }
+        }
+      }
+
+      Row(
+        modifier = Modifier.fillMaxWidth().clip(VictimShapes.Card16).background(VictimBlueCard)
+          .border(1.dp, VictimBlueBorder, VictimShapes.Card16).padding(14.dp).clickable { onNavigateToTracking() },
+        verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(Icons.Default.Code, contentDescription = "SQL", tint = AiCyan, modifier = Modifier.size(14.dp))
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            text = "PostGIS ST_DWithin Telemetry",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = AiCyan
-          )
+        Box(modifier = Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.8f)), contentAlignment = Alignment.Center) {
+          Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(22.dp))
         }
-        IconButton(onClick = onClose, modifier = Modifier.size(20.dp)) {
-          Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMuted, modifier = Modifier.size(14.dp))
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+          Text(text = "Need immediate help?", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
+          Text(text = "Use the SOS button from Home.", fontSize = 13.sp, color = VictimTextMuted)
         }
+        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF2563EB))
       }
       Spacer(modifier = Modifier.height(4.dp))
-      Text(
-        text = querySnippet,
-        fontSize = 9.sp,
-        fontFamily = FontFamily.Monospace,
-        color = Color(0xFFB0D5FF),
-        lineHeight = 13.sp
-      )
     }
+    VictimBottomNavBar(selected = VictimNavTab.MAP, onSelect = {
+      when (it) {
+        VictimNavTab.HOME -> onNavigateBack()
+        VictimNavTab.CHAT -> onNavigateToTracking()
+        VictimNavTab.MAP -> Unit
+        VictimNavTab.PROFILE -> onNavigateBack()
+      }
+    })
   }
 }
 
-// --------------------------------------------------------------------------
-// BOTTOM SHEET FOR SELECTED ENTITY DETAILS
-// --------------------------------------------------------------------------
 @Composable
-private fun EntityDetailsBottomSheet(
-  entity: SelectedMapEntity,
-  onDismiss: () -> Unit,
-  onNavigateToNavigation: () -> Unit = {},
-) {
-  Card(
-    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-    colors = CardDefaults.cardColors(containerColor = CardSurface),
-    border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder),
-    modifier = Modifier.fillMaxWidth()
-  ) {
-    Column(modifier = Modifier.padding(18.dp)) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
-      ) {
-        when (entity) {
-          is SelectedMapEntity.VictimEntity -> {
-            Column(modifier = Modifier.weight(1f)) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                  modifier = Modifier
-                    .size(10.dp)
-                    .background(EmergencyRed, CircleShape)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                  text = entity.title,
-                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = TextHighContrast
-                )
-              }
-              Spacer(modifier = Modifier.height(4.dp))
-              Text(text = entity.locationName, style = MaterialTheme.typography.bodySmall, color = TextMediumContrast)
-              Text(text = "Severity: ${entity.severity}", style = MaterialTheme.typography.labelSmall, color = EmergencyRed)
-            }
-          }
-
-          is SelectedMapEntity.ResponderEntity -> {
-            val resp = entity.responder
-            Column(modifier = Modifier.weight(1f)) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                  modifier = Modifier
-                    .size(10.dp)
-                    .background(SafeGreen, CircleShape)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                  text = resp.name,
-                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = TextHighContrast
-                )
-              }
-              Spacer(modifier = Modifier.height(4.dp))
-              Text(text = resp.role, style = MaterialTheme.typography.bodySmall, color = SafeGreen)
-              Text(
-                text = "ETA: ${resp.etaMinutes} min • Distance: ${resp.distanceMeters}m • Reliability: ${(resp.reliabilityScore * 100).toInt()}%",
-                style = MaterialTheme.typography.labelSmall,
-                color = TextMediumContrast
-              )
-            }
-          }
-
-          is SelectedMapEntity.HospitalEntity -> {
-            val hosp = entity.hospital
-            Column(modifier = Modifier.weight(1f)) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                  modifier = Modifier
-                    .size(10.dp)
-                    .background(AiCyan, CircleShape)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                  text = hosp.name,
-                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = TextHighContrast
-                )
-              }
-              Spacer(modifier = Modifier.height(4.dp))
-              Text(text = hosp.address, style = MaterialTheme.typography.bodySmall, color = TextMediumContrast, maxLines = 1, overflow = TextOverflow.Ellipsis)
-              Text(
-                text = "Live Capacity: ${hosp.bedAvailability} Beds • ${hosp.icuAvailability} ICUs • ${hosp.distanceKm} km away",
-                style = MaterialTheme.typography.labelSmall,
-                color = AiCyan
-              )
-            }
-          }
-
-          is SelectedMapEntity.AedEntity -> {
-            val aed = entity.aed
-            Column(modifier = Modifier.weight(1f)) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                  modifier = Modifier
-                    .size(10.dp)
-                    .background(ActionAmber, CircleShape)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                  text = "AED: ${aed.buildingName}",
-                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = TextHighContrast
-                )
-              }
-              Spacer(modifier = Modifier.height(4.dp))
-              Text(text = aed.locationDescription, style = MaterialTheme.typography.bodySmall, color = TextMediumContrast)
-              Text(
-                text = "Access: ${aed.accessCode} • ${aed.distanceMeters}m away",
-                style = MaterialTheme.typography.labelSmall,
-                color = ActionAmber
-              )
-            }
-          }
-        }
-
-        IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
-          Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMuted)
-        }
-      }
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      // Action Buttons Row
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-      ) {
-        Button(
-          onClick = {
-            onDismiss()
-            onNavigateToNavigation()
-          },
-          modifier = Modifier.weight(1f),
-          colors = ButtonDefaults.buttonColors(containerColor = SafeGreen),
-          shape = RoundedCornerShape(10.dp)
-        ) {
-          Icon(Icons.Default.Directions, contentDescription = "Directions", tint = Color.Black, modifier = Modifier.size(16.dp))
-          Spacer(modifier = Modifier.width(6.dp))
-          Text("AI Navigation", color = Color.Black, fontWeight = FontWeight.Bold)
-        }
-
-        OutlinedButton(
-          onClick = onDismiss,
-          modifier = Modifier.weight(1f),
-          shape = RoundedCornerShape(10.dp),
-          border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder)
-        ) {
-          Icon(Icons.Default.Call, contentDescription = "Call", tint = TextHighContrast, modifier = Modifier.size(16.dp))
-          Spacer(modifier = Modifier.width(6.dp))
-          Text("Emergency Comms", color = TextHighContrast)
-        }
-      }
+private fun HospitalPin(label: String, dist: String, modifier: Modifier = Modifier) {
+  Row(modifier = modifier.clip(RoundedCornerShape(12.dp)).background(Color.White).border(1.dp, VictimBorder, RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+    Box(modifier = Modifier.size(22.dp).clip(CircleShape).background(VictimPrimary), contentAlignment = Alignment.Center) {
+      Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
+    }
+    Spacer(modifier = Modifier.width(6.dp))
+    Column {
+      Text(text = label, fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
+      Text(text = dist, fontSize = 11.sp, color = VictimTextMuted)
     }
   }
 }
 
+@Composable
+private fun MapChip(label: String, bg: Color, border: Color, icon: ImageVector, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+  Row(
+    modifier = modifier.clip(RoundedCornerShape(14.dp)).background(if (selected) bg else Color.White)
+      .border(1.dp, if (selected) border else VictimBorder, RoundedCornerShape(14.dp))
+      .clickable { onClick() }.padding(horizontal = 8.dp, vertical = 10.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Icon(imageVector = icon, contentDescription = null, tint = VictimPrimary, modifier = Modifier.size(20.dp))
+    Spacer(modifier = Modifier.width(6.dp))
+    Text(text = label, fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = VictimTextDark, lineHeight = 14.sp)
+  }
+}

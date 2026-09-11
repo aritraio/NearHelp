@@ -6,9 +6,18 @@ import androidx.compose.ui.graphics.Color
 // --------------------------------------------------------------------------
 // 🤍 Victim Mockup Base (Clean White + Soft Pastel Cards)
 // Matches ui/demo-ui-1st/victim/* : white base, red primary, pastel cards.
+// Light-Mode-First design system — rounded modern surfaces (16–24dp).
 // --------------------------------------------------------------------------
 val VictimBackground = Color(0xFFFFFFFF)
 val VictimBackgroundSoft = Color(0xFFFFF7F7)
+val VictimSurface = Color(0xFFFFFFFF)
+val VictimBorder = Color(0xFFE2E8F0)
+val VictimDivider = Color(0xFFCBD5E1)
+val VictimTextDark = Color(0xFF0F172A)
+val VictimTextMuted = Color(0xFF64748B)
+val VictimPrimary = Color(0xFFE52538)
+val VictimPrimaryDark = Color(0xFFC81E2B)
+val VictimPrimaryLight = Color(0xFFFF4D4F)
 val VictimPinkCard = Color(0xFFFFF1F2)
 val VictimPinkBorder = Color(0xFFFECDD3)
 val VictimBlueCard = Color(0xFFEFF6FF)
@@ -18,12 +27,11 @@ val VictimGreenBorder = Color(0xFFA7F3D0)
 val VictimPurpleCard = Color(0xFFF5F3FF)
 val VictimPurpleBorder = Color(0xFFDDD6FE)
 val VictimOrangeCard = Color(0xFFFFFBEB)
+val VictimOrangeBorder = Color(0xFFFDE68A)
 val VictimInputBg = Color(0xFFF1F5F9)
-val VictimBorder = Color(0xFFE2E8F0)
-val VictimTextDark = Color(0xFF0F172A)
-val VictimTextMuted = Color(0xFF64748B)
-val VictimPrimary = Color(0xFFE52538)
-val VictimPrimaryDark = Color(0xFFC81E2B)
+val StatusLiveRed = Color(0xFFE52538)
+val StatusSafeGreen = Color(0xFF22C55E)
+val StarRatingYellow = Color(0xFFFBBF24)
 
 // --------------------------------------------------------------------------
 // 🌿 Guardian Palette (Calm, Safe, Proactive Radar State)
