@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,15 +27,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nearhelp.theme.EmergencyCrimson
-import com.example.nearhelp.theme.EmergencyCrimsonDark
+import com.example.nearhelp.theme.VictimPrimary
 
 @Composable
 fun AuthHeader(
@@ -59,6 +62,7 @@ fun AuthHeader(
         verticalArrangement = Arrangement.Center,
     ) {
         if (showLogo) {
+            // Victim mockup branding: red heart with white medical cross.
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(92.dp),
@@ -71,50 +75,67 @@ fun AuthHeader(
                         .background(Color(0x1FE52538), CircleShape)
                 )
 
-                // Middle Ring
                 Box(
-                    modifier = Modifier
-                        .size(76.dp)
-                        .background(Color(0x14E52538), CircleShape)
-                        .border(1.dp, Color(0x33E52538), CircleShape)
-                )
-
-                // Main Shield Icon Circle
-                Box(
-                    modifier = Modifier
-                        .size(62.dp)
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(EmergencyCrimson, EmergencyCrimsonDark)
-                            ),
-                            shape = CircleShape,
-                        )
-                        .border(2.dp, Color.White.copy(alpha = 0.9f), CircleShape),
                     contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(72.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Shield,
-                        contentDescription = "NearHelp Emergency Shield Logo",
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "NearHelp Heart Logo",
+                        tint = VictimPrimary,
+                        modifier = Modifier.size(72.dp),
+                    )
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(36.dp),
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
+
+            // Victim mockup wordmark: Near (dark) + Help (red).
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = Color(0xFF0F172A))) {
+                            append("Near")
+                        }
+                        withStyle(SpanStyle(color = VictimPrimary)) {
+                            append("Help")
+                        }
+                    },
+                    fontFamily = FontFamily.SansSerif,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Black,
+                        fontSize = 34.sp,
+                        letterSpacing = (-0.5).sp,
+                    ),
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
         }
 
-        Text(
-            text = title,
-            fontFamily = FontFamily.SansSerif,
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                letterSpacing = (-0.3).sp,
-            ),
-            color = Color(0xFF0F172A),
-            textAlign = TextAlign.Center,
-        )
+        // When branding logo is shown with the default titles, the wordmark above
+        // already displays "NearHelp" — skip duplicate title (no logic change).
+        val isDefaultBrandTitle = title == "NearHelp" || title == "Welcome to NearHelp"
+        if (!isDefaultBrandTitle) {
+            Text(
+                text = title,
+                fontFamily = FontFamily.SansSerif,
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    letterSpacing = (-0.3).sp,
+                ),
+                color = Color(0xFF0F172A),
+                textAlign = TextAlign.Center,
+            )
+        }
 
         Spacer(modifier = Modifier.height(6.dp))
 

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -32,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -40,7 +41,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nearhelp.theme.EmergencyCrimson
+import com.example.nearhelp.theme.VictimPinkBorder
+import com.example.nearhelp.theme.VictimPinkCard
+import com.example.nearhelp.theme.VictimPrimary
 
 /**
  * High-visibility 1-Tap Anonymous Emergency Bypass Button
@@ -68,25 +71,19 @@ fun EmergencyButton(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // Victim mockup: soft pink SOS card with red siren icon + arrow.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .scale(if (!isLoading) pulseScale else 1f)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Color(0xFFFF3B30),
-                            EmergencyCrimson,
-                            Color(0xFFD70015),
-                        )
-                    )
-                )
+                .clip(RoundedCornerShape(20.dp))
+                .background(VictimPinkCard)
+                .border(1.dp, VictimPinkBorder, RoundedCornerShape(20.dp))
                 .clickable(enabled = !isLoading) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onClick()
                 }
-                .padding(vertical = 14.dp, horizontal = 20.dp),
+                .padding(vertical = 16.dp, horizontal = 20.dp),
             contentAlignment = Alignment.Center,
         ) {
             if (isLoading) {
@@ -96,13 +93,13 @@ fun EmergencyButton(
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = VictimPrimary,
                         strokeWidth = 2.dp,
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Initiating Emergency Mode...",
-                        color = Color.White,
+                        color = VictimPrimary,
                         fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
@@ -114,32 +111,39 @@ fun EmergencyButton(
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Bolt,
+                        imageVector = Icons.Default.NotificationsActive,
                         contentDescription = "Instant SOS Bypass",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp),
+                        tint = VictimPrimary,
+                        modifier = Modifier.size(36.dp),
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "1-TAP EMERGENCY SOS",
+                            text = "One-Tap SOS",
                             fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp,
+                                fontSize = 19.sp,
+                                letterSpacing = 0.sp,
                             ),
-                            color = Color.White,
+                            color = VictimPrimary,
                         )
                         Text(
-                            text = "Skip login · Instant anonymous triage",
+                            text = "For medical emergencies only",
                             fontFamily = FontFamily.SansSerif,
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 11.5.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Normal,
                             ),
-                            color = Color.White.copy(alpha = 0.9f),
+                            color = Color(0xFF64748B),
                         )
                     }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Continue",
+                        tint = VictimPrimary,
+                        modifier = Modifier.size(24.dp),
+                    )
                 }
             }
         }

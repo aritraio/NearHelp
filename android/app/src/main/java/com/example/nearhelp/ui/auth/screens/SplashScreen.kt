@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocalHospital
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,15 +40,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nearhelp.theme.EmergencyCrimson
-import com.example.nearhelp.theme.GuardianBgBottom
-import com.example.nearhelp.theme.GuardianBgTop
-import com.example.nearhelp.theme.MintPrimary
+import com.example.nearhelp.theme.VictimBackground
+import com.example.nearhelp.theme.VictimBackgroundSoft
+import com.example.nearhelp.theme.VictimPinkCard
+import com.example.nearhelp.theme.VictimPrimary
 import com.example.nearhelp.ui.auth.AuthViewModel
 import kotlinx.coroutines.delay
 
@@ -89,8 +94,8 @@ fun SplashScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        GuardianBgTop,
-                        GuardianBgBottom,
+                        VictimBackground,
+                        VictimBackgroundSoft,
                     )
                 )
             ),
@@ -104,7 +109,7 @@ fun SplashScreen(
                 .alpha(logoAlpha.value)
                 .padding(24.dp),
         ) {
-            // Animated Pulsing Shield Logo
+            // Victim mockup branding: red heart with white medical cross.
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(150.dp),
@@ -114,7 +119,7 @@ fun SplashScreen(
                     modifier = Modifier
                         .size(140.dp)
                         .scale(pulseRingScale)
-                        .background(MintPrimary.copy(alpha = 0.35f), CircleShape)
+                        .background(VictimPinkCard, CircleShape)
                 )
 
                 // Mid glow ring
@@ -122,61 +127,61 @@ fun SplashScreen(
                     modifier = Modifier
                         .size(116.dp)
                         .background(Color.White.copy(alpha = 0.5f), CircleShape)
-                        .border(1.5.dp, MintPrimary.copy(alpha = 0.6f), CircleShape)
+                        .border(1.5.dp, VictimPrimary.copy(alpha = 0.25f), CircleShape)
                 )
 
-                // Center Shield Circle
+                // Center Heart Logo
                 Box(
-                    modifier = Modifier
-                        .size(92.dp)
-                        .clip(CircleShape)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFFFF3B30),
-                                    EmergencyCrimson,
-                                )
-                            ),
-                            shape = CircleShape,
-                        )
-                        .border(3.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(96.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Shield,
+                        imageVector = Icons.Default.Favorite,
                         contentDescription = "NearHelp Logo",
+                        tint = VictimPrimary,
+                        modifier = Modifier.size(96.dp),
+                    )
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(52.dp),
+                        modifier = Modifier.size(48.dp),
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // App Title
+            // App Title: Near (dark) + Help (red), per victim mockups.
             Text(
-                text = "NearHelp",
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = Color(0xFF0F172A))) {
+                        append("Near")
+                    }
+                    withStyle(SpanStyle(color = VictimPrimary)) {
+                        append("Help")
+                    }
+                },
                 fontFamily = FontFamily.SansSerif,
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Black,
-                    fontSize = 36.sp,
+                    fontSize = 44.sp,
                     letterSpacing = (-0.5).sp,
                 ),
-                color = Color(0xFF0F172A),
                 textAlign = TextAlign.Center,
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Tagline
+            // Tagline per victim mockups.
             Text(
-                text = "Instant Response · AI Triage · Community Lifesaver",
+                text = "Connect. Respond. Save time.",
                 fontFamily = FontFamily.SansSerif,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
                 ),
-                color = Color(0xFF334155),
+                color = Color(0xFF64748B),
                 textAlign = TextAlign.Center,
             )
 

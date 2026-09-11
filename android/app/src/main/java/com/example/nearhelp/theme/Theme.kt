@@ -31,21 +31,21 @@ private val DarkColorScheme =
 
 private val LightColorScheme =
     lightColorScheme(
-        primary = EmergencyCrimson,
+        primary = VictimPrimary,
         onPrimary = Color.White,
-        primaryContainer = MintLight,
+        primaryContainer = VictimPinkCard,
         onPrimaryContainer = TextPrimaryDark,
         secondary = SafeGreen,
         onSecondary = Color.White,
         tertiary = EmeraldAccent,
-        background = CrisisSurfaceBg,
-        onBackground = TextPrimaryDark,
-        surface = CardNeomorphicLight,
-        onSurface = TextPrimaryDark,
-        surfaceVariant = SoftInputBg,
-        onSurfaceVariant = TextSecondaryMuted,
-        outline = Color(0xFFE2E8F0),
-        error = EmergencyCrimson,
+        background = VictimBackground,
+        onBackground = VictimTextDark,
+        surface = VictimBackground,
+        onSurface = VictimTextDark,
+        surfaceVariant = VictimInputBg,
+        onSurfaceVariant = VictimTextMuted,
+        outline = VictimBorder,
+        error = VictimPrimary,
         onError = Color.White,
     )
 

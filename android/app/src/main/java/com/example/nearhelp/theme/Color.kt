@@ -4,10 +4,33 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 // --------------------------------------------------------------------------
-// 🌿 Guardian Palette (Calm, Safe, Proactive Radar State)
+// 🤍 Victim Mockup Base (Clean White + Soft Pastel Cards)
+// Matches ui/demo-ui-1st/victim/* : white base, red primary, pastel cards.
 // --------------------------------------------------------------------------
-val GuardianBgTop = Color(0xFFC8F5DC)
-val GuardianBgBottom = Color(0xFFE3FAF0)
+val VictimBackground = Color(0xFFFFFFFF)
+val VictimBackgroundSoft = Color(0xFFFFF7F7)
+val VictimPinkCard = Color(0xFFFFF1F2)
+val VictimPinkBorder = Color(0xFFFECDD3)
+val VictimBlueCard = Color(0xFFEFF6FF)
+val VictimBlueBorder = Color(0xFFBFDBFE)
+val VictimGreenCard = Color(0xFFECFDF5)
+val VictimGreenBorder = Color(0xFFA7F3D0)
+val VictimPurpleCard = Color(0xFFF5F3FF)
+val VictimPurpleBorder = Color(0xFFDDD6FE)
+val VictimOrangeCard = Color(0xFFFFFBEB)
+val VictimInputBg = Color(0xFFF1F5F9)
+val VictimBorder = Color(0xFFE2E8F0)
+val VictimTextDark = Color(0xFF0F172A)
+val VictimTextMuted = Color(0xFF64748B)
+val VictimPrimary = Color(0xFFE52538)
+val VictimPrimaryDark = Color(0xFFC81E2B)
+
+// --------------------------------------------------------------------------
+// 🌿 Guardian Palette (Calm, Safe, Proactive Radar State)
+// NOTE: Aligned to victim mockups — clean white base instead of mint.
+// --------------------------------------------------------------------------
+val GuardianBgTop = Color(0xFFFFFFFF)
+val GuardianBgBottom = Color(0xFFFFF1F2)
 val GuardianRadarCircle = Color(0x5948BB78)
 val GuardianRadarSweep = Color(0x4038A169)
 val MintLight = Color(0xFFDDF8EA)
@@ -20,7 +43,8 @@ val EmeraldAccent = Color(0xFF22C55E)
 val EmergencyCrimson = Color(0xFFE52538)
 val EmergencyCrimsonDark = Color(0xFFC2182B)
 val EmergencyCrimsonLight = Color(0xFFFF3B30)
-val CrisisSurfaceBg = Color(0xFFEFF3F6)
+// Victim mockup base surface: pure white (was #EFF3F6 slate).
+val CrisisSurfaceBg = Color(0xFFFFFFFF)
 val CardNeomorphicLight = Color(0xFFFFFFFF)
 val CardNeomorphicShadow = Color(0x12000000)
 val CancelPillGreen = Color(0xFF34C759)
