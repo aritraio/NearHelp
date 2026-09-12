@@ -198,7 +198,9 @@ fun ProfileScreen(
       // Stats
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
-          modifier = Modifier.weight(1f).clip(VictimShapes.Card16).background(VictimPinkCard).border(1.dp, VictimPinkBorder, VictimShapes.Card16).padding(14.dp),
+          modifier = Modifier.weight(1f).clip(VictimShapes.Card16).background(VictimPinkCard).border(1.dp, VictimPinkBorder, VictimShapes.Card16)
+            .clickable { viewModel.openEmergencyHistoryDialog() }
+            .padding(14.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(modifier = Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.8f)), contentAlignment = Alignment.Center) {
@@ -212,7 +214,9 @@ fun ProfileScreen(
           Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = VictimTextDark, modifier = Modifier.size(18.dp))
         }
         Row(
-          modifier = Modifier.weight(1f).clip(VictimShapes.Card16).background(VictimBlueCard).border(1.dp, VictimBlueBorder, VictimShapes.Card16).padding(14.dp),
+          modifier = Modifier.weight(1f).clip(VictimShapes.Card16).background(VictimBlueCard).border(1.dp, VictimBlueBorder, VictimShapes.Card16)
+            .clickable { viewModel.openEmergencyHistoryDialog() }
+            .padding(14.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(modifier = Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.8f)), contentAlignment = Alignment.Center) {
@@ -276,13 +280,41 @@ fun ProfileScreen(
 
       // Responder Information
       Text(text = "Responder Information", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
-      ProfileRow(iconBg = VictimPurpleCard, icon = Icons.Default.Shield, iconTint = Color(0xFF7C3AED), title = "Qualifications & Certifications", subtitle = "Your skills and certifications", onClick = {})
-      ProfileRow(iconBg = VictimGreenCard, icon = Icons.Default.CheckCircle, iconTint = StatusSafeGreen, title = "Verification Status", subtitle = "Account verification and documents", onClick = { viewModel.loadProfile() })
+      ProfileRow(
+        iconBg = VictimPurpleCard,
+        icon = Icons.Default.Shield,
+        iconTint = Color(0xFF7C3AED),
+        title = "Qualifications & Certifications",
+        subtitle = "Your medical skills and certifications",
+        onClick = { viewModel.openQualificationsDialog() },
+      )
+      ProfileRow(
+        iconBg = VictimGreenCard,
+        icon = Icons.Default.CheckCircle,
+        iconTint = StatusSafeGreen,
+        title = "Verification Status",
+        subtitle = "Account verification and documents",
+        onClick = { viewModel.loadProfile() },
+      )
 
       // Activity
       Text(text = "Activity", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
-      ProfileRow(iconBg = VictimPinkCard, icon = Icons.Default.History, iconTint = VictimPrimary, title = "Emergency History", subtitle = "View past emergencies (received & helped)", onClick = {})
-      ProfileRow(iconBg = VictimBlueCard, icon = Icons.Default.BarChart, iconTint = Color(0xFF2563EB), title = "Impact & Statistics", subtitle = "Your contribution to a safer community", onClick = {})
+      ProfileRow(
+        iconBg = VictimPinkCard,
+        icon = Icons.Default.History,
+        iconTint = VictimPrimary,
+        title = "Emergency History",
+        subtitle = "View past emergencies (received & helped)",
+        onClick = { viewModel.openEmergencyHistoryDialog() },
+      )
+      ProfileRow(
+        iconBg = VictimBlueCard,
+        icon = Icons.Default.BarChart,
+        iconTint = Color(0xFF2563EB),
+        title = "Impact & Statistics",
+        subtitle = "Your contribution to a safer community",
+        onClick = { viewModel.openEmergencyHistoryDialog() },
+      )
 
       // Languages (light chips)
       Text(text = "Spoken Languages", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
@@ -342,6 +374,17 @@ fun ProfileScreen(
   if (uiState.editingContact != null) {
     AddEditContactDialogLight(contact = uiState.editingContact, onDismiss = { viewModel.closeEditContactDialog() },
       onSave = { n, p, r, primary -> uiState.editingContact?.id?.let { viewModel.updateEmergencyContact(it, n, p, r, primary) } })
+  }
+  if (uiState.showQualificationsDialog) {
+    QualificationsDialogLight(
+      onDismiss = { viewModel.closeQualificationsDialog() },
+      onSave = { title, org, idNum -> viewModel.saveQualification(title, org, idNum) },
+    )
+  }
+  if (uiState.showEmergencyHistoryDialog) {
+    EmergencyHistoryDialogLight(
+      onDismiss = { viewModel.closeEmergencyHistoryDialog() },
+    )
   }
 }
 
@@ -525,5 +568,383 @@ private fun AddEditContactDialogLight(contact: EmergencyContact?, onDismiss: () 
     },
     dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color = VictimTextMuted) } },
     containerColor = Color.White,
+  )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun QualificationsDialogLight(
+  onDismiss: () -> Unit,
+  onSave: (String, String, String) -> Unit,
+) {
+  val availableSkills = listOf(
+    "CPR / AED Certified",
+    "First Aid Provider",
+    "EMT / Paramedic",
+    "Doctor / Physician",
+    "Registered Nurse (RN)",
+    "Community First Responder",
+  )
+  var selectedSkill by remember { mutableStateOf(availableSkills[0]) }
+  var organization by remember { mutableStateOf("") }
+  var certNumber by remember { mutableStateOf("") }
+  var hasAttachedDoc by remember { mutableStateOf(false) }
+
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+          modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(VictimPurpleCard),
+          contentAlignment = Alignment.Center,
+        ) {
+          Icon(
+            imageVector = Icons.Default.Shield,
+            contentDescription = null,
+            tint = Color(0xFF7C3AED),
+            modifier = Modifier.size(20.dp),
+          )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+          Text("Become a Responder", fontWeight = FontWeight.Black, fontSize = 18.sp, color = VictimTextDark)
+          Text("Add qualifications & certifications", fontSize = 12.sp, color = VictimTextMuted)
+        }
+      }
+    },
+    text = {
+      Column(
+        modifier = Modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        Text("Select Primary Qualification", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
+        FlowRow(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          availableSkills.forEach { skill ->
+            val isSelected = selectedSkill == skill
+            Box(
+              modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .background(if (isSelected) Color(0xFF7C3AED) else Color(0xFFF1F5F9))
+                .clickable { selectedSkill = skill }
+                .padding(horizontal = 10.dp, vertical = 7.dp),
+            ) {
+              Text(
+                text = skill,
+                fontSize = 12.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) Color.White else VictimTextDark,
+              )
+            }
+          }
+        }
+
+        OutlinedTextField(
+          value = organization,
+          onValueChange = { organization = it },
+          label = { Text("Issuing Organization") },
+          placeholder = { Text("e.g. Red Cross, St. John Ambulance, AHA") },
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(12.dp),
+          colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF7C3AED),
+            unfocusedBorderColor = VictimBorder,
+            focusedTextColor = VictimTextDark,
+            unfocusedTextColor = VictimTextDark,
+          ),
+        )
+
+        OutlinedTextField(
+          value = certNumber,
+          onValueChange = { certNumber = it },
+          label = { Text("License / Certificate ID") },
+          placeholder = { Text("e.g. CPR-2026-8849") },
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(12.dp),
+          colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF7C3AED),
+            unfocusedBorderColor = VictimBorder,
+            focusedTextColor = VictimTextDark,
+            unfocusedTextColor = VictimTextDark,
+          ),
+        )
+
+        // Upload verification document card
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (hasAttachedDoc) Color(0xFFECFDF5) else Color(0xFFF8FAFC))
+            .border(1.dp, if (hasAttachedDoc) StatusSafeGreen else VictimBorder, RoundedCornerShape(12.dp))
+            .clickable { hasAttachedDoc = !hasAttachedDoc }
+            .padding(12.dp),
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+              modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(if (hasAttachedDoc) Color(0xFFD1FAE5) else Color(0xFFE2E8F0)),
+              contentAlignment = Alignment.Center,
+            ) {
+              Icon(
+                imageVector = if (hasAttachedDoc) Icons.Default.CheckCircle else Icons.Default.Description,
+                contentDescription = null,
+                tint = if (hasAttachedDoc) StatusSafeGreen else VictimTextDark,
+                modifier = Modifier.size(18.dp),
+              )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = if (hasAttachedDoc) "Certificate Attached (PDF/Image)" else "Attach Certificate / ID Proof",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (hasAttachedDoc) StatusSafeGreen else VictimTextDark,
+              )
+              Text(
+                text = if (hasAttachedDoc) "Tap to change file" else "Tap to upload medical credential photo",
+                fontSize = 11.5.sp,
+                color = VictimTextMuted,
+              )
+            }
+          }
+        }
+      }
+    },
+    confirmButton = {
+      Button(
+        onClick = {
+          val org = if (organization.isBlank()) "Indian Red Cross Society" else organization.trim()
+          val idNum = if (certNumber.isBlank()) "CERT-VERIFIED-${System.currentTimeMillis() % 10000}" else certNumber.trim()
+          onSave(selectedSkill, org, idNum)
+        },
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED)),
+        shape = RoundedCornerShape(12.dp),
+      ) {
+        Text("Submit for Verification", color = Color.White, fontWeight = FontWeight.Bold)
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = onDismiss) {
+        Text("Cancel", color = VictimTextMuted)
+      }
+    },
+    containerColor = Color.White,
+    shape = RoundedCornerShape(20.dp),
+  )
+}
+
+private data class EmergencyIncidentItem(
+  val id: String,
+  val title: String,
+  val location: String,
+  val timeAgo: String,
+  val responderDetails: String,
+  val isReceivedHelp: Boolean,
+  val status: String = "RESOLVED",
+)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun EmergencyHistoryDialogLight(
+  onDismiss: () -> Unit,
+) {
+  val incidents = remember {
+    listOf(
+      EmergencyIncidentItem(
+        id = "INC-101",
+        title = "Severe Bleeding / Cut Injury",
+        location = "Salt Lake, Sector V",
+        timeAgo = "2 days ago",
+        responderDetails = "Responded by Dr. Amit Sen (Trauma Care) • Dispatched in 1m 40s",
+        isReceivedHelp = true,
+      ),
+      EmergencyIncidentItem(
+        id = "INC-102",
+        title = "Cardiac Distress / CPR Alert",
+        location = "New Town, Action Area 1",
+        timeAgo = "Aug 24, 2026",
+        responderDetails = "You responded as CPR Volunteer • AED Assisted",
+        isReceivedHelp = false,
+      ),
+      EmergencyIncidentItem(
+        id = "INC-103",
+        title = "Asthma Inhaler Crisis",
+        location = "Park Circus, Kolkata",
+        timeAgo = "Jul 12, 2026",
+        responderDetails = "Responded by Priya K. (BLS Certified) • Resolved",
+        isReceivedHelp = true,
+      ),
+      EmergencyIncidentItem(
+        id = "INC-104",
+        title = "Pedestrian Fall / Fracture",
+        location = "Gariahat Crossing",
+        timeAgo = "May 30, 2026",
+        responderDetails = "You assisted with limb stabilization until Ambulance arrival",
+        isReceivedHelp = false,
+      ),
+    )
+  }
+
+  var selectedFilter by remember { mutableStateOf("All") }
+  val filteredIncidents = remember(selectedFilter, incidents) {
+    when (selectedFilter) {
+      "Received (2)" -> incidents.filter { it.isReceivedHelp }
+      "Helped (2)" -> incidents.filter { !it.isReceivedHelp }
+      else -> incidents
+    }
+  }
+
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+          modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(VictimPinkCard),
+          contentAlignment = Alignment.Center,
+        ) {
+          Icon(
+            imageVector = Icons.Default.History,
+            contentDescription = null,
+            tint = VictimPrimary,
+            modifier = Modifier.size(20.dp),
+          )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+          Text("Emergency History", fontWeight = FontWeight.Black, fontSize = 18.sp, color = VictimTextDark)
+          Text("Past requests & community responses", fontSize = 12.sp, color = VictimTextMuted)
+        }
+      }
+    },
+    text = {
+      Column(
+        modifier = Modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        // Filter row
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+          listOf("All", "Received (2)", "Helped (2)").forEach { filter ->
+            val isSel = selectedFilter == filter
+            Box(
+              modifier = Modifier
+                .clip(RoundedCornerShape(100.dp))
+                .background(if (isSel) VictimPrimary else Color(0xFFF1F5F9))
+                .clickable { selectedFilter = filter }
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            ) {
+              Text(
+                text = filter,
+                fontSize = 11.5.sp,
+                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSel) Color.White else VictimTextDark,
+              )
+            }
+          }
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        // Incidents list
+        filteredIncidents.forEach { incident ->
+          Column(
+            modifier = Modifier
+              .fillMaxWidth()
+              .clip(RoundedCornerShape(14.dp))
+              .background(if (incident.isReceivedHelp) VictimPinkCard.copy(alpha = 0.5f) else VictimBlueCard.copy(alpha = 0.5f))
+              .border(
+                1.dp,
+                if (incident.isReceivedHelp) VictimPinkBorder else VictimBlueBorder,
+                RoundedCornerShape(14.dp),
+              )
+              .padding(12.dp),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                  modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (incident.isReceivedHelp) VictimPrimary else Color(0xFF2563EB))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                ) {
+                  Text(
+                    text = if (incident.isReceivedHelp) "RECEIVED" else "HELPED",
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                  )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                  text = incident.timeAgo,
+                  fontSize = 11.5.sp,
+                  color = VictimTextMuted,
+                )
+              }
+              Box(
+                modifier = Modifier
+                  .clip(RoundedCornerShape(6.dp))
+                  .background(Color(0xFFD1FAE5))
+                  .padding(horizontal = 6.dp, vertical = 2.dp),
+              ) {
+                Text(
+                  text = incident.status,
+                  fontSize = 10.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = StatusSafeGreen,
+                )
+              }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+              text = incident.title,
+              fontSize = 14.sp,
+              fontWeight = FontWeight.Bold,
+              color = VictimTextDark,
+            )
+            Text(
+              text = "📍 ${incident.location}",
+              fontSize = 12.sp,
+              color = VictimTextMuted,
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+              text = incident.responderDetails,
+              fontSize = 11.5.sp,
+              fontWeight = FontWeight.Medium,
+              color = if (incident.isReceivedHelp) VictimPrimary else Color(0xFF2563EB),
+            )
+          }
+        }
+      }
+    },
+    confirmButton = {
+      Button(
+        onClick = onDismiss,
+        colors = ButtonDefaults.buttonColors(containerColor = VictimPrimary),
+        shape = RoundedCornerShape(12.dp),
+      ) {
+        Text("Done", color = Color.White, fontWeight = FontWeight.Bold)
+      }
+    },
+    containerColor = Color.White,
+    shape = RoundedCornerShape(20.dp),
   )
 }

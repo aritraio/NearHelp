@@ -5,9 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -17,28 +19,56 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.input.pointer.positionChanged
+import kotlin.math.abs
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextOverflow
+import java.util.Locale
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -198,7 +228,8 @@ fun VictimOutlineButton(
 fun VictimLocationCard(
     locationTitle: String = "Kolkata, West Bengal",
     accuracyText: String = "Accuracy: ±12 m • Updated now",
-    actionLabel: String = "Update",
+    actionLabel: String = "Edit",
+    actionIcon: ImageVector = Icons.Default.Edit,
     onAction: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -225,8 +256,16 @@ fun VictimLocationCard(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = VictimTextDark,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            Text(text = accuracyText, fontSize = 12.sp, color = VictimTextMuted)
+            Text(
+                text = accuracyText,
+                fontSize = 12.sp,
+                color = VictimTextMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
         Box(
             modifier = Modifier
@@ -238,7 +277,7 @@ fun VictimLocationCard(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.MyLocation,
+                    imageVector = actionIcon,
                     contentDescription = null,
                     tint = VictimTextDark,
                     modifier = Modifier.size(16.dp),
@@ -247,6 +286,451 @@ fun VictimLocationCard(
                 Text(text = actionLabel, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = VictimTextDark)
             }
         }
+    }
+}
+
+@Composable
+fun LiveMapFeedCard(
+    latitude: Double = 22.5726,
+    longitude: Double = 88.3639,
+    coordinatesText: String? = null,
+    onMapClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit = {},
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val zoomAnim = remember { Animatable(1f) }
+    val panXAnim = remember { Animatable(0f) }
+    val panYAnim = remember { Animatable(0f) }
+
+    // Subtle localized pulse for current location blue dot
+    val infiniteTransition = rememberInfiniteTransition(label = "LocationDotPulse")
+    val dotPulseProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "DotPulseProgress"
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(VictimShapes.Card20)
+            .background(Color(0xFFEDF3F7))
+            .border(1.dp, VictimBorder, VictimShapes.Card20),
+    ) {
+        // 1. Interactive Dynamic Cartography Canvas with Pinch & Drag Gestures
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        var zoomAcc = 1f
+                        var panAcc = Offset.Zero
+                        var pastTouchSlop = false
+                        val touchSlop = viewConfiguration.touchSlop
+
+                        do {
+                            val event = awaitPointerEvent()
+                            val zoomChange = event.calculateZoom()
+                            val panChange = event.calculatePan()
+
+                            if (!pastTouchSlop) {
+                                zoomAcc *= zoomChange
+                                panAcc += panChange
+                                val panMotion = panAcc.getDistance()
+                                val zoomMotion = abs(1f - zoomAcc)
+                                if (panMotion > touchSlop || zoomMotion > 0.04f) {
+                                    pastTouchSlop = true
+                                }
+                            }
+
+                            if (pastTouchSlop) {
+                                event.changes.forEach { change ->
+                                    if (change.positionChanged()) {
+                                        change.consume()
+                                    }
+                                }
+                                coroutineScope.launch {
+                                    val currentZoom = zoomAnim.value
+                                    val newZoom = (currentZoom * zoomChange).coerceIn(0.6f, 3.5f)
+                                    zoomAnim.snapTo(newZoom)
+                                    val maxPanX = 1400f * newZoom.coerceAtLeast(1f)
+                                    val maxPanY = 1200f * newZoom.coerceAtLeast(1f)
+                                    panXAnim.snapTo((panXAnim.value + panChange.x).coerceIn(-maxPanX, maxPanX))
+                                    panYAnim.snapTo((panYAnim.value + panChange.y).coerceIn(-maxPanY, maxPanY))
+                                }
+                            }
+                        } while (event.changes.any { it.pressed })
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            coroutineScope.launch {
+                                val targetZoom = if (zoomAnim.value < 1.6f) 2.2f else 1f
+                                zoomAnim.animateTo(targetZoom, tween(300, easing = FastOutSlowInEasing))
+                                if (targetZoom == 1f) {
+                                    launch { panXAnim.animateTo(0f, tween(300)) }
+                                    launch { panYAnim.animateTo(0f, tween(300)) }
+                                }
+                            }
+                        }
+                    )
+                }
+        ) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = zoomAnim.value
+                        scaleY = zoomAnim.value
+                        translationX = panXAnim.value
+                        translationY = panYAnim.value
+                        transformOrigin = TransformOrigin(0.50f, 0.38f)
+                    }
+            ) {
+                val w = size.width
+                val h = size.height
+                val userLocation = Offset(w * 0.50f, h * 0.38f)
+
+                // 1. Waterway / River Path (expanded boundaries so it flows endlessly on pan)
+                val riverPath = Path().apply {
+                    moveTo(w * 0.14f, -h * 1.2f)
+                    cubicTo(
+                        w * 0.20f, h * 0.35f,
+                        w * 0.07f, h * 0.65f,
+                        w * 0.26f, h * 2.2f
+                    )
+                    lineTo(w * 0.38f, h * 2.2f)
+                    cubicTo(
+                        w * 0.17f, h * 0.65f,
+                        w * 0.30f, h * 0.35f,
+                        w * 0.24f, -h * 1.2f
+                    )
+                    close()
+                }
+                drawPath(
+                    path = riverPath,
+                    color = Color(0xFFD3E4EF)
+                )
+
+                // 2. Secondary Street Grid lines (continuous regional grid spanning -w to 2w, -h to 2h)
+                val gridColor = Color(0xFFDEE8F0)
+                val streetStroke = 1.5.dp.toPx()
+                val step = 40.dp.toPx()
+                var x = -w * 1.2f
+                while (x < w * 2.2f) {
+                    drawLine(
+                        color = gridColor,
+                        start = Offset(x, -h * 1.2f),
+                        end = Offset(x + h * 0.45f, h * 2.2f),
+                        strokeWidth = streetStroke
+                    )
+                    x += step
+                }
+                var y = -h * 1.2f
+                while (y < h * 2.2f) {
+                    drawLine(
+                        color = gridColor,
+                        start = Offset(-w * 1.2f, y),
+                        end = Offset(w * 2.2f, y - w * 0.25f),
+                        strokeWidth = streetStroke
+                    )
+                    y += step
+                }
+
+                // 3. Major Arteries & Expressways (cross-regional)
+                val majorRoadColor = Color(0xFFCADAE5)
+                val majorStroke = 3.5.dp.toPx()
+                // Horizontal arterial avenue passing through junction
+                drawLine(
+                    color = majorRoadColor,
+                    start = Offset(-w * 1.2f, userLocation.y),
+                    end = Offset(w * 2.2f, userLocation.y - 18.dp.toPx()),
+                    strokeWidth = majorStroke
+                )
+                // Diagonal arterial expressway
+                drawLine(
+                    color = majorRoadColor,
+                    start = Offset(-w * 0.5f, -h * 1.2f),
+                    end = Offset(w * 1.8f, h * 2.2f),
+                    strokeWidth = majorStroke
+                )
+                // Secondary cross-avenue
+                drawLine(
+                    color = majorRoadColor,
+                    start = Offset(userLocation.x - 65.dp.toPx(), -h * 1.2f),
+                    end = Offset(userLocation.x - 65.dp.toPx(), h * 2.2f),
+                    strokeWidth = 2.5.dp.toPx()
+                )
+                // Central Junction Roundabout at user's location
+                drawCircle(
+                    color = majorRoadColor,
+                    radius = 26.dp.toPx(),
+                    center = userLocation,
+                    style = Stroke(width = 2.dp.toPx())
+                )
+
+                // 4. Nearby Responder / Emergency Facility Markers
+                // Responder 1 (North-East - CPR Verified)
+                val resp1Offset = Offset(userLocation.x + 85.dp.toPx(), userLocation.y - 50.dp.toPx())
+                drawCircle(
+                    color = Color(0xFF10B981),
+                    radius = 4.5.dp.toPx(),
+                    center = resp1Offset
+                )
+                drawCircle(
+                    color = Color(0x3510B981),
+                    radius = 9.dp.toPx(),
+                    center = resp1Offset
+                )
+
+                // Responder 2 (West - First Aider)
+                val resp2Offset = Offset(userLocation.x - 75.dp.toPx(), userLocation.y + 40.dp.toPx())
+                drawCircle(
+                    color = Color(0xFF0284C7),
+                    radius = 4.dp.toPx(),
+                    center = resp2Offset
+                )
+                drawCircle(
+                    color = Color(0x300284C7),
+                    radius = 8.dp.toPx(),
+                    center = resp2Offset
+                )
+
+                // Responder 3 (South-East - EMT)
+                val resp3Offset = Offset(userLocation.x + 130.dp.toPx(), userLocation.y + 110.dp.toPx())
+                drawCircle(
+                    color = Color(0xFF10B981),
+                    radius = 4.dp.toPx(),
+                    center = resp3Offset
+                )
+
+                // Hospital 1: AMRI Trauma Care (East)
+                val hospOffset = Offset(userLocation.x + 95.dp.toPx(), userLocation.y + 55.dp.toPx())
+                drawCircle(
+                    color = Color(0xFFEF4444),
+                    radius = 5.dp.toPx(),
+                    center = hospOffset
+                )
+                drawCircle(
+                    color = Color(0x30EF4444),
+                    radius = 9.dp.toPx(),
+                    center = hospOffset
+                )
+
+                // Hospital 2: Apollo Multispecialty (North-West)
+                val hosp2Offset = Offset(userLocation.x - 110.dp.toPx(), userLocation.y - 70.dp.toPx())
+                drawCircle(
+                    color = Color(0xFFEF4444),
+                    radius = 5.dp.toPx(),
+                    center = hosp2Offset
+                )
+
+                // 5. CURRENT LOCATION SPOTTED AS A BLUE DOT (Iconic, tight & unobtrusive animation)
+                val pulseR = 12.dp.toPx() + (dotPulseProgress * 12.dp.toPx())
+                val pulseAlpha = (1f - dotPulseProgress) * 0.35f
+                drawCircle(
+                    color = Color(0xFF3B82F6).copy(alpha = pulseAlpha),
+                    radius = pulseR,
+                    center = userLocation
+                )
+                drawCircle(
+                    color = Color(0xFF2563EB).copy(alpha = pulseAlpha * 0.7f),
+                    radius = pulseR,
+                    center = userLocation,
+                    style = Stroke(width = 1.2.dp.toPx())
+                )
+
+                // Crisp White Ring for separation against map
+                drawCircle(
+                    color = Color.White,
+                    radius = 9.dp.toPx(),
+                    center = userLocation
+                )
+                // Solid Vibrant Blue Core (Google Maps standard #1D4ED8 / #2563EB)
+                drawCircle(
+                    color = Color(0xFF1D4ED8),
+                    radius = 6.5.dp.toPx(),
+                    center = userLocation
+                )
+                // Tiny Specular Light Reflection
+                drawCircle(
+                    color = Color(0xFFBFDBFE),
+                    radius = 1.8.dp.toPx(),
+                    center = Offset(userLocation.x - 1.5.dp.toPx(), userLocation.y - 1.5.dp.toPx())
+                )
+            }
+        }
+
+        // Top Status Overlay: "LIVE MAP FEED" + Coordinates + Zoom Telemetry
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .align(Alignment.TopStart)
+                .clip(RoundedCornerShape(100.dp))
+                .background(Color.White.copy(alpha = 0.94f))
+                .border(1.dp, VictimBorder, RoundedCornerShape(100.dp))
+                .padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF10B981))
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = "LIVE MAP",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = VictimTextDark,
+                letterSpacing = 0.3.sp
+            )
+            val coordDisplay = coordinatesText ?: String.format(Locale.US, "%.4f° N, %.4f° E", latitude, longitude)
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = "• $coordDisplay",
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.Medium,
+                color = VictimTextMuted
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = String.format(Locale.US, "• %.1fx", zoomAnim.value),
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = VictimPrimary
+            )
+        }
+
+        // Top-Right: Recenter Button (when panned/zoomed) + Open Full Map Button
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .align(Alignment.TopEnd),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Recenter to Current Location button (Highlights when panned/zoomed)
+            val isPannedOrZoomed = Math.abs(zoomAnim.value - 1f) > 0.05f || Math.abs(panXAnim.value) > 10f || Math.abs(panYAnim.value) > 10f
+            if (isPannedOrZoomed) {
+                Box(
+                    modifier = Modifier
+                        .height(34.dp)
+                        .clip(RoundedCornerShape(100.dp))
+                        .background(Color.White.copy(alpha = 0.95f))
+                        .border(1.dp, VictimPrimary.copy(alpha = 0.45f), RoundedCornerShape(100.dp))
+                        .clickable {
+                            coroutineScope.launch {
+                                launch { zoomAnim.animateTo(1f, tween(300, easing = FastOutSlowInEasing)) }
+                                launch { panXAnim.animateTo(0f, tween(300, easing = FastOutSlowInEasing)) }
+                                launch { panYAnim.animateTo(0f, tween(300, easing = FastOutSlowInEasing)) }
+                            }
+                        }
+                        .padding(horizontal = 9.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.MyLocation,
+                            contentDescription = "Recenter",
+                            tint = VictimPrimary,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Recenter",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = VictimPrimary
+                        )
+                    }
+                }
+            }
+
+            if (onMapClick != null) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.94f))
+                        .border(1.dp, VictimBorder, CircleShape)
+                        .clickable { onMapClick() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Map,
+                        contentDescription = "Open Full Map",
+                        tint = VictimTextDark,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+
+        // Floating Interactive Zoom Controls (+ and −) on Right Center
+        Column(
+            modifier = Modifier
+                .padding(end = 12.dp, bottom = 40.dp)
+                .align(Alignment.CenterEnd),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            // Zoom In (+)
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.95f))
+                    .border(1.dp, VictimBorder, CircleShape)
+                    .clickable {
+                        coroutineScope.launch {
+                            val target = (zoomAnim.value + 0.35f).coerceAtMost(3.5f)
+                            zoomAnim.animateTo(target, tween(250, easing = FastOutSlowInEasing))
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Zoom In",
+                    tint = VictimTextDark,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            // Zoom Out (−)
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.95f))
+                    .border(1.dp, VictimBorder, CircleShape)
+                    .clickable {
+                        coroutineScope.launch {
+                            val target = (zoomAnim.value - 0.35f).coerceAtLeast(0.6f)
+                            zoomAnim.animateTo(target, tween(250, easing = FastOutSlowInEasing))
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = "Zoom Out",
+                    tint = VictimTextDark,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        // Content slot (e.g. Pill HoldForSosButton aligned at BottomCenter)
+        content()
     }
 }
 

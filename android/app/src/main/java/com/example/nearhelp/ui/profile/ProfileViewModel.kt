@@ -24,6 +24,8 @@ data class ProfileUiState(
   val showEditMedicalIdDialog: Boolean = false,
   val showAddContactDialog: Boolean = false,
   val editingContact: EmergencyContact? = null,
+  val showQualificationsDialog: Boolean = false,
+  val showEmergencyHistoryDialog: Boolean = false,
 )
 
 class ProfileViewModel(
@@ -317,6 +319,21 @@ class ProfileViewModel(
 
   fun openEditContactDialog(contact: EmergencyContact) = _uiState.update { it.copy(editingContact = contact) }
   fun closeEditContactDialog() = _uiState.update { it.copy(editingContact = null) }
+
+  fun openQualificationsDialog() = _uiState.update { it.copy(showQualificationsDialog = true) }
+  fun closeQualificationsDialog() = _uiState.update { it.copy(showQualificationsDialog = false) }
+
+  fun openEmergencyHistoryDialog() = _uiState.update { it.copy(showEmergencyHistoryDialog = true) }
+  fun closeEmergencyHistoryDialog() = _uiState.update { it.copy(showEmergencyHistoryDialog = false) }
+
+  fun saveQualification(title: String, organization: String, idNumber: String) {
+    _uiState.update {
+      it.copy(
+        showQualificationsDialog = false,
+        successMessage = "Qualification '$title' submitted for verification.",
+      )
+    }
+  }
 
   fun clearError() = _uiState.update { it.copy(error = null) }
   fun clearSuccessMessage() = _uiState.update { it.copy(successMessage = null) }

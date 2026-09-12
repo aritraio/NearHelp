@@ -114,6 +114,16 @@ fun VictimMainScreen(
                             currentTab = VictimNavTab.PROFILE
                             visitedTabs = visitedTabs + VictimNavTab.PROFILE.name
                         },
+                        onNavigateToResponderProfile = {
+                            currentTab = VictimNavTab.PROFILE
+                            visitedTabs = visitedTabs + VictimNavTab.PROFILE.name
+                            profileViewModel.openQualificationsDialog()
+                        },
+                        onNavigateToHistory = {
+                            currentTab = VictimNavTab.PROFILE
+                            visitedTabs = visitedTabs + VictimNavTab.PROFILE.name
+                            profileViewModel.openEmergencyHistoryDialog()
+                        },
                         onNavigateToMap = {
                             currentTab = VictimNavTab.MAP
                             visitedTabs = visitedTabs + VictimNavTab.MAP.name
