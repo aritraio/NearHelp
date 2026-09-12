@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -119,6 +121,8 @@ fun LiveTrackingScreen(
 
   Column(
     modifier = modifier.fillMaxSize().background(VictimBackground)
+      .statusBarsPadding()
+      .navigationBarsPadding()
       .verticalScroll(rememberScrollState()).padding(horizontal = 14.dp, vertical = 10.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
@@ -416,7 +420,13 @@ private fun FeedbackContent(onSubmit: () -> Unit, onClose: () -> Unit) {
   var rating by remember { mutableIntStateOf(5) }
   var selected by remember { mutableStateOf("Very helpful") }
   var comment by remember { mutableStateOf("") }
-  Column(modifier = Modifier.fillMaxSize().background(Color.White).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+    modifier = Modifier.fillMaxSize().background(Color.White)
+      .statusBarsPadding()
+      .navigationBarsPadding()
+      .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(VictimPrimary), contentAlignment = Alignment.Center) {
@@ -485,7 +495,13 @@ private fun FeedbackContent(onSubmit: () -> Unit, onClose: () -> Unit) {
 
 @Composable
 private fun SummaryContent(onBackHome: () -> Unit) {
-  Column(modifier = Modifier.fillMaxSize().background(Color.White).verticalScroll(rememberScrollState()).padding(horizontal = 18.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+    modifier = Modifier.fillMaxSize().background(Color.White)
+      .statusBarsPadding()
+      .navigationBarsPadding()
+      .verticalScroll(rememberScrollState()).padding(horizontal = 18.dp, vertical = 12.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(VictimPrimary), contentAlignment = Alignment.Center) {

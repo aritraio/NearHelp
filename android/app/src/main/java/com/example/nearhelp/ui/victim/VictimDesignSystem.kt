@@ -10,11 +10,25 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
@@ -351,7 +365,8 @@ fun VictimBottomNavBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 22.dp, start = 8.dp, end = 8.dp),
+                .navigationBarsPadding()
+                .padding(top = 6.dp, bottom = 8.dp, start = 8.dp, end = 8.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -389,23 +404,55 @@ private fun VictimNavItem(
     icon: ImageVector,
     isSelected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val haptic = LocalHapticFeedback.current
+    val contentColor by animateColorAsState(
+        targetValue = if (isSelected) VictimPrimary else VictimTextMuted,
+        animationSpec = tween(durationMillis = 40, easing = androidx.compose.animation.core.LinearEasing),
+        label = "nav_item_color"
+    )
+    val pillAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0f,
+        animationSpec = tween(durationMillis = 40, easing = androidx.compose.animation.core.LinearEasing),
+        label = "nav_pill_alpha"
+    )
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable { onClick() }.padding(horizontal = 14.dp, vertical = 4.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = true, color = VictimPrimary.copy(alpha = 0.12f)),
+            ) {
+                if (!isSelected) {
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    onClick()
+                }
+            }
+            .padding(horizontal = 10.dp, vertical = 2.dp),
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = if (isSelected) VictimPrimary else VictimTextMuted,
-            modifier = Modifier.size(25.dp),
-        )
-        Spacer(modifier = Modifier.height(3.dp))
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .clip(RoundedCornerShape(14.dp))
+                .background(VictimPinkCard.copy(alpha = pillAlpha))
+                .padding(horizontal = 14.dp, vertical = 4.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = contentColor,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = label,
-            fontSize = 12.sp,
+            fontSize = 11.5.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) VictimPrimary else VictimTextMuted,
+            color = contentColor,
         )
     }
 }

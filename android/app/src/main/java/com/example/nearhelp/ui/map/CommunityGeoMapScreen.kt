@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -74,10 +75,14 @@ import com.example.nearhelp.ui.victim.VictimShapes
 @Composable
 fun CommunityGeoMapScreen(
   onNavigateBack: () -> Unit,
+  onNavigateToHome: () -> Unit = onNavigateBack,
+  onNavigateToAssistant: () -> Unit = {},
+  onNavigateToProfile: () -> Unit = {},
   onNavigateToTracking: () -> Unit = {},
   onNavigateToNavigation: () -> Unit = {},
   modifier: Modifier = Modifier,
   viewModel: CommunityGeoMapViewModel = viewModel(),
+  showBottomBar: Boolean = true,
 ) {
   val uiState by viewModel.uiState.collectAsState()
   var query by remember { mutableStateOf("") }
@@ -93,7 +98,7 @@ fun CommunityGeoMapScreen(
     )
   }.filter { query.isBlank() || it.first.contains(query, ignoreCase = true) }
 
-  Column(modifier = modifier.fillMaxSize().background(VictimBackground)) {
+  Column(modifier = modifier.fillMaxSize().background(VictimBackground).statusBarsPadding()) {
     Column(
       modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 10.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -211,14 +216,16 @@ fun CommunityGeoMapScreen(
       }
       Spacer(modifier = Modifier.height(4.dp))
     }
-    VictimBottomNavBar(selected = VictimNavTab.MAP, onSelect = {
-      when (it) {
-        VictimNavTab.HOME -> onNavigateBack()
-        VictimNavTab.CHAT -> onNavigateToTracking()
-        VictimNavTab.MAP -> Unit
-        VictimNavTab.PROFILE -> onNavigateBack()
-      }
-    })
+    if (showBottomBar) {
+      VictimBottomNavBar(selected = VictimNavTab.MAP, onSelect = {
+        when (it) {
+          VictimNavTab.HOME -> onNavigateToHome()
+          VictimNavTab.CHAT -> onNavigateToAssistant()
+          VictimNavTab.MAP -> Unit
+          VictimNavTab.PROFILE -> onNavigateToProfile()
+        }
+      })
+    }
   }
 }
 

@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 
 interface IAiAgentRepository {
   suspend fun getProtocol(conditionId: String): GroundedProtocolDto
+  suspend fun getAllProtocols(): List<GroundedProtocolDto>
   suspend fun chatWithAgent(
     sessionId: String,
     text: String,
@@ -36,6 +37,16 @@ class AiAgentRepository(
       // Fallback
     }
     return@withContext getFallbackProtocol(conditionId)
+  }
+
+  override suspend fun getAllProtocols(): List<GroundedProtocolDto> = withContext(Dispatchers.IO) {
+    listOf(
+      getFallbackProtocol("cardiac_arrest"),
+      getFallbackProtocol("leg_fracture"),
+      getFallbackProtocol("severe_bleeding"),
+      getFallbackProtocol("choking"),
+      getFallbackProtocol("burns")
+    )
   }
 
   override suspend fun chatWithAgent(
@@ -76,69 +87,262 @@ class AiAgentRepository(
   }
 
   private fun getFallbackProtocol(conditionId: String): GroundedProtocolDto {
-    return GroundedProtocolDto(
-      conditionId = conditionId,
-      conditionLabel = "Cardiac / Chest Pain",
-      crisisType = "medical",
-      severityLevel = 5,
-      priority = "critical",
-      protocolTitle = "AHA / Indian Resuscitation Council Basic Life Support (BLS) Protocol",
-      authority = "American Heart Association (AHA) & Indian Resuscitation Council (IRC)",
-      disclaimers = "Emergency interim bystander protocol. Municipal 108 ambulance dispatched.",
-      legalShield = "Protected under Section 134A Motor Vehicles (Amendment) Act 2019.",
-      recommendedRadiusKm = 3.5,
-      emergencyNumber = "108",
-      cprBpm = 110,
-      steps = listOf(
-        ProtocolStepDto(
-          stepNumber = 1,
-          title = "Check Safety & Confirm Unresponsiveness",
-          actionInstruction = "Ensure scene is safe. Tap shoulders firmly and shout loudly. Check carotid pulse in neck groove for no more than 10 seconds.",
-          warningNote = "If no pulse or gasping, begin CPR immediately.",
-          isCprStep = false,
-          icon = "AlertCircle"
-        ),
-        ProtocolStepDto(
-          stepNumber = 2,
-          title = "Begin Chest Compressions (110 BPM Metronome)",
-          actionInstruction = "Place heel of one hand in center of breastbone. Interlock fingers. Push hard and fast 5–6 cm deep at 110 BPM.",
-          warningNote = "Allow full chest recoil after each compression.",
-          isCprStep = true,
-          beatBpm = 110,
-          icon = "HeartPulse"
-        ),
-        ProtocolStepDto(
-          stepNumber = 3,
-          title = "Maintain 30:2 Compressions to Breaths",
-          actionInstruction = "Give 30 chest compressions followed by 2 rescue breaths, or perform continuous Hands-Only CPR.",
-          isCprStep = true,
-          beatBpm = 110,
-          icon = "Activity"
-        ),
-        ProtocolStepDto(
-          stepNumber = 4,
-          title = "Apply Nearby Automated Defibrillator (AED)",
-          actionInstruction = "Turn ON AED immediately. Adhere electrode pads to bare dry chest (upper right / lower left). Follow spoken voice prompts.",
-          warningNote = "Stand clear during rhythm analysis and shock!",
-          isCprStep = false,
-          icon = "Zap"
-        )
-      ),
-      citations = listOf(
-        CitationDto(
-          source = "AHA Guidelines for CPR and ECC 2020",
-          section = "Part 3: Adult Basic Life Support §3.2",
-          guidelineName = "2020 AHA Guidelines for CPR",
-          authority = "American Heart Association"
-        ),
-        CitationDto(
-          source = "Motor Vehicles (Amendment) Act 2019",
-          section = "Section 134A",
-          guidelineName = "Good Samaritan Statutory Immunity",
-          authority = "Ministry of Road Transport & Highways"
+    return when (conditionId) {
+      "leg_fracture" -> GroundedProtocolDto(
+        conditionId = "leg_fracture",
+        conditionLabel = "Fracture / Leg & Limb Injury",
+        crisisType = "trauma",
+        severityLevel = 4,
+        priority = "urgent",
+        protocolTitle = "Limb Immobilization & Trauma Care Protocol",
+        authority = "International Red Cross & Indian Orthopaedic Association",
+        disclaimers = "Keep patient still. Do not move injured limb unnecessarily.",
+        legalShield = "Protected under Section 134A Good Samaritan Law.",
+        recommendedRadiusKm = 3.0,
+        emergencyNumber = "108",
+        cprBpm = null,
+        steps = listOf(
+          ProtocolStepDto(
+            stepNumber = 1,
+            title = "Assess Limb & Control Active Bleeding",
+            actionInstruction = "Check for open wounds, severe swelling, or bone protrusion. Apply gentle direct pressure around any external bleeding using clean cloth.",
+            warningNote = "NEVER push a protruding bone back under the skin.",
+            isCprStep = false,
+            icon = "AlertCircle"
+          ),
+          ProtocolStepDto(
+            stepNumber = 2,
+            title = "Immobilize the Joint Above and Below Injury",
+            actionInstruction = "Support the leg in the exact position found. Place rolled jackets, blankets, or rigid splints along both sides of the leg to prevent motion.",
+            warningNote = "Do not force or attempt to straighten a deformed limb.",
+            isCprStep = false,
+            icon = "Shield"
+          ),
+          ProtocolStepDto(
+            stepNumber = 3,
+            title = "Apply Cold Compress for Swelling",
+            actionInstruction = "Wrap ice or a cold pack inside a towel and apply around the injured area for 15 minutes to reduce pain and internal swelling.",
+            warningNote = "Never apply bare ice directly onto skin.",
+            isCprStep = false,
+            icon = "Activity"
+          ),
+          ProtocolStepDto(
+            stepNumber = 4,
+            title = "Elevate Gently & Monitor Toe Sensation",
+            actionInstruction = "If comfortable and not worsening pain, prop the limb slightly with a pillow. Check toes periodically for warmth, pink color, and sensation.",
+            warningNote = "If toes become cold or pale, loosen any splints immediately.",
+            isCprStep = false,
+            icon = "CheckCircle"
+          )
         )
       )
-    )
+      "severe_bleeding" -> GroundedProtocolDto(
+        conditionId = "severe_bleeding",
+        conditionLabel = "Severe Bleeding & Hemorrhage",
+        crisisType = "trauma",
+        severityLevel = 5,
+        priority = "critical",
+        protocolTitle = "Stop the Bleed & Hemostasis Protocol",
+        authority = "American College of Surgeons & Indian Red Cross Society",
+        disclaimers = "Critical time-sensitive trauma. Apply continuous downward force.",
+        legalShield = "Protected under Section 134A Good Samaritan Law.",
+        recommendedRadiusKm = 2.5,
+        emergencyNumber = "108",
+        cprBpm = null,
+        steps = listOf(
+          ProtocolStepDto(
+            stepNumber = 1,
+            title = "Apply Direct Continuous Pressure",
+            actionInstruction = "Cover the bleeding wound with sterile gauze, clean cloth, or bare hands. Push down firmly and continuously with both hands without lifting.",
+            warningNote = "Do NOT remove saturated dressings; apply more layers on top.",
+            isCprStep = false,
+            icon = "AlertCircle"
+          ),
+          ProtocolStepDto(
+            stepNumber = 2,
+            title = "Pack Deep Wounds Firmly",
+            actionInstruction = "For large open gashes or puncture wounds in limbs, pack clean cloth or gauze deep into the wound cavity and resume firm downward pressure.",
+            warningNote = "Maintain continuous firm pressure for at least 5 unbroken minutes.",
+            isCprStep = false,
+            icon = "Shield"
+          ),
+          ProtocolStepDto(
+            stepNumber = 3,
+            title = "Apply Tourniquet if Bleeding Persists",
+            actionInstruction = "If arm or leg bleeding does not stop with pressure, place a commercial tourniquet or improvised strap 2–3 inches above the wound and tighten until bleeding ceases.",
+            warningNote = "Note application time. Never loosen or remove a tourniquet once placed.",
+            isCprStep = false,
+            icon = "Zap"
+          ),
+          ProtocolStepDto(
+            stepNumber = 4,
+            title = "Keep Warm & Prevent Shock",
+            actionInstruction = "Keep victim lying flat on back. Cover victim with a jacket or blanket to prevent hypothermia while awaiting emergency ambulance arrival.",
+            warningNote = "Do not offer water or food to a bleeding victim.",
+            isCprStep = false,
+            icon = "HeartPulse"
+          )
+        )
+      )
+      "choking" -> GroundedProtocolDto(
+        conditionId = "choking",
+        conditionLabel = "Choking / Airway Obstruction",
+        crisisType = "medical",
+        severityLevel = 5,
+        priority = "critical",
+        protocolTitle = "Foreign Body Airway Obstruction (Heimlich) Protocol",
+        authority = "AHA & European Resuscitation Council (ERC)",
+        disclaimers = "Act immediately if victim cannot cough or speak.",
+        legalShield = "Protected under Section 134A Good Samaritan Law.",
+        recommendedRadiusKm = 2.0,
+        emergencyNumber = "108",
+        cprBpm = null,
+        steps = listOf(
+          ProtocolStepDto(
+            stepNumber = 1,
+            title = "Assess Severity & Encourage Forceful Coughing",
+            actionInstruction = "Ask loudly: 'Are you choking?'. If the victim can breathe, talk, or cough loudly, encourage them to keep coughing forcefully.",
+            warningNote = "Intervene immediately if victim cannot speak or clutches throat silently.",
+            isCprStep = false,
+            icon = "AlertCircle"
+          ),
+          ProtocolStepDto(
+            stepNumber = 2,
+            title = "Deliver 5 Sharp Back Blows",
+            actionInstruction = "Stand slightly behind victim, support their upper chest with one hand, lean them forward, and deliver 5 forceful blows between shoulder blades with heel of hand.",
+            warningNote = "Ensure patient is leaning forward so the dislodged object exits.",
+            isCprStep = false,
+            icon = "Shield"
+          ),
+          ProtocolStepDto(
+            stepNumber = 3,
+            title = "Perform 5 Abdominal Thrusts (Heimlich)",
+            actionInstruction = "Stand behind victim, wrap arms around waist. Place thumb side of fist just above navel. Grasp fist with other hand and pull inward and upward sharply 5 times.",
+            warningNote = "For pregnant women, position fists on middle of breastbone instead.",
+            isCprStep = false,
+            icon = "Activity"
+          ),
+          ProtocolStepDto(
+            stepNumber = 4,
+            title = "Repeat Cycle or Begin CPR if Unresponsive",
+            actionInstruction = "Alternate 5 back blows and 5 abdominal thrusts until obstruction clears. If victim becomes unconscious, guide gently to ground and begin chest compressions.",
+            warningNote = "Never perform blind finger sweeps in mouth unless object is visible.",
+            isCprStep = false,
+            icon = "CheckCircle"
+          )
+        )
+      )
+      "burns" -> GroundedProtocolDto(
+        conditionId = "burns",
+        conditionLabel = "Severe Burns & Scalds",
+        crisisType = "thermal",
+        severityLevel = 3,
+        priority = "urgent",
+        protocolTitle = "Emergency Thermal Burn Care Protocol",
+        authority = "World Health Organization (WHO) & British Burn Association",
+        disclaimers = "Immediate cooling prevents deeper tissue injury.",
+        legalShield = "Protected under Section 134A Good Samaritan Law.",
+        recommendedRadiusKm = 3.0,
+        emergencyNumber = "108",
+        cprBpm = null,
+        steps = listOf(
+          ProtocolStepDto(
+            stepNumber = 1,
+            title = "Cool Burn Under Running Water (20 Minutes)",
+            actionInstruction = "Immediately cool burn under gentle, cool running tap water for 20 full minutes. This halts burning process and relieves acute pain.",
+            warningNote = "NEVER use ice, ice water, butter, toothpaste, or ointments.",
+            isCprStep = false,
+            icon = "AlertCircle"
+          ),
+          ProtocolStepDto(
+            stepNumber = 2,
+            title = "Remove Constrictive Items Promptly",
+            actionInstruction = "Quickly and gently remove rings, watches, tight belts, or jewelry near burn area before swelling begins.",
+            warningNote = "Do NOT pull off clothing that is stuck to charred skin.",
+            isCprStep = false,
+            icon = "Shield"
+          ),
+          ProtocolStepDto(
+            stepNumber = 3,
+            title = "Cover Loosely with Clean Sterile Wrap",
+            actionInstruction = "Cover cooled burn loosely with clean plastic cling wrap or sterile non-adherent dressing to minimize infection and contact pain.",
+            warningNote = "Never pop, break, or puncture blister bubbles.",
+            isCprStep = false,
+            icon = "Activity"
+          ),
+          ProtocolStepDto(
+            stepNumber = 4,
+            title = "Keep Victim Warm & Seek Urgent Care",
+            actionInstruction = "Keep unburned parts of body warm with clean blanket. Burns on face, hands, joints, or larger than patient's palm require emergency hospital evaluation.",
+            warningNote = "Watch for signs of inhalation injury if trapped in smoke.",
+            isCprStep = false,
+            icon = "CheckCircle"
+          )
+        )
+      )
+      else -> GroundedProtocolDto(
+        conditionId = "cardiac_arrest",
+        conditionLabel = "Cardiac / Chest Pain",
+        crisisType = "medical",
+        severityLevel = 5,
+        priority = "critical",
+        protocolTitle = "Basic Life Support (BLS) & CPR Protocol",
+        authority = "American Heart Association (AHA) & Indian Resuscitation Council (IRC)",
+        disclaimers = "Emergency bystander protocol. 108 ambulance dispatched.",
+        legalShield = "Protected under Section 134A Motor Vehicles Act 2019.",
+        recommendedRadiusKm = 3.5,
+        emergencyNumber = "108",
+        cprBpm = null,
+        steps = listOf(
+          ProtocolStepDto(
+            stepNumber = 1,
+            title = "Check Scene Safety & Patient Response",
+            actionInstruction = "Ensure scene is safe. Tap shoulders firmly and shout: 'Are you okay?'. Check carotid pulse in neck groove for no more than 10 seconds.",
+            warningNote = "If unresponsive and not breathing normally, begin CPR immediately.",
+            isCprStep = false,
+            icon = "AlertCircle"
+          ),
+          ProtocolStepDto(
+            stepNumber = 2,
+            title = "Begin Continuous Chest Compressions",
+            actionInstruction = "Position heel of one hand in center of breastbone, interlock fingers, and push firmly down 5–6 cm. Maintain steady rhythmic compressions without pausing.",
+            warningNote = "Allow full chest recoil between compressions.",
+            isCprStep = false,
+            icon = "HeartPulse"
+          ),
+          ProtocolStepDto(
+            stepNumber = 3,
+            title = "Deliver Rescue Breaths or Hands-Only CPR",
+            actionInstruction = "Deliver 30 compressions followed by 2 gentle breaths. If untrained in rescue breathing, provide continuous uninterrupted chest compressions.",
+            warningNote = "Do not stop compressions for more than 10 seconds.",
+            isCprStep = false,
+            icon = "Activity"
+          ),
+          ProtocolStepDto(
+            stepNumber = 4,
+            title = "Deploy Nearby Defibrillator (AED)",
+            actionInstruction = "Turn ON AED immediately. Adhere electrode pads to bare dry chest (upper right / lower left). Follow spoken voice prompts and stand clear during shock.",
+            warningNote = "Ensure no one touches patient during rhythm analysis and shock!",
+            isCprStep = false,
+            icon = "Zap"
+          )
+        ),
+        citations = listOf(
+          CitationDto(
+            source = "AHA Guidelines for CPR and ECC 2020",
+            section = "Part 3: Adult Basic Life Support §3.2",
+            guidelineName = "2020 AHA Guidelines for CPR",
+            authority = "American Heart Association"
+          ),
+          CitationDto(
+            source = "Motor Vehicles (Amendment) Act 2019",
+            section = "Section 134A",
+            guidelineName = "Good Samaritan Statutory Immunity",
+            authority = "Ministry of Road Transport & Highways"
+          )
+        )
+      )
+    }
   }
 
   private fun getFallbackChatResponse(

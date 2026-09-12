@@ -24,11 +24,10 @@ data class AiCrisisAssistantUiState(
   val sessionId: String = "DEMO-SESSION-001",
   val conditionId: String = "cardiac_arrest",
   val protocol: GroundedProtocolDto? = null,
+  val protocols: List<GroundedProtocolDto> = emptyList(),
   val completedSteps: List<Int> = emptyList(),
+  val completedStepsMap: Map<String, Set<Int>> = emptyMap(),
   val currentStepIndex: Int = 0,
-  val cprMetronomeActive: Boolean = false,
-  val cprBeatCount: Long = 0,
-  val isHeartPulse: Boolean = false,
   val chatMessages: List<AiChatMessageUiModel> = emptyList(),
   val activeContraindication: ContraindicationAlertDto? = null,
   val isChatDrawerOpen: Boolean = false,
@@ -51,65 +50,50 @@ class AiCrisisAssistantViewModel(
   private val _uiState = MutableStateFlow(AiCrisisAssistantUiState())
   val uiState: StateFlow<AiCrisisAssistantUiState> = _uiState.asStateFlow()
 
-  private var metronomeJob: Job? = null
-
   fun initialize(conditionId: String = "cardiac_arrest", sessionId: String = "DEMO-SESSION-001") {
     _uiState.update { it.copy(conditionId = conditionId, sessionId = sessionId, isLoading = true) }
     viewModelScope.launch {
-      val proto = repository.getProtocol(conditionId)
+      val all = repository.getAllProtocols()
+      val activeProto = all.firstOrNull { it.conditionId == conditionId } ?: all.firstOrNull() ?: repository.getProtocol(conditionId)
       _uiState.update { state ->
         state.copy(
-          protocol = proto,
-          isLoading = false,
-          cprMetronomeActive = proto.cprBpm != null && proto.cprBpm > 0
+          protocols = all,
+          protocol = activeProto,
+          isLoading = false
         )
-      }
-      if (proto.cprBpm != null && proto.cprBpm > 0) {
-        startMetronomeTimer(proto.cprBpm)
       }
     }
   }
 
   fun toggleStep(stepNumber: Int) {
+    val activeCond = _uiState.value.conditionId
+    toggleStep(activeCond, stepNumber)
+  }
+
+  fun toggleStep(conditionId: String, stepNumber: Int) {
     _uiState.update { state ->
-      val updated = if (state.completedSteps.contains(stepNumber)) {
-        state.completedSteps - stepNumber
+      val currentSet = state.completedStepsMap[conditionId] ?: emptySet()
+      val updatedSet = if (currentSet.contains(stepNumber)) {
+        currentSet - stepNumber
       } else {
-        state.completedSteps + stepNumber
+        currentSet + stepNumber
       }
-      val nextIdx = minOf(updated.size, (state.protocol?.steps?.size ?: 1) - 1)
-      state.copy(completedSteps = updated, currentStepIndex = nextIdx)
+      val updatedMap = state.completedStepsMap + (conditionId to updatedSet)
+      val legacyCompleted = if (conditionId == state.conditionId) updatedSet.toList() else state.completedSteps
+      val nextIdx = minOf(updatedSet.size, (state.protocol?.steps?.size ?: 1) - 1)
+      state.copy(
+        completedStepsMap = updatedMap,
+        completedSteps = legacyCompleted,
+        currentStepIndex = nextIdx
+      )
     }
   }
 
-  fun toggleCprMetronome() {
-    val isActive = !_uiState.value.cprMetronomeActive
-    _uiState.update { it.copy(cprMetronomeActive = isActive) }
-    if (isActive) {
-      val bpm = _uiState.value.protocol?.cprBpm ?: 110
-      startMetronomeTimer(bpm)
-    } else {
-      stopMetronomeTimer()
+  fun selectProtocol(conditionId: String) {
+    val found = _uiState.value.protocols.firstOrNull { it.conditionId == conditionId }
+    if (found != null) {
+      _uiState.update { it.copy(conditionId = conditionId, protocol = found) }
     }
-  }
-
-  private fun startMetronomeTimer(bpm: Int) {
-    stopMetronomeTimer()
-    val periodMs = (60000.0 / bpm).toLong() // 545ms for 110 BPM
-    metronomeJob = viewModelScope.launch {
-      while (isActive && _uiState.value.cprMetronomeActive) {
-        _uiState.update { it.copy(isHeartPulse = true, cprBeatCount = it.cprBeatCount + 1) }
-        delay(120)
-        _uiState.update { it.copy(isHeartPulse = false) }
-        delay(periodMs - 120)
-      }
-    }
-  }
-
-  private fun stopMetronomeTimer() {
-    metronomeJob?.cancel()
-    metronomeJob = null
-    _uiState.update { it.copy(isHeartPulse = false) }
   }
 
   fun setChatDrawerOpen(isOpen: Boolean) {
@@ -179,6 +163,5 @@ class AiCrisisAssistantViewModel(
 
   override fun onCleared() {
     super.onCleared()
-    stopMetronomeTimer()
   }
 }

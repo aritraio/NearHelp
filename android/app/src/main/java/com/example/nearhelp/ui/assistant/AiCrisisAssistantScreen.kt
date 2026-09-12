@@ -12,11 +12,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerSnapDistance
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -50,16 +62,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nearhelp.data.model.AiChatMessageUiModel
+import com.example.nearhelp.data.model.GroundedProtocolDto
 import com.example.nearhelp.data.model.ProtocolStepDto
+import kotlinx.coroutines.launch
 import com.example.nearhelp.theme.StatusSafeGreen
 import com.example.nearhelp.theme.VictimBackground
 import com.example.nearhelp.theme.VictimBlueBorder
@@ -76,40 +93,57 @@ import com.example.nearhelp.theme.VictimPurpleBorder
 import com.example.nearhelp.theme.VictimPurpleCard
 import com.example.nearhelp.theme.VictimTextDark
 import com.example.nearhelp.theme.VictimTextMuted
+import com.example.nearhelp.ui.victim.VictimBottomNavBar
+import com.example.nearhelp.ui.victim.VictimNavTab
 import com.example.nearhelp.ui.victim.VictimShapes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiCrisisAssistantScreen(
   onNavigateBack: () -> Unit,
+  onNavigateToHome: () -> Unit = onNavigateBack,
+  onNavigateToMap: () -> Unit = {},
+  onNavigateToProfile: () -> Unit = {},
   viewModel: AiCrisisAssistantViewModel,
   conditionId: String = "cardiac_arrest",
   sessionId: String = "DEMO-SESSION-001",
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  showBottomBar: Boolean = true,
 ) {
   val uiState by viewModel.uiState.collectAsState()
   var inputQuestion by remember { mutableStateOf("") }
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+  val coroutineScope = rememberCoroutineScope()
 
   LaunchedEffect(conditionId, sessionId) { viewModel.initialize(conditionId, sessionId) }
 
-  val protocol = uiState.protocol
-  val totalSteps = protocol?.steps?.size ?: 4
-  val progress = if (totalSteps > 0) uiState.completedSteps.size.toFloat() / totalSteps else 0f
+  val protocols = uiState.protocols.ifEmpty { listOfNotNull(uiState.protocol) }
+  val initialPageIndex = remember(protocols, conditionId) {
+    val idx = protocols.indexOfFirst { it.conditionId == conditionId }
+    if (idx >= 0) idx else 0
+  }
+  val pagerState = rememberPagerState(
+    initialPage = initialPageIndex,
+    pageCount = { protocols.size }
+  )
 
   val quickTopics = listOf(
     Triple("CPR", VictimPinkCard, VictimPinkBorder) to Icons.Default.Favorite,
-    Triple("Choking", VictimOrangeCard, VictimOrangeBorder) to Icons.Default.Person,
-    Triple("Bleeding", VictimGreenCard, VictimGreenBorder) to Icons.Default.Info,
-    Triple("Burns", VictimPurpleCard, VictimPurpleBorder) to Icons.Default.Star,
     Triple("Fractures", VictimBlueCard, VictimBlueBorder) to Icons.Default.Add,
-    Triple("Staying Healthy", VictimGreenCard, VictimGreenBorder) to Icons.Default.Shield,
+    Triple("Bleeding", VictimPinkCard, VictimPinkBorder) to Icons.Default.Warning,
+    Triple("Choking", VictimOrangeCard, VictimOrangeBorder) to Icons.Default.Person,
+    Triple("Burns", VictimPurpleCard, VictimPurpleBorder) to Icons.Default.Star,
+    Triple("Wellness", VictimGreenCard, VictimGreenBorder) to Icons.Default.Shield,
   )
 
   Scaffold(
     topBar = {
       Row(
-        modifier = Modifier.fillMaxWidth().background(VictimBackground).padding(horizontal = 16.dp, vertical = 10.dp),
+        modifier = Modifier
+          .fillMaxWidth()
+          .background(VictimBackground)
+          .statusBarsPadding()
+          .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(VictimPrimary), contentAlignment = Alignment.Center) {
@@ -122,44 +156,64 @@ fun AiCrisisAssistantScreen(
             Text(text = "Help", fontWeight = FontWeight.Black, fontSize = 20.sp, color = VictimPrimary)
           }
         }
-        Box(modifier = Modifier.size(38.dp).clip(CircleShape).background(VictimPinkCard).clickable { onNavigateBack() }, contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.size(38.dp).clip(CircleShape).background(VictimPinkCard).clickable { onNavigateToProfile() }, contentAlignment = Alignment.Center) {
           Icon(imageVector = Icons.Default.Person, contentDescription = "Profile", tint = VictimTextDark, modifier = Modifier.size(20.dp))
         }
       }
     },
     bottomBar = {
-      Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-          Box(modifier = Modifier.size(46.dp).clip(CircleShape).background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = VictimTextDark)
-          }
-          Spacer(modifier = Modifier.width(8.dp))
-          OutlinedTextField(
-            value = inputQuestion, onValueChange = { inputQuestion = it },
-            placeholder = { Text("Ask something...", color = VictimTextMuted, fontSize = 14.sp) },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(24.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-              focusedBorderColor = VictimBorder, unfocusedBorderColor = VictimBorder,
-              focusedContainerColor = Color(0xFFF8FAFC), unfocusedContainerColor = Color(0xFFF8FAFC),
-              focusedTextColor = VictimTextDark, unfocusedTextColor = VictimTextDark,
-            ),
-            maxLines = 1,
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Box(
-            modifier = Modifier.size(46.dp).clip(CircleShape).background(VictimPinkCard)
-              .clickable {
-                if (inputQuestion.isNotBlank()) {
-                  viewModel.setChatDrawerOpen(true)
-                  viewModel.sendChatMessage(inputQuestion.trim())
-                  inputQuestion = ""
-                }
-              },
-            contentAlignment = Alignment.Center,
+      androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxWidth()) {
+        Surface(color = Color.White, shadowElevation = 4.dp, modifier = Modifier.fillMaxWidth()) {
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            Icon(imageVector = Icons.Default.Mic, contentDescription = "Voice", tint = VictimPrimary)
+            Box(modifier = Modifier.size(42.dp).clip(CircleShape).background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
+              Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = VictimTextDark)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            OutlinedTextField(
+              value = inputQuestion, onValueChange = { inputQuestion = it },
+              placeholder = { Text("Ask something...", color = VictimTextMuted, fontSize = 14.sp) },
+              modifier = Modifier.weight(1f),
+              shape = RoundedCornerShape(24.dp),
+              colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = VictimBorder, unfocusedBorderColor = VictimBorder,
+                focusedContainerColor = Color(0xFFF8FAFC), unfocusedContainerColor = Color(0xFFF8FAFC),
+                focusedTextColor = VictimTextDark, unfocusedTextColor = VictimTextDark,
+              ),
+              maxLines = 1,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+              modifier = Modifier.size(42.dp).clip(CircleShape).background(VictimPinkCard)
+                .clickable {
+                  if (inputQuestion.isNotBlank()) {
+                    viewModel.setChatDrawerOpen(true)
+                    viewModel.sendChatMessage(inputQuestion.trim())
+                    inputQuestion = ""
+                  }
+                },
+              contentAlignment = Alignment.Center,
+            ) {
+              Icon(imageVector = Icons.Default.Mic, contentDescription = "Voice", tint = VictimPrimary)
+            }
           }
+        }
+        if (showBottomBar) {
+          VictimBottomNavBar(
+            selected = VictimNavTab.CHAT,
+            onSelect = { tab ->
+              when (tab) {
+                VictimNavTab.HOME -> onNavigateToHome()
+                VictimNavTab.CHAT -> Unit
+                VictimNavTab.MAP -> onNavigateToMap()
+                VictimNavTab.PROFILE -> onNavigateToProfile()
+              }
+            }
+          )
         }
       }
     },
@@ -219,12 +273,33 @@ fun AiCrisisAssistantScreen(
                 val (label, bg, border) = triple
                 Row(
                   modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(bg).border(1.dp, border, RoundedCornerShape(14.dp))
-                    .clickable { viewModel.setChatDrawerOpen(true); viewModel.sendChatMessage("First aid for $label") }.padding(horizontal = 10.dp, vertical = 12.dp),
+                    .clickable {
+                      val targetCond = when (label) {
+                        "CPR" -> "cardiac_arrest"
+                        "Fractures" -> "leg_fracture"
+                        "Bleeding" -> "severe_bleeding"
+                        "Choking" -> "choking"
+                        "Burns" -> "burns"
+                        else -> null
+                      }
+                      val pageIdx = targetCond?.let { cond -> protocols.indexOfFirst { it.conditionId == cond } } ?: -1
+                      if (pageIdx >= 0) {
+                        coroutineScope.launch {
+                          pagerState.animateScrollToPage(
+                            page = pageIdx,
+                            animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                          )
+                        }
+                      } else {
+                        viewModel.setChatDrawerOpen(true)
+                        viewModel.sendChatMessage("First aid for $label")
+                      }
+                    }.padding(horizontal = 8.dp, vertical = 10.dp),
                   verticalAlignment = Alignment.CenterVertically,
                 ) {
-                  Icon(imageVector = icon, contentDescription = null, tint = VictimTextDark, modifier = Modifier.size(20.dp))
-                  Spacer(modifier = Modifier.width(6.dp))
-                  Text(text = label, fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
+                  Icon(imageVector = icon, contentDescription = null, tint = VictimTextDark, modifier = Modifier.size(18.dp))
+                  Spacer(modifier = Modifier.width(5.dp))
+                  Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VictimTextDark, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
               }
             }
@@ -249,34 +324,16 @@ fun AiCrisisAssistantScreen(
           Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF2563EB))
         }
       }
-      // Protocol progress (preserved clinical engine, light card)
-      item {
-        Card(colors = CardDefaults.cardColors(containerColor = Color.White), border = androidx.compose.foundation.BorderStroke(1.dp, VictimBorder), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
-          Column(modifier = Modifier.padding(14.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-              Column {
-                Text(text = protocol?.conditionLabel ?: "Emergency Protocol", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
-                Text(text = "Level ${protocol?.severityLevel ?: 5} • ${protocol?.authority ?: "AHA / IRC Grounded"}", fontSize = 12.sp, color = VictimPrimary, fontWeight = FontWeight.SemiBold)
-              }
-              Row(modifier = Modifier.clip(RoundedCornerShape(100.dp)).background(VictimGreenCard).border(1.dp, VictimGreenBorder, RoundedCornerShape(100.dp)).padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = StatusSafeGreen, modifier = Modifier.size(13.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Sec 134A Protected", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = VictimTextDark)
-              }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              LinearProgressIndicator(progress = { progress }, modifier = Modifier.weight(1f).height(6.dp).clip(CircleShape), color = VictimPrimary, trackColor = VictimBorder)
-              Spacer(modifier = Modifier.width(8.dp))
-              Text(text = "${uiState.completedSteps.size}/$totalSteps Done", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = VictimTextMuted)
-            }
-          }
-        }
-      }
+      // Active Contraindication Alert Banner (if triggered)
       if (uiState.activeContraindication != null) {
         item {
           val alert = uiState.activeContraindication!!
-          Card(colors = CardDefaults.cardColors(containerColor = VictimPinkCard), border = androidx.compose.foundation.BorderStroke(1.dp, VictimPinkBorder), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
+          Card(
+            colors = CardDefaults.cardColors(containerColor = VictimPinkCard),
+            border = androidx.compose.foundation.BorderStroke(1.dp, VictimPinkBorder),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth()
+          ) {
             Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
               Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = VictimPrimary, modifier = Modifier.size(24.dp))
               Spacer(modifier = Modifier.width(10.dp))
@@ -292,12 +349,92 @@ fun AiCrisisAssistantScreen(
           }
         }
       }
+
+      // Emergency Protocols Carousel Header
       item {
-        Text(text = "EVIDENCE-BASED ACTION PROTOCOL", color = VictimTextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp, vertical = 4.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = "Emergency Protocols",
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Bold,
+            color = VictimTextDark
+          )
+          if (protocols.isNotEmpty()) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+              protocols.indices.forEach { index ->
+                val isSelected = pagerState.currentPage == index
+                val indicatorWidth by animateDpAsState(
+                  targetValue = if (isSelected) 18.dp else 6.dp,
+                  animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                  label = "indicatorWidth"
+                )
+                val indicatorColor by animateColorAsState(
+                  targetValue = if (isSelected) VictimPrimary else Color(0xFFCBD5E1),
+                  animationSpec = tween(durationMillis = 250),
+                  label = "indicatorColor"
+                )
+                Box(
+                  modifier = Modifier
+                    .height(6.dp)
+                    .width(indicatorWidth)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(indicatorColor)
+                    .clickable {
+                      coroutineScope.launch {
+                        pagerState.animateScrollToPage(
+                          page = index,
+                          animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                        )
+                      }
+                    }
+                )
+              }
+            }
+          }
+        }
       }
-      items(protocol?.steps ?: emptyList()) { step ->
-        val isCompleted = uiState.completedSteps.contains(step.stepNumber)
-        ProtocolStepCard(step = step, isCompleted = isCompleted, onToggle = { viewModel.toggleStep(step.stepNumber) })
+
+      // Swipeable Carousel of Unified Problem + Solution Cards (Uniform height to eliminate jerking)
+      if (protocols.isNotEmpty()) {
+        item {
+          HorizontalPager(
+            state = pagerState,
+            key = { pageIndex -> protocols.getOrNull(pageIndex)?.conditionId ?: pageIndex },
+            beyondViewportPageCount = 2,
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(590.dp),
+            pageSpacing = 12.dp,
+            flingBehavior = PagerDefaults.flingBehavior(
+              state = pagerState,
+              pagerSnapDistance = PagerSnapDistance.atMost(1),
+              snapAnimationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMediumLow
+              )
+            )
+          ) { pageIndex ->
+            val currentProto = protocols.getOrNull(pageIndex)
+            if (currentProto != null) {
+              val completed = uiState.completedStepsMap[currentProto.conditionId] ?: emptySet()
+              UnifiedEmergencyProtocolCard(
+                protocol = currentProto,
+                completedSteps = completed,
+                onToggleStep = { stepNum -> viewModel.toggleStep(currentProto.conditionId, stepNum) },
+                modifier = Modifier.fillMaxSize()
+              )
+            }
+          }
+        }
       }
       // Recent Conversations
       item {
@@ -391,27 +528,319 @@ fun AiCrisisAssistantScreen(
   }
 }
 
+private data class ProtocolCardTheme(
+  val icon: ImageVector,
+  val tintColor: Color,
+  val bgTint: Color,
+  val severityBadge: String
+)
+
 @Composable
-fun ProtocolStepCard(step: ProtocolStepDto, isCompleted: Boolean, onToggle: () -> Unit) {
+fun UnifiedEmergencyProtocolCard(
+  protocol: GroundedProtocolDto,
+  completedSteps: Set<Int>,
+  onToggleStep: (Int) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  val totalSteps = protocol.steps.size
+  val progress = remember(completedSteps.size, totalSteps) {
+    if (totalSteps > 0) completedSteps.size.toFloat() / totalSteps else 0f
+  }
+
+  val theme = remember(protocol.conditionId) {
+    when (protocol.conditionId) {
+      "leg_fracture" -> ProtocolCardTheme(Icons.Default.Add, Color(0xFF2563EB), VictimBlueCard, "Level 4 • Urgent Injury")
+      "severe_bleeding" -> ProtocolCardTheme(Icons.Default.Warning, Color(0xFFDC2626), VictimPinkCard, "Level 5 • Critical Hemorrhage")
+      "choking" -> ProtocolCardTheme(Icons.Default.Person, Color(0xFFD97706), VictimOrangeCard, "Level 5 • Airway Obstruction")
+      "burns" -> ProtocolCardTheme(Icons.Default.Star, Color(0xFF9333EA), VictimPurpleCard, "Level 3 • Thermal Injury")
+      else -> ProtocolCardTheme(Icons.Default.Favorite, VictimPrimary, VictimPinkCard, "Level 5 • Critical Life Threat")
+    }
+  }
+
   Card(
-    colors = CardDefaults.cardColors(containerColor = if (isCompleted) VictimGreenCard else Color.White),
-    border = androidx.compose.foundation.BorderStroke(1.dp, if (isCompleted) VictimGreenBorder else VictimBorder),
-    shape = RoundedCornerShape(12.dp),
-    modifier = Modifier.fillMaxWidth().clickable { onToggle() },
+    colors = CardDefaults.cardColors(containerColor = Color.White),
+    border = androidx.compose.foundation.BorderStroke(1.dp, VictimBorder),
+    shape = RoundedCornerShape(18.dp),
+    modifier = modifier.fillMaxWidth()
   ) {
-    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-      Box(modifier = Modifier.size(24.dp).background(if (isCompleted) Color(0xFF22C55E) else VictimPinkCard, CircleShape), contentAlignment = Alignment.Center) {
-        if (isCompleted) Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-        else Text(text = "${step.stepNumber}", color = VictimPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(14.dp)
+    ) {
+      // Header Row: Condition Icon + Title + Good Samaritan Badge
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          modifier = Modifier.weight(1f)
+        ) {
+          Box(
+            modifier = Modifier
+              .size(38.dp)
+              .clip(CircleShape)
+              .background(theme.bgTint),
+            contentAlignment = Alignment.Center
+          ) {
+            Icon(
+              imageVector = theme.icon,
+              contentDescription = null,
+              tint = theme.tintColor,
+              modifier = Modifier.size(20.dp)
+            )
+          }
+          Spacer(modifier = Modifier.width(10.dp))
+          Column {
+            Text(
+              text = protocol.conditionLabel,
+              fontSize = 16.sp,
+              fontWeight = FontWeight.Bold,
+              color = VictimTextDark,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Box(modifier = Modifier.size(6.dp).background(theme.tintColor, CircleShape))
+              Spacer(modifier = Modifier.width(5.dp))
+              Text(
+                text = theme.severityBadge,
+                fontSize = 12.sp,
+                color = theme.tintColor,
+                fontWeight = FontWeight.SemiBold
+              )
+            }
+          }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Surface(
+          color = VictimGreenCard,
+          shape = RoundedCornerShape(100.dp),
+          border = androidx.compose.foundation.BorderStroke(1.dp, VictimGreenBorder)
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Icon(
+              imageVector = Icons.Default.Shield,
+              contentDescription = null,
+              tint = StatusSafeGreen,
+              modifier = Modifier.size(13.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Sec 134A Protected",
+              fontSize = 10.5.sp,
+              fontWeight = FontWeight.Bold,
+              color = VictimTextDark,
+              maxLines = 1,
+              softWrap = false
+            )
+          }
+        }
+      }
+
+      // Clinical authority and guidelines source
+      val authorityText = protocol.authority
+      Spacer(modifier = Modifier.height(8.dp))
+      Surface(
+        color = Color(0xFFF8FAFC),
+        shape = RoundedCornerShape(8.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        Row(
+          modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            tint = VictimTextMuted,
+            modifier = Modifier.size(14.dp)
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = authorityText,
+            fontSize = 11.sp,
+            color = VictimTextMuted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+          )
+        }
+      }
+
+      Spacer(modifier = Modifier.height(10.dp))
+
+      // Progress bar and completed step counter
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        LinearProgressIndicator(
+          progress = { progress },
+          modifier = Modifier.weight(1f).height(6.dp).clip(CircleShape),
+          color = theme.tintColor,
+          trackColor = VictimBorder
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+          text = "${completedSteps.size}/$totalSteps Done",
+          fontSize = 11.5.sp,
+          fontWeight = FontWeight.Bold,
+          color = VictimTextMuted,
+          maxLines = 1,
+          softWrap = false
+        )
+      }
+
+      Spacer(modifier = Modifier.height(10.dp))
+
+      // Action Steps Header inside the same card
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = "ACTION PROTOCOL STEPS",
+          color = VictimTextMuted,
+          fontSize = 11.sp,
+          fontWeight = FontWeight.Bold,
+          letterSpacing = 0.5.sp
+        )
+        Text(
+          text = if (completedSteps.size == totalSteps && totalSteps > 0) "All Steps Completed" else "Tap step to mark done",
+          fontSize = 10.5.sp,
+          color = if (completedSteps.size == totalSteps && totalSteps > 0) StatusSafeGreen else VictimTextMuted,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      // Integrated Action Steps inside the same card (Each takes exactly 1/4 of remaining card height)
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        protocol.steps.forEach { step ->
+          val isDone = completedSteps.contains(step.stepNumber)
+          IntegratedStepRow(
+            step = step,
+            isCompleted = isDone,
+            tintColor = theme.tintColor,
+            onToggle = { onToggleStep(step.stepNumber) },
+            modifier = Modifier
+              .weight(1f)
+              .fillMaxWidth()
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+fun IntegratedStepRow(
+  step: ProtocolStepDto,
+  isCompleted: Boolean,
+  tintColor: Color,
+  onToggle: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Surface(
+    color = if (isCompleted) VictimGreenCard else Color(0xFFF8FAFC),
+    shape = RoundedCornerShape(12.dp),
+    border = androidx.compose.foundation.BorderStroke(
+      1.dp,
+      if (isCompleted) VictimGreenBorder else Color(0xFFE2E8F0)
+    ),
+    modifier = modifier
+      .fillMaxWidth()
+      .clickable { onToggle() }
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = 10.dp, vertical = 6.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Box(
+        modifier = Modifier
+          .size(24.dp)
+          .clip(CircleShape)
+          .background(if (isCompleted) Color(0xFF22C55E) else Color.White)
+          .border(
+            1.dp,
+            if (isCompleted) Color(0xFF22C55E) else Color(0xFFCBD5E1),
+            CircleShape
+          ),
+        contentAlignment = Alignment.Center
+      ) {
+        if (isCompleted) {
+          Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp)
+          )
+        } else {
+          Text(
+            text = "${step.stepNumber}",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = VictimTextDark
+          )
+        }
       }
       Spacer(modifier = Modifier.width(10.dp))
-      Column(modifier = Modifier.weight(1f)) {
-        Text(text = step.title, color = VictimTextDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = step.actionInstruction, color = VictimTextMuted, fontSize = 12.sp, lineHeight = 17.sp)
+      Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.Center
+      ) {
+        Text(
+          text = step.title,
+          fontSize = 12.5.sp,
+          fontWeight = FontWeight.Bold,
+          color = VictimTextDark,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = step.actionInstruction,
+          fontSize = 11.5.sp,
+          color = VictimTextMuted,
+          lineHeight = 15.sp,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis
+        )
         if (!step.warningNote.isNullOrBlank()) {
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(text = "⚠️ ${step.warningNote}", color = VictimPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+          Spacer(modifier = Modifier.height(3.dp))
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .clip(RoundedCornerShape(6.dp))
+              .background(VictimPinkCard.copy(alpha = 0.7f))
+              .padding(horizontal = 7.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(
+              text = "⚠️ ${step.warningNote}",
+              color = VictimPrimary,
+              fontSize = 10.5.sp,
+              fontWeight = FontWeight.SemiBold,
+              lineHeight = 13.sp,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis
+            )
+          }
         }
       }
     }

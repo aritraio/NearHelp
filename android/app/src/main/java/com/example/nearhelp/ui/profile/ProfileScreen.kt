@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -105,8 +106,12 @@ import com.example.nearhelp.ui.victim.VictimShapes
 @Composable
 fun ProfileScreen(
   onNavigateBack: () -> Unit,
+  onNavigateToHome: () -> Unit = onNavigateBack,
+  onNavigateToAssistant: () -> Unit = {},
+  onNavigateToMap: () -> Unit = {},
   viewModel: ProfileViewModel,
   modifier: Modifier = Modifier,
+  showBottomBar: Boolean = true,
 ) {
   val uiState by viewModel.uiState.collectAsState()
   val context = LocalContext.current
@@ -122,7 +127,7 @@ fun ProfileScreen(
   val displayName = user?.name?.ifBlank { "Aritra" } ?: "Aritra"
   val trustScore = (user?.trustScore ?: 84.0).toInt()
 
-  Column(modifier = modifier.fillMaxSize().background(VictimBackground)) {
+  Column(modifier = modifier.fillMaxSize().background(VictimBackground).statusBarsPadding()) {
     Column(
       modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 10.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -303,7 +308,19 @@ fun ProfileScreen(
       }
       Spacer(modifier = Modifier.height(8.dp))
     }
-    VictimBottomNavBar(selected = VictimNavTab.PROFILE, onSelect = { if (it != VictimNavTab.PROFILE) onNavigateBack() })
+    if (showBottomBar) {
+      VictimBottomNavBar(
+        selected = VictimNavTab.PROFILE,
+        onSelect = {
+          when (it) {
+            VictimNavTab.HOME -> onNavigateToHome()
+            VictimNavTab.CHAT -> onNavigateToAssistant()
+            VictimNavTab.MAP -> onNavigateToMap()
+            VictimNavTab.PROFILE -> Unit
+          }
+        }
+      )
+    }
   }
 
   if (uiState.showEditProfileDialog) {

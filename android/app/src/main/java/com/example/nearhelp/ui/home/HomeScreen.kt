@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -93,9 +95,15 @@ fun HomeScreen(
     onNavigateToAssistant: () -> Unit = {},
     viewModel: AuthViewModel,
     modifier: Modifier = Modifier,
+    showBottomBar: Boolean = true,
+    onOverlayStateChanged: (Boolean) -> Unit = {},
 ) {
     var state by remember { mutableStateOf(VictimHomeState.HOME) }
     val haptic = LocalHapticFeedback.current
+
+    LaunchedEffect(state) {
+        onOverlayStateChanged(state != VictimHomeState.HOME)
+    }
 
     Box(modifier = modifier.fillMaxSize().background(VictimBackground)) {
         when (state) {
@@ -105,6 +113,7 @@ fun HomeScreen(
                 onNavigateToMap = onNavigateToMap,
                 onNavigateToAssistant = onNavigateToAssistant,
                 onNavigateToTracking = onNavigateToTracking,
+                showBottomBar = showBottomBar,
             )
             VictimHomeState.SOS_SHEET -> SosDetailSheet(
                 onCancel = { state = VictimHomeState.HOME },
@@ -129,8 +138,9 @@ private fun VictimHomeContent(
     onNavigateToMap: () -> Unit,
     onNavigateToAssistant: () -> Unit,
     onNavigateToTracking: () -> Unit,
+    showBottomBar: Boolean = true,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -206,17 +216,19 @@ private fun VictimHomeContent(
             }
             Spacer(modifier = Modifier.height(4.dp))
         }
-        VictimBottomNavBar(
-            selected = VictimNavTab.HOME,
-            onSelect = {
-                when (it) {
-                    VictimNavTab.HOME -> Unit
-                    VictimNavTab.CHAT -> onNavigateToAssistant()
-                    VictimNavTab.MAP -> onNavigateToMap()
-                    VictimNavTab.PROFILE -> onNavigateToProfile()
-                }
-            },
-        )
+        if (showBottomBar) {
+            VictimBottomNavBar(
+                selected = VictimNavTab.HOME,
+                onSelect = {
+                    when (it) {
+                        VictimNavTab.HOME -> Unit
+                        VictimNavTab.CHAT -> onNavigateToAssistant()
+                        VictimNavTab.MAP -> onNavigateToMap()
+                        VictimNavTab.PROFILE -> onNavigateToProfile()
+                    }
+                },
+            )
+        }
     }
 }
 
@@ -254,7 +266,7 @@ private fun SosDetailSheet(onCancel: () -> Unit, onAutoSend: () -> Unit) {
         }
         onAutoSend()
     }
-    Column(modifier = Modifier.fillMaxSize().background(Color(0x800F172A))) {
+    Column(modifier = Modifier.fillMaxSize().background(Color(0x800F172A)).statusBarsPadding().navigationBarsPadding()) {
         Spacer(modifier = Modifier.weight(0.35f))
         Column(
             modifier = Modifier.weight(1f).fillMaxWidth()
@@ -398,7 +410,15 @@ private fun FindingRespondersContent(
     onNavigateToTracking: () -> Unit,
     onNavigateToAssistant: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(text = "←", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = VictimTextDark, modifier = Modifier.clickable { onCancel() }.padding(end = 10.dp))
             Column(modifier = Modifier.weight(1f)) {
