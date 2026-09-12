@@ -2,7 +2,7 @@
 
 > **Document Type**: Mobile Frontend Design System & Jetpack Compose Specification  
 > **Target Platform**: Android 14+ (Material 3 Expressive + Soft Neomorphic / Glassmorphic UI)  
-> **Reference Artifact**: [assets/7d95a6af3988cb71f16fc8dc4457af2e.webp](file:///Users/aritra/Code/Projects/NearHelp/assets/7d95a6af3988cb71f16fc8dc4457af2e.webp)  
+> **Reference Specification**: Material 3 Expressive & Soft Neomorphic Mobile Architecture  
 > **Author**: Lead Android UI/UX & Frontend Architect  
 > **Version**: 2.0.0 • Production Ready  
 
