@@ -1,9 +1,10 @@
 # NearHelp AI — Master TODO List
 
-> **Last Updated**: 2026-08-29  
+> **Last Updated**: 2026-09-13  
 > **Project Start**: 2026-08-10  
-> **Timeline**: 4 Months · 3 Phases · 24 Modules  
-> **Status**: 🟢 **Phase 1 MVP Production Backend, AI Microservice & Android Core Complete (162/162 Backend & AI Tests Passing)**
+> **Accelerated Timeline**: 3 Months (Aug 10 – Nov 10, 2026) · **Hard Deadline: November 10, 2026** (Pre-Exam Complete Freeze)  
+> **Status**: 🟢 **Phase 1 MVP Core Complete (162/162 Tests Passing) · Real Device Live Loop & Phase 2 Accelerated**
+
 
 ---
 
@@ -51,10 +52,11 @@
 
 ---
 
-## 📐 Phase 1 — MVP Core (Months 1–2)
+## 📐 Phase 1 — MVP Core & Multi-Device Live Loop (Weeks 1–8: Aug 10 – Sep 30, 2026)
 
-> **Goal**: End-to-end SOS lifecycle proven: trigger → classify → rank → alert → guide → coordinate → resolve.  
-> **Modules**: 1–11
+> **Goal**: End-to-end SOS lifecycle proven on physical hardware: trigger → classify → rank → alert (FCM) → guide → coordinate (WebSocket) → resolve.  
+> **Modules**: 1–11  
+> **Target Milestone Completion**: September 30, 2026 (Live 2-device physical verification)
 
 ---
 
@@ -279,10 +281,11 @@
 
 ---
 
-## 📐 Phase 2 — Enhancement (Month 3)
+## 📐 Phase 2 — System Enhancements (Weeks 9–11: Oct 01 – Oct 20, 2026)
 
-> **Goal**: Multilingual translation, voice SOS STT, event timeline, reputation, and community features.  
-> **Modules**: 12–17
+> **Goal**: Multilingual translation (Bengali ⇄ English), Voice SOS STT, emergency timeline streaming, reputation, and verified skills.  
+> **Modules**: 12–17  
+> **Target Milestone Completion**: October 20, 2026
 
 ---
 
@@ -346,10 +349,14 @@
 
 ---
 
-## 📐 Phase 3 — Final Integration, Admin & Defense (Month 4)
+## 📐 Phase 3 — Pre-Exam Code Freeze, Benchmarks & Final Defense (Weeks 12–14: Oct 21 – Nov 10, 2026)
 
-> **Goal**: Admin command center, analytics, load testing, and examiner defense.  
-> **Modules**: 18–24
+> **Goal**: Admin command center, digital twin load simulator benchmarks (5 charts), thesis documentation, demo video, and pre-exam defense freeze.  
+> **Modules**: 18–24  
+> **⚠️ PRE-EXAM CRITICAL TIMELINE**:  
+> - **October 31, 2026**: Complete Code Freeze across all repositories (Android, Backend, AI).  
+> - **November 01 – 10, 2026**: Final benchmark charts export, academic thesis report binding (Abhisikta), 3-min video walkthrough (Sayantan), and Viva dry run.  
+> - **November 10, 2026**: 100% Complete & Project Handed In. Team fully offboarded for semester exams!
 
 ---
 
@@ -441,13 +448,23 @@
 
 ## 📊 Progress Summary
 
-| Phase | Total Tasks | Completed | In Progress / Pending | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **Review 1 Deliverables** | 30 | 30 | 0 | 🟢 **100% Complete** |
-| **Infrastructure & Monorepo** | 15 | 10 | 5 | 🟢 Ready |
-| **Phase 1 (MVP Production Core)** | 95 | 95 | 0 | 🟢 **100% Complete** |
-| **Phase 2 (Enhancements)** | 55 | 10 | 45 | 🟡 Next Up |
-| **Phase 3 (Admin, Stretch & Defense)** | 35 | 8 | 27 | ⚪ Scheduled |
-| **Testing & QA** | 20 | 18 | 2 | 🟢 **162/162 Tests Passing** |
-| **Documentation & Review** | 15 | 8 | 7 | 🟢 Review 1 Ready |
-| **Total Ecosystem** | **~265** | **171** | **94** | 🟢 **Phase 1 Production Cleared** |
+| Phase | Total Tasks | Completed | In Progress / Pending | Status | Target Deadline |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Review 1 Deliverables** | 30 | 30 | 0 | 🟢 **100% Complete** | Done |
+| **Infrastructure & Monorepo** | 15 | 10 | 5 | 🟢 Ready | Active |
+| **Phase 1 (MVP Production Core)** | 95 | 95 | 0 | 🟢 **100% Complete** | Sep 30 (Live Loop) |
+| **Phase 2 (Enhancements)** | 55 | 10 | 45 | 🟡 Next Up | Oct 20 |
+| **Phase 3 (Admin, Stretch & Defense)** | 35 | 8 | 27 | ⚪ Scheduled | Oct 31 (Code Freeze) |
+| **Testing & QA** | 20 | 18 | 2 | 🟢 **162/162 Tests Passing** | Oct 31 |
+| **Documentation & Review** | 15 | 8 | 7 | 🟢 Review 1 Ready | Nov 10 (Final Docs) |
+| **Total Ecosystem** | **~265** | **171** | **94** | 🟢 **Phase 1 Production Cleared** | **Nov 10, 2026** |
+
+### 🗓️ Accelerated Pre-Exam Milestone Roadmap (Hard Deadline: Nov 10, 2026)
+
+| Sprint / Period | Core Focus | Critical Deliverables | Target Date |
+| :--- | :--- | :--- | :--- |
+| **Sprint 1 (Weeks 6–8)** | **Live Device Loop & Phase 1 Closeout** | Real FCM push across 2 phones, live WebSocket GPS/chat on physical hardware, SRS draft | **Sep 30, 2026** |
+| **Sprint 2 (Weeks 9–11)** | **Phase 2 Enhancements** | Voice SOS STT, Gemini Bengali translation, timeline stream, SDD document & UML | **Oct 20, 2026** |
+| **Sprint 3 (Weeks 12–13)** | **Admin & Benchmarking (Code Freeze)** | Digital twin simulator (100 SOS load test, 5 charts), Admin command telemetry, **Hard Code Freeze** | **Oct 31, 2026** |
+| **Sprint 4 (Week 14)** | **Thesis, Media & Viva Sign-off** | Final Project Report bound (Abhisikta), 3-min video walkthrough (Sayantan), Viva rehearsal | **Nov 10, 2026** |
+| **Post-Nov 10** | **Semester Exam Period** | **ZERO Project Involvements — 100% Dedicated to Exam Preparation** | **Nov 11 onwards** |

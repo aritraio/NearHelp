@@ -2,8 +2,8 @@
 
 > **Owner**: Dishari (Android App UI/UX Lead)  
 > **Platform**: Android (Kotlin + Jetpack Compose)  
-> **Design Philosophy**: High-Urgency, Stress-Resilient, One-Tap Accessibility, OLED Dark Mode  
-> **Status**: 🟢 **Phase 1 UI Screens & Design Tokens Complete**
+> **Accelerated Timeline**: Aug 10 – Nov 10, 2026 · **Hard Deadline: November 10, 2026** (Pre-Exam Complete Freeze)  
+> **Status**: 🟢 **Phase 1 UI Screens Complete (58% Overall) · Real Device Live Loop & Phase 2 Active**
 
 ---
 
@@ -30,7 +30,7 @@
 
 ## 📱 Detailed Task Allocations by Module
 
-### 🔴 Phase 1 — Review 1 & MVP Core UI (Months 1–2)
+### 🔴 Phase 1 — MVP Core UI & Live Multi-Device Loop (Weeks 1–8: Aug 10 – Sep 30, 2026)
 
 #### Module 1 — Auth & Onboarding UI
 - [x] 🔴 **Anonymous Emergency Bypass**: Skip login button allowing 1-tap immediate SOS trigger.
@@ -82,7 +82,7 @@
 
 ---
 
-### 🟡 Phase 2 — Feature Enhancements & Advanced UI (Month 3)
+### 🟡 Phase 2 — Feature Enhancements & Advanced UI (Weeks 9–11: Oct 01 – Oct 20, 2026)
 
 #### Module 13 — Voice SOS Audio UI
 - [ ] 🟡 **Voice SOS Wave Visualizer**: Implement real-time mic volume audio visualizer component.
@@ -106,7 +106,11 @@
 
 ---
 
-### ⚪ Phase 3 — Guardian Mode, Polish & Defense (Month 4)
+### ⚪ Phase 3 — Guardian Mode, Polish & Pre-Exam Freeze (Weeks 12–14: Oct 21 – Nov 10, 2026)
+
+> **⚠️ UI CODE FREEZE: October 31, 2026**  
+> All Jetpack Compose screens, layouts, and vector assets must be 100% frozen by Oct 31.  
+> Nov 1 – Nov 10 is reserved exclusively for the app walkthrough rehearsal with Aritra and final video capture.
 
 #### Module 21 — Guardian Safety Mode UI
 - [ ] ⚪ **Guardian Radar Screen**: Radar visualization of nearby safety score and safe perimeter indicators.
@@ -124,9 +128,9 @@
 
 ## 📊 Dishari's Progress Summary
 
-| Phase | Category | Total Tasks | Completed | Pending | Progress |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Auth, SOS, Map, Tracking & AI UI | 22 | 22 | 0 | 🟢 **100% Complete** |
-| **Phase 2** | Voice UI, Timeline, Skills & Settings | 10 | 0 | 10 | 🟡 Next Up |
-| **Phase 3** | Guardian Mode, SMS Fallback & Polish | 6 | 0 | 6 | ⚪ Scheduled |
-| **Total** | **All Deliverables** | **38** | **22** | **16** | 🟢 **58% Overall** |
+| Phase | Category | Total Tasks | Completed | Pending | Target Date | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | Auth, SOS, Map, Tracking & AI UI | 22 | 22 | 0 | **Sep 30, 2026** | 🟢 **100% Complete** |
+| **Phase 2** | Voice UI, Timeline, Skills & Settings | 10 | 0 | 10 | **Oct 20, 2026** | 🟡 Next Up |
+| **Phase 3** | Guardian Mode, Polish & Rehearsal | 6 | 0 | 6 | **Oct 31 (Freeze)** | ⚪ Scheduled |
+| **Total** | **All Deliverables** | **38** | **22** | **16** | **Nov 10, 2026** | 🟢 **58% Overall** |
