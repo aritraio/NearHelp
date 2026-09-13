@@ -61,15 +61,19 @@ class CommunityGeoMapViewModel : ViewModel() {
   }
 
   fun setZoom(zoom: Float) {
-    _uiState.update { it.copy(zoomLevel = zoom.coerceIn(0.7f, 2.5f)) }
+    _uiState.update { it.copy(zoomLevel = zoom.coerceIn(0.5f, 3.5f)) }
   }
 
   fun zoomIn() {
-    _uiState.update { it.copy(zoomLevel = (it.zoomLevel + 0.2f).coerceAtMost(2.5f)) }
+    _uiState.update { it.copy(zoomLevel = (it.zoomLevel + 0.2f).coerceAtMost(3.5f)) }
   }
 
   fun zoomOut() {
-    _uiState.update { it.copy(zoomLevel = (it.zoomLevel - 0.2f).coerceAtLeast(0.7f)) }
+    _uiState.update { it.copy(zoomLevel = (it.zoomLevel - 0.2f).coerceAtLeast(0.5f)) }
+  }
+
+  fun zoomBy(factor: Float) {
+    _uiState.update { it.copy(zoomLevel = (it.zoomLevel * factor).coerceIn(0.5f, 3.5f)) }
   }
 
   fun updatePan(dx: Float, dy: Float) {
