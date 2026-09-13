@@ -1,11 +1,12 @@
 # NearHelp AI — Master Task Allocation, Strategy & Team Operating System
 
 > **Project**: NearHelp AI (Emergency Response & AI Triage System)  
-> **Team Size**: 6 Members · **Duration**: 3 Months Accelerated (Aug 10 – Nov 10, 2026) · **Modules**: 24 Core Modules  
-> **Hard Deadline**: 🔴 **November 10, 2026** (Pre-Exam Complete Freeze — Zero Workload During Mid-Nov University Exams)  
+> **Team Size**: 6 Members · **Duration**: Accelerated Pre-November Sprint · **Modules**: 24 Core Modules  
+> **Hard Deadline**: 🔴 **November 07, 2026 (First Week of November)** (Complete Academic Defense & Project Handover)  
+> **Strategic Timeframe**: See [`docs/timeframe.md`](timeframe.md) for full calendar factoring in **CT2 Exam Week** (Sep 14–20) and **Durga Puja Vacation** (Oct 12–25) (~3 Weeks Academic/Festival Gap)  
 > **Last Updated**: 2026-09-13  
-> **Current Milestone**: 🟢 **Review 1 Complete (162+ Tests Passing) · Physical Multi-Device Live Loop Active**  
-> **Next Milestone**: 🟡 **Phase 2 Sprints (Voice SOS, Translation, Timeline) — Target Oct 20**
+> **Current Milestone**: 🟢 **Phase 1 Complete · 206/206 Tests Passing (90 Backend + 72 AI + 44 Android Unit Tests)**  
+> **Next Milestone**: 🟡 **CT2 Exam Week (Sep 14–20) → Sprint 1 Live Hardware Loop (Sep 21–27)**
 
 ---
 
@@ -141,12 +142,13 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 - [x] **Screen 6 — Dynamic Community Geo-Map**: Interactive map with pulsing victim beacon, responder pins, hospital beds, and AED locators.
 
 #### Phase 1: MVP Screens (Months 1–2)
-- [x] **Module 1 UI — Auth & Onboarding**: Splash screen, Login screen, Sign-up form, and Phone OTP layout in Jetpack Compose (`android/`).
-- [ ] **Module 2 UI — Profile & Medical ID**: User details layout, emergency contacts, blood group, and allergy list view.
-- [ ] **Module 6 UI — Main SOS Trigger Screen**: Big SOS trigger button, emergency category selector (Medical, Fire, Crime, Accident), text/voice input area.
-- [ ] **Module 7 UI — Live Map Screen**: Google Maps SDK view integration with markers for user, responders, and nearby hospitals.
-- [ ] **Responder Alert Screen**: Incoming SOS alert dialog, acceptance button, and ETA countdown card.
-- [ ] **In-App Chat Screen**: Messaging UI connected to WebSocket chat endpoint.
+- [x] **Module 1 UI — Auth & Onboarding**: Splash screen, Login screen, Sign-up form, and Phone OTP layout in Jetpack Compose (`android/app/src/main/java/com/example/nearhelp/ui/auth/`).
+- [x] **Module 2 UI — Profile & Medical ID**: User details layout, emergency contacts, blood group, allergies, responder qualifications dialog, and emergency history dialog in Jetpack Compose (`ProfileScreen.kt`).
+- [x] **Module 6 UI — Main SOS Trigger Screen**: Big SOS trigger button, emergency category selector (Medical, Fire, Crime, Accident), hold countdown, and photo intake (`SosTriggerScreen.kt`).
+- [x] **Module 7 UI — Live Map Screen**: Full-screen interactive map with pulsing victim beacon, responder pins, nearby hospital/AED cards, and pan/zoom gestures (`CommunityGeoMapScreen.kt`).
+- [x] **Responder Alert & Rescue Navigation Screen**: Emergency alert dialog, acceptance flow, turn-by-turn route directions, and encrypted Medical ID reveal (`RescueNavigationScreen.kt`).
+- [x] **In-App Chat & Assistant Drawer**: Bystander AI chat drawer with clinical contraindication guardrails and live tracking stream (`LiveTrackingScreen.kt`, `AiCrisisAssistantScreen.kt`).
+- [x] **Navigation & Shared Components**: Unified `NearHelpTopBar` header across all screens, and `AnimatedContent` tab transitions in `MainScreen.kt`.
 
 #### Phase 2: Feature UI Enhancement (Month 3)
 - [ ] **Module 13 UI — Voice SOS Recording**: Hold-to-record audio interface with wave visualizer and confirmation sheet.
@@ -275,62 +277,73 @@ To ensure total harmony, zero fights, and smooth progress across all 4 months, a
 
 ---
 
-## 📅 Accelerated Pre-Exam Milestone & Evaluation Roadmap (Deadline: Nov 10, 2026)
+## 📅 Accelerated Pre-Exam Milestone & Evaluation Roadmap (First Week of Nov: Nov 07, 2026)
+
+> Full strategic calendar and capacity analysis available in [`docs/timeframe.md`](timeframe.md).
 
 ```mermaid
 gantt
-    title NearHelp AI - Accelerated Pre-Exam Timeline (Deadline: Nov 10, 2026)
+    title NearHelp AI - Pre-Exam Strategic Roadmap (Deadline: Nov 07, 2026)
     dateFormat  YYYY-MM-DD
     axisFormat  %b %d
     
-    section Review 1 Sprint
+    section Review 1 Sprint (Done)
     Interactive Showcase & Defense Package :done, 2026-08-15, 14d
     
-    section Phase 1: MVP Core & Live Loop
-    Core AI & FastAPI Setup (Aritra)         :done, 2026-08-30, 15d
-    DB, Auth & WebSocket Infrastructure (Adil):done, 2026-08-30, 15d
-    Android Base UI & Core Screens (Dishari)  :done, 2026-08-25, 20d
-    Multi-Device FCM & Live Socket Loop      :active, 2026-09-13, 17d
-    SRS & UML Core Diagrams (Abhisikta)      :active, 2026-09-13, 17d
-    Knowledge Base Protocol Curation (Plaban):done, 2026-09-01, 15d
-    App Branding & Iconography (Sayantan)    :done, 2026-09-01, 15d
+    section Academic Constraints
+    CT2 Exam Week (Academic Focus)            :crit, 2026-09-14, 7d
+    Durga Puja & Festival Vacation (Zero Code):crit, 2026-10-12, 14d
     
-    section Phase 2: Enhancements
-    Voice SOS STT & Translation (Aritra)     :2026-10-01, 20d
-    Location Stream & Timeline Events (Adil)  :2026-10-01, 20d
-    AI Chat & Timeline UI (Dishari)          :2026-10-01, 20d
-    SDD & Test Specifications (Abhisikta)    :2026-10-01, 20d
-    Literature Review & Competitors (Plaban) :2026-10-01, 20d
-    Custom Map Pins & Slide Deck (Sayantan)  :2026-10-01, 20d
+    section Sprint 1: Live Hardware Loop (Sep 21-27)
+    FCM Push & WebSockets on Physical Devices :active, 2026-09-21, 7d
+    Final SRS Draft & UML Core Diagrams       :2026-09-21, 7d
     
-    section Phase 3: Freeze, Defense & Exam Prep
-    Load Sim & Hard Code Freeze (Aritra/Adil):crit, 2026-10-21, 11d
-    Android UI Polish & Animations (Dishari) :2026-10-21, 11d
-    Final Thesis Report Compilation (Abhisikta):2026-11-01, 10d
-    Demo Video & Poster Production (Sayantan):2026-11-01, 10d
-    Viva Rehearsal & Complete Project Freeze :crit, 2026-11-05, 5d
-    University Semester Exams (Zero Project) :milestone, 2026-11-11, 0d
+    section Sprint 2: Enhancements A (Sep 28 - Oct 04)
+    Gemini Bengali ⇄ English Translation      :2026-09-28, 7d
+    Emergency Timeline WebSocket Broadcasting :2026-09-28, 7d
+    SDD Component Architecture & DFDs         :2026-09-28, 7d
+    
+    section Sprint 3: Pre-Puja Push B (Oct 05-11)
+    Voice SOS STT Audio Triage Pipeline       :2026-10-05, 7d
+    Kolkata Regional Facilities Data JSON     :2026-10-05, 7d
+    Custom Map Pin Markers & Slide Template   :2026-10-05, 7d
+    Pre-Puja Clean Git Branch Push            :milestone, 2026-10-11, 0d
+    
+    section Sprint 4: Load Sim & Code Freeze (Oct 26-31)
+    Digital Twin Load Simulator (5 Charts)    :crit, 2026-10-26, 6d
+    Admin Command Center Telemetry Stream     :2026-10-26, 6d
+    Android UI Transitions & Micro-Animations :2026-10-26, 6d
+    ABSOLUTE CODE FREEZE (All Repositories)   :milestone, 2026-10-31, 0d
+    
+    section Sprint 5: Submission & Viva (Nov 01-07)
+    Final Project Report Printed & Bound      :crit, 2026-11-01, 7d
+    3-Minute App Demo Video & Poster Design   :2026-11-01, 7d
+    Team Viva Dry Run & Examiner Rehearsal    :crit, 2026-11-05, 2d
+    PROJECT 100% COMPLETE & SUBMITTED         :milestone, 2026-11-07, 0d
 ```
 
-### 🗓️ Accelerated Sprint Checkpoints Table
+### 🗓️ Strategic Sprint Checkpoints Table
 
-| Sprint / Period | Aritra | Adil | Dishari | Abhisikta | Plaban | Sayantan | Target Date |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Review 1 Sprint** (Done ✅) | Showcase State Engine, Triage Logic, 192 Tests | Spatial Model, Telemetry Feed, Handover Report | Showcase Screen Suite, Dark Theme Tokens | Review 1 Report, Slides, Script, Q&A Guide | Clinical Triage Matrix & Scenario Payloads | Iconography, Frame Layouts, Slide HUD | Aug 29 |
-| **Sprint 1 (Weeks 6–8)** | Multi-device API & WebSocket verification | Live GPS coordinate stream & FCM push setup | Navigation polish & real-device Retrofit binding | Final SRS Draft, Use Case & Class Diagrams | Protocol verification & Kolkata facility coordinates | Adaptive launcher icons & logo kit in `assets/` | **Sep 30** |
-| **Sprint 2 (Weeks 9–11)** | Voice SOS STT & Gemini Bengali translation | Emergency timeline stream, Redis caching & reputation | Voice SOS UI, timeline milestone feed, settings | Final SDD Draft, DFDs Level 0-2, Sequence Diagrams | 15 academic papers survey & competitor matrix | Custom map pin markers & presentation slides | **Oct 20** |
-| **Sprint 3 (Weeks 12–13)** | Digital Twin simulator (100 SOS load test, 5 charts) | Admin Command APIs & telemetry streaming | Visual theme polish & UI micro-animations freeze | Test case execution reports & test coverage tables | 5 Viva test scenarios & prompt test scripts | Visual infographics & system diagrams styling | **Oct 31 (Code Freeze)** |
-| **Sprint 4 (Week 14)** | System integration check & viva defense coaching | Backend cloud verification & endpoint security | Demo walkthrough test with Aritra | Final Project Report printed/bound & User Manual | Viva validation data check | 3-minute narrated demo video & exhibition poster | **Nov 10 (Final Sign-off)** |
-| **Post-Nov 10** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **Nov 11 onwards** |
+| Sprint / Period | Calendar Dates | Aritra | Adil | Dishari | Abhisikta | Plaban | Sayantan | Target Milestone |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Review 1 Sprint** (Done ✅) | Aug 10 – Aug 29 | Showcase State Engine, Triage Logic, 192 Tests | Spatial Model, Telemetry Feed, Handover Report | Showcase Screen Suite, Dark Theme Tokens | Review 1 Report, Slides, Script, Q&A Guide | Clinical Triage Matrix & Scenario Payloads | Iconography, Frame Layouts, Slide HUD | Aug 29 |
+| **Week 1 (CT2 Exams)** | Sep 14 – Sep 20 | Exam Prep / Stability check | Exam Prep / Server check | Exam Prep | Exam Prep | Exam Prep | Exam Prep | Exam Focus |
+| **Sprint 1 (Post-CT2)** | Sep 21 – Sep 27 | Multi-device API & live loop check | Physical 2-device FCM push & GPS socket stream | Real-device network integration & TopBar verification | Final SRS Draft, Use Case & Class Diagrams | Protocol verification & Kolkata facility GPS points | Launcher icons & vector brand kit in `assets/` | **Sep 27** |
+| **Sprint 2 (Enhancements A)** | Sep 28 – Oct 04 | Gemini Bengali ⇄ English translation pipeline | Emergency timeline stream & Redis caching | Live timeline UI & translation toggle | Final SDD Draft, DFDs Level 0-2, Sequence Diagrams | 15 academic papers survey & competitor matrix | Custom map pin markers & presentation slide deck | **Oct 04** |
+| **Sprint 3 (Pre-Puja Push B)** | Oct 05 – Oct 11 | Voice SOS STT extraction pipeline & JSON parser | Admin telemetry APIs & reputation trust score engine | Voice SOS UI, audio waveform & qualification dialogs | Test case execution reports (206+ tests logged) | Finalize Kolkata regional dataset JSON | Visual infographics & system diagrams styling | **Oct 11 (Pre-Puja Push)** |
+| **Weeks 5–6 (Durga Puja Break)** | Oct 12 – Oct 25 | **FESTIVAL REST** | **FESTIVAL REST** | **FESTIVAL REST** | **FESTIVAL REST** | **FESTIVAL REST** | **FESTIVAL REST** | **Festival Vacation** |
+| **Sprint 4 (Freeze Sprint)** | Oct 26 – Oct 31 | Digital Twin simulator (100 SOS load test, 5 charts) | Live telemetry stream to Admin Command API | Micro-animations polish & smooth scrolling | Integrate benchmark charts into Thesis Draft | Viva prompt test scenarios & live demo scripts | Infographic touch-up & slide sync polish | **Oct 31 (Hard Code Freeze)** |
+| **Sprint 5 (Submission Week)** | Nov 01 – Nov 07 | System integration sign-off & viva coaching | Backend production check & security audit | Demo walkthrough test with Aritra | Final Project Report printed/bound & User Manual | Viva validation data check | 3-minute narrated demo video & exhibition poster | **Nov 07 (Final Sign-off)** |
+| **Post-Nov 07** | Nov 08 onwards | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **100% EXAM FOCUS** | **Semester Exams** |
 
 ---
 
 ## 🎯 Pre-Exam Completion & Viva Guarantee
 
-By adhering to this accelerated 3-month master plan:
-1. **Aritra & Adil** lock all backend, AI microservice, and load simulator code before **October 31, 2026** (strict code freeze).
+By adhering to this strategic academic timeframe:
+1. **Aritra & Adil** lock all backend, AI microservice, and load simulator code on **October 31, 2026** (strict code freeze).
 2. **Dishari** delivers a fully polished, responsive Android app UI by **October 31, 2026**.
-3. **Abhisikta** compiles and binds the complete academic thesis (SRS, SDD, UML, Test Reports) by **November 10, 2026**.
-4. **Sayantan & Plaban** finalize all media assets, demo video, and research benchmarks by **November 10, 2026**.
+3. **Abhisikta** compiles, verifies, and prints the complete academic thesis (SRS, SDD, UML, Test Reports) by **November 07, 2026**.
+4. **Sayantan & Plaban** finalize all media assets, demo video, and research benchmarks by **November 07, 2026**.
 
-> **⚠️ Exam Protection Guarantee**: All project deliverables are 100% complete, submitted, and archived by **November 10, 2026**. No team member will have any outstanding project tasks during mid-November university exams.
+> **⚠️ Exam Protection Guarantee**: All project deliverables are 100% complete, submitted, and archived by **November 07, 2026 (First Week of November)**. No team member will have any outstanding project tasks during mid-November university exams.

@@ -2,8 +2,9 @@
 
 > **Last Updated**: 2026-09-13  
 > **Project Start**: 2026-08-10  
-> **Accelerated Timeline**: 3 Months (Aug 10 – Nov 10, 2026) · **Hard Deadline: November 10, 2026** (Pre-Exam Complete Freeze)  
-> **Status**: 🟢 **Phase 1 MVP Core Complete (162/162 Tests Passing) · Real Device Live Loop & Phase 2 Accelerated**
+> **Target Completion**: **First Week of November 2026 (Hard Deadline: November 07, 2026)**  
+> **Strategic Timeframe**: Refer to [`docs/timeframe.md`](timeframe.md) for the detailed calendar factoring in **CT2 Exam Week** (Sep 14–20) and **Durga Puja Vacation** (Oct 12–25) (~3 Weeks Academic/Festival Gap).  
+> **Status**: 🟢 **Phase 1 MVP Production Core Complete · 206/206 Automated Tests Passing (90 Backend + 72 AI + 44 Android Unit Tests)**
 
 
 ---
@@ -86,6 +87,8 @@
 - [x] 🟡 Build Sign-Up Screen (registration form with validation, blood group chips, terms agreement) ([`SignUpScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/SignUpScreen.kt))
 - [x] 🟡 Build Phone OTP Input Screen (6-digit code entry with countdown resend timer) ([`PhoneOtpScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/PhoneOtpScreen.kt))
 - [x] 🟢 Implement token storage in encrypted SharedPreferences ([`TokenStorage.kt`](../android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt))
+- [x] 🟡 Implement animated tab transitions (`AnimatedContent` slide/fade) between Victim Navigation tabs ([`MainScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/main/MainScreen.kt))
+- [x] 🟡 Extract and apply unified `NearHelpTopBar` header across all victim and emergency screens ([`NearHelpTopBar.kt`](../android/app/src/main/java/com/example/nearhelp/ui/components/NearHelpTopBar.kt))
 
 ---
 
@@ -106,8 +109,10 @@
 
 - [x] 🟡 Build Encrypted Medical ID reveal component ([`RescueNavigationScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/navigation/RescueNavigationScreen.kt))
 - [x] 🟡 Build Emergency Contacts quick call/SMS action triggers
-- [x] 🟡 Build Native Profile Screen in Jetpack Compose (`android/`)
+- [x] 🟡 Build Native Profile Screen in Jetpack Compose ([`ProfileScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/profile/ProfileScreen.kt))
 - [x] 🟡 Build Medical ID card view and edit sheets
+- [x] 🟡 Build Responder Qualifications & Certifications dialog (`ProfileScreen.kt`)
+- [x] 🟡 Build Emergency Activity History dialog with verified incident audit records (`ProfileScreen.kt`)
 
 ---
 
@@ -208,6 +213,7 @@
 - [x] 🟡 Display facility markers (hospitals with live bed & ICU count, verified AED locators)
 - [x] 🟡 Implement toggle layers for responders, hospitals, and AEDs
 - [x] 🟡 Render expanding PostGIS radial query dispatch circle animation
+- [x] 🟡 Implement full-screen touch gestures (pinch-zoom, drag-pan), bottom facility detail sheet cards, and direct directions trigger ([`CommunityGeoMapScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/map/CommunityGeoMapScreen.kt))
 
 #### Backend (Adil)
 
@@ -232,6 +238,7 @@
 
 - [x] 🟡 Implement live turn-by-turn navigation and ETA card ([`RescueNavigationScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/navigation/RescueNavigationScreen.kt))
 - [x] 🟡 Consume WebSocket stream in Android Jetpack Compose client ([`LiveTrackingScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/tracking/LiveTrackingScreen.kt))
+- [x] 🟡 Apply `VictimDesignSystem` UI styling with live ETA countdown, responder profile card, and bottom slide-to-cancel pill ([`LiveTrackingScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/tracking/LiveTrackingScreen.kt))
 
 ---
 
@@ -257,6 +264,8 @@
 - [x] 🔴 Set up LangGraph agent orchestration framework in `ai_service/` ([`gemini_agent.py`](../ai_service/app/agent/gemini_agent.py), [`state.py`](../ai_service/app/agent/state.py), [`knowledge.py`](../ai_service/app/agent/knowledge.py))
 - [x] 🔴 Integrate Gemini 2.5 LLM with citation enforcement ([`gemini_agent.py`](../ai_service/app/agent/gemini_agent.py), [`knowledge.py`](../ai_service/app/agent/knowledge.py))
 - [x] 🟡 Implement production WebSocket endpoint (`/ws/ai/chat`) ([`agent_ws.py`](../ai_service/app/api/agent_ws.py), [`ai_ws.py`](../backend/app/api/ai_ws.py))
+- [x] 🟡 Expand protocol repository to 8 clinical emergency protocols (Cardiac Arrest, Severe Bleeding, Choking, Burns, Seizure, Anaphylaxis, Asthma, Fracture)
+- [x] 🟡 Eliminate layout clipping via dynamic content height calculations and safe bottom navigation padding ([`AiCrisisAssistantScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantScreen.kt))
 
 ---
 
@@ -442,7 +451,15 @@
   - [x] Suite 5: Clinical Contraindication & Hallucination Guardrails (`test_guardrails.py`)
   - [x] Suite 6: LangGraph Crisis Assistant Agent & Citations (`test_agent.py`)
   - [x] Suite 7: AI Chat Real-Time WebSockets (`test_agent_ws.py`)
-- [ ] 🟢 Android unit tests (JUnit / Compose UI tests)
+- [x] 🟢 **Android Test Suite (JUnit + Compose ViewModels & Transitions)**: 44/44 unit tests passing ([`android/app/src/test/`](../android/app/src/test/))
+  - [x] Suite 1: AuthViewModel & Login/Signup States (`AuthViewModelTest.kt`)
+  - [x] Suite 2: AuthRepository & Token Storage (`AuthRepositoryTest.kt`)
+  - [x] Suite 3: RescueNavigationViewModel (`RescueNavigationViewModelTest.kt`)
+  - [x] Suite 4: CommunityGeoMapViewModel & Layer Toggles (`CommunityGeoMapViewModelTest.kt`)
+  - [x] Suite 5: ProfileViewModel & Medical ID State (`ProfileViewModelTest.kt`)
+  - [x] Suite 6: LiveTrackingViewModel & Real-time ETA (`LiveTrackingViewModelTest.kt`)
+  - [x] Suite 7: MainScreenViewModel & Bottom Navigation (`MainScreenViewModelTest.kt`)
+  - [x] Suite 8: NavigationTransitionTest (`NavigationTransitionTest.kt`)
 
 ---
 
@@ -451,20 +468,25 @@
 | Phase | Total Tasks | Completed | In Progress / Pending | Status | Target Deadline |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Review 1 Deliverables** | 30 | 30 | 0 | 🟢 **100% Complete** | Done |
-| **Infrastructure & Monorepo** | 15 | 10 | 5 | 🟢 Ready | Active |
-| **Phase 1 (MVP Production Core)** | 95 | 95 | 0 | 🟢 **100% Complete** | Sep 30 (Live Loop) |
-| **Phase 2 (Enhancements)** | 55 | 10 | 45 | 🟡 Next Up | Oct 20 |
-| **Phase 3 (Admin, Stretch & Defense)** | 35 | 8 | 27 | ⚪ Scheduled | Oct 31 (Code Freeze) |
-| **Testing & QA** | 20 | 18 | 2 | 🟢 **162/162 Tests Passing** | Oct 31 |
-| **Documentation & Review** | 15 | 8 | 7 | 🟢 Review 1 Ready | Nov 10 (Final Docs) |
-| **Total Ecosystem** | **~265** | **171** | **94** | 🟢 **Phase 1 Production Cleared** | **Nov 10, 2026** |
+| **Infrastructure & Monorepo** | 15 | 11 | 4 | 🟢 Ready | Active |
+| **Phase 1 (MVP Production Core)** | 95 | 95 | 0 | 🟢 **100% Complete** | Sep 27 (Post-CT2 Live Loop) |
+| **Phase 2 (Enhancements)** | 55 | 12 | 43 | 🟡 Active Sprints | Oct 11 (Pre-Puja Lock) |
+| **Phase 3 (Admin, Stretch & Defense)** | 35 | 8 | 27 | ⚪ Scheduled | Oct 31 (Hard Code Freeze) |
+| **Testing & QA** | 20 | 20 | 0 | 🟢 **206/206 Tests Passing** | All Suites Green |
+| **Documentation & Review** | 15 | 8 | 7 | 🟢 Review 1 Ready | Nov 07 (Final Sign-Off) |
+| **Total Ecosystem** | **~265** | **184** | **81** | 🟢 **Phase 1 Core Cleared (69.4%)** | **Nov 07, 2026** |
 
-### 🗓️ Accelerated Pre-Exam Milestone Roadmap (Hard Deadline: Nov 10, 2026)
+### 🗓️ Strategic Academic Timeframe & Milestone Roadmap (First Week of Nov Deadline)
 
-| Sprint / Period | Core Focus | Critical Deliverables | Target Date |
-| :--- | :--- | :--- | :--- |
-| **Sprint 1 (Weeks 6–8)** | **Live Device Loop & Phase 1 Closeout** | Real FCM push across 2 phones, live WebSocket GPS/chat on physical hardware, SRS draft | **Sep 30, 2026** |
-| **Sprint 2 (Weeks 9–11)** | **Phase 2 Enhancements** | Voice SOS STT, Gemini Bengali translation, timeline stream, SDD document & UML | **Oct 20, 2026** |
-| **Sprint 3 (Weeks 12–13)** | **Admin & Benchmarking (Code Freeze)** | Digital twin simulator (100 SOS load test, 5 charts), Admin command telemetry, **Hard Code Freeze** | **Oct 31, 2026** |
-| **Sprint 4 (Week 14)** | **Thesis, Media & Viva Sign-off** | Final Project Report bound (Abhisikta), 3-min video walkthrough (Sayantan), Viva rehearsal | **Nov 10, 2026** |
-| **Post-Nov 10** | **Semester Exam Period** | **ZERO Project Involvements — 100% Dedicated to Exam Preparation** | **Nov 11 onwards** |
+> Detailed breakdown with capacity analysis available in [`docs/timeframe.md`](timeframe.md).
+
+| Sprint / Period | Calendar Dates | Core Focus & Academic Context | Critical Deliverables | Target Milestone |
+| :--- | :--- | :--- | :--- | :--- |
+| **Week 1** | **Sep 14 – Sep 20, 2026** | 🟡 **Academic Gap: CT2 Exams** | **Class Test 2 (CT2) Exams**. Focus on exam prep. Minimal project activity (~15% load). Async checks & stability monitoring. | Exam Focus |
+| **Sprint 1 (Week 2)** | **Sep 21 – Sep 27, 2026** | 🟢 **Post-CT2 Hardware Loop** | Physical FCM push on 2 devices, live WebSocket GPS & chat on hardware, formal SRS Draft & UML diagrams (Abhisikta). | **Sep 27, 2026** |
+| **Sprint 2 (Week 3)** | **Sep 28 – Oct 04, 2026** | 🟢 **Phase 2 Enhancements A** | Gemini Bengali ⇄ English translation, emergency timeline WebSocket event stream, SDD document & DFDs Level 0-2. | **Oct 04, 2026** |
+| **Sprint 3 (Week 4)** | **Oct 05 – Oct 11, 2026** | 🟢 **Phase 2 Enhancements B (Pre-Puja Push)** | Voice SOS STT audio pipeline, Kolkata regional datasets JSON (hospitals, AEDs, blood banks), **Clean Git Branch Push before Puja**. | **Oct 11, 2026** |
+| **Weeks 5–6** | **Oct 12 – Oct 25, 2026** | 🔴 **Festival Gap: Durga Puja** | **Durga Puja & Festival Vacation (~2 Weeks)**. Sasthi to Dashami (Oct 16–21) + Lakshmi Puja (Oct 25). Zero scheduled meetings. Family time & cultural celebration. | Festival Break |
+| **Sprint 4 (Week 7)** | **Oct 26 – Nov 01, 2026** | 🟣 **Load Sim & Hard Code Freeze** | Digital Twin load simulator (100 SOS load test, 5 charts), Admin command telemetry stream. **OCTOBER 31: ABSOLUTE HARD CODE FREEZE**. | **Oct 31, 2026 (Code Freeze)** |
+| **Sprint 5 (Week 8)** | **Nov 02 – Nov 07, 2026** | 🏁 **Thesis, Media & Viva Sign-off (First Week Nov)** | Final Project Report bound (Abhisikta), 3-min video walkthrough (Sayantan), Project Poster, Team Viva Dry Run. | **Nov 07, 2026 (100% Complete)** |
+| **Post-Nov 07** | **Nov 08 onwards** | 🎓 **Semester Exam Period** | **ZERO Project Involvements — 100% Dedicated to Semester Exam Preparation** | Semester Exams |
