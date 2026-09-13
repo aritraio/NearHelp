@@ -167,6 +167,57 @@ fun NearHelpBrandHeader(
     }
 }
 
+/**
+ * Unified NearHelp top bar reproducing the polished Home Screen header lockup across all screens:
+ * - Left: "NearHelp" dual-tone wordmark (custom typography) + "Connect. Respond. Save time." subtitle
+ * - Right: Circular avatar button ("A") or optional custom trailing content
+ */
+@Composable
+fun NearHelpTopBar(
+    modifier: Modifier = Modifier,
+    tagline: String = "Connect. Respond. Save time.",
+    avatarInitial: String = "A",
+    onAvatarClick: (() -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            NearHelpWordmark(fontSize = 30)
+            Text(
+                text = tagline,
+                fontSize = 12.5.sp,
+                color = VictimTextMuted,
+            )
+        }
+        if (trailingContent != null) {
+            trailingContent()
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE8EDF3))
+                    .then(
+                        if (onAvatarClick != null) Modifier.clickable { onAvatarClick() }
+                        else Modifier
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = avatarInitial,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = VictimTextDark,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun VictimPrimaryButton(
     text: String,

@@ -93,6 +93,7 @@ import com.example.nearhelp.theme.VictimBorder
 import com.example.nearhelp.theme.VictimPrimary
 import com.example.nearhelp.theme.VictimTextDark
 import com.example.nearhelp.theme.VictimTextMuted
+import com.example.nearhelp.ui.victim.NearHelpTopBar
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
 import com.example.nearhelp.ui.victim.VictimShapes
@@ -338,47 +339,10 @@ fun CommunityGeoMapScreen(
           .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        // Brand Row
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          Box(
-            modifier = Modifier
-              .size(36.dp)
-              .clip(CircleShape)
-              .background(VictimPrimary),
-            contentAlignment = Alignment.Center
-          ) {
-            Icon(
-              imageVector = Icons.Default.Add,
-              contentDescription = null,
-              tint = Color.White,
-              modifier = Modifier.size(20.dp)
-            )
-          }
-          Spacer(modifier = Modifier.width(8.dp))
-          Row(modifier = Modifier.weight(1f)) {
-            Text(text = "Near", fontWeight = FontWeight.Black, fontSize = 21.sp, color = VictimTextDark)
-            Text(text = "Help", fontWeight = FontWeight.Black, fontSize = 21.sp, color = VictimPrimary)
-          }
-          Box(
-            modifier = Modifier
-              .size(38.dp)
-              .clip(CircleShape)
-              .background(Color.White)
-              .border(1.dp, VictimBorder, CircleShape)
-              .clickable { onNavigateToProfile() },
-            contentAlignment = Alignment.Center
-          ) {
-            Icon(
-              imageVector = Icons.Default.Person,
-              contentDescription = "Profile",
-              tint = VictimTextDark,
-              modifier = Modifier.size(20.dp)
-            )
-          }
-        }
+        // Unified Brand Header
+        NearHelpTopBar(
+          onAvatarClick = onNavigateToProfile,
+        )
 
         // Floating Search Bar with Elevation Shadow
         Box(

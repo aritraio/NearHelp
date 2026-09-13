@@ -89,6 +89,7 @@ import com.example.nearhelp.theme.VictimPrimary
 import com.example.nearhelp.theme.VictimPurpleCard
 import com.example.nearhelp.theme.VictimTextDark
 import com.example.nearhelp.theme.VictimTextMuted
+import com.example.nearhelp.ui.victim.NearHelpTopBar
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
 import com.example.nearhelp.ui.victim.VictimShapes
@@ -154,65 +155,33 @@ fun ProfileScreen(
         .padding(vertical = 8.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      // 1. Header: Brand Logo & Title + Settings (No back button per user requirement)
-      Row(
+      // 1. Header: Unified NearHelp Brand Header + Settings action
+      NearHelpTopBar(
         modifier = Modifier
           .fillMaxWidth()
           .padding(horizontal = 16.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Box(
-          modifier = Modifier
-            .size(38.dp)
-            .clip(CircleShape)
-            .background(VictimPrimary),
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector = Icons.Default.People,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp),
-          )
-        }
-        Spacer(modifier = Modifier.width(10.dp))
-        Row(
-          modifier = Modifier.weight(1f),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-            text = "Near",
-            fontWeight = FontWeight.Black,
-            fontSize = 22.sp,
-            color = VictimTextDark,
-          )
-          Text(
-            text = "Help",
-            fontWeight = FontWeight.Black,
-            fontSize = 22.sp,
-            color = VictimPrimary,
-          )
-        }
-        if (uiState.isLoading) {
-          CircularProgressIndicator(
-            modifier = Modifier.size(22.dp),
-            color = VictimPrimary,
-            strokeWidth = 2.dp,
-          )
-        } else {
-          IconButton(
-            onClick = { viewModel.loadProfile() },
-            modifier = Modifier.size(40.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Settings,
-              contentDescription = "Settings",
-              tint = VictimTextDark,
-              modifier = Modifier.size(24.dp),
+        trailingContent = {
+          if (uiState.isLoading) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(22.dp),
+              color = VictimPrimary,
+              strokeWidth = 2.dp,
             )
+          } else {
+            IconButton(
+              onClick = { viewModel.loadProfile() },
+              modifier = Modifier.size(40.dp),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings",
+                tint = VictimTextDark,
+                modifier = Modifier.size(24.dp),
+              )
+            }
           }
         }
-      }
+      )
 
       // 2. User Identity Row: Avatar with Edit Badge, Name, Verified Badge, Location & Trust Score
       Row(

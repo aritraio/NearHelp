@@ -122,6 +122,7 @@ import com.example.nearhelp.theme.VictimPurpleBorder
 import com.example.nearhelp.theme.VictimPurpleCard
 import com.example.nearhelp.theme.VictimTextDark
 import com.example.nearhelp.theme.VictimTextMuted
+import com.example.nearhelp.ui.victim.NearHelpTopBar
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
 import com.example.nearhelp.ui.victim.VictimShapes
@@ -264,28 +265,14 @@ fun AiCrisisAssistantScreen(
 
   Scaffold(
     topBar = {
-      Row(
+      NearHelpTopBar(
+        onAvatarClick = onNavigateToProfile,
         modifier = Modifier
           .fillMaxWidth()
           .background(VictimBackground)
           .statusBarsPadding()
           .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(VictimPrimary), contentAlignment = Alignment.Center) {
-          Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
-          Row {
-            Text(text = "Near", fontWeight = FontWeight.Black, fontSize = 20.sp, color = VictimTextDark)
-            Text(text = "Help", fontWeight = FontWeight.Black, fontSize = 20.sp, color = VictimPrimary)
-          }
-        }
-        Box(modifier = Modifier.size(38.dp).clip(CircleShape).background(VictimPinkCard).clickable { onNavigateToProfile() }, contentAlignment = Alignment.Center) {
-          Icon(imageVector = Icons.Default.Person, contentDescription = "Profile", tint = VictimTextDark, modifier = Modifier.size(20.dp))
-        }
-      }
+      )
     },
     bottomBar = {
       androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxWidth()) {

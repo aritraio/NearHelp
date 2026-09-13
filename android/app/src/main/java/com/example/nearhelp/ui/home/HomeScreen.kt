@@ -110,6 +110,7 @@ import com.example.nearhelp.theme.VictimTextMuted
 import com.example.nearhelp.ui.auth.AuthViewModel
 import com.example.nearhelp.ui.victim.LiveMapFeedCard
 import com.example.nearhelp.ui.victim.MapPlaceholder
+import com.example.nearhelp.ui.victim.NearHelpTopBar
 import com.example.nearhelp.ui.victim.NearHelpWordmark
 import com.example.nearhelp.ui.victim.PastelInfoCard
 import com.example.nearhelp.ui.victim.SectionHeader
@@ -360,17 +361,10 @@ private fun VictimHomeContent(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Header: NearHelp + avatar
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Column {
-                    NearHelpWordmark(fontSize = 30)
-                    Text(text = "Connect. Respond. Save time.", fontSize = 12.5.sp, color = VictimTextMuted)
-                }
-                Box(
-                    modifier = Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFE8EDF3)).clickable { onNavigateToProfile() },
-                    contentAlignment = Alignment.Center,
-                ) { Text(text = "A", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = VictimTextDark) }
-            }
+            // Header: Unified NearHelp Top Bar with brand wordmark and avatar
+            NearHelpTopBar(
+                onAvatarClick = onNavigateToProfile,
+            )
 
             // Location Card with Live GPS & Edit option
             VictimLocationCard(
