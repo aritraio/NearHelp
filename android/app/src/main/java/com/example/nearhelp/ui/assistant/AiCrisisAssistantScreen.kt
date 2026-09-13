@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -428,7 +429,7 @@ fun AiCrisisAssistantScreen(
         state = listState,
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(top = 6.dp, bottom = 52.dp),
+        contentPadding = PaddingValues(top = 6.dp, bottom = 72.dp),
       ) {
       // Medical Assistant unified card
       item {
@@ -577,9 +578,11 @@ fun AiCrisisAssistantScreen(
               Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = VictimPrimary, modifier = Modifier.size(24.dp))
               Spacer(modifier = Modifier.width(10.dp))
               Column(modifier = Modifier.weight(1f)) {
-                Text(text = alert.warningTitle, color = VictimPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                Text(text = alert.warningMessage, color = VictimTextDark, fontSize = 12.sp)
-                Text(text = alert.actionDirective, color = VictimTextDark, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = alert.warningTitle, color = VictimPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 17.sp)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(text = alert.warningMessage, color = VictimTextDark, fontSize = 12.sp, lineHeight = 16.sp)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(text = alert.actionDirective, color = VictimTextDark, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, lineHeight = 16.sp)
               }
               IconButton(onClick = { viewModel.dismissContraindication() }, modifier = Modifier.size(20.dp)) {
                 Icon(imageVector = Icons.Default.Close, contentDescription = null, tint = VictimTextMuted)
@@ -668,7 +671,7 @@ fun AiCrisisAssistantScreen(
             beyondViewportPageCount = 2,
             modifier = Modifier
               .fillMaxWidth()
-              .height(590.dp),
+              .wrapContentHeight(),
             pageSpacing = 12.dp,
             flingBehavior = PagerDefaults.flingBehavior(
               state = pagerState,
@@ -686,12 +689,13 @@ fun AiCrisisAssistantScreen(
                 protocol = currentProto,
                 completedSteps = completed,
                 onToggleStep = { stepNum -> viewModel.toggleStep(currentProto.conditionId, stepNum) },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
               )
             }
           }
         }
       }
+
       // Recent Conversations
       item {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -1223,7 +1227,7 @@ fun UnifiedEmergencyProtocolCard(
   ) {
     Column(
       modifier = Modifier
-        .fillMaxSize()
+        .fillMaxWidth()
         .padding(14.dp)
     ) {
       // Header Row: Condition Icon + Title + Good Samaritan Badge
@@ -1380,10 +1384,9 @@ fun UnifiedEmergencyProtocolCard(
 
       Spacer(modifier = Modifier.height(8.dp))
 
-      // Integrated Action Steps inside the same card (Each takes exactly 1/4 of remaining card height)
+      // Integrated Action Steps inside the same card (dynamically sized so red warning notes never clip)
       Column(
         modifier = Modifier
-          .weight(1f)
           .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
       ) {
@@ -1394,9 +1397,7 @@ fun UnifiedEmergencyProtocolCard(
             isCompleted = isDone,
             tintColor = theme.tintColor,
             onToggle = { onToggleStep(step.stepNumber) },
-            modifier = Modifier
-              .weight(1f)
-              .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
           )
         }
       }
@@ -1425,12 +1426,13 @@ fun IntegratedStepRow(
   ) {
     Row(
       modifier = Modifier
-        .fillMaxSize()
-        .padding(horizontal = 10.dp, vertical = 6.dp),
-      verticalAlignment = Alignment.CenterVertically
+        .fillMaxWidth()
+        .padding(horizontal = 10.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.Top
     ) {
       Box(
         modifier = Modifier
+          .padding(top = 1.dp)
           .size(24.dp)
           .clip(CircleShape)
           .background(if (isCompleted) Color(0xFF22C55E) else Color.White)
@@ -1460,15 +1462,13 @@ fun IntegratedStepRow(
       Spacer(modifier = Modifier.width(10.dp))
       Column(
         modifier = Modifier.weight(1f),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
       ) {
         Text(
           text = step.title,
           fontSize = 12.5.sp,
           fontWeight = FontWeight.Bold,
           color = VictimTextDark,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
@@ -1476,27 +1476,22 @@ fun IntegratedStepRow(
           fontSize = 11.5.sp,
           color = VictimTextMuted,
           lineHeight = 15.sp,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis
         )
         if (!step.warningNote.isNullOrBlank()) {
-          Spacer(modifier = Modifier.height(3.dp))
-          Row(
+          Spacer(modifier = Modifier.height(4.dp))
+          Box(
             modifier = Modifier
               .fillMaxWidth()
               .clip(RoundedCornerShape(6.dp))
-              .background(VictimPinkCard.copy(alpha = 0.7f))
-              .padding(horizontal = 7.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
+              .background(VictimPinkCard)
+              .padding(horizontal = 8.dp, vertical = 3.5.dp)
           ) {
             Text(
               text = "⚠️ ${step.warningNote}",
               color = VictimPrimary,
               fontSize = 10.5.sp,
               fontWeight = FontWeight.SemiBold,
-              lineHeight = 13.sp,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis
+              lineHeight = 14.sp,
             )
           }
         }
