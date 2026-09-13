@@ -26,7 +26,7 @@
 Ensure you have the following installed on your machine:
 * **Docker & Docker Compose** (v24.0+)
 * **Python** (v3.11 or v3.12)
-* **Node.js** (v20+ LTS) & **npm**
+* **JDK 17** (for Android Gradle builds)
 * **Android Studio** (Ladybug / Koala or newer with Android SDK 34)
 * **Git**
 
@@ -117,10 +117,10 @@ curl http://localhost:8001/docs
 
 ### 🟣 Documentation & QA (Abhisikta)
 **Owner**: Abhisikta  
-**Path**: `docs/` & `archive/review-1/`
+**Path**: `docs/`
 
-* Review reports and academic deliverables live in `archive/review-1/`.
-* Follow Markdown standards for SRS, SDD, and UML diagrams.
+* Project specifications, architecture blueprints, and design systems live in `docs/`.
+* Follow Markdown standards for SRS, SDD, and architectural documentation.
 
 ---
 
@@ -128,17 +128,17 @@ curl http://localhost:8001/docs
 **Owner**: Plaban  
 **Path**: `data/`
 
-* Place medical protocols in `data/protocols/<category>/` (PDF/Markdown).
-* Place regional geospatial data in `data/regional/<category>.json`.
+* Place medical and emergency protocols in `data/protocols/` (JSON / Markdown).
+* Place regional geospatial facility datasets in `data/regional/` (JSON).
 
 ---
 
 ### 🔵 Design & Assets (Sayantan)
 **Owner**: Sayantan  
-**Path**: `assets/`
+**Path**: `android/app/src/main/res/` & `docs/design.md`
 
-* Export SVG vector icons into `assets/icons/`.
-* Save branding assets and presentation decks into `assets/branding/`.
+* App icons, vector drawables, and branding assets live in `android/app/src/main/res/drawable/` and `mipmap-*/`.
+* UI specifications and design tokens are documented in `docs/design.md`.
 
 ---
 

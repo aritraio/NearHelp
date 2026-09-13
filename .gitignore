@@ -43,7 +43,8 @@ android/.idea/
 *.code-workspace
 
 # Obsidian
-.obsidian/workspace.json
+.obsidian/
+**/.obsidian/
 
 # ------------------------------------------------------------------------------
 # 3. Python & Virtual Environments
@@ -115,6 +116,7 @@ chroma_db/
 # ------------------------------------------------------------------------------
 backend/uploads/
 uploads/
+app-issues/
 *.log
 
 # ------------------------------------------------------------------------------

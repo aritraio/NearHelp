@@ -12,6 +12,7 @@ All primary project design, governance, and planning specifications have been or
 | Document | Description | Link |
 | :--- | :--- | :--- |
 | **System Architecture** | Technical blueprint: microservices, data flow, algorithms, DB schemas, security | [docs/architecture.md](docs/architecture.md) |
+| **Design System Specification** | Material 3 Expressive, Neomorphic tokens, screen wireframes, animations | [docs/design.md](docs/design.md) |
 | **Master TODO List** | Comprehensive task tracking (~238 tasks) across 3 MoSCoW phases | [docs/todos.md](docs/todos.md) |
 | **Project Proposal** | Complete academic proposal, problem statement, research questions, deliverables | [docs/proposal.md](docs/proposal.md) |
 | **Team Task Allocation** | Governance, 6-member team roles, zero-conflict rules, contingency matrix | [docs/Task.md](docs/Task.md) |
@@ -37,6 +38,7 @@ During the first few minutes of an emergency (cardiac arrest, fire, accident), p
 NearHelp/
 ├── docs/                           # Architecture, Specs, Guidelines, TODOs
 │   ├── architecture.md             # System Architecture & Technical Specifications
+│   ├── design.md                   # Comprehensive UI/UX Design System Specification
 │   ├── todos.md                    # Master TODO List (~238 tasks)
 │   ├── proposal.md                 # Master Project Proposal
 │   ├── Task.md                     # Team Task Allocations & Governance
@@ -45,12 +47,11 @@ NearHelp/
 ├── android/                        # Android Client (Kotlin + Jetpack Compose)
 ├── backend/                        # Backend API Service (FastAPI + PostgreSQL/PostGIS)
 ├── ai_service/                     # AI Microservice (Gemini 2.5 + RAG + LangGraph)
-├── simulator/                      # Digital Twin Simulator (Locust + Load Testing)
 ├── data/                           # Emergency Protocols & Kolkata Regional JSON Data
-│   ├── protocols/                  # WHO, Red Cross, NDMA PDFs
+│   ├── protocols/                  # WHO, Red Cross, NDMA Guidelines (JSON/MD)
 │   └── regional/                   # Hospitals, Police, Fire Station JSONs
 │
-└── assets/                         # Branding, Icons, Map Pins, Media
+└── docker-compose.yml              # Local Multi-Container Development Infrastructure
 ```
 
 ---
