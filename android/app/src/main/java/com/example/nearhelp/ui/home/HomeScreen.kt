@@ -46,10 +46,20 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -179,37 +189,96 @@ fun HomeScreen(
     }
 
     Box(modifier = modifier.fillMaxSize().background(VictimBackground)) {
-        when (state) {
-            VictimHomeState.HOME -> VictimHomeContent(
-                locationState = locationState,
-                customLocation = customLocation,
-                onLocationChange = { customLocation = it },
-                onResetGps = {
-                    customLocation = null
-                    locationHelper.startLocationUpdates()
-                },
-                onSosTap = { state = VictimHomeState.SOS_SHEET },
-                onNavigateToProfile = onNavigateToProfile,
-                onNavigateToResponderProfile = onNavigateToResponderProfile,
-                onNavigateToHistory = onNavigateToHistory,
-                onNavigateToMap = onNavigateToMap,
-                onNavigateToAssistant = onNavigateToAssistant,
-                onNavigateToTracking = onNavigateToTracking,
-                showBottomBar = showBottomBar,
-            )
-            VictimHomeState.SOS_SHEET -> SosDetailSheet(
-                locationTitle = customLocation ?: locationState.localityName,
-                onCancel = { state = VictimHomeState.HOME },
-                onAutoSend = { state = VictimHomeState.FINDING },
-            )
-            VictimHomeState.FINDING -> FindingRespondersContent(
-                onCancel = { state = VictimHomeState.HOME },
-                onNavigateToTracking = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onNavigateToTracking()
-                },
-                onNavigateToAssistant = onNavigateToAssistant,
-            )
+        AnimatedContent(
+            targetState = state,
+            transitionSpec = {
+                when {
+                    initialState == VictimHomeState.HOME && targetState == VictimHomeState.SOS_SHEET -> {
+                        (slideInVertically(
+                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
+                            initialOffsetY = { it / 3 }
+                        ) + scaleIn(
+                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
+                            initialScale = 0.94f
+                        ) + fadeIn(
+                            animationSpec = tween(220, easing = FastOutSlowInEasing)
+                        )) togetherWith (
+                        scaleOut(
+                            animationSpec = tween(200, easing = FastOutSlowInEasing),
+                            targetScale = 0.96f
+                        ) + fadeOut(
+                            animationSpec = tween(160)
+                        ))
+                    }
+                    initialState == VictimHomeState.SOS_SHEET && targetState == VictimHomeState.FINDING -> {
+                        (scaleIn(
+                            animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow),
+                            initialScale = 0.92f
+                        ) + fadeIn(
+                            animationSpec = tween(240)
+                        )) togetherWith (
+                        scaleOut(
+                            animationSpec = tween(200, easing = FastOutSlowInEasing),
+                            targetScale = 0.96f
+                        ) + fadeOut(
+                            animationSpec = tween(160)
+                        ))
+                    }
+                    targetState == VictimHomeState.HOME -> {
+                        (scaleIn(
+                            animationSpec = tween(240, easing = FastOutSlowInEasing),
+                            initialScale = 0.96f
+                        ) + fadeIn(
+                            animationSpec = tween(200)
+                        )) togetherWith (
+                        slideOutVertically(
+                            animationSpec = tween(220, easing = FastOutSlowInEasing),
+                            targetOffsetY = { it / 3 }
+                        ) + fadeOut(
+                            animationSpec = tween(180)
+                        ))
+                    }
+                    else -> {
+                        (fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.95f)) togetherWith
+                        (fadeOut(animationSpec = tween(180)) + scaleOut(targetScale = 0.96f))
+                    }
+                }
+            },
+            label = "home_state_transition",
+            modifier = Modifier.fillMaxSize()
+        ) { targetState ->
+            when (targetState) {
+                VictimHomeState.HOME -> VictimHomeContent(
+                    locationState = locationState,
+                    customLocation = customLocation,
+                    onLocationChange = { customLocation = it },
+                    onResetGps = {
+                        customLocation = null
+                        locationHelper.startLocationUpdates()
+                    },
+                    onSosTap = { state = VictimHomeState.SOS_SHEET },
+                    onNavigateToProfile = onNavigateToProfile,
+                    onNavigateToResponderProfile = onNavigateToResponderProfile,
+                    onNavigateToHistory = onNavigateToHistory,
+                    onNavigateToMap = onNavigateToMap,
+                    onNavigateToAssistant = onNavigateToAssistant,
+                    onNavigateToTracking = onNavigateToTracking,
+                    showBottomBar = showBottomBar,
+                )
+                VictimHomeState.SOS_SHEET -> SosDetailSheet(
+                    locationTitle = customLocation ?: locationState.localityName,
+                    onCancel = { state = VictimHomeState.HOME },
+                    onAutoSend = { state = VictimHomeState.FINDING },
+                )
+                VictimHomeState.FINDING -> FindingRespondersContent(
+                    onCancel = { state = VictimHomeState.HOME },
+                    onNavigateToTracking = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onNavigateToTracking()
+                    },
+                    onNavigateToAssistant = onNavigateToAssistant,
+                )
+            }
         }
     }
 }

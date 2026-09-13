@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.offset
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -891,44 +894,74 @@ fun VictimBottomNavBar(
     onSelect: (VictimNavTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val tabs = remember { listOf(VictimNavTab.HOME, VictimNavTab.CHAT, VictimNavTab.MAP, VictimNavTab.PROFILE) }
+    val selectedIndex = tabs.indexOf(selected).coerceAtLeast(0)
+
+    // Smooth gliding pill indicator across tabs with organic spring dynamics
+    val animatedTabIndex by animateFloatAsState(
+        targetValue = selectedIndex.toFloat(),
+        animationSpec = spring(
+            dampingRatio = 0.76f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "nav_pill_glide"
+    )
+
     Surface(
         color = VictimBackground,
         tonalElevation = 8.dp,
         shadowElevation = 8.dp,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Row(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(top = 6.dp, bottom = 8.dp, start = 8.dp, end = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(top = 6.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
         ) {
-            VictimNavItem(
-                label = "Home",
-                icon = Icons.Default.Home,
-                isSelected = selected == VictimNavTab.HOME,
-                onClick = { onSelect(VictimNavTab.HOME) },
+            val totalWidth = maxWidth
+            val tabWidth = totalWidth / tabs.size
+            val pillWidth = 58.dp
+            val pillHeight = 32.dp
+
+            // Active Sliding Capsule (Visual Guide)
+            val indicatorLeft = (tabWidth * animatedTabIndex) + (tabWidth - pillWidth) / 2
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorLeft, y = 2.dp)
+                    .width(pillWidth)
+                    .height(pillHeight)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(VictimPinkCard)
+                    .border(0.5.dp, VictimPrimary.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
             )
-            VictimNavItem(
-                label = "Chat",
-                icon = Icons.Default.ChatBubbleOutline,
-                isSelected = selected == VictimNavTab.CHAT,
-                onClick = { onSelect(VictimNavTab.CHAT) },
-            )
-            VictimNavItem(
-                label = "Map",
-                icon = Icons.Default.Map,
-                isSelected = selected == VictimNavTab.MAP,
-                onClick = { onSelect(VictimNavTab.MAP) },
-            )
-            VictimNavItem(
-                label = "Profile",
-                icon = Icons.Default.Person,
-                isSelected = selected == VictimNavTab.PROFILE,
-                onClick = { onSelect(VictimNavTab.PROFILE) },
-            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                tabs.forEach { tab ->
+                    val isSelected = tab == selected
+                    VictimNavItem(
+                        label = when (tab) {
+                            VictimNavTab.HOME -> "Home"
+                            VictimNavTab.CHAT -> "Chat"
+                            VictimNavTab.MAP -> "Map"
+                            VictimNavTab.PROFILE -> "Profile"
+                        },
+                        icon = when (tab) {
+                            VictimNavTab.HOME -> Icons.Default.Home
+                            VictimNavTab.CHAT -> Icons.Default.ChatBubbleOutline
+                            VictimNavTab.MAP -> Icons.Default.Map
+                            VictimNavTab.PROFILE -> Icons.Default.Person
+                        },
+                        isSelected = isSelected,
+                        onClick = { onSelect(tab) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
         }
     }
 }
@@ -942,15 +975,42 @@ private fun VictimNavItem(
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
+
+    // Smooth color transition
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) VictimPrimary else VictimTextMuted,
-        animationSpec = tween(durationMillis = 40, easing = androidx.compose.animation.core.LinearEasing),
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
         label = "nav_item_color"
     )
-    val pillAlpha by animateFloatAsState(
+
+    // Bouncy pop-in / pop-out icon scale
+    val iconScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.18f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "nav_icon_scale"
+    )
+
+    // Active vertical lift
+    val iconElevation by animateDpAsState(
+        targetValue = if (isSelected) (-2.5).dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = 0.8f,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "nav_icon_elevation"
+    )
+
+    // Active indicator dot alpha and scale
+    val dotScale by animateFloatAsState(
         targetValue = if (isSelected) 1f else 0f,
-        animationSpec = tween(durationMillis = 40, easing = androidx.compose.animation.core.LinearEasing),
-        label = "nav_pill_alpha"
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "nav_dot_scale"
     )
 
     Column(
@@ -966,20 +1026,25 @@ private fun VictimNavItem(
                     onClick()
                 }
             }
-            .padding(horizontal = 10.dp, vertical = 2.dp),
+            .padding(vertical = 2.dp),
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .clip(RoundedCornerShape(14.dp))
-                .background(VictimPinkCard.copy(alpha = pillAlpha))
-                .padding(horizontal = 14.dp, vertical = 4.dp)
+                .height(32.dp)
+                .fillMaxWidth()
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 tint = contentColor,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier
+                    .size(24.dp)
+                    .graphicsLayer {
+                        scaleX = iconScale
+                        scaleY = iconScale
+                        translationY = iconElevation.toPx()
+                    },
             )
         }
         Spacer(modifier = Modifier.height(2.dp))
@@ -988,6 +1053,19 @@ private fun VictimNavItem(
             fontSize = 11.5.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             color = contentColor,
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        // Micro-indicator dot
+        Box(
+            modifier = Modifier
+                .size(3.5.dp)
+                .graphicsLayer {
+                    scaleX = dotScale
+                    scaleY = dotScale
+                    alpha = dotScale
+                }
+                .clip(CircleShape)
+                .background(VictimPrimary)
         )
     }
 }

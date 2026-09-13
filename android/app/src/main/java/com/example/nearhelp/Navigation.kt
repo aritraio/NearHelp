@@ -39,30 +39,84 @@ import com.example.nearhelp.ui.tracking.LiveTrackingScreen
 import com.example.nearhelp.ui.tracking.LiveTrackingViewModel
 import com.example.nearhelp.ui.victim.VictimNavTab
 
-private const val NAV_TRANSITION_DURATION = 140
+private const val NAV_TRANSITION_DURATION = 280
 
 private fun isBottomNavKey(key: Any): Boolean =
   key is HomeNavKey || key is ProfileNavKey || key is CommunityMapNavKey || key is AiCrisisAssistantNavKey
 
+private fun getBottomNavIndex(key: Any): Int = when (key) {
+  is HomeNavKey -> 0
+  is AiCrisisAssistantNavKey -> 1
+  is CommunityMapNavKey -> 2
+  is ProfileNavKey -> 3
+  else -> 0
+}
+
 private fun <T : Any> appTransitionSpec():
     AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
   if (initialState.key is SplashNavKey || targetState.key is SplashNavKey) {
-    fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION)) togetherWith
-      fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION))
+    (fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)) +
+     scaleIn(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing), initialScale = 0.96f)) togetherWith
+    (fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)) +
+     scaleOut(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing), targetScale = 1.04f))
   } else if (isBottomNavKey(initialState.key) && isBottomNavKey(targetState.key)) {
-    fadeIn(animationSpec = tween(40, easing = androidx.compose.animation.core.LinearEasing)) togetherWith
-      fadeOut(animationSpec = tween(40, easing = androidx.compose.animation.core.LinearEasing))
+    val isForward = getBottomNavIndex(targetState.key) >= getBottomNavIndex(initialState.key)
+    if (isForward) {
+      (slideInHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialOffsetX = { it / 5 }
+      ) + scaleIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialScale = 0.95f
+      ) + fadeIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing)
+      )) togetherWith
+      (slideOutHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetOffsetX = { -it / 6 }
+      ) + scaleOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetScale = 0.96f
+      ) + fadeOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutSlowInEasing)
+      ))
+    } else {
+      (slideInHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialOffsetX = { -it / 5 }
+      ) + scaleIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialScale = 0.95f
+      ) + fadeIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing)
+      )) togetherWith
+      (slideOutHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetOffsetX = { it / 6 }
+      ) + scaleOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetScale = 0.96f
+      ) + fadeOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutSlowInEasing)
+      ))
+    }
   } else {
     (slideInHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       initialOffsetX = { fullWidth -> fullWidth }
+    ) + scaleIn(
+      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+      initialScale = 0.95f
     ) + fadeIn(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialAlpha = 0.8f
+      initialAlpha = 0.6f
     )) togetherWith
     (slideOutHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       targetOffsetX = { fullWidth -> -fullWidth / 4 }
+    ) + scaleOut(
+      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+      targetScale = 0.92f
     ) + fadeOut(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       targetAlpha = 0.7f
@@ -73,25 +127,71 @@ private fun <T : Any> appTransitionSpec():
 private fun <T : Any> appPopTransitionSpec():
     AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
   if (initialState.key is SplashNavKey || targetState.key is SplashNavKey) {
-    fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION)) togetherWith
-      fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION))
+    (fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)) +
+     scaleIn(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing), initialScale = 0.96f)) togetherWith
+    (fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)) +
+     scaleOut(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing), targetScale = 1.04f))
   } else if (isBottomNavKey(initialState.key) && isBottomNavKey(targetState.key)) {
-    fadeIn(animationSpec = tween(40, easing = androidx.compose.animation.core.LinearEasing)) togetherWith
-      fadeOut(animationSpec = tween(40, easing = androidx.compose.animation.core.LinearEasing))
+    val isForward = getBottomNavIndex(targetState.key) >= getBottomNavIndex(initialState.key)
+    if (isForward) {
+      (slideInHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialOffsetX = { it / 5 }
+      ) + scaleIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialScale = 0.95f
+      ) + fadeIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing)
+      )) togetherWith
+      (slideOutHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetOffsetX = { -it / 6 }
+      ) + scaleOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetScale = 0.96f
+      ) + fadeOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutSlowInEasing)
+      ))
+    } else {
+      (slideInHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialOffsetX = { -it / 5 }
+      ) + scaleIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialScale = 0.95f
+      ) + fadeIn(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing)
+      )) togetherWith
+      (slideOutHorizontally(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetOffsetX = { it / 6 }
+      ) + scaleOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetScale = 0.96f
+      ) + fadeOut(
+        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutSlowInEasing)
+      ))
+    }
   } else {
     (slideInHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       initialOffsetX = { fullWidth -> -fullWidth / 4 }
+    ) + scaleIn(
+      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+      initialScale = 0.92f
     ) + fadeIn(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialAlpha = 0.8f
+      initialAlpha = 0.7f
     )) togetherWith
     (slideOutHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       targetOffsetX = { fullWidth -> fullWidth }
+    ) + scaleOut(
+      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+      targetScale = 0.96f
     ) + fadeOut(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      targetAlpha = 0.7f
+      targetAlpha = 0.6f
     ))
   }
 }
@@ -102,37 +202,43 @@ private fun <T : Any> appPredictivePopTransitionSpec():
     (slideInHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       initialOffsetX = { fullWidth -> fullWidth / 4 }
+    ) + scaleIn(
+      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+      initialScale = 0.93f
     ) + fadeIn(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialAlpha = 0.8f
+      initialAlpha = 0.7f
     )) togetherWith
     (slideOutHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       targetOffsetX = { fullWidth -> -fullWidth }
     ) + scaleOut(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      targetScale = 0.94f
+      targetScale = 0.92f
     ) + fadeOut(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      targetAlpha = 0.7f
+      targetAlpha = 0.6f
     ))
   } else {
     (slideInHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       initialOffsetX = { fullWidth -> -fullWidth / 4 }
+    ) + scaleIn(
+      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
+      initialScale = 0.93f
     ) + fadeIn(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialAlpha = 0.8f
+      initialAlpha = 0.7f
     )) togetherWith
     (slideOutHorizontally(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
       targetOffsetX = { fullWidth -> fullWidth }
     ) + scaleOut(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      targetScale = 0.94f
+      targetScale = 0.92f
     ) + fadeOut(
       animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      targetAlpha = 0.7f
+      targetAlpha = 0.6f
     ))
   }
 }
