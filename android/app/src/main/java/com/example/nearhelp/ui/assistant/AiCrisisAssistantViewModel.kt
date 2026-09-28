@@ -98,6 +98,7 @@ fun defaultChatHistory(): List<ChatHistorySession> = listOf(
 
 data class AiCrisisAssistantUiState(
   val sessionId: String = "DEMO-SESSION-001",
+  val activeThreadId: String? = null,
   val conditionId: String = "cardiac_arrest",
   val protocol: GroundedProtocolDto? = null,
   val protocols: List<GroundedProtocolDto> = emptyList(),
@@ -175,7 +176,32 @@ class AiCrisisAssistantViewModel(
   }
 
   fun setChatDrawerOpen(isOpen: Boolean) {
-    _uiState.update { it.copy(isChatDrawerOpen = isOpen) }
+    if (!isOpen) {
+      closeChatDrawer()
+    } else {
+      _uiState.update { it.copy(isChatDrawerOpen = true) }
+    }
+  }
+
+  fun closeChatDrawer() {
+    _uiState.update { state ->
+      val updatedHistory = if (state.chatMessages.isNotEmpty() && state.activeThreadId != null) {
+        updateHistoryWithThread(
+          history = state.chatHistory,
+          threadId = state.activeThreadId,
+          messages = state.chatMessages,
+          timestamp = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+        )
+      } else {
+        state.chatHistory
+      }
+      state.copy(
+        isChatDrawerOpen = false,
+        activeThreadId = null,
+        chatMessages = emptyList(),
+        chatHistory = updatedHistory
+      )
+    }
   }
 
   fun setHistorySidePanelOpen(isOpen: Boolean) {
@@ -185,6 +211,7 @@ class AiCrisisAssistantViewModel(
   fun loadChatSession(session: ChatHistorySession) {
     _uiState.update {
       it.copy(
+        activeThreadId = session.id,
         chatMessages = session.messages,
         isHistorySidePanelOpen = false,
         isChatDrawerOpen = true
@@ -195,9 +222,22 @@ class AiCrisisAssistantViewModel(
   fun startNewChat() {
     _uiState.update {
       it.copy(
+        activeThreadId = null,
         chatMessages = emptyList(),
         isHistorySidePanelOpen = false,
         isChatDrawerOpen = true
+      )
+    }
+  }
+
+  fun deleteChatSession(threadId: String) {
+    _uiState.update { state ->
+      val updatedHistory = state.chatHistory.filterNot { it.id == threadId }
+      val isCurrent = state.activeThreadId == threadId
+      state.copy(
+        chatHistory = updatedHistory,
+        chatMessages = if (isCurrent) emptyList() else state.chatMessages,
+        activeThreadId = if (isCurrent) null else state.activeThreadId
       )
     }
   }
@@ -206,8 +246,9 @@ class AiCrisisAssistantViewModel(
     _uiState.update { it.copy(activeContraindication = null) }
   }
 
-  private fun updateHistoryWithCurrentChat(
+  private fun updateHistoryWithThread(
     history: List<ChatHistorySession>,
+    threadId: String,
     messages: List<AiChatMessageUiModel>,
     timestamp: String
   ): List<ChatHistorySession> {
@@ -215,16 +256,18 @@ class AiCrisisAssistantViewModel(
     val firstUserMsg = messages.firstOrNull { it.isUser }?.text ?: messages.first().text
     val title = firstUserMsg.take(36).let { if (it.length >= 36) "$it..." else it }
     val snippet = messages.lastOrNull()?.text?.take(60) ?: ""
-    val currentSession = ChatHistorySession(
-      id = "active-session",
-      title = title,
+    val existing = history.firstOrNull { it.id == threadId }
+    val group = existing?.group ?: "Today"
+    val updatedSession = ChatHistorySession(
+      id = threadId,
+      title = existing?.title ?: title,
       snippet = snippet,
       timestamp = "Today, $timestamp",
-      group = "Today",
+      group = group,
       messages = messages
     )
-    val remaining = history.filterNot { it.id == "active-session" }
-    return listOf(currentSession) + remaining
+    val remaining = history.filterNot { it.id == threadId }
+    return listOf(updatedSession) + remaining
   }
 
   fun sendChatMessage(text: String) {
@@ -232,6 +275,8 @@ class AiCrisisAssistantViewModel(
 
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val nowStr = timeFormat.format(Date())
+
+    val threadId = _uiState.value.activeThreadId ?: "thread-${System.currentTimeMillis()}"
 
     val userMsg = AiChatMessageUiModel(
       id = "user-${System.currentTimeMillis()}",
@@ -244,15 +289,17 @@ class AiCrisisAssistantViewModel(
     val updatedMessages = _uiState.value.chatMessages + userMsg
     _uiState.update {
       it.copy(
+        activeThreadId = threadId,
+        isChatDrawerOpen = true,
         chatMessages = updatedMessages,
         isLoading = true,
-        chatHistory = updateHistoryWithCurrentChat(it.chatHistory, updatedMessages, nowStr)
+        chatHistory = updateHistoryWithThread(it.chatHistory, threadId, updatedMessages, nowStr)
       )
     }
 
     viewModelScope.launch {
       val response = repository.chatWithAgent(
-        sessionId = _uiState.value.sessionId,
+        sessionId = threadId,
         text = text,
         currentStepIndex = _uiState.value.currentStepIndex,
         completedSteps = _uiState.value.completedSteps
@@ -271,12 +318,18 @@ class AiCrisisAssistantViewModel(
 
       val finalMessages = _uiState.value.chatMessages + aiMsg
       _uiState.update { state ->
-        state.copy(
-          chatMessages = finalMessages,
-          activeContraindication = response.contraindications.firstOrNull(),
-          isLoading = false,
-          chatHistory = updateHistoryWithCurrentChat(state.chatHistory, finalMessages, nowStr)
-        )
+        if (state.activeThreadId == threadId) {
+          state.copy(
+            chatMessages = finalMessages,
+            activeContraindication = response.contraindications.firstOrNull(),
+            isLoading = false,
+            chatHistory = updateHistoryWithThread(state.chatHistory, threadId, finalMessages, nowStr)
+          )
+        } else {
+          state.copy(
+            chatHistory = updateHistoryWithThread(state.chatHistory, threadId, finalMessages, nowStr)
+          )
+        }
       }
     }
   }

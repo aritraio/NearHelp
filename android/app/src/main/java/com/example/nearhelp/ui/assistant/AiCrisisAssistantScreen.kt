@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -838,30 +839,140 @@ fun AiCrisisAssistantScreen(
 }
 
   if (uiState.isChatDrawerOpen) {
-    ModalBottomSheet(onDismissRequest = { viewModel.setChatDrawerOpen(false) }, sheetState = sheetState, containerColor = Color.White) {
-      Column(modifier = Modifier.fillMaxWidth().height(520.dp).padding(horizontal = 14.dp, vertical = 8.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-          Row(verticalAlignment = Alignment.CenterVertically) {
+    ModalBottomSheet(
+      onDismissRequest = { viewModel.closeChatDrawer() },
+      sheetState = sheetState,
+      containerColor = Color.White
+    ) {
+      Column(
+        modifier = Modifier
+          .fillMaxWidth()
+          .fillMaxHeight(0.85f)
+          .navigationBarsPadding()
+          .imePadding()
+          .padding(horizontal = 14.dp, vertical = 6.dp)
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(8.dp).background(StatusSafeGreen, CircleShape))
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = "Bystander AI Clinical Assistant", color = VictimTextDark, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            val currentTitle = if (!uiState.activeThreadId.isNullOrBlank()) {
+              val session = uiState.chatHistory.firstOrNull { it.id == uiState.activeThreadId }
+              session?.title ?: "AI Clinical Consultation"
+            } else {
+              "AI Clinical Assistant"
+            }
+            Text(
+              text = currentTitle,
+              color = VictimTextDark,
+              fontSize = 15.sp,
+              fontWeight = FontWeight.Bold,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis
+            )
           }
-          IconButton(onClick = { viewModel.setChatDrawerOpen(false) }) {
-            Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = VictimTextMuted)
-          }
-        }
-        androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(vertical = 6.dp)) {
-          items(uiState.quickQuestions) { q ->
-            Surface(color = VictimBlueCard, shape = RoundedCornerShape(14.dp), border = androidx.compose.foundation.BorderStroke(1.dp, VictimBlueBorder), modifier = Modifier.clickable { viewModel.sendChatMessage(q) }) {
-              Text(text = q, color = VictimTextDark, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(
+              onClick = { viewModel.startNewChat() },
+              modifier = Modifier.size(32.dp)
+            ) {
+              Icon(imageVector = Icons.Default.Add, contentDescription = "New Consultation", tint = VictimPrimary, modifier = Modifier.size(20.dp))
+            }
+            Spacer(modifier = Modifier.width(4.dp))
+            IconButton(
+              onClick = { viewModel.closeChatDrawer() },
+              modifier = Modifier.size(32.dp)
+            ) {
+              Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = VictimTextMuted, modifier = Modifier.size(20.dp))
             }
           }
         }
-        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth().padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          if (uiState.chatMessages.isEmpty()) {
-            item { Text(text = "Tap a suggestion above or ask any first-aid question.", color = VictimTextMuted, fontSize = 12.sp, modifier = Modifier.padding(vertical = 16.dp)) }
+        androidx.compose.foundation.lazy.LazyRow(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          contentPadding = PaddingValues(vertical = 6.dp)
+        ) {
+          items(uiState.quickQuestions) { q ->
+            Surface(
+              color = VictimBlueCard,
+              shape = RoundedCornerShape(14.dp),
+              border = androidx.compose.foundation.BorderStroke(1.dp, VictimBlueBorder),
+              modifier = Modifier.clickable { viewModel.sendChatMessage(q) }
+            ) {
+              Text(
+                text = q,
+                color = VictimTextDark,
+                fontSize = 11.sp,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+              )
+            }
           }
-          items(uiState.chatMessages) { msg -> ChatMessageBubble(msg = msg) }
+        }
+        LazyColumn(
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+          verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+          if (uiState.chatMessages.isEmpty()) {
+            item {
+              Column(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+              ) {
+                Box(
+                  modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(VictimPinkCard),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text(text = "🩺", fontSize = 22.sp)
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                  text = "Emergency Clinical Assistant",
+                  fontSize = 14.5.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = VictimTextDark
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                  text = "Ask any first-aid question or tap a suggestion above.",
+                  fontSize = 12.sp,
+                  color = VictimTextMuted
+                )
+              }
+            }
+          }
+          items(uiState.chatMessages, key = { it.id }) { msg ->
+            ChatMessageBubble(msg = msg)
+          }
+          if (uiState.isLoading) {
+            item {
+              Row(
+                modifier = Modifier
+                  .padding(vertical = 4.dp)
+                  .clip(RoundedCornerShape(12.dp))
+                  .background(Color(0xFFF1F5F9))
+                  .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Text(
+                  text = "AI is evaluating clinical guidance...",
+                  fontSize = 11.5.sp,
+                  color = VictimTextMuted,
+                  fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
+              }
+            }
+          }
         }
         if (attachedMediaName != null) {
           Row(
@@ -1207,11 +1318,12 @@ fun AiCrisisAssistantScreen(
                 modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 2.dp)
               )
             }
-            items(sessions) { session ->
+            items(sessions, key = { it.id }) { session ->
+              val isActive = session.id == uiState.activeThreadId
               Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFF8FAFC),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                color = if (isActive) VictimPinkCard else Color(0xFFF8FAFC),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (isActive) VictimPinkBorder else Color(0xFFE2E8F0)),
                 modifier = Modifier
                   .fillMaxWidth()
                   .clickable { viewModel.loadChatSession(session) }
@@ -1224,21 +1336,33 @@ fun AiCrisisAssistantScreen(
                     modifier = Modifier
                       .size(36.dp)
                       .clip(CircleShape)
-                      .background(VictimBlueCard),
+                      .background(if (isActive) VictimPrimary else VictimBlueCard),
                     contentAlignment = Alignment.Center
                   ) {
-                    Text(text = "💬", fontSize = 16.sp)
+                    Text(text = if (isActive) "🔴" else "💬", fontSize = 14.sp)
                   }
                   Spacer(modifier = Modifier.width(10.dp))
                   Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                      text = session.title,
-                      fontSize = 13.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = VictimTextDark,
-                      maxLines = 1,
-                      overflow = TextOverflow.Ellipsis
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                      Text(
+                        text = session.title,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = VictimTextDark,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                      )
+                      if (isActive) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                          text = "ACTIVE",
+                          fontSize = 9.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = VictimPrimary
+                        )
+                      }
+                    }
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                       text = session.snippet,
@@ -1257,12 +1381,17 @@ fun AiCrisisAssistantScreen(
                     )
                   }
                   Spacer(modifier = Modifier.width(6.dp))
-                  Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Open session",
-                    tint = VictimTextMuted,
-                    modifier = Modifier.size(14.dp)
-                  )
+                  IconButton(
+                    onClick = { viewModel.deleteChatSession(session.id) },
+                    modifier = Modifier.size(28.dp)
+                  ) {
+                    Icon(
+                      imageVector = Icons.Default.Close,
+                      contentDescription = "Delete session",
+                      tint = VictimTextMuted.copy(alpha = 0.6f),
+                      modifier = Modifier.size(15.dp)
+                    )
+                  }
                 }
               }
             }
@@ -1598,30 +1727,61 @@ fun IntegratedStepRow(
 
 @Composable
 fun ChatMessageBubble(msg: AiChatMessageUiModel) {
-  Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = if (msg.isUser) Alignment.End else Alignment.Start) {
+  val isUser = msg.isUser
+  Column(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
+  ) {
     Surface(
-      color = if (msg.isUser) VictimPrimary else Color(0xFFF1F5F9),
-      shape = RoundedCornerShape(12.dp),
-      border = if (!msg.isUser) androidx.compose.foundation.BorderStroke(1.dp, VictimBorder) else null,
-      modifier = Modifier.fillMaxWidth(0.9f),
+      color = if (isUser) VictimPrimary else Color(0xFFF8FAFC),
+      shape = RoundedCornerShape(
+        topStart = 16.dp,
+        topEnd = 16.dp,
+        bottomStart = if (isUser) 16.dp else 4.dp,
+        bottomEnd = if (isUser) 4.dp else 16.dp
+      ),
+      border = if (!isUser) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)) else null,
+      shadowElevation = if (isUser) 1.dp else 0.5.dp,
+      modifier = Modifier
+        .widthIn(min = 60.dp, max = 320.dp)
+        .padding(vertical = 2.dp)
     ) {
-      Column(modifier = Modifier.padding(10.dp)) {
-        if (!msg.isUser && msg.highlightBadge != null) {
-          Text(text = msg.highlightBadge, color = VictimPrimary, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 2.dp))
+      Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+        if (!isUser && !msg.highlightBadge.isNullOrBlank()) {
+          Surface(
+            color = VictimPinkCard,
+            shape = RoundedCornerShape(6.dp),
+            border = androidx.compose.foundation.BorderStroke(0.5.dp, VictimPinkBorder),
+            modifier = Modifier.padding(bottom = 6.dp)
+          ) {
+            Text(
+              text = msg.highlightBadge,
+              color = VictimPrimary,
+              fontSize = 10.sp,
+              fontWeight = FontWeight.Bold,
+              modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp)
+            )
+          }
         }
-        Text(text = msg.text, color = if (msg.isUser) Color.White else VictimTextDark, fontSize = 12.5.sp, lineHeight = 18.sp)
+
+        Text(
+          text = msg.text,
+          color = if (isUser) Color.White else VictimTextDark,
+          fontSize = 13.5.sp,
+          lineHeight = 19.sp
+        )
 
         // Show clinical contraindications if any
-        if (!msg.isUser && msg.contraindications.isNotEmpty()) {
-          Spacer(modifier = Modifier.height(6.dp))
+        if (!isUser && msg.contraindications.isNotEmpty()) {
+          Spacer(modifier = Modifier.height(8.dp))
           for (contra in msg.contraindications) {
             Surface(
               color = Color(0xFFFEF2F2),
-              shape = RoundedCornerShape(6.dp),
+              shape = RoundedCornerShape(8.dp),
               border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFECACA)),
               modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
             ) {
-              Column(modifier = Modifier.padding(6.dp)) {
+              Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                   text = "⚠️ ${contra.warningTitle}",
                   color = Color(0xFFB91C1C),
@@ -1640,32 +1800,40 @@ fun ChatMessageBubble(msg: AiChatMessageUiModel) {
           }
         }
 
-        // Show statutory / medical citations if present
-        if (!msg.isUser && msg.citations.isNotEmpty()) {
-          Spacer(modifier = Modifier.height(6.dp))
-          Row(
+        // Show statutory / medical citations stacked in Column with maxLines so they NEVER squish!
+        if (!isUser && msg.citations.isNotEmpty()) {
+          Spacer(modifier = Modifier.height(8.dp))
+          Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
           ) {
             msg.citations.take(2).forEach { cit ->
               Surface(
                 color = Color(0xFFEFF6FF),
-                shape = RoundedCornerShape(4.dp),
-                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFFBFDBFE))
+                shape = RoundedCornerShape(6.dp),
+                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFFBFDBFE)),
+                modifier = Modifier.fillMaxWidth()
               ) {
                 Text(
                   text = "📚 ${cit.authority} • ${cit.section}",
                   color = Color(0xFF1D4ED8),
-                  fontSize = 9.sp,
+                  fontSize = 9.5.sp,
                   fontWeight = FontWeight.Medium,
-                  modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                  maxLines = 2,
+                  overflow = TextOverflow.Ellipsis,
+                  modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.5.dp)
                 )
               }
             }
           }
         }
 
-        Text(text = msg.timestamp, color = if (msg.isUser) Color.White.copy(alpha = 0.8f) else VictimTextMuted, fontSize = 9.sp, modifier = Modifier.align(Alignment.End).padding(top = 2.dp))
+        Text(
+          text = msg.timestamp,
+          color = if (isUser) Color.White.copy(alpha = 0.75f) else VictimTextMuted,
+          fontSize = 9.sp,
+          modifier = Modifier.align(Alignment.End).padding(top = 4.dp)
+        )
       }
     }
   }
