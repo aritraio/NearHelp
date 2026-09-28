@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.app.Activity
+import android.content.Intent
 import android.provider.OpenableColumns
+import android.speech.RecognizerIntent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -51,8 +54,11 @@ import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.CameraAlt
@@ -96,6 +102,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -205,6 +213,29 @@ fun AiCrisisAssistantScreen(
 
   val triggerFilePicker: () -> Unit = {
     filePickerLauncher.launch("*/*")
+  }
+
+  val speechRecognizerLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.StartActivityForResult()
+  ) { result ->
+    if (result.resultCode == Activity.RESULT_OK) {
+      val spoken = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+      if (!spoken.isNullOrBlank()) {
+        inputQuestion = spoken
+      }
+    }
+  }
+
+  val triggerSpeechRecognition: () -> Unit = {
+    try {
+      val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        putExtra(RecognizerIntent.EXTRA_PROMPT, "Describe what happened...")
+      }
+      speechRecognizerLauncher.launch(intent)
+    } catch (e: Exception) {
+      viewModel.setChatDrawerOpen(true)
+    }
   }
 
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -338,7 +369,8 @@ fun AiCrisisAssistantScreen(
             }
             Spacer(modifier = Modifier.width(8.dp))
             OutlinedTextField(
-              value = inputQuestion, onValueChange = { inputQuestion = it },
+              value = inputQuestion,
+              onValueChange = { inputQuestion = it },
               placeholder = { Text("Ask something...", color = VictimTextMuted, fontSize = 14.sp) },
               modifier = Modifier.weight(1f),
               shape = RoundedCornerShape(24.dp),
@@ -347,7 +379,29 @@ fun AiCrisisAssistantScreen(
                 focusedContainerColor = Color(0xFFF8FAFC), unfocusedContainerColor = Color(0xFFF8FAFC),
                 focusedTextColor = VictimTextDark, unfocusedTextColor = VictimTextDark,
               ),
-              maxLines = 1,
+              maxLines = 2,
+              keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Send,
+                keyboardType = KeyboardType.Text
+              ),
+              keyboardActions = KeyboardActions(
+                onSend = {
+                  val fullQuery = buildString {
+                    if (!attachedMediaName.isNullOrBlank()) {
+                      append("[Attached: $attachedMediaName] ")
+                    }
+                    append(inputQuestion.trim())
+                  }.trim()
+                  if (fullQuery.isNotBlank()) {
+                    viewModel.setChatDrawerOpen(true)
+                    viewModel.sendChatMessage(fullQuery)
+                    inputQuestion = ""
+                    attachedMediaName = null
+                    attachedMediaBitmap = null
+                    attachedMediaUri = null
+                  }
+                }
+              ),
               trailingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 4.dp)) {
                   IconButton(
@@ -376,8 +430,12 @@ fun AiCrisisAssistantScreen(
               }
             )
             Spacer(modifier = Modifier.width(8.dp))
+            val hasInputText = inputQuestion.trim().isNotBlank() || !attachedMediaName.isNullOrBlank()
             Box(
-              modifier = Modifier.size(42.dp).clip(CircleShape).background(VictimPinkCard)
+              modifier = Modifier
+                .size(42.dp)
+                .clip(CircleShape)
+                .background(if (hasInputText) VictimPrimary else VictimPinkCard)
                 .clickable {
                   val fullQuery = buildString {
                     if (!attachedMediaName.isNullOrBlank()) {
@@ -393,12 +451,26 @@ fun AiCrisisAssistantScreen(
                     attachedMediaBitmap = null
                     attachedMediaUri = null
                   } else {
-                    viewModel.setChatDrawerOpen(true)
+                    triggerSpeechRecognition()
                   }
                 },
               contentAlignment = Alignment.Center,
             ) {
-              Icon(imageVector = Icons.Default.Mic, contentDescription = "Voice", tint = VictimPrimary, modifier = Modifier.size(20.dp))
+              if (hasInputText) {
+                Icon(
+                  imageVector = Icons.AutoMirrored.Filled.Send,
+                  contentDescription = "Send",
+                  tint = Color.White,
+                  modifier = Modifier.size(19.dp)
+                )
+              } else {
+                Icon(
+                  imageVector = Icons.Default.Mic,
+                  contentDescription = "Voice Input",
+                  tint = VictimPrimary,
+                  modifier = Modifier.size(20.dp)
+                )
+              }
             }
           }
         }
@@ -849,6 +921,27 @@ fun AiCrisisAssistantScreen(
             ),
             shape = RoundedCornerShape(22.dp),
             maxLines = 3,
+            keyboardOptions = KeyboardOptions(
+              imeAction = ImeAction.Send,
+              keyboardType = KeyboardType.Text
+            ),
+            keyboardActions = KeyboardActions(
+              onSend = {
+                val fullQuery = buildString {
+                  if (!attachedMediaName.isNullOrBlank()) {
+                    append("[Attached: $attachedMediaName] ")
+                  }
+                  append(inputQuestion.trim())
+                }.trim()
+                if (fullQuery.isNotBlank()) {
+                  viewModel.sendChatMessage(fullQuery)
+                  inputQuestion = ""
+                  attachedMediaName = null
+                  attachedMediaBitmap = null
+                  attachedMediaUri = null
+                }
+              }
+            ),
             trailingIcon = {
               Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -880,11 +973,12 @@ fun AiCrisisAssistantScreen(
             }
           )
           Spacer(modifier = Modifier.width(8.dp))
+          val drawerHasInput = inputQuestion.trim().isNotBlank() || !attachedMediaName.isNullOrBlank()
           Box(
             modifier = Modifier
               .size(44.dp)
               .clip(CircleShape)
-              .background(VictimPrimary)
+              .background(if (drawerHasInput) VictimPrimary else VictimPinkCard)
               .clickable {
                 val fullQuery = buildString {
                   if (!attachedMediaName.isNullOrBlank()) {
@@ -898,15 +992,17 @@ fun AiCrisisAssistantScreen(
                   attachedMediaName = null
                   attachedMediaBitmap = null
                   attachedMediaUri = null
+                } else {
+                  triggerSpeechRecognition()
                 }
               },
             contentAlignment = Alignment.Center
           ) {
             Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-              contentDescription = "Send",
-              tint = Color.White,
-              modifier = Modifier.size(18.dp)
+              imageVector = if (drawerHasInput) Icons.AutoMirrored.Filled.Send else Icons.Default.Mic,
+              contentDescription = if (drawerHasInput) "Send" else "Voice Input",
+              tint = if (drawerHasInput) Color.White else VictimPrimary,
+              modifier = Modifier.size(19.dp)
             )
           }
         }
@@ -1514,6 +1610,61 @@ fun ChatMessageBubble(msg: AiChatMessageUiModel) {
           Text(text = msg.highlightBadge, color = VictimPrimary, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 2.dp))
         }
         Text(text = msg.text, color = if (msg.isUser) Color.White else VictimTextDark, fontSize = 12.5.sp, lineHeight = 18.sp)
+
+        // Show clinical contraindications if any
+        if (!msg.isUser && msg.contraindications.isNotEmpty()) {
+          Spacer(modifier = Modifier.height(6.dp))
+          for (contra in msg.contraindications) {
+            Surface(
+              color = Color(0xFFFEF2F2),
+              shape = RoundedCornerShape(6.dp),
+              border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFECACA)),
+              modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+            ) {
+              Column(modifier = Modifier.padding(6.dp)) {
+                Text(
+                  text = "⚠️ ${contra.warningTitle}",
+                  color = Color(0xFFB91C1C),
+                  fontSize = 11.sp,
+                  fontWeight = FontWeight.Bold
+                )
+                Text(
+                  text = contra.actionDirective,
+                  color = Color(0xFF991B1B),
+                  fontSize = 10.sp,
+                  fontWeight = FontWeight.Medium,
+                  modifier = Modifier.padding(top = 2.dp)
+                )
+              }
+            }
+          }
+        }
+
+        // Show statutory / medical citations if present
+        if (!msg.isUser && msg.citations.isNotEmpty()) {
+          Spacer(modifier = Modifier.height(6.dp))
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+          ) {
+            msg.citations.take(2).forEach { cit ->
+              Surface(
+                color = Color(0xFFEFF6FF),
+                shape = RoundedCornerShape(4.dp),
+                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFFBFDBFE))
+              ) {
+                Text(
+                  text = "📚 ${cit.authority} • ${cit.section}",
+                  color = Color(0xFF1D4ED8),
+                  fontSize = 9.sp,
+                  fontWeight = FontWeight.Medium,
+                  modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+              }
+            }
+          }
+        }
+
         Text(text = msg.timestamp, color = if (msg.isUser) Color.White.copy(alpha = 0.8f) else VictimTextMuted, fontSize = 9.sp, modifier = Modifier.align(Alignment.End).padding(top = 2.dp))
       }
     }

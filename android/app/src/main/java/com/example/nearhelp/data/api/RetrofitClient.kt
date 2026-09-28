@@ -38,17 +38,17 @@ object RetrofitClient {
   val CANDIDATE_BASE_URLS: List<String> = if (isRunningOnEmulator()) {
     listOf(
       "http://10.0.2.2:8000/",
-      "http://127.0.0.1:8000/",
       PRODUCTION_BASE_URL,
+      "http://127.0.0.1:8000/",
       "http://$DEV_HOST_LAN_IP_1:8000/",
       "http://$DEV_HOST_LAN_IP_2:8000/"
     )
   } else {
     listOf(
-      "http://127.0.0.1:8000/",
       PRODUCTION_BASE_URL,
       "http://$DEV_HOST_LAN_IP_1:8000/",
       "http://$DEV_HOST_LAN_IP_2:8000/",
+      "http://127.0.0.1:8000/",
       "http://10.0.2.2:8000/"
     )
   }

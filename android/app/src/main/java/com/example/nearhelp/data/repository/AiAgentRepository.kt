@@ -8,6 +8,7 @@ import com.example.nearhelp.data.model.ClinicalHandoverSummaryDto
 import com.example.nearhelp.data.model.ContraindicationAlertDto
 import com.example.nearhelp.data.model.GroundedProtocolDto
 import com.example.nearhelp.data.model.ProtocolStepDto
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -78,10 +79,14 @@ class AiAgentRepository(
       )
       val response = apiService.chatWithAgent(req)
       if (response.isSuccessful && response.body() != null) {
-        return@withContext response.body()!!
+        val body = response.body()!!
+        Log.i("AiAgentRepository", "Live AI chat response received: ${body.highlightText} (latency: ${body.processingTimeMs}ms)")
+        return@withContext body
+      } else {
+        Log.w("AiAgentRepository", "Live AI chat returned code ${response.code()}, falling back to local clinical knowledge.")
       }
     } catch (e: Exception) {
-      // Fallback
+      Log.w("AiAgentRepository", "Live AI chat failed (${e.message}), engaging local clinical engine fallback.")
     }
     return@withContext getFallbackChatResponse(sessionId, text, currentStepIndex, completedSteps)
   }
