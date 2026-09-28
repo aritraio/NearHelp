@@ -16,7 +16,7 @@ class AISettings(BaseSettings):
 
     # Gemini & Generative AI
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
     EMBEDDING_MODEL: str = "models/text-embedding-004"
 
     # Google Cloud & Speech-to-Text

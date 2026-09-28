@@ -46,7 +46,7 @@ class NearHelpApplication : Application() {
     authRepository = AuthRepository(authApiService, tokenStorage)
     userRepository = UserRepository(userApiService, tokenStorage)
     routingRepository = RoutingRepository(routingApiService)
-    aiAgentRepository = AiAgentRepository(aiAgentApiService)
+    aiAgentRepository = AiAgentRepository(aiAgentApiService, tokenStorage)
   }
 
   companion object {

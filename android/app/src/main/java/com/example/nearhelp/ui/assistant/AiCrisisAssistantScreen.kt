@@ -67,12 +67,14 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -85,7 +87,9 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import com.example.nearhelp.NearHelpApplication
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -168,6 +172,8 @@ fun AiCrisisAssistantScreen(
   var attachedMediaName by remember { mutableStateOf<String?>(null) }
   var attachedMediaUri by remember { mutableStateOf<Uri?>(null) }
   var attachedMediaBitmap by remember { mutableStateOf<Bitmap?>(null) }
+  var showGeminiApiKeyDialog by remember { mutableStateOf(false) }
+  var geminiApiKeyInput by remember { mutableStateOf("") }
 
   val filePickerLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.GetContent()
@@ -877,6 +883,22 @@ fun AiCrisisAssistantScreen(
           }
           Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
+              onClick = {
+                geminiApiKeyInput = NearHelpApplication.instance.tokenStorage.getGeminiApiKey() ?: ""
+                showGeminiApiKeyDialog = true
+              },
+              modifier = Modifier.size(32.dp)
+            ) {
+              val hasKey = !NearHelpApplication.instance.tokenStorage.getGeminiApiKey().isNullOrBlank()
+              Icon(
+                imageVector = Icons.Default.Key,
+                contentDescription = "Gemini API Key",
+                tint = if (hasKey) StatusSafeGreen else VictimTextMuted,
+                modifier = Modifier.size(18.dp)
+              )
+            }
+            Spacer(modifier = Modifier.width(2.dp))
+            IconButton(
               onClick = { viewModel.startNewChat() },
               modifier = Modifier.size(32.dp)
             ) {
@@ -890,6 +912,60 @@ fun AiCrisisAssistantScreen(
               Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = VictimTextMuted, modifier = Modifier.size(20.dp))
             }
           }
+        }
+
+        if (showGeminiApiKeyDialog) {
+          AlertDialog(
+            onDismissRequest = { showGeminiApiKeyDialog = false },
+            title = {
+              Text("Google Gemini AI Key", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = VictimTextDark)
+            },
+            text = {
+              Column {
+                Text(
+                  text = "Configure your Google Gemini API key (from Google AI Studio) to enable dynamic generative AI clinical reasoning. If blank, NearHelp uses grounded clinical first-aid protocols (AHA/IRC/WHO).",
+                  fontSize = 13.sp,
+                  color = VictimTextMuted,
+                  lineHeight = 18.sp
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                  value = geminiApiKeyInput,
+                  onValueChange = { geminiApiKeyInput = it },
+                  placeholder = { Text("AIzaSy...", fontSize = 13.sp) },
+                  singleLine = true,
+                  modifier = Modifier.fillMaxWidth(),
+                  colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VictimPrimary,
+                    unfocusedBorderColor = Color(0xFFD1D5DB)
+                  )
+                )
+              }
+            },
+            confirmButton = {
+              TextButton(
+                onClick = {
+                  NearHelpApplication.instance.tokenStorage.saveGeminiApiKey(geminiApiKeyInput)
+                  Toast.makeText(context, if (geminiApiKeyInput.isNotBlank()) "Gemini API Key Saved!" else "Using Grounded Clinical Protocols", Toast.LENGTH_SHORT).show()
+                  showGeminiApiKeyDialog = false
+                }
+              ) {
+                Text("Save Key", color = VictimPrimary, fontWeight = FontWeight.Bold)
+              }
+            },
+            dismissButton = {
+              TextButton(
+                onClick = {
+                  geminiApiKeyInput = ""
+                  NearHelpApplication.instance.tokenStorage.saveGeminiApiKey("")
+                  Toast.makeText(context, "Key Cleared - Using Grounded Clinical Engine", Toast.LENGTH_SHORT).show()
+                  showGeminiApiKeyDialog = false
+                }
+              ) {
+                Text("Clear", color = VictimTextMuted)
+              }
+            }
+          )
         }
         androidx.compose.foundation.lazy.LazyRow(
           horizontalArrangement = Arrangement.spacedBy(6.dp),

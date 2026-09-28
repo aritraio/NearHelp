@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     # AI Microservice URL & Direct Gemini Fallback
     AI_SERVICE_URL: str = "http://localhost:8001"
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
 
     from pydantic import model_validator
 

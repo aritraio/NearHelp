@@ -381,6 +381,48 @@ class AIClient:
         elif any(k in q_lower for k in ["legal", "police", "samaritan", "liability", "law", "court", "আইন"]):
             reply = "🛡️ You are 100% legally protected under Section 134A of the Motor Vehicles (Amendment) Act 2019 and Supreme Court 2016 Good Samaritan Guidelines. You cannot be detained, harassed, or held liable.\n\n[Source: Motor Vehicles (Amendment) Act 2019 Section 134A]"
             highlight = "Section 134A MV Act Shield"
+        elif any(k in q_lower for k in ["what can you do", "who are you", "what is nearhelp", "capabilities", "features", "how do you work", "help me"]):
+            reply = (
+                "👋 I am NearHelp AI, your real-time Emergency Crisis & Clinical First-Aid Assistant.\n\n"
+                "Here is how I assist in emergencies:\n"
+                "1. 🩺 Real-Time Triage: Rapidly assess symptoms and guide life-saving interventions for Cardiac Arrest, Severe Bleeding, Choking, Stroke, Burns, Fractures, and Seizures.\n"
+                "2. 🫀 CPR Rhythm & Audio Metronome: Provide AHA/IRC-grounded chest compression rhythm at 110 BPM.\n"
+                "3. ⚠️ Contraindication Shield: Alert against dangerous mistakes like giving oral liquids to unconscious persons or moving spinal trauma victims.\n"
+                "4. 🛡️ Good Samaritan Legal Protection: Explain statutory immunity under Section 134A of the Motor Vehicles Act.\n"
+                "5. 🚑 Paramedic Handover: Generate digital clinical summaries for 108 ambulance crews upon arrival.\n\n"
+                "[Source: NearHelp Clinical AI & AHA Guidelines 2020]"
+            )
+            highlight = "NearHelp Emergency Capabilities"
+        elif any(k in q_lower for k in ["chok", "heimlich", "food stuck", "throat", "cant breathe", "গলায়"]):
+            reply = "🚨 Stand behind the victim. Wrap arms around waist. Make a fist just above the navel. Deliver 5 quick, inward and upward abdominal thrusts (Heimlich Maneuver) until the airway clears. If unconscious, lower to floor and start CPR.\n\n[Source: American Red Cross & AHA Choking Guidelines 2020]"
+            highlight = "Heimlich / Choking Relief"
+        elif any(k in q_lower for k in ["burn", "fire", "scald", "blister", "hot water", "পোড়া"]):
+            reply = "💧 Cool the burn immediately under cool running tap water for 20 full minutes. Never apply ice, toothpaste, or turmeric. Cover loosely with clean plastic food wrap or sterile dressing.\n\n[Source: British Burn Association & WHO Burn Trauma Guide 2021]"
+            highlight = "Thermal Burn First-Aid"
+        elif any(k in q_lower for k in ["bleed", "tourniquet", "blood", "pressure", "cut", "wound", "রক্ত"]):
+            reply = "🩸 Expose wound and apply continuous, firm direct pressure with clean gauze/cloth using your body weight. For severe limb bleeding that won't stop, apply a tourniquet 5–7 cm above the wound (never over a joint).\n\n[Source: WHO Trauma Care & Stop The Bleed Protocol §4.1]"
+            highlight = "Hemorrhage Control"
+        elif any(k in q_lower for k in ["fracture", "broken bone", "broken leg", "splint", "ভাঙা", "হাড়"]):
+            reply = "🦴 Support and immobilize the injured limb in the exact position found. DO NOT attempt to push bone back or straighten deformed limbs. Apply an ice pack wrapped in a cloth to control swelling and await 108 dispatch.\n\n[Source: NDMA & ATLS Pre-Hospital Trauma Guidelines]"
+            highlight = "Limb Immobilization Protocol"
+        elif any(k in q_lower for k in ["seizure", "mouth", "spoon", "froth", "fit", "খিঁচুনি"]):
+            reply = "🛡️ Protect victim's head with a soft folded jacket and clear hard objects. NEVER insert spoons, fingers, or objects into the mouth. Once shaking stops, roll gently into the recovery position.\n\n[Source: ILAE & NHS Seizure Protocol]"
+            highlight = "Seizure Safety"
+        elif any(k in q_lower for k in ["stroke", "face drop", "slurred", "arm weak", "paralysis", "মুখ বাকা"]):
+            reply = "🧠 Perform FAST check immediately:\n• F (Face): Ask to smile — does one side droop?\n• A (Arms): Ask to raise both arms — does one drift downward?\n• S (Speech): Ask to repeat a simple sentence — is it slurred?\n• T (Time): Call 108 immediately. Keep victim quiet with head slightly elevated.\n\n[Source: American Stroke Association (ASA) 2019]"
+            highlight = "FAST Stroke Assessment"
+        elif any(k in q_lower for k in ["snake", "bite", "venom", "সাপ", "কামড়"]):
+            reply = "🐍 Keep victim completely calm and still to slow venom circulation. Immobilize the bitten limb at or slightly below heart level with a broad bandage. NEVER cut the wound, suck venom, or apply a tourniquet. Rush to the nearest hospital with Anti-Snake Venom (ASV).\n\n[Source: WHO Guidelines for the Management of Snakebites]"
+            highlight = "Snakebite Protocol"
+        elif any(k in q_lower for k in ["asthma", "inhaler", "wheez", "breathlessness", "শ্বাসকষ্ট"]):
+            reply = "🫁 Help the person sit upright leaning slightly forward. Administer 4 separate puffs of their blue reliever inhaler (Salbutamol) with 4 deep breaths after each puff. If no improvement within 4 minutes, deliver 4 more puffs and call 108 immediately.\n\n[Source: Global Initiative for Asthma (GINA) 2023]"
+            highlight = "Acute Asthma Relief"
+        elif any(k in q_lower for k in ["heat", "sunstroke", "heatstroke", "exhaustion", "লু"]):
+            reply = "☀️ Move victim to a cool, shaded environment immediately. Remove excess clothing. Apply cool, wet towels to the neck, armpits, and groin while fanning vigorously. If conscious, offer cool water in small sips.\n\n[Source: NDMA Heat Wave Guidelines & Wilderness Medical Society]"
+            highlight = "Heat Emergency Management"
+        elif any(k in q_lower for k in ["poison", "toxic", "chemical", "swallowed", "বিষ"]):
+            reply = "🧪 DO NOT induce vomiting or administer fluids unless instructed by medical professionals. Keep any container or packaging for paramedic inspection. Check breathing and place in recovery position if drowsy. Call 108 immediately.\n\n[Source: WHO International Programme on Chemical Safety]"
+            highlight = "Poisoning Emergency Protocol"
         else:
             # Direct Gemini Generative AI Integration when GEMINI_API_KEY is configured
             gemini_replied = False
@@ -404,12 +446,12 @@ class AIClient:
                         )
                     except Exception as model_err:
                         logger.warning(
-                            "Gemini model '%s' failed (%s). Retrying with 'gemini-2.5-flash'...",
+                            "Gemini model '%s' failed (%s). Retrying with 'gemini-1.5-flash'...",
                             settings.GEMINI_MODEL,
                             model_err,
                         )
                         response = gemini_client.models.generate_content(
-                            model="gemini-2.5-flash",
+                            model="gemini-1.5-flash",
                             contents=prompt,
                         )
 
@@ -421,8 +463,16 @@ class AIClient:
                     logger.warning("Direct Gemini invocation fallback failed: %s", e)
 
             if not gemini_replied:
-                reply = "📋 Ensure victim is on a firm flat surface. Check responsiveness and breathing. Begin CPR at 110 BPM and send for nearest AED.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
-                highlight = "Grounded Protocol Step"
+                reply = (
+                    "📋 General Emergency Assessment:\n\n"
+                    "1. Check scene safety before approaching.\n"
+                    "2. Check victim responsiveness (tap shoulders and shout).\n"
+                    "3. Check for normal breathing.\n"
+                    "4. Dial 108 immediately for ambulance dispatch.\n\n"
+                    "Please state the specific emergency (e.g. CPR, bleeding, burns, choking, fracture, snakebite) for step-by-step guidance.\n\n"
+                    "[Source: Indian Resuscitation Council & WHO First-Aid Guidelines]"
+                )
+                highlight = "Emergency Triage Assessment"
 
         return AgentChatResponse(
             session_id=request.session_id,

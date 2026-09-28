@@ -99,6 +99,12 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
 
   fun getServerBaseUrl(): String? = sharedPreferences.getString(KEY_SERVER_BASE_URL, null)
 
+  fun saveGeminiApiKey(key: String) {
+    sharedPreferences.edit().putString(KEY_GEMINI_API_KEY, key.trim()).apply()
+  }
+
+  fun getGeminiApiKey(): String? = sharedPreferences.getString(KEY_GEMINI_API_KEY, null)
+
   override fun clear() {
     sharedPreferences.edit().clear().apply()
   }
@@ -118,5 +124,6 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     private const val KEY_AUTH_PROVIDER = "auth_provider"
     private const val KEY_FCM_TOKEN = "fcm_token"
     private const val KEY_SERVER_BASE_URL = "server_base_url"
+    private const val KEY_GEMINI_API_KEY = "gemini_api_key"
   }
 }

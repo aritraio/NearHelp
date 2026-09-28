@@ -42,7 +42,7 @@ class GeminiEmergencyLLM:
 
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
-        self.model_name = settings.GEMINI_MODEL or "gemini-2.5-flash"
+        self.model_name = settings.GEMINI_MODEL or "gemini-2.0-flash"
         self._client = None
         self._init_client()
 
@@ -128,6 +128,55 @@ class GeminiEmergencyLLM:
             highlight = "Seizure Safety"
             return reply, highlight, citations
 
+        if any(k in q_lower for k in ["what can you do", "who are you", "what is nearhelp", "capabilities", "features", "how do you work", "help me"]):
+            reply = (
+                "👋 I am NearHelp AI, your real-time Emergency Crisis & Clinical First-Aid Assistant.\n\n"
+                "Here is how I assist in emergencies:\n"
+                "1. 🩺 Real-Time Triage: Rapidly assess symptoms and guide life-saving interventions for Cardiac Arrest, Severe Bleeding, Choking, Stroke, Burns, Fractures, and Seizures.\n"
+                "2. 🫀 CPR Rhythm & Audio Metronome: Provide AHA/IRC-grounded chest compression rhythm at 110 BPM.\n"
+                "3. ⚠️ Contraindication Shield: Alert against dangerous mistakes like giving oral liquids to unconscious persons or moving spinal trauma victims.\n"
+                "4. 🛡️ Good Samaritan Legal Protection: Explain statutory immunity under Section 134A of the Motor Vehicles Act.\n"
+                "5. 🚑 Paramedic Handover: Generate digital clinical summaries for 108 ambulance crews upon arrival.\n\n"
+                "[Source: NearHelp Clinical AI & AHA Guidelines 2020]"
+            )
+            highlight = "NearHelp Emergency Capabilities"
+            return reply, highlight, citations
+
+        if any(k in q_lower for k in ["chok", "heimlich", "food stuck", "throat", "cant breathe", "গলায়"]):
+            reply = "🚨 Stand behind the victim. Wrap arms around waist. Make a fist just above the navel. Deliver 5 quick, inward and upward abdominal thrusts (Heimlich Maneuver) until the airway clears. If unconscious, lower to floor and start CPR.\n\n[Source: American Red Cross & AHA Choking Guidelines 2020]"
+            highlight = "Heimlich / Choking Relief"
+            return reply, highlight, citations
+
+        if any(k in q_lower for k in ["fracture", "broken bone", "broken leg", "splint", "ভাঙা", "হাড়"]):
+            reply = "🦴 Support and immobilize the injured limb in the exact position found. DO NOT attempt to push bone back or straighten deformed limbs. Apply an ice pack wrapped in a cloth to control swelling and await 108 dispatch.\n\n[Source: NDMA & ATLS Pre-Hospital Trauma Guidelines]"
+            highlight = "Limb Immobilization Protocol"
+            return reply, highlight, citations
+
+        if any(k in q_lower for k in ["stroke", "face drop", "slurred", "arm weak", "paralysis", "মুখ বাকা"]):
+            reply = "🧠 Perform FAST check immediately:\n• F (Face): Ask to smile — does one side droop?\n• A (Arms): Ask to raise both arms — does one drift downward?\n• S (Speech): Ask to repeat a simple sentence — is it slurred?\n• T (Time): Call 108 immediately. Keep victim quiet with head slightly elevated.\n\n[Source: American Stroke Association (ASA) 2019]"
+            highlight = "FAST Stroke Assessment"
+            return reply, highlight, citations
+
+        if any(k in q_lower for k in ["snake", "bite", "venom", "সাপ", "কামড়"]):
+            reply = "🐍 Keep victim completely calm and still to slow venom circulation. Immobilize the bitten limb at or slightly below heart level with a broad bandage. NEVER cut the wound, suck venom, or apply a tourniquet. Rush to the nearest hospital with Anti-Snake Venom (ASV).\n\n[Source: WHO Guidelines for the Management of Snakebites]"
+            highlight = "Snakebite Protocol"
+            return reply, highlight, citations
+
+        if any(k in q_lower for k in ["asthma", "inhaler", "wheez", "breathlessness", "শ্বাসকষ্ট"]):
+            reply = "🫁 Help the person sit upright leaning slightly forward. Administer 4 separate puffs of their blue reliever inhaler (Salbutamol) with 4 deep breaths after each puff. If no improvement within 4 minutes, deliver 4 more puffs and call 108 immediately.\n\n[Source: Global Initiative for Asthma (GINA) 2023]"
+            highlight = "Acute Asthma Relief"
+            return reply, highlight, citations
+
+        if any(k in q_lower for k in ["heat", "sunstroke", "heatstroke", "exhaustion", "লু"]):
+            reply = "☀️ Move victim to a cool, shaded environment immediately. Remove excess clothing. Apply cool, wet towels to the neck, armpits, and groin while fanning vigorously. If conscious, offer cool water in small sips.\n\n[Source: NDMA Heat Wave Guidelines & Wilderness Medical Society]"
+            highlight = "Heat Emergency Management"
+            return reply, highlight, citations
+
+        if any(k in q_lower for k in ["poison", "toxic", "chemical", "swallowed", "বিষ"]):
+            reply = "🧪 DO NOT induce vomiting or administer fluids unless instructed by medical professionals. Keep any container or packaging for paramedic inspection. Check breathing and place in recovery position if drowsy. Call 108 immediately.\n\n[Source: WHO International Programme on Chemical Safety]"
+            highlight = "Poisoning Emergency Protocol"
+            return reply, highlight, citations
+
         # 4. Hybrid RAG Retrieval for Dynamic Question Answering
         rag_passages = await rag_retriever.retrieve(
             query=user_query,
@@ -162,12 +211,12 @@ class GeminiEmergencyLLM:
                     )
                 except Exception as model_err:
                     logger.warning(
-                        "Gemini invocation with model '%s' failed (%s). Retrying with 'gemini-2.5-flash'...",
+                        "Gemini invocation with model '%s' failed (%s). Retrying with 'gemini-1.5-flash'...",
                         self.model_name,
                         model_err,
                     )
                     response = self._client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model="gemini-1.5-flash",
                         contents=prompt,
                     )
                 if response and response.text:
