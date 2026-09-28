@@ -396,6 +396,7 @@ class AIClient:
                         "3. Enforce strict contraindications (No oral fluids to unconscious victims; No moving spinal trauma victims; Never stop CPR for cracked ribs). "
                         "4. Reassure Good Samaritans about Section 134A legal immunity."
                     )
+                    prompt = f"{system_prompt}\n\nBystander question: {request.text}\nWhat is the immediate actionable clinical guidance?"
                     try:
                         response = gemini_client.models.generate_content(
                             model=settings.GEMINI_MODEL,
