@@ -7,7 +7,6 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from app.rag.chunker import ProtocolChunk
 from app.rag.store import vector_store
 from app.schemas.agent import CitationItem
 

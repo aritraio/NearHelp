@@ -403,7 +403,7 @@ class RoutingService:
 
         polyline_points = [
             {"lat": origin_lat, "lng": origin_lon},
-            {"lat": mid_lat_detour_1, "lng": mid_lon_1 if "mid_lon_1" in locals() else mid_lon_detour_1},
+            {"lat": mid_lat_detour_1, "lng": mid_lon_detour_1},
             {"lat": mid_lat_detour_2, "lng": mid_lon_detour_2},
             {"lat": dest_lat, "lng": dest_lon},
         ]

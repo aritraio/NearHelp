@@ -38,11 +38,6 @@ class VisionService:
         # 1. Try Gemini 2.5 Flash / Vision API if key configured
         if settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != "your_gemini_api_key_here":
             try:
-                import google.generativeai as genai
-
-                genai.configure(api_key=settings.GEMINI_API_KEY)
-                model = genai.GenerativeModel(settings.GEMINI_MODEL)
-
                 system_prompt = (
                     "You are an AI Clinical Triage and Emergency Scene Recognition Assistant for NearHelp AI. "
                     "Analyze this emergency scene photograph and extract: "
@@ -53,16 +48,39 @@ class VisionService:
                     "Respond with a strict JSON object with keys: 'scene_description', 'emergency_type', 'hazards', 'injuries', 'confidence'."
                 )
 
-                response = model.generate_content(
-                    [
-                        system_prompt,
-                        {"mime_type": image_mime_type, "data": image_bytes},
-                    ]
-                )
+                response_text = None
+                try:
+                    from google import genai
+                    from google.genai import types
 
-                if response and response.text:
-                    clean_text = response.text.strip()
+                    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+                    response = client.models.generate_content(
+                        model=settings.GEMINI_MODEL,
+                        contents=[
+                            system_prompt,
+                            types.Part.from_bytes(data=image_bytes, mime_type=image_mime_type),
+                        ],
+                    )
+                    if response and response.text:
+                        response_text = response.text
+                except ImportError:
+                    import google.generativeai as legacy_genai
+
+                    legacy_genai.configure(api_key=settings.GEMINI_API_KEY)
+                    model = legacy_genai.GenerativeModel(settings.GEMINI_MODEL)
+                    response = model.generate_content(
+                        [
+                            system_prompt,
+                            {"mime_type": image_mime_type, "data": image_bytes},
+                        ]
+                    )
+                    if response and response.text:
+                        response_text = response.text
+
+                if response_text:
+                    clean_text = response_text.strip()
                     clean_text = clean_text.removeprefix("```json")
+                    clean_text = clean_text.removeprefix("```")
                     clean_text = clean_text.removesuffix("```")
 
                     data = json.loads(clean_text)
@@ -76,7 +94,7 @@ class VisionService:
                         latency,
                     )
             except Exception as e:
-                logger.warning("Gemini 2.5 Vision API call failed: %s", e)
+                logger.warning("Gemini Vision API call failed: %s", e)
 
         # 2. Resilient Fallback / Simulated Analysis for Development & Testing
         latency = (time.perf_counter() - start_time) * 1000.0

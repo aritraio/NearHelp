@@ -25,8 +25,6 @@ from app.schemas.ai import (
     SeverityRequest,
     SeverityResponse,
     SeverityScoreFactors,
-    StepProgressRequest,
-    StepProgressResponse,
     TaxonomyResponse,
 )
 
@@ -132,7 +130,7 @@ class AIClient:
         except Exception as e:
             logger.warning("Unable to reach AI service at %s (%s). Engaging local agent fallback.", target_url, e)
 
-        return self._local_fallback_agent_chat(request, (time.perf_counter() - start_time) * 1000.0)
+        return await self._local_fallback_agent_chat(request, (time.perf_counter() - start_time) * 1000.0)
 
     async def get_protocols(self) -> list[GroundedProtocolResponse]:
         """Fetch all grounded protocols from AI service or local catalog."""
@@ -340,7 +338,7 @@ class AIClient:
             latency_ms=round(latency_ms, 2),
         )
 
-    def _local_fallback_agent_chat(self, request: AgentChatRequest, latency_ms: float) -> AgentChatResponse:
+    async def _local_fallback_agent_chat(self, request: AgentChatRequest, latency_ms: float) -> AgentChatResponse:
         """Local fallback for bystander Q&A chat turn with contraindication and citation enforcement."""
         q_lower = request.text.lower()
         citations = [
@@ -372,7 +370,7 @@ class AIClient:
                 )
             )
         elif any(k in q_lower for k in ["deep", "compress", "chest", "rate", "fast", "speed", "bpm", "depth"]):
-            reply = "✅ Compress 5 to 6 cm (approx 2–2.4 inches) deep at a cadence of 110–120 compressions/minute in the center of the breastbone. Allow complete recoil between compressions.\n\n[Source: AHA CPR Guidelines 2020 §3.2 • IRC BLS 2020 §2]"
+            reply = "✅ Compress 5 to 6 cm (approx 2-2.4 inches) deep at a cadence of 110-120 compressions/minute in the center of the breastbone. Allow complete recoil between compressions.\n\n[Source: AHA CPR Guidelines 2020 §3.2 • IRC BLS 2020 §2]"
             highlight = "AHA / IRC Guideline (110 BPM)"
         elif any(k in q_lower for k in ["aed", "defibrillator", "shock", "pad"]):
             reply = "⚡ Turn ON the AED immediately. Follow voice prompts and adhere electrode pads to the bare dry chest: Upper right chest below collarbone, Lower left chest below armpit. Stand clear during shock!\n\n[Source: AHA CPR Guidelines 2020 §4.1]"
@@ -384,8 +382,46 @@ class AIClient:
             reply = "🛡️ You are 100% legally protected under Section 134A of the Motor Vehicles (Amendment) Act 2019 and Supreme Court 2016 Good Samaritan Guidelines. You cannot be detained, harassed, or held liable.\n\n[Source: Motor Vehicles (Amendment) Act 2019 Section 134A]"
             highlight = "Section 134A MV Act Shield"
         else:
-            reply = "📋 Ensure victim is on a firm flat surface. Check responsiveness and breathing. Begin CPR at 110 BPM and send for nearest AED.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
-            highlight = "Grounded Protocol Step"
+            # Direct Gemini Generative AI Integration when GEMINI_API_KEY is configured
+            gemini_replied = False
+            if settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != "your_gemini_api_key_here":
+                try:
+                    from google import genai
+
+                    gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
+                    system_prompt = (
+                        "You are NearHelp AI, an emergency crisis assistant providing real-time evidence-based first-aid guidance. "
+                        "Rules: 1. Keep guidance direct, urgent, actionable, and concise (under 3-4 sentences). "
+                        "2. Enforce evidence citations in square brackets like [Source: AHA CPR Guidelines 2020 §3.2] or [Source: Section 134A MV Act 2019] or [Source: WHO Essential Trauma Care]. "
+                        "3. Enforce strict contraindications (No oral fluids to unconscious victims; No moving spinal trauma victims; Never stop CPR for cracked ribs). "
+                        "4. Reassure Good Samaritans about Section 134A legal immunity."
+                    )
+                    try:
+                        response = gemini_client.models.generate_content(
+                            model=settings.GEMINI_MODEL,
+                            contents=prompt,
+                        )
+                    except Exception as model_err:
+                        logger.warning(
+                            "Gemini model '%s' failed (%s). Retrying with 'gemini-2.5-flash'...",
+                            settings.GEMINI_MODEL,
+                            model_err,
+                        )
+                        response = gemini_client.models.generate_content(
+                            model="gemini-2.5-flash",
+                            contents=prompt,
+                        )
+
+                    if response and response.text:
+                        reply = response.text.strip()
+                        highlight = "Gemini Clinical Response"
+                        gemini_replied = True
+                except Exception as e:
+                    logger.warning("Direct Gemini invocation fallback failed: %s", e)
+
+            if not gemini_replied:
+                reply = "📋 Ensure victim is on a firm flat surface. Check responsiveness and breathing. Begin CPR at 110 BPM and send for nearest AED.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
+                highlight = "Grounded Protocol Step"
 
         return AgentChatResponse(
             session_id=request.session_id,
@@ -440,7 +476,7 @@ class AIClient:
                     ProtocolStepItem(
                         step_number=2,
                         title="Begin High-Quality Chest Compressions (110 BPM)",
-                        action_instruction="Place heel of hand on center of chest. Interlock fingers. Push hard and fast at depth of 5–6 cm at 110 BPM.",
+                        action_instruction="Place heel of hand on center of chest. Interlock fingers. Push hard and fast at depth of 5-6 cm at 110 BPM.",
                         warning_note="Allow full chest recoil after each push.",
                         is_cpr_step=True,
                         beat_bpm=110,
@@ -518,7 +554,7 @@ class AIClient:
             ],
             destination_hospital="AMRI Hospital Salt Lake Emergency Trauma Center",
             legal_shield_compliance="Section 134A Motor Vehicles (Amendment) Act 2019",
-            digital_signature_hash=f"SHA256:7f9a2b8c4d1e0f3a6b5c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8",
+            digital_signature_hash="SHA256:7f9a2b8c4d1e0f3a6b5c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8",
         )
 
     def _local_fallback_triage(

@@ -6,8 +6,6 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.agent.knowledge import get_grounded_protocol
-from app.core.config import settings
 from app.rag.guardrails import hallucination_guardrails
 from app.rag.retriever import rag_retriever
 from app.rag.store import vector_store

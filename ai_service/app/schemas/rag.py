@@ -1,6 +1,5 @@
 """NearHelp AI — RAG Knowledge Base Schemas & Contracts."""
 
-from typing import Any
 
 from pydantic import BaseModel, Field
 

@@ -53,8 +53,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_DEFAULT_PER_MINUTE: int = 100
     IDEMPOTENCY_EXPIRE_SECONDS: int = 86400  # 24 hours
 
-    # AI Microservice URL
+    # AI Microservice URL & Direct Gemini Fallback
     AI_SERVICE_URL: str = "http://localhost:8001"
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash"
 
     from pydantic import model_validator
 

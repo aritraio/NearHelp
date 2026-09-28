@@ -59,7 +59,7 @@ class ClinicalSemanticVectorizer:
         # Accidents & Crime
         "accident": 12.0, "crash": 12.0, "collision": 12.0, "car": 8.0, "truck": 8.0, "drowning": 14.0,
         "water": 8.0, "submerged": 12.0, "assault": 14.0, "knife": 14.0, "stab": 15.0, "stabbed": 15.0, "weapon": 12.0,
-        "flood": 12.0, "collapse": 12.0, "rubble": 12.0, "trapped": 12.0, "debris": 10.0, "balcony": 10.0,
+        "flood": 12.0, "rubble": 12.0, "trapped": 12.0, "debris": 10.0, "balcony": 10.0,
         # Bengali Clinical Tokens
         "পড়ে": 10.0, "শ্বাস": 14.0, "বুক": 12.0, "বুকে": 14.0, "ব্যথা": 12.0, "প্রচণ্ড": 12.0, "রক্ত": 12.0, "রক্তপাত": 14.0,
         "আগুন": 14.0, "ধোঁয়া": 12.0, "ধোঁয়ায়": 12.0, "গ্যাস": 14.0, "সিলিন্ডার": 14.0, "লিক": 14.0,
@@ -67,7 +67,7 @@ class ClinicalSemanticVectorizer:
         "সাড়া": 12.0, "ডাকলে": 10.0, "মাটিতে": 10.0, "বাড়ি": 8.0, "বাড়িতে": 10.0,
         # Hindi Transliterated Tokens
         "behosh": 14.0, "saans": 14.0, "chhati": 12.0, "dard": 10.0, "khoon": 12.0, "aag": 14.0,
-        "cylinder": 14.0, "mirgi": 14.0, "daura": 12.0, "jal": 10.0, "haddi": 12.0, "toot": 10.0,
+        "mirgi": 14.0, "daura": 12.0, "jal": 10.0, "haddi": 12.0, "toot": 10.0,
         "chot": 10.0, "ruk": 8.0, "patti": 8.0,
     }
 
@@ -162,19 +162,35 @@ class EmbeddingService:
         """Generate embedding vector using Gemini API or local vectorizer."""
         if settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != "your_gemini_api_key_here":
             try:
-                import google.generativeai as genai
+                from google import genai
 
-                genai.configure(api_key=settings.GEMINI_API_KEY)
-                result = genai.embed_content(
+                client = genai.Client(api_key=settings.GEMINI_API_KEY)
+                result = client.models.embed_content(
                     model=settings.EMBEDDING_MODEL,
-                    content=text,
-                    task_type="classification",
+                    contents=text,
                 )
-                if result.get("embedding"):
-                    emb = result["embedding"]
+                if result and result.embeddings:
+                    emb = result.embeddings[0].values
                     norm = math.sqrt(sum(x * x for x in emb))
                     if norm > 0:
                         return [x / norm for x in emb]
+            except ImportError:
+                try:
+                    import google.generativeai as legacy_genai
+
+                    legacy_genai.configure(api_key=settings.GEMINI_API_KEY)
+                    result = legacy_genai.embed_content(
+                        model=settings.EMBEDDING_MODEL,
+                        content=text,
+                        task_type="classification",
+                    )
+                    if result.get("embedding"):
+                        emb = result["embedding"]
+                        norm = math.sqrt(sum(x * x for x in emb))
+                        if norm > 0:
+                            return [x / norm for x in emb]
+                except Exception as e:
+                    logger.warning("Legacy Gemini embedding failed: %s", e)
             except Exception as e:
                 logger.warning(
                     "Gemini embedding call failed, falling back to local vectorizer: %s",
@@ -230,7 +246,6 @@ class EmbeddingService:
                     matched_symptoms.append(symptom)
 
             # Reference text keyword overlap
-            ref_overlap_count = 0
             total_overlap_words = 0
             for ref_t in profile.reference_texts:
                 ref_words = [w.lower() for w in re.sub(r"[^\w\s]", " ", ref_t).split() if len(w) >= 2]

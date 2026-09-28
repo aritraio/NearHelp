@@ -25,6 +25,8 @@ from app.schemas.agent import (
     ContraindicationAlert,
     GroundedProtocolResponse,
 )
+from app.rag.guardrails import hallucination_guardrails
+from app.rag.retriever import rag_retriever
 from langgraph.graph import END, StateGraph
 
 logger = logging.getLogger(__name__)
@@ -33,9 +35,6 @@ logger = logging.getLogger(__name__)
 # ==============================================================================
 # GEMINI 2.5 CLIENT WRAPPER (GOOGLE-GENAI SDK WITH RESILIENT FALLBACK)
 # ==============================================================================
-
-from app.rag.guardrails import hallucination_guardrails
-from app.rag.retriever import rag_retriever
 
 
 class GeminiEmergencyLLM:
@@ -156,10 +155,21 @@ class GeminiEmergencyLLM:
                 )
                 prompt = f"{system_prompt}\n\nBystander question: {user_query}\nCurrent protocol step: {current_step + 1}. What is the immediate actionable instruction?"
                 
-                response = self._client.models.generate_content(
-                    model=self.model_name,
-                    contents=prompt,
-                )
+                try:
+                    response = self._client.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt,
+                    )
+                except Exception as model_err:
+                    logger.warning(
+                        "Gemini invocation with model '%s' failed (%s). Retrying with 'gemini-2.5-flash'...",
+                        self.model_name,
+                        model_err,
+                    )
+                    response = self._client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=prompt,
+                    )
                 if response and response.text:
                     raw_text = response.text.strip()
                     sanitized_res = hallucination_guardrails.sanitize_llm_response(raw_text, citations)
