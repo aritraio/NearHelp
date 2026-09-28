@@ -83,6 +83,18 @@ import com.example.nearhelp.theme.VictimPurpleCard
 import com.example.nearhelp.theme.VictimTextDark
 import com.example.nearhelp.theme.VictimTextMuted
 import com.example.nearhelp.ui.victim.MapPlaceholder
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Circle
+import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.example.nearhelp.ui.victim.StatusBadge
 import com.example.nearhelp.ui.victim.VictimOutlineButton
 import com.example.nearhelp.ui.victim.VictimPrimaryButton
@@ -142,13 +154,59 @@ fun LiveTrackingScreen(
       }
     }
 
+    val victimTrackingPos = remember { LatLng(22.5726, 88.3639) }
+    val responderTrackingPos = remember { LatLng(22.5785, 88.3695) }
+    val trackingCameraState = rememberCameraPositionState {
+      position = CameraPosition.fromLatLngZoom(victimTrackingPos, 14.8f)
+    }
+
     // Map with route + markers
     Box(
-      modifier = Modifier.fillMaxWidth().clip(VictimShapes.Card20)
+      modifier = Modifier.fillMaxWidth().height(320.dp).clip(VictimShapes.Card20)
         .background(Color(0xFFE8EEF3)).border(1.dp, VictimBorder, VictimShapes.Card20),
     ) {
-      MapPlaceholder(modifier = Modifier.height(300.dp)) {
-        Box(modifier = Modifier.fillMaxSize()) {
+      GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = trackingCameraState,
+        properties = MapProperties(mapType = MapType.NORMAL),
+        uiSettings = MapUiSettings(
+          zoomControlsEnabled = false,
+          myLocationButtonEnabled = false,
+          compassEnabled = false,
+          mapToolbarEnabled = false,
+        ),
+      ) {
+        Circle(
+          center = victimTrackingPos,
+          radius = 350.0,
+          fillColor = Color(0x22DC2626),
+          strokeColor = Color(0xFFDC2626),
+          strokeWidth = 2.5f,
+        )
+        Marker(
+          state = MarkerState(position = victimTrackingPos),
+          title = "You (Victim)",
+          icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+        )
+        Marker(
+          state = MarkerState(position = responderTrackingPos),
+          title = "Priya (Responder)",
+          snippet = "ETA 2 mins",
+          icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+        )
+        Polyline(
+          points = listOf(
+            responderTrackingPos,
+            LatLng(22.5760, 88.3670),
+            LatLng(22.5740, 88.3655),
+            victimTrackingPos
+          ),
+          color = Color(0xFF2563EB),
+          width = 10f,
+        )
+      }
+
+      Box(modifier = Modifier.fillMaxSize()) {
           // Route line suggestion
           Box(modifier = Modifier.align(Alignment.Center).size(width = 8.dp, height = 200.dp).background(Color(0xFF2563EB), RoundedCornerShape(4.dp)))
           // Priya bubble top
@@ -220,7 +278,6 @@ fun LiveTrackingScreen(
             Text(text = "Kolkata, West Bengal", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = VictimTextDark)
           }
         }
-      }
       if (isArrived) {
         Box(
           modifier = Modifier.align(Alignment.TopCenter).padding(top = 64.dp)

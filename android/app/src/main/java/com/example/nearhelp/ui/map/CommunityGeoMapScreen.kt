@@ -58,6 +58,20 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.rememberCoroutineScope
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -140,9 +154,11 @@ data class EmergencyMapFacility(
   val status: String = "Open 24 hours",
   val subDetail: String,
   val phone: String,
-  val pinNormalizedX: Float, // -1f (left) to 1f (right) relative to center
-  val pinNormalizedY: Float, // -1f (top) to 1f (bottom) relative to center
-  val icon: ImageVector,
+  val pinNormalizedX: Float = 0f,
+  val pinNormalizedY: Float = 0f,
+  val icon: ImageVector = Icons.Default.LocalHospital,
+  val lat: Double = 22.5804,
+  val lng: Double = 88.4378,
 )
 
 /**
@@ -162,6 +178,13 @@ fun CommunityGeoMapScreen(
 ) {
   val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
+  val coroutineScope = rememberCoroutineScope()
+  val incidentCenter = remember(uiState.incident.lat, uiState.incident.lng) {
+    LatLng(uiState.incident.lat, uiState.incident.lng)
+  }
+  val cameraPositionState = rememberCameraPositionState {
+    position = CameraPosition.fromLatLngZoom(incidentCenter, 14.5f)
+  }
 
   var searchQuery by remember { mutableStateOf("") }
   var selectedCategory by remember { mutableStateOf(EmergencyMapCategory.HOSPITALS) }
@@ -194,6 +217,8 @@ fun CommunityGeoMapScreen(
         status = "Open 24 hours",
         subDetail = "${hosp.bedAvailability} beds • ${hosp.traumaLevel}",
         phone = hosp.emergencyHelpline,
+        lat = hosp.lat,
+        lng = hosp.lng,
         pinNormalizedX = when (index) {
           0 -> -0.42f
           1 -> 0.45f
@@ -210,27 +235,27 @@ fun CommunityGeoMapScreen(
 
     val defaultHospitals = if (hospitalsFromState.isEmpty()) {
       listOf(
-        EmergencyMapFacility("hosp_1", "AMRI Hospitals — Salt Lake", EmergencyMapCategory.HOSPITALS, "1.8 km", 1.8, "Open 24 hours", "38 beds available • Trauma Level 1", "033 6606 3800", -0.45f, -0.35f, Icons.Default.LocalHospital),
-        EmergencyMapFacility("hosp_2", "Apollo Multispeciality Hospitals", EmergencyMapCategory.HOSPITALS, "2.9 km", 2.9, "Open 24 hours", "64 beds available • Cardiac Center", "033 2320 3040", -0.35f, 0.25f, Icons.Default.LocalHospital),
-        EmergencyMapFacility("hosp_3", "Fortis Hospital Anandapur", EmergencyMapCategory.HOSPITALS, "4.6 km", 4.6, "Open 24 hours", "51 beds available • Acute Care", "033 6628 4444", 0.48f, -0.12f, Icons.Default.LocalHospital),
-        EmergencyMapFacility("hosp_4", "ILS Hospitals — Salt Lake", EmergencyMapCategory.HOSPITALS, "2.1 km", 2.1, "Open 24 hours", "22 beds available • 24/7 ER", "033 4031 5000", 0.35f, 0.32f, Icons.Default.LocalHospital),
+        EmergencyMapFacility("hosp_1", "AMRI Hospitals — Salt Lake", EmergencyMapCategory.HOSPITALS, "1.8 km", 1.8, "Open 24 hours", "38 beds available • Trauma Level 1", "033 6606 3800", -0.45f, -0.35f, Icons.Default.LocalHospital, 22.5712, 88.4120),
+        EmergencyMapFacility("hosp_2", "Apollo Multispeciality Hospitals", EmergencyMapCategory.HOSPITALS, "2.9 km", 2.9, "Open 24 hours", "64 beds available • Cardiac Center", "033 2320 3040", -0.35f, 0.25f, Icons.Default.LocalHospital, 22.5685, 88.4012),
+        EmergencyMapFacility("hosp_3", "Fortis Hospital Anandapur", EmergencyMapCategory.HOSPITALS, "4.6 km", 4.6, "Open 24 hours", "51 beds available • Acute Care", "033 6628 4444", 0.48f, -0.12f, Icons.Default.LocalHospital, 22.5180, 88.4010),
+        EmergencyMapFacility("hosp_4", "ILS Hospitals — Salt Lake", EmergencyMapCategory.HOSPITALS, "2.1 km", 2.1, "Open 24 hours", "22 beds available • 24/7 ER", "033 4031 5000", 0.35f, 0.32f, Icons.Default.LocalHospital, 22.5890, 88.4200),
       )
     } else {
       hospitalsFromState
     }
 
     val pharmacies = listOf(
-      EmergencyMapFacility("pharm_1", "Apollo Pharmacy — Sector V", EmergencyMapCategory.PHARMACIES, "450 m", 0.45, "Open 24 hours", "Emergency Meds & Oxygen Cylinders", "+91 98300 22114", -0.22f, -0.18f, Icons.Default.LocalPharmacy),
-      EmergencyMapFacility("pharm_2", "Frank Ross Pharmacy — Salt Lake", EmergencyMapCategory.PHARMACIES, "850 m", 0.85, "Open 24 hours", "Life-Saving Prescriptions & First Aid", "+91 98311 44552", 0.28f, -0.28f, Icons.Default.LocalPharmacy),
-      EmergencyMapFacility("pharm_3", "MedPlus 24x7 Chemist", EmergencyMapCategory.PHARMACIES, "1.2 km", 1.2, "Open 24 hours", "Critical Care Supplies & Surgical Items", "+91 98305 66771", -0.38f, 0.15f, Icons.Default.LocalPharmacy),
-      EmergencyMapFacility("pharm_4", "Suraksha Pharma Depot", EmergencyMapCategory.PHARMACIES, "1.7 km", 1.7, "Open 24 hours", "Prescriptions & Nebulizer Kits", "+91 98322 88990", 0.42f, 0.22f, Icons.Default.LocalPharmacy),
+      EmergencyMapFacility("pharm_1", "Apollo Pharmacy — Sector V", EmergencyMapCategory.PHARMACIES, "450 m", 0.45, "Open 24 hours", "Emergency Meds & Oxygen Cylinders", "+91 98300 22114", -0.22f, -0.18f, Icons.Default.LocalPharmacy, 22.5820, 88.4350),
+      EmergencyMapFacility("pharm_2", "Frank Ross Pharmacy — Salt Lake", EmergencyMapCategory.PHARMACIES, "850 m", 0.85, "Open 24 hours", "Life-Saving Prescriptions & First Aid", "+91 98311 44552", 0.28f, -0.28f, Icons.Default.LocalPharmacy, 22.5790, 88.4410),
+      EmergencyMapFacility("pharm_3", "MedPlus 24x7 Chemist", EmergencyMapCategory.PHARMACIES, "1.2 km", 1.2, "Open 24 hours", "Critical Care Supplies & Surgical Items", "+91 98305 66771", -0.38f, 0.15f, Icons.Default.LocalPharmacy, 22.5760, 88.4360),
+      EmergencyMapFacility("pharm_4", "Suraksha Pharma Depot", EmergencyMapCategory.PHARMACIES, "1.7 km", 1.7, "Open 24 hours", "Prescriptions & Nebulizer Kits", "+91 98322 88990", 0.42f, 0.22f, Icons.Default.LocalPharmacy, 22.5840, 88.4420),
     )
 
     val otherHelp = listOf(
-      EmergencyMapFacility("emerg_1", "Sector V Police Station", EmergencyMapCategory.OTHER_HELP, "900 m", 0.9, "24/7 Police Outpost", "Rapid Response Patrol • Emergency Police", "100", -0.25f, 0.22f, Icons.Default.LocalPolice),
-      EmergencyMapFacility("emerg_2", "EMS Rapid Ambulance Depot", EmergencyMapCategory.OTHER_HELP, "600 m", 0.6, "24/7 EMS Dispatch", "Advanced Life Support Fleet", "108", -0.15f, -0.28f, Icons.Default.LocalHospital),
-      EmergencyMapFacility("emerg_3", "Central Blood Bank & Plasma Unit", EmergencyMapCategory.OTHER_HELP, "2.2 km", 2.2, "Open 24 hours", "All Blood Groups • Emergency Support", "033 2357 3200", 0.25f, 0.35f, Icons.Default.Favorite),
-      EmergencyMapFacility("emerg_4", "Disaster Emergency Helpline", EmergencyMapCategory.OTHER_HELP, "1.1 km", 1.1, "24/7 Helpline", "Toll-Free Emergency Response", "112", 0.38f, -0.24f, Icons.Default.Shield),
+      EmergencyMapFacility("emerg_1", "Sector V Police Station", EmergencyMapCategory.OTHER_HELP, "900 m", 0.9, "24/7 Police Outpost", "Rapid Response Patrol • Emergency Police", "100", -0.25f, 0.22f, Icons.Default.LocalPolice, 22.5810, 88.4320),
+      EmergencyMapFacility("emerg_2", "EMS Rapid Ambulance Depot", EmergencyMapCategory.OTHER_HELP, "600 m", 0.6, "24/7 EMS Dispatch", "Advanced Life Support Fleet", "108", -0.15f, -0.28f, Icons.Default.LocalHospital, 22.5830, 88.4390),
+      EmergencyMapFacility("emerg_3", "Central Blood Bank & Plasma Unit", EmergencyMapCategory.OTHER_HELP, "2.2 km", 2.2, "Open 24 hours", "All Blood Groups • Emergency Support", "033 2357 3200", 0.25f, 0.35f, Icons.Default.Favorite, 22.5740, 88.4430),
+      EmergencyMapFacility("emerg_4", "Disaster Emergency Helpline", EmergencyMapCategory.OTHER_HELP, "1.1 km", 1.1, "24/7 Helpline", "Toll-Free Emergency Response", "112", 0.38f, -0.24f, Icons.Default.Shield, 22.5850, 88.4360),
     )
 
     defaultHospitals + pharmacies + otherHelp
@@ -255,32 +280,68 @@ fun CommunityGeoMapScreen(
         .weight(1f)
         .fillMaxWidth()
     ) {
-      // 1. FULL SCREEN INTERACTIVE MAP CANVAS (Pinch-to-zoom, Pan, and Auto-Contracting)
-      FullScreenEmergencyMap(
-        zoomLevel = uiState.zoomLevel,
-        panOffsetX = uiState.panOffsetX,
-        panOffsetY = uiState.panOffsetY,
-        onPan = { dx, dy ->
-          if (isSheetExpanded) isSheetExpanded = false
-          viewModel.updatePan(dx, dy)
-        },
-        onZoom = { factor ->
-          if (isSheetExpanded) isSheetExpanded = false
-          viewModel.zoomBy(factor)
-        },
+      // 1. FULL SCREEN LIVE GOOGLE MAP
+      GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(mapType = MapType.NORMAL),
+        uiSettings = MapUiSettings(
+          zoomControlsEnabled = false,
+          myLocationButtonEnabled = false,
+          compassEnabled = true,
+          mapToolbarEnabled = false,
+        ),
         onMapClick = {
           if (isSheetExpanded) isSheetExpanded = false
-        },
-        facilities = allFacilities,
-        selectedCategory = selectedCategory,
-        selectedFacilityId = selectedFacilityId,
-        onSelectFacility = { facility ->
-          selectedFacilityId = facility.id
-          selectedCategory = facility.category
-          isSheetExpanded = true
-        },
-        modifier = Modifier.fillMaxSize(),
-      )
+        }
+      ) {
+        // Dynamic search/dispatch radius circle
+        Circle(
+          center = incidentCenter,
+          radius = uiState.incident.searchRadiusKm * 1000.0,
+          fillColor = Color(0x22DC2626),
+          strokeColor = Color(0xFFDC2626),
+          strokeWidth = 3f,
+        )
+
+        // Incident marker
+        Marker(
+          state = MarkerState(position = incidentCenter),
+          title = "Emergency Incident",
+          snippet = uiState.incident.locationName,
+          icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+        )
+
+        // Responders
+        uiState.incident.responders.forEach { resp ->
+          Marker(
+            state = MarkerState(position = LatLng(resp.lat, resp.lng)),
+            title = resp.name,
+            snippet = "${resp.role} • ${resp.etaMinutes} min away",
+            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN),
+          )
+        }
+
+        // Filtered Facilities (Hospitals, Pharmacies, Police)
+        filteredFacilities.forEach { facility ->
+          Marker(
+            state = MarkerState(position = LatLng(facility.lat, facility.lng)),
+            title = facility.name,
+            snippet = "${facility.subDetail} • ${facility.distance}",
+            icon = when (facility.category) {
+              EmergencyMapCategory.HOSPITALS -> BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+              EmergencyMapCategory.PHARMACIES -> BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
+              EmergencyMapCategory.OTHER_HELP -> BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+            },
+            onClick = {
+              selectedFacilityId = facility.id
+              selectedCategory = facility.category
+              isSheetExpanded = true
+              true
+            }
+          )
+        }
+      }
 
       // Transparent touch listener above bottom sheet to contract menu immediately when map is tapped
       if (isSheetExpanded) {
@@ -309,7 +370,9 @@ fun CommunityGeoMapScreen(
           contentDescription = "Recenter GPS",
           onClick = {
             if (isSheetExpanded) isSheetExpanded = false
-            viewModel.resetView()
+            coroutineScope.launch {
+              cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(incidentCenter, 14.5f), 500)
+            }
           },
         )
         FloatingMapButton(
@@ -317,7 +380,9 @@ fun CommunityGeoMapScreen(
           contentDescription = "Zoom In",
           onClick = {
             if (isSheetExpanded) isSheetExpanded = false
-            viewModel.zoomIn()
+            coroutineScope.launch {
+              cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 250)
+            }
           },
         )
         FloatingMapButton(
@@ -325,7 +390,9 @@ fun CommunityGeoMapScreen(
           contentDescription = "Zoom Out",
           onClick = {
             if (isSheetExpanded) isSheetExpanded = false
-            viewModel.zoomOut()
+            coroutineScope.launch {
+              cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 250)
+            }
           },
         )
       }
