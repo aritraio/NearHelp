@@ -101,4 +101,8 @@ dependencies {
 
   // Serialization
   implementation(libs.kotlinx.serialization.json)
+
+  // Google Maps SDK & Compose
+  implementation(libs.maps.compose)
+  implementation(libs.play.services.maps)
 }
