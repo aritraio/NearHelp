@@ -171,7 +171,14 @@ class AiCrisisAssistantViewModel(
   fun selectProtocol(conditionId: String) {
     val found = _uiState.value.protocols.firstOrNull { it.conditionId == conditionId }
     if (found != null) {
-      _uiState.update { it.copy(conditionId = conditionId, protocol = found) }
+      val questions = (repository as? com.example.nearhelp.data.repository.AiAgentRepository)?.getQuickQuestionsForCondition(conditionId)
+      _uiState.update { state ->
+        state.copy(
+          conditionId = conditionId,
+          protocol = found,
+          quickQuestions = questions ?: state.quickQuestions
+        )
+      }
     }
   }
 
@@ -322,6 +329,7 @@ class AiCrisisAssistantViewModel(
           state.copy(
             chatMessages = finalMessages,
             activeContraindication = response.contraindications.firstOrNull(),
+            quickQuestions = if (response.suggestedQuickQuestions.isNotEmpty()) response.suggestedQuickQuestions else state.quickQuestions,
             isLoading = false,
             chatHistory = updateHistoryWithThread(state.chatHistory, threadId, finalMessages, nowStr)
           )

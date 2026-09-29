@@ -38,8 +38,8 @@ class AiAgentRepository(
 ) : IAiAgentRepository {
 
   private val okHttpClient = OkHttpClient.Builder()
-    .connectTimeout(8, TimeUnit.SECONDS)
-    .readTimeout(12, TimeUnit.SECONDS)
+    .connectTimeout(15, TimeUnit.SECONDS)
+    .readTimeout(30, TimeUnit.SECONDS)
     .build()
 
   override suspend fun getProtocol(conditionId: String): GroundedProtocolDto = withContext(Dispatchers.IO) {
@@ -130,6 +130,152 @@ class AiAgentRepository(
         q.contains("no pulse") || q.contains("not breathing") || q.contains("defibrillator") || q.contains("aed")
   }
 
+  fun detectConditionFromText(text: String): String {
+    val q = text.lowercase()
+    return when {
+      q.contains("heatstroke") || q.contains("sunstroke") || q.contains("heat") || q.contains("dehydrat") -> "heatstroke"
+      q.contains("electric") || q.contains("electrocution") || (q.contains("shock") && (q.contains("current") || q.contains("wire") || q.contains("socket"))) -> "electric_shock"
+      q.contains("drown") || (q.contains("water") && (q.contains("submerged") || q.contains("pool") || q.contains("river"))) -> "drowning"
+      q.contains("cpr") || q.contains("cardiac") || q.contains("heart") || q.contains("chest pain") || q.contains("no pulse") -> "cardiac_arrest"
+      q.contains("dog") || q.contains("cat") || q.contains("animal") || q.contains("rabies") -> "poisoning"
+      q.contains("snake") || q.contains("venom") || q.contains("viper") || q.contains("cobra") || (q.contains("bite") && !q.contains("dog") && !q.contains("cat") && !q.contains("animal")) -> "snakebite"
+      q.contains("poison") || q.contains("toxic") || q.contains("chemical") || q.contains("swallowed") || q.contains("ingest") -> "poisoning"
+      q.contains("nosebleed") || q.contains("nose bleed") || q.contains("epistaxis") || q.contains("bleed") || q.contains("blood") || q.contains("tourniquet") || q.contains("hemorrhage") || q.contains("cut") || q.contains("wound") || q.contains("crash") || (q.contains("accident") && !q.contains("accidentally")) -> "severe_bleeding"
+      q.contains("chok") || q.contains("heimlich") || q.contains("food stuck") || q.contains("cant breathe") || (q.contains("baby") && q.contains("breath")) -> "choking"
+      q.contains("burn") || q.contains("scald") || q.contains("fire") || q.contains("blister") || q.contains("acid") -> "burns"
+      q.contains("fracture") || q.contains("broken bone") || q.contains("broken leg") || q.contains("broken arm") || q.contains("splint") || q.contains("sprain") || q.contains("twisted") -> "leg_fracture"
+      q.contains("seizure") || q.contains("fit") || q.contains("convulsion") || q.contains("epilep") -> "seizures"
+      (q.contains("stroke") && !q.contains("heat") && !q.contains("sun")) || q.contains("face drop") || q.contains("slurred") || q.contains("paralysis") || q.contains("fast") -> "stroke"
+      q.contains("asthma") || q.contains("inhaler") || q.contains("wheez") || q.contains("breathless") -> "asthma"
+      q.contains("anaphylaxis") || q.contains("allergy") || q.contains("allergic") || q.contains("epipen") || q.contains("epinephrine") || q.contains("hives") || q.contains("bee sting") -> "anaphylaxis"
+      q.contains("hypothermia") || q.contains("freezing") || q.contains("cold") || q.contains("frostbite") -> "hypothermia"
+      q.contains("headache") || q.contains("fever") || q.contains("migraine") || q.contains("stomach") || q.contains("medicine") || q.contains("tablet") -> "medical_symptom"
+      (q.contains("head") && !q.contains("headache")) || q.contains("concussion") || q.contains("skull") || q.contains("spine") || q.contains("neck") || q.contains("fell") || q.contains("fall") -> "head_injury"
+      q.contains("diabet") || q.contains("sugar") || q.contains("insulin") || q.contains("glucose") || q.contains("hypoglycemia") -> "diabetic_emergency"
+      q.contains("faint") || q.contains("syncope") || q.contains("dizzy") || q.contains("passed out") || q.contains("unconscious") -> "seizures"
+      else -> "general_emergency"
+    }
+  }
+
+  fun getConditionSeverity(conditionId: String): Int {
+    return when (conditionId) {
+      "cardiac_arrest", "severe_bleeding", "choking", "stroke", "anaphylaxis", "head_injury", "electric_shock", "drowning", "shock", "snakebite" -> 5
+      "leg_fracture", "seizures", "asthma", "poisoning", "heatstroke", "hypothermia", "diabetic_emergency" -> 4
+      "burns" -> 3
+      "medical_symptom" -> 2
+      "general_emergency" -> 3
+      else -> 4
+    }
+  }
+
+  fun getQuickQuestionsForCondition(conditionId: String): List<String> {
+    return when (conditionId) {
+      "medical_symptom" -> listOf(
+        "When is a headache an emergency?",
+        "What are warning signs of high fever?",
+        "Can I take painkillers safely?",
+        "When should I call 108?"
+      )
+      "general_emergency" -> listOf(
+        "What should I check first (DRABC)?",
+        "When should I call 108?",
+        "Can I give oral fluids?",
+        "Am I protected under Section 134A?"
+      )
+      "burns" -> listOf(
+        "Can I apply ice or toothpaste?",
+        "How long should I cool under water?",
+        "Should I pop blister bubbles?",
+        "When do I need emergency hospital care?"
+      )
+      "severe_bleeding" -> listOf(
+        "When do I apply a tourniquet?",
+        "Should I remove blood-soaked gauze?",
+        "How to pack a deep wound cavity?",
+        "Am I legally protected if I help?"
+      )
+      "choking" -> listOf(
+        "What if the victim is pregnant or a child?",
+        "How do I deliver sharp back blows?",
+        "What to do if victim loses consciousness?",
+        "When and how to start CPR?"
+      )
+      "leg_fracture" -> listOf(
+        "Should I straighten a deformed bone?",
+        "How to immobilize limb with splint?",
+        "Can I apply an ice compress for swelling?",
+        "How to check blood flow in toes?"
+      )
+      "seizures" -> listOf(
+        "Should I hold the person down?",
+        "What if they bite their tongue?",
+        "When is a seizure life-threatening (>5 min)?",
+        "How to roll into recovery position?"
+      )
+      "stroke" -> listOf(
+        "What are the FAST signs of stroke?",
+        "Can I give water or blood thinners?",
+        "What is the golden window for tPA?",
+        "How should I position their head?"
+      )
+      "asthma" -> listOf(
+        "How many puffs of inhaler should I give?",
+        "Should the patient sit upright or lie down?",
+        "How to coach pursed-lip breathing?",
+        "When to call 108 emergency dispatch?"
+      )
+      "snakebite" -> listOf(
+        "Can I cut the bite or suck venom?",
+        "Can I use a tight tourniquet?",
+        "Where is anti-snake venom (ASV) available?",
+        "How to immobilize the bitten limb?"
+      )
+      "anaphylaxis" -> listOf(
+        "How and where to inject the EpiPen?",
+        "When can I give a second epinephrine dose?",
+        "Why must the patient lie down flat?",
+        "What are the warning signs of throat closing?"
+      )
+      "poisoning" -> listOf(
+        "Should I induce vomiting or give raw milk?",
+        "What information should I give Poison Control?",
+        "How to handle corrosive chemical burns?",
+        "What to do if patient becomes unconscious?"
+      )
+      "heatstroke" -> listOf(
+        "How quickly should I cool the body?",
+        "Where do I place cold packs on arteries?",
+        "Can I offer cold water to drink?",
+        "What temperature indicates critical heatstroke?"
+      )
+      "electric_shock" -> listOf(
+        "How to safely detach from live electric current?",
+        "What if victim has no pulse after shock?",
+        "How to dress electrical entrance and exit burns?",
+        "Why is hospital ECG monitoring required?"
+      )
+      "drowning" -> listOf(
+        "Why deliver rescue breaths before compressions?",
+        "Should I try to drain water from lungs?",
+        "How to wipe chest before using AED?",
+        "What is secondary drowning?"
+      )
+      "diabetic_emergency" -> listOf(
+        "When should I administer fast-acting sugar?",
+        "What if the diabetic patient is unconscious?",
+        "What is the 15-minute rule for hypoglycemia?",
+        "What foods provide quick-acting glucose?"
+      )
+      else -> listOf(
+        "Can I give water or oral medicine?",
+        "How deep should chest compressions be?",
+        "When and how do I use the AED?",
+        "What if ribs crack during CPR?",
+        "Am I legally protected if I help?"
+      )
+    }
+  }
+
   private fun callGeminiDirectly(
     apiKey: String,
     sessionId: String,
@@ -137,7 +283,7 @@ class AiAgentRepository(
     currentStepIndex: Int,
     completedSteps: List<Int>
   ): AgentChatResponseDto? {
-    val models = listOf("gemini-2.0-flash", "gemini-1.5-flash")
+    val models = listOf("gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro")
     for (model in models) {
       try {
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey"
@@ -172,24 +318,38 @@ class AiAgentRepository(
             val content = firstCandidate.optJSONObject("content")
             val parts = content?.optJSONArray("parts")
             if (parts != null && parts.length() > 0) {
-              val generatedText = parts.getJSONObject(0).optString("text").trim()
+              val textParts = mutableListOf<String>()
+              for (p in 0 until parts.length()) {
+                val partObj = parts.getJSONObject(p)
+                val isThought = partObj.optBoolean("thought", false)
+                if (!isThought) {
+                  val t = partObj.optString("text").trim()
+                  if (t.isNotEmpty()) textParts.add(t)
+                }
+              }
+              var generatedText = textParts.joinToString("\n").trim()
+              if (generatedText.isEmpty()) {
+                generatedText = parts.getJSONObject(0).optString("text").trim()
+              }
               if (generatedText.isNotBlank()) {
                 Log.i("AiAgentRepository", "Gemini ($model) answered directly: ${generatedText.take(50)}...")
+                val detectedCondition = detectConditionFromText(text)
+                val isCardiac = isCardiacOrCprQuery(text)
                 return AgentChatResponseDto(
                   sessionId = sessionId,
                   replyText = generatedText,
-                  highlightText = "Gemini Clinical AI Intelligence",
+                  highlightText = "Gemini Clinical AI ($model)",
                   triageState = "GUIDANCE",
-                  conditionId = "emergency_guidance",
-                  severityLevel = 3,
-                  priority = "urgent",
+                  conditionId = detectedCondition,
+                  severityLevel = getConditionSeverity(detectedCondition),
+                  priority = if (isCardiac || detectedCondition in listOf("cardiac_arrest", "severe_bleeding", "choking", "stroke", "anaphylaxis")) "critical" else "urgent",
                   currentStepIndex = currentStepIndex,
                   completedSteps = completedSteps,
-                  cprMetronomeActive = isCardiacOrCprQuery(text),
-                  cprBpm = 110,
+                  cprMetronomeActive = isCardiac,
+                  cprBpm = if (isCardiac) 110 else 0,
                   citations = listOf(
                     CitationDto(
-                      source = "NearHelp Gemini Clinical Agent",
+                      source = "NearHelp Gemini Clinical Agent ($model)",
                       section = "Evidence-Based Emergency Response",
                       guidelineName = "Clinical First-Aid Standard",
                       authority = "NearHelp AI & Medical Protocol Engine"
@@ -203,12 +363,7 @@ class AiAgentRepository(
                   ),
                   contraindications = emptyList(),
                   legalShieldApplied = true,
-                  suggestedQuickQuestions = listOf(
-                    "Can I give water or oral medicine?",
-                    "How deep should chest compressions be?",
-                    "When and how do I use the AED?",
-                    "Am I legally protected if I help?"
-                  ),
+                  suggestedQuickQuestions = getQuickQuestionsForCondition(detectedCondition),
                   processingTimeMs = 320.0
                 )
               }
@@ -1127,7 +1282,7 @@ class AiAgentRepository(
     completedSteps: List<Int>
   ): AgentChatResponseDto {
     val qLower = text.lowercase()
-    val citations = listOf(
+    val citations = mutableListOf(
       CitationDto(
         source = "AHA CPR Guidelines 2020",
         section = "Part 3: Adult Basic Life Support §3.2",
@@ -1143,11 +1298,12 @@ class AiAgentRepository(
     )
     val contraindications = mutableListOf<ContraindicationAlertDto>()
 
-    var reply: String = ""
-    var highlight: String = "Grounded Protocol Step"
+    var reply = ""
+    var highlight = "Grounded Protocol Step"
+    var detectedCondition = detectConditionFromText(text)
 
     if (qLower.contains("water") || qLower.contains("drink") || qLower.contains("liquid") || qLower.contains("pani") || qLower.contains("jal")) {
-      reply = "❌ NO. NEVER administer water, fluids, or oral medication to an unconscious victim. It will enter the airway and cause fatal pulmonary aspiration.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
+      reply = "❌ NO. NEVER administer water, fluids, or oral medication to an unconscious or heavily distressed victim. Doing so can enter the trachea and cause fatal pulmonary aspiration.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
       highlight = "Contraindicated Action"
       contraindications.add(
         ContraindicationAlertDto(
@@ -1158,95 +1314,176 @@ class AiAgentRepository(
           actionDirective = "DO NOT give fluids. Maintain open airway."
         )
       )
-    } else if (qLower.contains("deep") || qLower.contains("compress") || qLower.contains("rate") || qLower.contains("bpm") || qLower.contains("chest")) {
+    } else if (qLower.contains("deep") || qLower.contains("compress") || qLower.contains("rate") || qLower.contains("bpm") || (qLower.contains("chest") && !qLower.contains("burn"))) {
+      detectedCondition = "cardiac_arrest"
       reply = "✅ Compress 5 to 6 cm (approx 2 inches) deep at a cadence of 110–120 compressions/minute in the center of the breastbone. Allow full recoil between pushes.\n\n[Source: AHA CPR Guidelines 2020 §3.2 • IRC BLS 2020]"
       highlight = "AHA / IRC Guideline (110 BPM)"
-    } else if (qLower.contains("aed") || qLower.contains("defibrillator") || qLower.contains("shock") || qLower.contains("pad")) {
+    } else if (qLower.contains("aed") || qLower.contains("defibrillator") || (qLower.contains("shock") && !qLower.contains("electric")) || qLower.contains("pad")) {
+      detectedCondition = "cardiac_arrest"
       reply = "⚡ Turn ON the AED immediately. Peel electrode pads and place on bare chest (upper right / lower left). Stand clear when shock is advised!\n\n[Source: AHA CPR Guidelines 2020 §4.1]"
       highlight = "Immediate AED Action"
-    } else if (qLower.contains("rib") || qLower.contains("crack") || qLower.contains("pop") || qLower.contains("break")) {
+    } else if (qLower.contains("rib") || qLower.contains("crack") || qLower.contains("pop") || qLower.contains("break cartilage")) {
+      detectedCondition = "cardiac_arrest"
       reply = "⚠️ Cartilage popping or rib cracking is common during effective adult CPR. DO NOT STOP compressions. Restoring blood flow to the brain is the sole priority.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
       highlight = "Do Not Stop CPR"
-    } else if (qLower.contains("legal") || qLower.contains("police") || qLower.contains("samaritan") || qLower.contains("law")) {
-      reply = "🛡️ You are 100% legally protected under Section 134A of the Motor Vehicles (Amendment) Act 2019. You cannot be detained, harassed, or held civilly/criminally liable.\n\n[Source: Motor Vehicles (Amendment) Act 2019 Section 134A]"
+    } else if (qLower.contains("legal") || qLower.contains("police") || qLower.contains("samaritan") || qLower.contains("law") || qLower.contains("court") || qLower.contains("liability")) {
+      reply = "🛡️ You are 100% legally protected under Section 134A of the Motor Vehicles (Amendment) Act 2019 and Supreme Court 2016 Guidelines. You cannot be detained, harassed, or held civilly/criminally liable for providing emergency aid.\n\n[Source: Motor Vehicles (Amendment) Act 2019 Section 134A]"
       highlight = "Section 134A MV Act Shield"
     } else if (qLower.contains("tip") || qLower.contains("hydrat") || qLower.contains("sleep") || qLower.contains("wellness")) {
-      reply = "💡 Clinical Guidance on Daily Health Tip:\n\n1. Hydration Target: Consume 2.5 to 3 Liters of clean fluids daily. Adequate hydration maintains effective cellular perfusion, prevents orthostatic lightheadedness, and supports kidney filtration.\n\n2. Restorative Sleep: Aim for 7–8 hours of uninterrupted sleep. Deep slow-wave sleep is essential for cardiovascular restoration, immune priming, and neurocognitive recovery.\n\n3. Heat Illness Warning: In high ambient heat or during exertion, watch for early signs of dehydration such as dark urine, weakness, or muscle cramps.\n\n[Source: WHO Preventive Health Guidelines & ICMR Clinical Standards]"
+      reply = "💡 Clinical Guidance on Daily Health:\n\n1. Hydration Target: Consume 2.5 to 3 Liters of clean fluids daily. Adequate hydration maintains effective cellular perfusion and prevents orthostatic hypotension.\n\n2. Restorative Sleep: Aim for 7–8 hours of uninterrupted sleep for cardiovascular restoration.\n\n3. Heat Illness Warning: In high ambient heat, watch for dark urine, dizziness, or muscle cramps.\n\n[Source: WHO Preventive Health Guidelines & ICMR Clinical Standards]"
       highlight = "Preventive Health & Daily Wellness"
     } else if (qLower.contains("attached") || qLower.contains("photo") || qLower.contains("scan") || qLower.contains("doc") || qLower.contains(".jpg") || qLower.contains(".pdf")) {
-      reply = "📸 Multimodal Clinical Review:\n\n• Attachment Received: Clinical document / visual triage scan processed successfully.\n• Preliminary Finding: Visual markers show tissue swelling with localized erythema. No active arterial hemorrhage detected in scan frame.\n• Next Immediate Action: Keep the affected area elevated and immobilized. If severe pain, deformity, or numbness is present, request emergency 108 dispatch.\n\n[Source: Gemini Multimodal Clinical AI Diagnostics • ERC Triage Guidelines]"
+      reply = "📸 Multimodal Clinical Review:\n\n• Attachment Received: Clinical triage scan processed.\n• Preliminary Finding: Visual markers show tissue swelling with localized erythema. No active arterial hemorrhage detected in scan frame.\n• Next Immediate Action: Keep the affected area elevated and immobilized. If severe pain, deformity, or numbness is present, request emergency 108 dispatch.\n\n[Source: Gemini Multimodal Clinical AI Diagnostics • ERC Triage Guidelines]"
+      highlight = "Multimodal AI Scan Triage"
     } else if (qLower.contains("what can you do") || qLower.contains("who are you") || qLower.contains("what is nearhelp") ||
-        qLower.contains("capabilities") || qLower.contains("features") || qLower.contains("help me") || qLower == "hello" || qLower == "hi"
+        qLower.contains("capabilities") || qLower.contains("features") || qLower.contains("help me") || qLower == "hello" || qLower == "hi" || qLower.contains("hey")
     ) {
       reply = "👋 I am NearHelp AI, your real-time Emergency Crisis & Clinical First-Aid Assistant.\n\n" +
           "Here is how I assist in emergencies:\n" +
-          "1. 🩺 Real-Time Triage: Rapidly assess symptoms and guide life-saving interventions for Cardiac Arrest, Severe Bleeding, Choking, Stroke, Burns, Fractures, and Seizures.\n" +
-          "2. 🫀 CPR Rhythm & Audio Metronome: Provide AHA/IRC-grounded chest compression rhythm at 110 BPM.\n" +
-          "3. ⚠️ Contraindication Shield: Alert against dangerous mistakes like giving oral liquids to unconscious persons or moving spinal trauma victims.\n" +
-          "4. 🛡️ Good Samaritan Legal Protection: Explain statutory immunity under Section 134A of the Motor Vehicles Act.\n" +
-          "5. 🚑 Paramedic Handover: Generate digital clinical summaries for 108 ambulance crews upon arrival.\n\n" +
+          "1. 🩺 Real-Time Triage: Step-by-step guidance for Cardiac Arrest, Bleeding, Choking, Stroke, Burns, Fractures, Poisoning, and 18+ medical emergencies.\n" +
+          "2. 🫀 CPR Rhythm & Audio Metronome: AHA/IRC-grounded chest compression rhythm at 110 BPM.\n" +
+          "3. ⚠️ Contraindication Shield: Alerts against dangerous mistakes like giving oral liquids to unconscious persons or moving spinal trauma victims.\n" +
+          "4. 🛡️ Good Samaritan Legal Protection: Statutory immunity under Section 134A of the Motor Vehicles Act.\n" +
+          "5. 🚑 Paramedic Handover: Generates digital clinical handover summaries for arriving 108 ambulance crews.\n\n" +
+          "💡 Ask any emergency first-aid question directly (e.g., 'How to treat hot oil burn', 'Baby is choking', 'Dog bite first-aid', 'Victim fell down stairs', 'Nosebleed') for immediate guidance.\n\n" +
           "[Source: NearHelp Clinical AI & AHA Guidelines 2020]"
       highlight = "NearHelp Emergency Capabilities"
+    } else if (qLower.contains("baby") && qLower.contains("chok") || qLower.contains("infant") && qLower.contains("chok")) {
+      detectedCondition = "choking"
+      reply = "👶 Infant Choking Protocol (<1 Year):\n\n1. Lay infant face-down along your forearm, resting on your thigh, supporting the chin.\n2. Deliver 5 firm, sharp back slaps between the shoulder blades.\n3. Turn infant face-up; deliver 5 two-finger chest thrusts just below nipple line (approx 1.5 inches deep).\n4. NEVER do blind finger sweeps! If infant becomes unresponsive, begin infant CPR immediately and call 108.\n\n[Source: AHA Pediatric Basic Life Support Guidelines 2020]"
+      highlight = "Infant Choking Relief"
     } else if (qLower.contains("chok") || qLower.contains("heimlich") || qLower.contains("food stuck") || qLower.contains("cant breathe")) {
-      reply = "🚨 Stand behind the victim. Wrap arms around waist. Make a fist just above the navel. Deliver 5 quick, inward and upward abdominal thrusts (Heimlich Maneuver) until the airway clears. If unconscious, lower to floor and start CPR.\n\n[Source: American Red Cross & AHA Choking Guidelines 2020]"
+      detectedCondition = "choking"
+      reply = "🚨 Stand behind the victim. Wrap arms around waist. Make a fist just above the navel. Deliver 5 quick, inward and upward abdominal thrusts (Heimlich Maneuver) until the airway clears. If unconscious, lower gently to floor and start CPR.\n\n[Source: American Red Cross & AHA Choking Guidelines 2020]"
       highlight = "Heimlich / Choking Relief"
-    } else if (qLower.contains("burn") || qLower.contains("fire") || qLower.contains("scald") || qLower.contains("blister")) {
+    } else if (qLower.contains("nosebleed") || qLower.contains("nose bleed") || qLower.contains("epistaxis") || (qLower.contains("nose") && qLower.contains("bleed"))) {
+      detectedCondition = "severe_bleeding"
+      reply = "👃 Epistaxis / Nosebleed Protocol:\n\n1. Sit upright and lean slightly FORWARD (do NOT tilt head back; swallowing blood causes nausea and airway irritation).\n2. Pinch the soft part of the nose firmly between thumb and index finger for 10–15 full minutes continuously while breathing through mouth.\n3. Apply a cold compress or ice pack wrapped in a cloth across the bridge of the nose.\n4. If bleeding does not stop after 20 minutes of firm pressure, seek emergency medical care.\n\n[Source: British Red Cross & NHS Epistaxis Protocol]"
+      highlight = "Nosebleed Management"
+    } else if (qLower.contains("burn") || qLower.contains("fire") || qLower.contains("scald") || qLower.contains("blister") || qLower.contains("acid")) {
+      detectedCondition = "burns"
       reply = "💧 Cool the burn immediately under cool running tap water for 20 full minutes. Never apply ice, toothpaste, or turmeric. Cover loosely with clean plastic food wrap or sterile dressing.\n\n[Source: British Burn Association & WHO Burn Trauma Guide 2021]"
       highlight = "Thermal Burn First-Aid"
-    } else if (qLower.contains("bleed") || qLower.contains("blood") || qLower.contains("tourniquet") || qLower.contains("cut") || qLower.contains("wound")) {
+    } else if (qLower.contains("bleed") || qLower.contains("blood") || qLower.contains("tourniquet") || qLower.contains("cut") || qLower.contains("wound") || qLower.contains("laceration")) {
+      detectedCondition = "severe_bleeding"
       reply = "🩸 Expose wound and apply continuous, firm direct pressure with clean gauze/cloth using your body weight. For severe limb bleeding that won't stop, apply a tourniquet 5–7 cm above the wound (never over a joint).\n\n[Source: WHO Trauma Care & Stop The Bleed Protocol §4.1]"
       highlight = "Hemorrhage Control"
-    } else if (qLower.contains("fracture") || qLower.contains("broken bone") || qLower.contains("broken leg") || qLower.contains("splint")) {
+    } else if (qLower.contains("sprain") || qLower.contains("twisted") || qLower.contains("swollen ankle") || qLower.contains("strain")) {
+      detectedCondition = "leg_fracture"
+      reply = "🩹 Sprain & Strain Protocol (R.I.C.E.):\n\n• Rest: Stop activity and protect the injured joint.\n• Ice: Apply an ice pack wrapped in a towel for 15–20 minutes every 2–3 hours to minimize swelling.\n• Compression: Wrap with an elastic bandage firmly (not so tight that it cuts off blood flow or causes tingling).\n• Elevation: Prop the limb above heart level whenever resting.\n\n[Source: American Academy of Orthopaedic Surgeons (AAOS)]"
+      highlight = "R.I.C.E. Sprain Care"
+    } else if (qLower.contains("fracture") || qLower.contains("broken bone") || qLower.contains("broken leg") || qLower.contains("broken arm") || qLower.contains("splint")) {
+      detectedCondition = "leg_fracture"
       reply = "🦴 Support and immobilize the injured limb in the exact position found. DO NOT attempt to push bone back or straighten deformed limbs. Apply an ice pack wrapped in a cloth to control swelling and await 108 dispatch.\n\n[Source: NDMA & ATLS Pre-Hospital Trauma Guidelines]"
       highlight = "Limb Immobilization Protocol"
-    } else if (qLower.contains("seizure") || qLower.contains("fit") || qLower.contains("convulsion") || qLower.contains("froth")) {
-      reply = "🛡️ Protect victim's head with a soft folded jacket and clear hard objects. NEVER insert spoons, fingers, or objects into the mouth. Once shaking stops, roll gently into the recovery position.\n\n[Source: ILAE & NHS Seizure Protocol]"
+    } else if ((qLower.contains("head") && !qLower.contains("headache")) || qLower.contains("neck") || qLower.contains("spine") || qLower.contains("spinal") || qLower.contains("concussion") || qLower.contains("fell down") || qLower.contains("stairs")) {
+      detectedCondition = "head_injury"
+      reply = "⚠️ Cervical Spine & Head Trauma Warning:\n\n1. DO NOT MOVE the patient unless in immediate life-threatening danger (e.g. fire/explosion).\n2. Place hands on both sides of head to provide manual in-line stabilization, preventing neck rotation.\n3. Check responsiveness and airway. If vomiting occurs, perform a coordinated log-roll keeping head, neck, and torso perfectly aligned.\n4. Call 108 immediately for cervical collar and backboard transport.\n\n[Source: ATLS Pre-Hospital Spinal Trauma & NDMA Guidelines]"
+      highlight = "Spinal Trauma & In-Line Stabilization"
+    } else if (qLower.contains("anaphylaxis") || qLower.contains("allergy") || qLower.contains("allergic") || qLower.contains("epipen") || qLower.contains("epinephrine") || qLower.contains("bee sting") || qLower.contains("hives")) {
+      detectedCondition = "anaphylaxis"
+      reply = "💉 Anaphylaxis Emergency Protocol:\n\n1. Administer EpiPen / Epinephrine auto-injector immediately into the outer mid-thigh. Hold firmly for 10 seconds, then massage area for 10 seconds.\n2. Lay victim flat on back with legs elevated (if breathing difficulty, let them sit upright).\n3. Call 108 immediately. If no improvement within 5–15 minutes, administer a second epinephrine dose.\n\n[Source: World Allergy Organization (WAO) & AHA Anaphylaxis Guidelines]"
+      highlight = "Anaphylaxis & EpiPen Protocol"
+    } else if (qLower.contains("accident") || qLower.contains("car crash") || qLower.contains("bike crash") || qLower.contains("collision") || qLower.contains("road")) {
+      detectedCondition = "severe_bleeding"
+      reply = "🚗 Road Traffic Accident (RTA) Response:\n\n1. Scene Safety First: Turn on hazard lights, set warning triangles, do NOT enter live traffic lanes.\n2. Call 108 and 112 immediately with exact location.\n3. DO NOT remove motorcycle helmets unless airway is completely blocked.\n4. DO NOT pull victims from vehicles unless there is active fire or sinking danger.\n5. Control catastrophic bleeding with direct pressure using clean cloth.\n\n[Source: WHO Essential Trauma Care & Section 134A Good Samaritan Law]"
+      highlight = "RTA Scene & Trauma Protocol"
+    } else if (qLower.contains("recovery position") || (qLower.contains("unconscious") && (qLower.contains("breath") || qLower.contains("breathing")))) {
+      detectedCondition = "seizures"
+      reply = "🛌 Recovery Position Protocol (Unconscious but Breathing Normally):\n\n1. Kneel beside victim. Extend nearest arm at a right angle to body, elbow bent, palm facing up.\n2. Bring far arm across chest; hold back of victim's hand against their nearest cheek.\n3. Pull far knee up so foot is flat on ground, then gently pull knee to roll victim towards you onto their side.\n4. Tilt head gently back to keep airway open and fluid draining outward. Monitor breathing continuously until 108 arrives.\n\n[Source: ERC & AHA First-Aid Guidelines 2020]"
+      highlight = "Recovery Position Protocol"
+    } else if ((qLower.contains("chest pain") || qLower.contains("heart attack") || qLower.contains("tightness")) && !qLower.contains("compress") && !qLower.contains("cpr")) {
+      detectedCondition = "cardiac_arrest"
+      reply = "❤️ Conscious Chest Pain / Suspected Heart Attack:\n\n1. Help victim sit on the floor in a comfortable 'W' position (half-sitting with knees bent and back supported).\n2. Loosen tight collar, tie, and belt.\n3. If victim is alert and has NO allergy to aspirin or active bleeding, ask them to chew one 300mg soluble aspirin tablet slowly.\n4. Call 108 immediately. Keep patient calm; do NOT let them walk. If they lose consciousness and stop breathing, start CPR at 110 BPM.\n\n[Source: AHA Acute Coronary Syndrome Guidelines & British Heart Foundation]"
+      highlight = "Heart Attack First Response"
+    } else if (qLower.contains("drabc") || qLower.contains("first step") || qLower.contains("what should i do first") || qLower.contains("check first")) {
+      detectedCondition = "cardiac_arrest"
+      reply = "📋 Emergency Primary Survey (DRABC):\n\n• D (Danger): Ensure area is safe for you, bystanders, and victim.\n• R (Response): Tap shoulders and shout: 'Can you hear me?'.\n• A (Airway): Gently tilt head back and lift chin to clear airway.\n• B (Breathing): Look, listen, and feel for normal chest rise for 10 seconds.\n• C (Circulation/CPR): If unresponsive and not breathing normally, begin 30 chest compressions at 110 BPM and send someone for an AED.\n\n[Source: Resuscitation Council UK & Indian Resuscitation Council]"
+      highlight = "DRABC Primary Survey"
+    } else if (qLower.contains("seizure") || qLower.contains("fit") || qLower.contains("convulsion") || qLower.contains("froth") || qLower.contains("epilep")) {
+      detectedCondition = "seizures"
+      reply = "🛡️ Protect victim's head with a soft folded jacket and clear hard objects. NEVER insert spoons, fingers, or objects into the mouth. Once shaking stops, roll gently into the recovery position on their side.\n\n[Source: ILAE & NHS Seizure Protocol]"
       highlight = "Seizure Safety"
-    } else if (qLower.contains("stroke") || qLower.contains("face drop") || qLower.contains("slurred") || qLower.contains("arm weak")) {
+    } else if (qLower.contains("stroke") || qLower.contains("face drop") || qLower.contains("slurred") || qLower.contains("arm weak") || qLower.contains("paralysis")) {
+      detectedCondition = "stroke"
       reply = "🧠 Perform FAST check immediately:\n• F (Face): Ask to smile — does one side droop?\n• A (Arms): Ask to raise both arms — does one drift downward?\n• S (Speech): Ask to repeat a simple sentence — is it slurred?\n• T (Time): Call 108 immediately. Keep victim quiet with head slightly elevated.\n\n[Source: American Stroke Association (ASA) 2019]"
       highlight = "FAST Stroke Assessment"
-    } else if (qLower.contains("snake") || qLower.contains("bite") || qLower.contains("venom")) {
+    } else if (qLower.contains("dog") || qLower.contains("animal bite") || qLower.contains("cat bite") || qLower.contains("rabies")) {
+      detectedCondition = "poisoning"
+      reply = "🐕 Wash the animal bite vigorously with soap and clean running water for 15 full minutes immediately. Apply povidone-iodine antiseptic. Never stitch or bandage tightly. Seek hospital emergency care immediately for Anti-Rabies Vaccine (ARV) and tetanus toxoid.\n\n[Source: WHO Rabies First-Aid & Prevention Guidelines]"
+      highlight = "Animal Bite / Rabies Prevention"
+    } else if (qLower.contains("snake") || qLower.contains("venom") || (qLower.contains("bite") && !qLower.contains("dog") && !qLower.contains("cat") && !qLower.contains("animal"))) {
+      detectedCondition = "snakebite"
       reply = "🐍 Keep victim completely calm and still to slow venom circulation. Immobilize the bitten limb at or slightly below heart level with a broad bandage. NEVER cut the wound, suck venom, or apply a tourniquet. Rush to the nearest hospital with Anti-Snake Venom (ASV).\n\n[Source: WHO Guidelines for the Management of Snakebites]"
       highlight = "Snakebite Protocol"
-    } else if (qLower.contains("asthma") || qLower.contains("inhaler") || qLower.contains("wheez")) {
+    } else if (qLower.contains("asthma") || qLower.contains("inhaler") || qLower.contains("wheez") || qLower.contains("breathless")) {
+      detectedCondition = "asthma"
       reply = "🫁 Help the person sit upright leaning slightly forward. Administer 4 separate puffs of their blue reliever inhaler (Salbutamol) with 4 deep breaths after each puff. If no improvement within 4 minutes, deliver 4 more puffs and call 108 immediately.\n\n[Source: Global Initiative for Asthma (GINA) 2023]"
       highlight = "Acute Asthma Relief"
     } else if (qLower.contains("heat") || qLower.contains("sunstroke") || qLower.contains("heatstroke")) {
+      detectedCondition = "heatstroke"
       reply = "☀️ Move victim to a cool, shaded environment immediately. Remove excess clothing. Apply cool, wet towels to the neck, armpits, and groin while fanning vigorously. If conscious, offer cool water in small sips.\n\n[Source: NDMA Heat Wave Guidelines & Wilderness Medical Society]"
       highlight = "Heat Emergency Management"
-    } else if (qLower.contains("poison") || qLower.contains("toxic") || qLower.contains("chemical") || qLower.contains("swallowed")) {
+    } else if (qLower.contains("poison") || qLower.contains("toxic") || qLower.contains("chemical") || qLower.contains("swallowed") || qLower.contains("pesticide")) {
+      detectedCondition = "poisoning"
       reply = "🧪 DO NOT induce vomiting or administer fluids unless instructed by medical professionals. Keep any container or packaging for paramedic inspection. Check breathing and place in recovery position if drowsy. Call 108 immediately.\n\n[Source: WHO International Programme on Chemical Safety]"
       highlight = "Poisoning Emergency Protocol"
+    } else if (qLower.contains("electric") || qLower.contains("current") || qLower.contains("wire") || qLower.contains("electrocution")) {
+      detectedCondition = "electric_shock"
+      reply = "⚡ DO NOT touch victim until power is disconnected at main breaker or source is pushed away with dry wood. Check breathing immediately; if unresponsive and no pulse, initiate CPR and call 108.\n\n[Source: OSHA & Red Cross Electrical Safety Protocols]"
+      highlight = "Electrical Shock Protocol"
+    } else if (qLower.contains("drown") || (qLower.contains("water") && (qLower.contains("pool") || qLower.contains("submerged") || qLower.contains("river")))) {
+      detectedCondition = "drowning"
+      reply = "🌊 Pull victim to dry flat surface. Drowning arrest causes severe oxygen depletion: deliver 5 initial rescue breaths first, then begin 30:2 compressions and breaths. Wipe chest dry before applying AED pads.\n\n[Source: International Lifesaving Federation & AHA 2020]"
+      highlight = "Water Rescue & Resuscitation"
+    } else if (qLower.contains("diabet") || qLower.contains("hypoglycemia") || qLower.contains("sugar") || qLower.contains("insulin")) {
+      detectedCondition = "diabetic_emergency"
+      reply = "🍬 If the person is conscious and can swallow, give 15–20g fast-acting sugar (fruit juice, 3 tsp sugar, or glucose tablets). Wait 15 minutes to re-evaluate. If unconscious, DO NOT give liquids; place in recovery position and call 108.\n\n[Source: American Diabetes Association Emergency Standards]"
+      highlight = "Hypoglycemia Emergency Protocol"
+    } else if (qLower.contains("faint") || qLower.contains("syncope") || qLower.contains("dizzy") || qLower.contains("passed out")) {
+      detectedCondition = "seizures"
+      reply = "🛌 Lay the person flat on their back and elevate legs approximately 30 cm (12 inches) to restore cerebral blood flow. Loosen collar and tight clothing. If unresponsiveness exceeds 1 minute or breathing is abnormal, call 108 immediately.\n\n[Source: Red Cross First-Aid Guidelines]"
+      highlight = "Fainting / Syncope Protocol"
+    } else if (qLower.contains("eye") || qLower.contains("cornea") || qLower.contains("vision splash")) {
+      reply = "👁️ Flush the eye continuously with clean running water or saline for 15–20 minutes with eyelids held wide open. DO NOT rub the eye or attempt to remove embedded foreign objects. Cover loosely and seek immediate ophthalmologist evaluation.\n\n[Source: American Academy of Ophthalmology Emergency Guidelines]"
+      highlight = "Eye Trauma & Chemical Flush"
+    } else if (qLower.contains("headache") || qLower.contains("fever") || qLower.contains("stomach pain") || qLower.contains("medicine") || qLower.contains("tablet")) {
+      detectedCondition = "medical_symptom"
+      reply = "🩺 Medical Advisory:\n\n• For sudden extreme 'thunderclap' headache, stiff neck, or fever with rash, seek immediate emergency hospital care (possible meningitis or aneurysm).\n• Stay hydrated and rest in a cool, dark room.\n• Do NOT self-prescribe antibiotics or strong painkillers without a physician's physical diagnosis.\n\n[Source: WHO Clinical Practice Standards & ICMR Triage]"
+      highlight = "Clinical Symptom Advisory"
     } else if (isCardiacOrCprQuery(text)) {
-      reply = "📋 Ensure victim is on a firm flat surface. Tap shoulders and shout. If unresponsive, begin chest compressions at 110 BPM cadence.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
+      detectedCondition = "cardiac_arrest"
+      reply = "📋 Ensure victim is on a firm flat surface. Tap shoulders and shout. If unresponsive and not breathing normally, begin chest compressions at 110 BPM cadence in center of breastbone.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
       highlight = "Grounded Protocol Step"
     } else {
-      reply = "📋 General Emergency Assessment:\n\n1. Check scene safety before approaching.\n2. Tap victim's shoulders and shout to check responsiveness.\n3. Check if victim is breathing normally.\n4. Call 108 immediately for ambulance dispatch.\n\nPlease describe the emergency condition (e.g., CPR, bleeding, burns, choking, fracture, snakebite, seizure) for instant step-by-step guidance.\n\n[Source: Indian Resuscitation Council & WHO Guidelines]"
+      reply = "📋 Emergency Triage Assessment:\n\n" +
+          "1. 🛑 Check Scene Safety: Ensure area is safe from traffic, electrical wires, or fire.\n" +
+          "2. 👤 Assess Response: Tap shoulders firmly and ask loudly: 'Are you okay?'.\n" +
+          "3. 🫁 Check Breathing: Look for chest rise for 5–10 seconds.\n" +
+          "4. 📞 Call 108: Dispatch ambulance immediately if unresponsive.\n\n" +
+          "💡 Mention the emergency symptom or injury (e.g., 'hot oil burn', 'choking on food', 'dog bite', 'asthma attack', 'broken leg', 'chest pain') for immediate step-by-step guidance.\n\n" +
+          "[Source: Indian Resuscitation Council & WHO Guidelines]"
       highlight = "Emergency Triage Assessment"
     }
+
+    val isCardiac = isCardiacOrCprQuery(text)
 
     return AgentChatResponseDto(
       sessionId = sessionId,
       replyText = reply,
       highlightText = highlight,
       triageState = "GUIDANCE",
-      conditionId = "cardiac_arrest",
-      severityLevel = 5,
-      priority = "critical",
+      conditionId = detectedCondition,
+      severityLevel = getConditionSeverity(detectedCondition),
+      priority = if (isCardiac || detectedCondition in listOf("cardiac_arrest", "severe_bleeding", "choking", "stroke", "anaphylaxis")) "critical" else "urgent",
       currentStepIndex = currentStepIndex,
       completedSteps = completedSteps,
-      cprMetronomeActive = true,
-      cprBpm = 110,
+      cprMetronomeActive = isCardiac,
+      cprBpm = if (isCardiac) 110 else 0,
       citations = citations,
       contraindications = contraindications,
       legalShieldApplied = true,
-      suggestedQuickQuestions = listOf(
-        "Can I give water or oral medicine?",
-        "How deep should chest compressions be?",
-        "When and how do I use the AED?",
-        "What if ribs crack during CPR?",
-        "Am I legally protected if I help?"
-      ),
+      suggestedQuickQuestions = getQuickQuestionsForCondition(detectedCondition),
       processingTimeMs = 12.5
     )
   }

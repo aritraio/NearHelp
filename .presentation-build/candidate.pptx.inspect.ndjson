@@ -1,0 +1,218 @@
+{"kind":"deck","id":"pr/83m22q","name":"Deck"}
+{"kind":"layout","layoutId":"9cddc135-156c-4298-9f62-668d3926d306","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"dd3d5495-3812-48d3-bb50-3491e829d927","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/dxi09m","slide":1,"title":"Project Introduction ( Problem Statement)","textShapes":6}
+{"kind":"shape","id":"sh/jixwfa5s","slide":1,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/kj6xof6d","slide":1,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/lkfehkny","slide":1,"text":"Project Introduction ( Problem Statement)","textPreview":"Project Introduction ( Problem Statement)","textChars":41,"textLines":1,"bbox":[60,32,1120,64]}
+{"kind":"shape","id":"sh/at4filob","slide":1,"bbox":[60,112,1147,0]}
+{"kind":"textbox","id":"sh/budwbq5w","slide":1,"text":"NearHelp AI","textPreview":"NearHelp AI","textChars":11,"textLines":1,"bbox":[72,144,690,82]}
+{"kind":"textbox","id":"sh/wvmxkv6h","slide":1,"text":"Community emergency assistance on Android","textPreview":"Community emergency assistance on Android","textChars":41,"textLines":1,"bbox":[74,224,690,52]}
+{"kind":"textbox","id":"sh/xwfed0n2","slide":1,"text":"When an emergency occurs, bystanders need quick guidance and clear location context while professional responders are on the way.","textPreview":"When an emergency occurs, bystanders need quick guidance and clear location context while professional responders are on the way.","textChars":129,"textLines":1,"bbox":[74,306,680,110]}
+{"kind":"textbox","id":"sh/mp4felof","slide":1,"text":"The current prototype brings an SOS entry point, a location map, emergency protocols and AI chat into one mobile experience.","textPreview":"The current prototype brings an SOS entry point, a location map, emergency protocols and AI chat into one mobile experience.","textChars":124,"textLines":1,"bbox":[74,437,680,102]}
+{"kind":"shape","id":"sh/nqdw7q5k","slide":1,"bbox":[74,561,650,0]}
+{"kind":"textbox","id":"sh/7i5wjqlw","slide":1,"text":"Team: Aritra, Adil, Dishari, Abhisikta, Plaban and Sayantan","textPreview":"Team: Aritra, Adil, Dishari, Abhisikta, Plaban and Sayantan","textChars":59,"textLines":1,"bbox":[74,581,700,54]}
+{"kind":"image","id":"im/14369wji","slide":1,"name":"","alt":"NearHelp home screen with live map and SOS control","bbox":[865,144,272,500]}
+{"kind":"notes","id":"nt/dxi09m","slide":1,"text":"Project team names and roles come from README.md. Screenshot is from the SS folder in the repository. College, department and faculty mentor were not supplied, so they are omitted."}
+{"kind":"slide","id":"sl/tuifeq","slide":2,"title":"Existing Emergency Response Challenges","textShapes":16}
+{"kind":"shape","id":"sh/cf61sb2x","slide":2,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/bex0z6ls","slide":2,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/adojq1k7","slide":2,"text":"Existing Emergency Response Challenges","textPreview":"Existing Emergency Response Challenges","textChars":38,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/pcfixw3m","slide":2,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/ob61or21","slide":2,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/nqx0vmlg","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/2pojmhkv","slide":2,"text":"The critical gap is what a person can do before organized help arrives.","textPreview":"The critical gap is what a person can do before organized help arrives.","textChars":71,"textLines":1,"bbox":[65,149,1100,53]}
+{"kind":"textbox","id":"sh/t8j290jq","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[70,245,65,45]}
+{"kind":"textbox","id":"sh/87q10v25","slide":2,"text":"Time and distance","textPreview":"Time and distance","textChars":17,"textLines":1,"bbox":[140,245,450,42]}
+{"kind":"textbox","id":"sh/25wzu5gj","slide":2,"text":"Professional responders may be several minutes away when an incident begins.","textPreview":"Professional responders may be several minutes away when an incident begins.","textChars":76,"textLines":1,"bbox":[140,288,450,73]}
+{"kind":"textbox","id":"sh/n6503ax4","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[665,245,65,45]}
+{"kind":"textbox","id":"sh/o7ehwfyp","slide":2,"text":"Bystander uncertainty","textPreview":"Bystander uncertainty","textChars":21,"textLines":1,"bbox":[735,245,450,42]}
+{"kind":"textbox","id":"sh/p8ni5kfu","slide":2,"text":"People nearby may be willing to help but may not know a safe first step.","textPreview":"People nearby may be willing to help but may not know a safe first step.","textChars":72,"textLines":1,"bbox":[735,288,450,73]}
+{"kind":"textbox","id":"sh/ehczqlg7","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[70,427,65,45]}
+{"kind":"textbox","id":"sh/f2l0zqxs","slide":2,"text":"Location friction","textPreview":"Location friction","textChars":17,"textLines":1,"bbox":[140,427,450,42]}
+{"kind":"textbox","id":"sh/03ehsvyd","slide":2,"text":"Describing an exact location during stress can slow a request for help.","textPreview":"Describing an exact location during stress can slow a request for help.","textChars":71,"textLines":1,"bbox":[140,470,450,73]}
+{"kind":"textbox","id":"sh/14ni10fy","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[665,427,65,45]}
+{"kind":"textbox","id":"sh/ydgj2pgr","slide":2,"text":"Fragmented tools","textPreview":"Fragmented tools","textChars":16,"textLines":1,"bbox":[735,427,450,42]}
+{"kind":"textbox","id":"sh/zyp0buxc","slide":2,"text":"Calling, maps and guidance are often separate interactions for the user.","textPreview":"Calling, maps and guidance are often separate interactions for the user.","textChars":72,"textLines":1,"bbox":[735,470,450,73]}
+{"kind":"notes","id":"nt/tuifeq","slide":2,"text":"WHO emphasizes the need for timely emergency care: https://www.who.int/health-topics/emergency-care . 112 India provides a location-enabled SOS system, so this slide does not claim location sharing is absent from existing systems: https://112.gov.in/ . The challenges frame the user experience and are not measured outcomes for NearHelp AI."}
+{"kind":"slide","id":"sl/0mnzti","slide":3,"title":"Proposed Solution","textShapes":16}
+{"kind":"shape","id":"sh/mhcbehcz","slide":3,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/94nu9wbq","slide":3,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/83utgru5","slide":3,"text":"Proposed Solution","textPreview":"Proposed Solution","textChars":17,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/zelc3mt8","slide":3,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/ydcbahc3","slide":3,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/lg3u5wbe","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/0futcrut","slide":3,"text":"NearHelp AI places the first emergency actions in a single Android app.","textPreview":"NearHelp AI places the first emergency actions in a single Android app.","textChars":71,"textLines":1,"bbox":[66,153,1110,61]}
+{"kind":"textbox","id":"sh/ba1cz2tc","slide":3,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[70,254,85,54]}
+{"kind":"textbox","id":"sh/q9sb6xcr","slide":3,"text":"SOS access","textPreview":"SOS access","textChars":10,"textLines":1,"bbox":[169,254,316,53]}
+{"kind":"textbox","id":"sh/gb29gjax","slide":3,"text":"A prominent control starts the emergency journey.","textPreview":"A prominent control starts the emergency journey.","textChars":49,"textLines":1,"bbox":[511,254,670,65]}
+{"kind":"shape","id":"sh/hcbqpori","slide":3,"bbox":[169,332,1002,0]}
+{"kind":"textbox","id":"sh/u90retsr","slide":3,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[70,353,85,54]}
+{"kind":"textbox","id":"sh/va98ne9c","slide":3,"text":"Location context","textPreview":"Location context","textChars":16,"textLines":1,"bbox":[169,353,316,53]}
+{"kind":"textbox","id":"sh/87i9cja1","slide":3,"text":"GPS and the map help users understand where they are.","textPreview":"GPS and the map help users understand where they are.","textChars":53,"textLines":1,"bbox":[511,353,670,65]}
+{"kind":"shape","id":"sh/t8rqlorm","slide":3,"bbox":[169,431,1002,0]}
+{"kind":"textbox","id":"sh/6l0ra9sv","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[70,452,85,54]}
+{"kind":"textbox","id":"sh/7m98je9g","slide":3,"text":"Immediate guidance","textPreview":"Immediate guidance","textChars":18,"textLines":1,"bbox":[169,452,316,53]}
+{"kind":"textbox","id":"sh/s3m9o3a5","slide":3,"text":"Protocol screens and AI chat provide information while help is sought.","textPreview":"Protocol screens and AI chat provide information while help is sought.","textChars":70,"textLines":1,"bbox":[511,452,670,65]}
+{"kind":"shape","id":"sh/d4vax8rq","slide":3,"bbox":[169,530,1002,0]}
+{"kind":"textbox","id":"sh/l0rqh8ju","slide":3,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[70,551,85,54]}
+{"kind":"textbox","id":"sh/0zi98329","slide":3,"text":"Community foundation","textPreview":"Community foundation","textChars":20,"textLines":1,"bbox":[169,551,316,53]}
+{"kind":"textbox","id":"sh/zy98fy1o","slide":3,"text":"The design can later connect users with verified nearby responders.","textPreview":"The design can later connect users with verified nearby responders.","textChars":67,"textLines":1,"bbox":[511,551,670,65]}
+{"kind":"shape","id":"sh/exgr6tk3","slide":3,"bbox":[169,629,1002,0]}
+{"kind":"notes","id":"nt/0mnzti","slide":3,"text":"The first three solution elements are visible in screenshots from the repository. Responder connection is future scope, not demonstrated here."}
+{"kind":"slide","id":"sl/9uns1o","slide":4,"title":"System Workflow and Methodology","textShapes":22}
+{"kind":"shape","id":"sh/xwfupgfm","slide":4,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/atovu1gv","slide":4,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/buxcn6xg","slide":4,"text":"System Workflow and Methodology","textPreview":"System Workflow and Methodology","textChars":31,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/o76dsryp","slide":4,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/psfulwfa","slide":4,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/254vq1gz","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/n6dcj6x4","slide":4,"text":"The prototype follows a short path from opening the app to choosing an informed next action.","textPreview":"The prototype follows a short path from opening the app to choosing an informed next action.","textChars":92,"textLines":1,"bbox":[63,145,1130,72]}
+{"kind":"textbox","id":"sh/03mdoryt","slide":4,"text":"Open app","textPreview":"Open app","textChars":8,"textLines":1,"bbox":[58,251,163,70]}
+{"kind":"textbox","id":"sh/14vuhwze","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[220,260,36,50]}
+{"kind":"textbox","id":"sh/d4jqlsre","slide":4,"text":"Select help","textPreview":"Select help","textChars":11,"textLines":1,"bbox":[256,251,163,70]}
+{"kind":"textbox","id":"sh/c3q9snqt","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[418,260,36,50]}
+{"kind":"textbox","id":"sh/rih8ji98","slide":4,"text":"Use GPS","textPreview":"Use GPS","textChars":7,"textLines":1,"bbox":[454,251,163,70]}
+{"kind":"textbox","id":"sh/qh8rqd8n","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[616,260,36,50]}
+{"kind":"textbox","id":"sh/pgzqh8r2","slide":4,"text":"View map","textPreview":"View map","textChars":8,"textLines":1,"bbox":[652,251,163,70]}
+{"kind":"textbox","id":"sh/4fq9o3qh","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[814,260,36,50]}
+{"kind":"textbox","id":"sh/3eh8fy9c","slide":4,"text":"Ask AI","textPreview":"Ask AI","textChars":6,"textLines":1,"bbox":[850,251,163,70]}
+{"kind":"textbox","id":"sh/2d8rmd8r","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[1012,260,36,50]}
+{"kind":"textbox","id":"sh/hczqd8r6","slide":4,"text":"Act","textPreview":"Act","textChars":3,"textLines":1,"bbox":[1048,251,163,70]}
+{"kind":"textbox","id":"sh/gb6pk3ql","slide":4,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[71,398,65,45]}
+{"kind":"textbox","id":"sh/8va903yh","slide":4,"text":"Input","textPreview":"Input","textChars":5,"textLines":1,"bbox":[141,398,470,42]}
+{"kind":"textbox","id":"sh/twjq98z2","slide":4,"text":"User opens the app, chooses a topic or starts an SOS action.","textPreview":"User opens the app, chooses a topic or starts an SOS action.","textChars":60,"textLines":1,"bbox":[141,441,470,73]}
+{"kind":"textbox","id":"sh/6tsrytgb","slide":4,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[664,398,65,45]}
+{"kind":"textbox","id":"sh/7u187yhw","slide":4,"text":"Processing","textPreview":"Processing","textChars":10,"textLines":1,"bbox":[734,398,470,42]}
+{"kind":"textbox","id":"sh/kra9w3y5","slide":4,"text":"Device location informs the map; the chat sends a question to the AI service.","textPreview":"Device location informs the map; the chat sends a question to the AI service.","textChars":77,"textLines":1,"bbox":[734,441,470,73]}
+{"kind":"textbox","id":"sh/lsjq5ozq","slide":4,"text":"Output: the screen presents local context, a protocol step or an AI response for the user to review.","textPreview":"Output: the screen presents local context, a protocol step or an AI response for the user to review.","textChars":100,"textLines":1,"bbox":[70,573,1115,69]}
+{"kind":"notes","id":"nt/9uns1o","slide":4,"text":"This is a simplified user workflow. The SOS control, location map and assistant screens are visible in repository screenshots. It does not represent a verified end-to-end dispatch."}
+{"kind":"slide","id":"sl/bqz4d1","slide":5,"title":"Implemented Features of NearHelp AI","textShapes":12}
+{"kind":"shape","id":"sh/2pgjuhon","slide":5,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/pc725c7e","slide":5,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/ory1wr6t","slide":5,"text":"Implemented Features of NearHelp AI","textPreview":"Implemented Features of NearHelp AI","textChars":35,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/fm5kz2pc","slide":5,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/elwjqxor","slide":5,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/1o721c72","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"shape","id":"sh/gny1s76x","slide":5,"bbox":[67,159,7,92]}
+{"kind":"textbox","id":"sh/zi9kb65g","slide":5,"text":"Emergency entry","textPreview":"Emergency entry","textChars":15,"textLines":1,"bbox":[99,153,600,42]}
+{"kind":"textbox","id":"sh/yh0321ov","slide":5,"text":"The home screen presents a hold-to-activate SOS control.","textPreview":"The home screen presents a hold-to-activate SOS control.","textChars":56,"textLines":1,"bbox":[99,197,603,67]}
+{"kind":"shape","id":"sh/8fmh8j61","slide":5,"bbox":[67,278,7,92]}
+{"kind":"textbox","id":"sh/tgvy1o7m","slide":5,"text":"Location and map","textPreview":"Location and map","textChars":16,"textLines":1,"bbox":[99,272,600,42]}
+{"kind":"textbox","id":"sh/6tkz69ov","slide":5,"text":"The app shows the current GPS position and a live map view.","textPreview":"The app shows the current GPS position and a live map view.","textChars":59,"textLines":1,"bbox":[99,316,603,67]}
+{"kind":"shape","id":"sh/7udgzepg","slide":5,"bbox":[67,397,7,92]}
+{"kind":"textbox","id":"sh/kr2h4j65","slide":5,"text":"Emergency protocols","textPreview":"Emergency protocols","textChars":19,"textLines":1,"bbox":[99,391,600,42]}
+{"kind":"textbox","id":"sh/lsbyx47a","slide":5,"text":"The interface displays topic-based steps for common emergencies.","textPreview":"The interface displays topic-based steps for common emergencies.","textChars":64,"textLines":1,"bbox":[99,435,603,67]}
+{"kind":"shape","id":"sh/ypkz29oz","slide":5,"bbox":[67,516,7,92]}
+{"kind":"textbox","id":"sh/jqtgvepk","slide":5,"text":"AI conversation","textPreview":"AI conversation","textChars":15,"textLines":1,"bbox":[99,510,600,42]}
+{"kind":"textbox","id":"sh/wn2x0z6t","slide":5,"text":"The assistant accepts a question and displays a response.","textPreview":"The assistant accepts a question and displays a response.","textChars":57,"textLines":1,"bbox":[99,554,603,67]}
+{"kind":"textbox","id":"sh/dk3ex0z2","slide":5,"text":"Current Android build","textPreview":"Current Android build","textChars":21,"textLines":1,"bbox":[836,616,278,29]}
+{"kind":"image","id":"im/6dsn210j","slide":5,"name":"","alt":"NearHelp protocol and assistant screen","bbox":[842,150,260,455]}
+{"kind":"notes","id":"nt/bqz4d1","slide":5,"text":"Features are supported by project screenshots in SS/. The visible SOS control does not prove an alert was dispatched. The protocol and assistant screen show UI behavior, not clinical validation."}
+{"kind":"slide","id":"sl/n52h07","slide":6,"title":"AI Chatbot & Google Maps Integration","textShapes":9}
+{"kind":"shape","id":"sh/gvyhoju9","slide":6,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/fup0vedo","slide":6,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/utwzm9c3","slide":6,"text":"AI Chatbot & Google Maps Integration","textPreview":"AI Chatbot & Google Maps Integration","textChars":36,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/pk7i1ovq","slide":6,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/4jy1s3u5","slide":6,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/3yp0zydk","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/2xgjqtcz","slide":6,"text":"Gemini-assisted chat","textPreview":"Gemini-assisted chat","textChars":20,"textLines":1,"bbox":[70,150,495,50]}
+{"kind":"textbox","id":"sh/5onip4vm","slide":6,"text":"The user enters an emergency question. The app sends it to the AI service and presents the returned answer.","textPreview":"The user enters an emergency question. The app sends it to the AI service and presents the returned answer.","textChars":107,"textLines":1,"bbox":[70,211,490,113]}
+{"kind":"textbox","id":"sh/k3ehgzu1","slide":6,"text":"The captured reply includes a source label. Medical reliability still requires systematic validation.","textPreview":"The captured reply includes a source label. Medical reliability still requires systematic validation.","textChars":101,"textLines":1,"bbox":[70,315,490,73]}
+{"kind":"shape","id":"sh/3qlov6h8","slide":6,"bbox":[635,155,0,470]}
+{"kind":"textbox","id":"sh/4re5obyt","slide":6,"text":"Location map","textPreview":"Location map","textChars":12,"textLines":1,"bbox":[695,150,495,50]}
+{"kind":"textbox","id":"sh/psn6xgze","slide":6,"text":"Device GPS provides position context. Google Maps displays the area around the user.","textPreview":"Device GPS provides position context. Google Maps displays the area around the user.","textChars":84,"textLines":1,"bbox":[695,211,490,113]}
+{"kind":"textbox","id":"sh/qtwnqlgz","slide":6,"text":"The map supports orientation before an SOS action or a request for guidance.","textPreview":"The map supports orientation before an SOS action or a request for guidance.","textChars":76,"textLines":1,"bbox":[695,315,490,73]}
+{"kind":"image","id":"im/p4bidcfe","slide":6,"name":"","alt":"AI assistant response in the NearHelp app","bbox":[137,407,288,207]}
+{"kind":"image","id":"im/cr2h8ry5","slide":6,"name":"","alt":"NearHelp location and map screen","bbox":[774,407,320,207]}
+{"kind":"notes","id":"nt/n52h07","slide":6,"text":"Screenshots are from the project SS folder. The repository includes a Google Maps view and an AI agent integration. The screenshot demonstrates a reply; it does not establish clinical accuracy or production readiness."}
+{"kind":"slide","id":"sl/i8i10u","slide":7,"title":"System Architecture and Technology Stack","textShapes":12}
+{"kind":"shape","id":"sh/a1o7ilw3","slide":7,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/x4f6tgvu","slide":7,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/w36pkve9","slide":7,"text":"System Architecture and Technology Stack","textPreview":"System Architecture and Technology Stack","textChars":40,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/nedon6dc","slide":7,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/md47e1w7","slide":7,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/90f6pgvi","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/ozmpgbex","slide":7,"text":"The Android client is the user-facing layer. It connects the location map and AI interaction.","textPreview":"The Android client is the user-facing layer. It connects the location map and AI interaction.","textChars":93,"textLines":1,"bbox":[67,144,1120,57]}
+{"kind":"textbox","id":"sh/zadoj6dg","slide":7,"text":"Android app\nKotlin + Jetpack Compose","textPreview":"Android app | Kotlin + Jetpack Compose","textChars":36,"textLines":2,"bbox":[477,229,327,88]}
+{"kind":"textbox","id":"sh/e94na1wv","slide":7,"text":"Google Maps SDK","textPreview":"Google Maps SDK","textChars":15,"textLines":1,"bbox":[111,422,267,84]}
+{"kind":"textbox","id":"sh/crm94fix","slide":7,"text":"Gemini AI service","textPreview":"Gemini AI service","textChars":17,"textLines":1,"bbox":[505,422,267,84]}
+{"kind":"textbox","id":"sh/xsvaxkji","slide":7,"text":"Backend API foundation","textPreview":"Backend API foundation","textChars":22,"textLines":1,"bbox":[899,422,267,84]}
+{"kind":"shape","id":"sh/ap4r250r","slide":7,"bbox":[244.5,317,396,105]}
+{"kind":"shape","id":"sh/bqdsva1c","slide":7,"bbox":[638.5,317,2,105]}
+{"kind":"shape","id":"sh/o3m90f2l","slide":7,"bbox":[640.5,317,392,105]}
+{"kind":"textbox","id":"sh/povqt0j6","slide":7,"text":"Implemented app layer","textPreview":"Implemented app layer","textChars":21,"textLines":1,"bbox":[109,527,505,37]}
+{"kind":"textbox","id":"sh/21kry5kv","slide":7,"text":"Maps and AI are visible in the current demo.","textPreview":"Maps and AI are visible in the current demo.","textChars":44,"textLines":1,"bbox":[109,571,505,49]}
+{"kind":"textbox","id":"sh/n2t8ra1g","slide":7,"text":"Integration path","textPreview":"Integration path","textChars":16,"textLines":1,"bbox":[700,527,470,37]}
+{"kind":"textbox","id":"sh/8z69czi5","slide":7,"text":"FastAPI and data services support the wider project design; connected rescue flow still needs validation.","textPreview":"FastAPI and data services support the wider project design; connected rescue flow still needs validation.","textChars":105,"textLines":1,"bbox":[700,571,470,66]}
+{"kind":"notes","id":"nt/i8i10u","slide":7,"text":"Architecture is simplified from README.md and the Android source. FastAPI is in the repository, but this slide does not claim an end-to-end rescue workflow or production database integration."}
+{"kind":"slide","id":"sl/5zl7ra","slide":8,"title":"Application Demo, Testing & Current Results","textShapes":15}
+{"kind":"shape","id":"sh/f614nu5o","slide":8,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/g7a5gz69","slide":8,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/18jmp4ne","slide":8,"text":"Application Demo, Testing & Current Results","textPreview":"Application Demo, Testing & Current Results","textChars":43,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/6183apor","slide":8,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/r2h4ju5c","slide":8,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/s3qlcz6x","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/t4jmlkni","slide":8,"text":"Current evidence comes from device screenshots of the working Android interface.","textPreview":"Current evidence comes from device screenshots of the working Android interface.","textChars":80,"textLines":1,"bbox":[67,143,1135,65]}
+{"kind":"textbox","id":"sh/6hk3q9gb","slide":8,"text":"Demo check","textPreview":"Demo check","textChars":10,"textLines":1,"bbox":[718,205,260,37]}
+{"kind":"textbox","id":"sh/tkbm1oz2","slide":8,"text":"Observed result","textPreview":"Observed result","textChars":15,"textLines":1,"bbox":[990,205,210,37]}
+{"kind":"shape","id":"sh/sj2lsjyh","slide":8,"bbox":[713,246,491,0]}
+{"kind":"textbox","id":"sh/f6t43eh8","slide":8,"text":"Launch + navigation","textPreview":"Launch + navigation","textChars":19,"textLines":1,"bbox":[719,256,268,63]}
+{"kind":"textbox","id":"sh/u5k3u9gn","slide":8,"text":"Home and major tabs appear","textPreview":"Home and major tabs appear","textChars":26,"textLines":1,"bbox":[990,256,208,63]}
+{"kind":"shape","id":"sh/h8vm5ofy","slide":8,"bbox":[713,325,491,0]}
+{"kind":"textbox","id":"sh/g7m5wjyt","slide":8,"text":"Location map","textPreview":"Location map","textChars":12,"textLines":1,"bbox":[719,335,268,63]}
+{"kind":"textbox","id":"sh/va94ruho","slide":8,"text":"GPS area and SOS control shown","textPreview":"GPS area and SOS control shown","textChars":30,"textLines":1,"bbox":[990,335,208,63]}
+{"kind":"shape","id":"sh/ap03ipg3","slide":8,"bbox":[713,404,491,0]}
+{"kind":"textbox","id":"sh/y5o7qx0r","slide":8,"text":"Emergency content","textPreview":"Emergency content","textChars":17,"textLines":1,"bbox":[719,414,268,63]}
+{"kind":"textbox","id":"sh/z6hoz21c","slide":8,"text":"Protocol topic and steps shown","textPreview":"Protocol topic and steps shown","textChars":30,"textLines":1,"bbox":[990,414,208,63]}
+{"kind":"shape","id":"sh/07qps7ix","slide":8,"bbox":[713,483,491,0]}
+{"kind":"textbox","id":"sh/l8z61czi","slide":8,"text":"AI conversation","textPreview":"AI conversation","textChars":15,"textLines":1,"bbox":[719,493,268,63]}
+{"kind":"textbox","id":"sh/q1o7md0v","slide":8,"text":"Question and response captured","textPreview":"Question and response captured","textChars":30,"textLines":1,"bbox":[990,493,208,63]}
+{"kind":"shape","id":"sh/r2xovi1g","slide":8,"bbox":[713,562,491,0]}
+{"kind":"textbox","id":"sh/c36poni1","slide":8,"text":"These checks confirm visible interface behavior. Dispatch reliability, response time and medical accuracy need separate evaluation.","textPreview":"These checks confirm visible interface behavior. Dispatch reliability, response time and medical accuracy need separate evaluation.","textChars":131,"textLines":1,"bbox":[70,568,1135,76]}
+{"kind":"image","id":"im/r698nm1g","slide":8,"name":"","alt":"Home screen capture","bbox":[83,230,166,305]}
+{"kind":"image","id":"im/q507ehkv","slide":8,"name":"","alt":"Protocol screen capture","bbox":[285,230,166,305]}
+{"kind":"image","id":"im/krutgjux","slide":8,"name":"","alt":"Chat response capture","bbox":[487,230,166,305]}
+{"kind":"notes","id":"nt/5zl7ra","slide":8,"text":"Evidence comes from project screenshots 29917.jpg, screen_test.png and screen_check2.png. The checks summarize what is visible, not formal automated test results or real-world rescue performance."}
+{"kind":"slide","id":"sl/gfyxx2","slide":9,"title":"Research Contribution","textShapes":14}
+{"kind":"shape","id":"sh/gbqtgjqt","slide":9,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/fahc7e98","slide":9,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/e9obe983","slide":9,"text":"Research Contribution","textPreview":"Research Contribution","textChars":21,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/pgzudo7q","slide":9,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/ofqtkjq5","slide":9,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/3ehcby9k","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/2d8bit8z","slide":9,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[68,158,100,48]}
+{"kind":"textbox","id":"sh/5kfa14r6","slide":9,"text":"Emergency care","textPreview":"Emergency care","textChars":14,"textLines":1,"bbox":[68,228,365,64]}
+{"kind":"shape","id":"sh/4j6t8zql","slide":9,"bbox":[68,311,351,0]}
+{"kind":"textbox","id":"sh/qd0ze1oj","slide":9,"text":"WHO emphasizes access to quality, timely emergency care. This motivates support during the early response period.","textPreview":"WHO emphasizes access to quality, timely emergency care. This motivates support during the early response period.","textChars":113,"textLines":1,"bbox":[68,337,351,166]}
+{"kind":"textbox","id":"sh/bet0n6p4","slide":9,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[473,158,100,48]}
+{"kind":"textbox","id":"sh/cf2hgb6p","slide":9,"text":"Existing digital systems","textPreview":"Existing digital systems","textChars":24,"textLines":1,"bbox":[473,228,365,64]}
+{"kind":"shape","id":"sh/dgbipw7a","slide":9,"bbox":[473,311,351,0]}
+{"kind":"textbox","id":"sh/y1kzi1of","slide":9,"text":"India’s 112 system already combines SOS requests with location data. NearHelp studies the user-facing guidance layer.","textPreview":"India’s 112 system already combines SOS requests with location data. NearHelp studies the user-facing guidance layer.","textChars":117,"textLines":1,"bbox":[473,337,351,166]}
+{"kind":"textbox","id":"sh/z2t0r6p0","slide":9,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[878,158,100,48]}
+{"kind":"textbox","id":"sh/0321kb6l","slide":9,"text":"Community response","textPreview":"Community response","textChars":18,"textLines":1,"bbox":[878,228,365,64]}
+{"kind":"shape","id":"sh/l4bitgn6","slide":9,"bbox":[878,311,351,0]}
+{"kind":"textbox","id":"sh/m5kjmlor","slide":9,"text":"A randomized trial found that phone alerts increased CPR started by nearby trained volunteers before EMS arrival.","textPreview":"A randomized trial found that phone alerts increased CPR started by nearby trained volunteers before EMS arrival.","textChars":113,"textLines":1,"bbox":[878,337,351,166]}
+{"kind":"shape","id":"sh/n6d0vq5c","slide":9,"bbox":[69,537,1138,92]}
+{"kind":"textbox","id":"sh/jadgjqlk","slide":9,"text":"Project contribution: a prototype that places map context, emergency content and AI interaction in one mobile journey.","textPreview":"Project contribution: a prototype that places map context, emergency content and AI interaction in one mobile journey.","textChars":118,"textLines":1,"bbox":[95,549,1080,72]}
+{"kind":"textbox","id":"sh/i94zal4z","slide":9,"text":"Sources: WHO emergency care; 112 India; Ringh et al., NEJM (2015)","textPreview":"Sources: WHO emergency care; 112 India; Ringh et al., NEJM (2015)","textChars":65,"textLines":1,"bbox":[72,647,1100,25]}
+{"kind":"notes","id":"nt/gfyxx2","slide":9,"text":"[1] WHO, Emergency care, https://www.who.int/health-topics/emergency-care\n[2] Government of India, Emergency Response Support System, https://112.gov.in/\n[3] M. Ringh et al., Mobile-Phone Dispatch of Laypersons for CPR in Out-of-Hospital Cardiac Arrest, New England Journal of Medicine 372 (2015), 2316–2325, https://www.nejm.org/doi/full/10.1056/NEJMoa1406038 . The project contribution is a prototype integration and research direction, not a measured improvement over existing systems. 112 India also offers a SHOUT volunteer feature for women and children."}
+{"kind":"slide","id":"sl/nj3hs6","slide":10,"title":"Limitations, Future Scope & Conclusion","textShapes":12}
+{"kind":"shape","id":"sh/4321s3ap","slide":10,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/j2tkjy94","slide":10,"bbox":[0,0,10,720]}
+{"kind":"textbox","id":"sh/ihkjqtsj","slide":10,"text":"Limitations, Future Scope & Conclusion","textPreview":"Limitations, Future Scope & Conclusion","textChars":38,"textLines":1,"bbox":[58,33,1160,76]}
+{"kind":"shape","id":"sh/hgb2h8re","slide":10,"bbox":[58,118,1160,0]}
+{"kind":"textbox","id":"sh/wf21o3at","slide":10,"text":"NearHelp AI  /  Project review","textPreview":"NearHelp AI  /  Project review","textChars":30,"textLines":1,"bbox":[58,678,800,20]}
+{"kind":"textbox","id":"sh/ve9kfy98","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1160,674,60,26]}
+{"kind":"textbox","id":"sh/ud0jmtsn","slide":10,"text":"Current limitations","textPreview":"Current limitations","textChars":19,"textLines":1,"bbox":[69,155,500,48]}
+{"kind":"textbox","id":"sh/9cr2dor2","slide":10,"text":"The screenshots do not establish successful real-world dispatch or improved response time.","textPreview":"The screenshots do not establish successful real-world dispatch or improved response time.","textChars":90,"textLines":1,"bbox":[70,221,502,80]}
+{"kind":"textbox","id":"sh/8bi1kjah","slide":10,"text":"AI answers need systematic checks against verified medical sources before wider use.","textPreview":"AI answers need systematic checks against verified medical sources before wider use.","textChars":84,"textLines":1,"bbox":[70,321,502,80]}
+{"kind":"textbox","id":"sh/md8nm5gn","slide":10,"text":"The current demo does not evaluate responder availability or field performance.","textPreview":"The current demo does not evaluate responder availability or field performance.","textChars":79,"textLines":1,"bbox":[70,421,502,80]}
+{"kind":"shape","id":"sh/7eh4fax8","slide":10,"bbox":[636,153,0,413]}
+{"kind":"textbox","id":"sh/8zq5ofyt","slide":10,"text":"Future scope","textPreview":"Future scope","textChars":12,"textLines":1,"bbox":[695,155,480,48]}
+{"kind":"textbox","id":"sh/90zmhkfe","slide":10,"text":"Validate protocol retrieval and medical safety guardrails.","textPreview":"Validate protocol retrieval and medical safety guardrails.","textChars":58,"textLines":1,"bbox":[697,221,478,66]}
+{"kind":"textbox","id":"sh/y9o3ilgr","slide":10,"text":"Connect and verify nearby responders, then add live rescue tracking.","textPreview":"Connect and verify nearby responders, then add live rescue tracking.","textChars":68,"textLines":1,"bbox":[697,315,478,76]}
+{"kind":"textbox","id":"sh/zax4bqxc","slide":10,"text":"Expand access with Bengali, Hindi and English support.","textPreview":"Expand access with Bengali, Hindi and English support.","textChars":54,"textLines":1,"bbox":[697,421,478,66]}
+{"kind":"shape","id":"sh/kbqlkvyx","slide":10,"bbox":[69,558,1138,84]}
+{"kind":"textbox","id":"sh/lczmd0f2","slide":10,"text":"Conclusion: NearHelp AI now demonstrates the mobile foundation for location-aware emergency assistance.","textPreview":"Conclusion: NearHelp AI now demonstrates the mobile foundation for location-aware emergency assistance.","textChars":103,"textLines":1,"bbox":[95,566,1080,71]}
+{"kind":"notes","id":"nt/nj3hs6","slide":10,"text":"Limitations are framed around the evidence available in repository screenshots. Future scope follows ppt_instruction.md. No claim of clinical validation or real-world rescue performance is made."}

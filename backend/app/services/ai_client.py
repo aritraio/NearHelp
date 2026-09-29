@@ -423,6 +423,30 @@ class AIClient:
         elif any(k in q_lower for k in ["poison", "toxic", "chemical", "swallowed", "বিষ"]):
             reply = "🧪 DO NOT induce vomiting or administer fluids unless instructed by medical professionals. Keep any container or packaging for paramedic inspection. Check breathing and place in recovery position if drowsy. Call 108 immediately.\n\n[Source: WHO International Programme on Chemical Safety]"
             highlight = "Poisoning Emergency Protocol"
+        elif any(k in q_lower for k in ["electric", "current", "wire", "electrocution", "বিদ্যুৎ"]):
+            reply = "⚡ DO NOT touch victim until power source is disconnected at main breaker or pushed away with dry wood. Check breathing immediately; if unresponsive and not breathing normally, initiate CPR at 110 BPM and call 108.\n\n[Source: OSHA & Red Cross Electrical Safety Protocols]"
+            highlight = "Electrical Shock Protocol"
+        elif any(k in q_lower for k in ["drown", "submerged", "pool", "river", "ডুবে"]):
+            reply = "🌊 Pull victim to dry flat surface. Drowning arrest causes severe hypoxia: deliver 5 initial rescue breaths first, then begin 30:2 compressions and breaths. Wipe chest completely dry before applying AED pads.\n\n[Source: International Lifesaving Federation & AHA Guidelines 2020]"
+            highlight = "Water Rescue & Resuscitation"
+        elif any(k in q_lower for k in ["diabet", "sugar", "insulin", "hypoglycemia", "ডায়াবেটিস"]):
+            reply = "🍬 If the person is conscious and can swallow, give 15–20g fast-acting sugar (fruit juice, 3 tsp sugar, or glucose). Wait 15 minutes to re-evaluate. If unconscious, NEVER give fluids; place in recovery position and call 108.\n\n[Source: American Diabetes Association Emergency Standards]"
+            highlight = "Hypoglycemia Emergency Protocol"
+        elif any(k in q_lower for k in ["faint", "syncope", "dizzy", "passed out", "অজ্ঞান"]):
+            reply = "🛌 Lay the person flat on their back and elevate legs 30 cm (12 inches) to restore blood flow to the brain. Loosen tight collars. If unresponsiveness lasts >1 minute or breathing is abnormal, call 108 immediately.\n\n[Source: Red Cross First-Aid Guidelines]"
+            highlight = "Fainting / Syncope Protocol"
+        elif any(k in q_lower for k in ["dog", "animal bite", "cat bite", "rabies", "জলাতঙ্ক"]):
+            reply = "🐕 Wash the bite wound vigorously under running tap water with soap for 15 full minutes immediately. Apply povidone-iodine antiseptic. Never stitch or bandage tightly. Seek immediate hospital care for Anti-Rabies Vaccine (ARV).\n\n[Source: WHO Rabies First-Aid Guidelines]"
+            highlight = "Animal Bite / Rabies Prevention"
+        elif any(k in q_lower for k in ["eye", "cornea", "splash", "চোখ"]):
+            reply = "👁️ Flush the eye continuously with clean running water or saline for 15–20 minutes with eyelids held wide open. DO NOT rub the eye or remove embedded objects. Cover loosely and seek immediate ophthalmic evaluation.\n\n[Source: American Academy of Ophthalmology Guidelines]"
+            highlight = "Eye Trauma & Chemical Flush"
+        elif any(k in q_lower for k in ["nosebleed", "nose bleed", "epistaxis", "নাক দিয়ে রক্ত"]):
+            reply = "👃 Sit upright and lean slightly forward (do NOT tilt head back). Pinch the soft part of the nose firmly for 10–15 minutes continuously while breathing through mouth. Apply cold pack to bridge of nose.\n\n[Source: NHS & British Red Cross Epistaxis Guidelines]"
+            highlight = "Epistaxis / Nosebleed Protocol"
+        elif any(k in q_lower for k in ["headache", "fever", "stomach pain", "medicine", "tablet", "মাথা"]):
+            reply = "🩺 Medical Advisory:\n\n• For sudden extreme headache ('thunderclap'), stiff neck, or fever with rash, seek immediate emergency hospital care.\n• Stay hydrated and rest in a cool, quiet room.\n• Do NOT self-prescribe antibiotics or strong painkillers without physician diagnosis.\n\n[Source: WHO Clinical Practice Standards & ICMR Triage]"
+            highlight = "Clinical Symptom Advisory"
         else:
             # Direct Gemini Generative AI Integration when GEMINI_API_KEY is configured
             gemini_replied = False
@@ -474,28 +498,141 @@ class AIClient:
                 )
                 highlight = "Emergency Triage Assessment"
 
-        return AgentChatResponse(
-            session_id=request.session_id,
-            reply_text=reply,
-            highlight_text=highlight,
-            triage_state="GUIDANCE",
-            condition_id="cardiac_arrest",
-            severity_level=5,
-            priority="critical",
-            current_step_index=request.current_step_index,
-            completed_steps=request.completed_steps,
-            cpr_metronome_active=True,
-            cpr_bpm=110,
-            citations=citations,
-            contraindications=contraindications,
-            legal_shield_applied=True,
-            suggested_quick_questions=[
+        is_cardiac = any(k in q_lower for k in ["cpr", "compress", "cardiac", "heart", "chest pain", "bpm", "aed", "defibrillator", "pulse", "not breathing"])
+        
+        detected_condition = "general_emergency"
+        if any(k in q_lower for k in ["burn", "fire", "scald", "blister", "hot water", "পোড়া"]):
+            detected_condition = "burns"
+        elif any(k in q_lower for k in ["bleed", "tourniquet", "blood", "pressure", "cut", "wound", "রক্ত"]):
+            detected_condition = "severe_bleeding"
+        elif any(k in q_lower for k in ["chok", "heimlich", "food stuck", "throat", "cant breathe", "গলায়"]):
+            detected_condition = "choking"
+        elif any(k in q_lower for k in ["fracture", "broken bone", "broken leg", "splint", "ভাঙা", "হাড়"]):
+            detected_condition = "leg_fracture"
+        elif any(k in q_lower for k in ["seizure", "mouth", "spoon", "froth", "fit", "খিঁচুনি"]):
+            detected_condition = "seizures"
+        elif any(k in q_lower for k in ["stroke", "face drop", "slurred", "arm weak", "paralysis", "মুখ বাকা"]):
+            detected_condition = "stroke"
+        elif any(k in q_lower for k in ["asthma", "inhaler", "wheez", "breathlessness", "শ্বাসকষ্ট"]):
+            detected_condition = "asthma"
+        elif any(k in q_lower for k in ["heat", "sunstroke", "heatstroke", "exhaustion", "লু"]):
+            detected_condition = "heatstroke"
+        elif any(k in q_lower for k in ["snake", "bite", "venom", "সাপ", "কামড়"]):
+            detected_condition = "snakebite"
+        elif any(k in q_lower for k in ["poison", "toxic", "chemical", "swallowed", "বিষ"]):
+            detected_condition = "poisoning"
+        elif any(k in q_lower for k in ["electric", "current", "wire", "electrocution"]):
+            detected_condition = "electric_shock"
+        elif any(k in q_lower for k in ["drown", "submerged", "pool", "river"]):
+            detected_condition = "drowning"
+        elif any(k in q_lower for k in ["diabet", "sugar", "insulin", "hypoglycemia"]):
+            detected_condition = "diabetic_emergency"
+        elif any(k in q_lower for k in ["headache", "fever", "migraine", "stomach pain", "medicine", "tablet", "মাথা"]):
+            detected_condition = "medical_symptom"
+        elif is_cardiac:
+            detected_condition = "cardiac_arrest"
+
+        quick_questions_map = {
+            "burns": [
+                "Can I apply ice or toothpaste?",
+                "How long should I cool under water?",
+                "Should I pop blister bubbles?",
+                "When do I need emergency hospital care?",
+            ],
+            "severe_bleeding": [
+                "When do I apply a tourniquet?",
+                "Should I remove blood-soaked gauze?",
+                "How to pack a deep wound cavity?",
+                "Am I legally protected if I help?",
+            ],
+            "choking": [
+                "What if the victim is pregnant or a child?",
+                "How do I deliver sharp back blows?",
+                "What to do if victim loses consciousness?",
+                "When and how to start CPR?",
+            ],
+            "leg_fracture": [
+                "Should I straighten a deformed bone?",
+                "How to immobilize limb with splint?",
+                "Can I apply an ice compress for swelling?",
+                "How to check blood flow in toes?",
+            ],
+            "seizures": [
+                "Should I hold the person down?",
+                "What if they bite their tongue?",
+                "When is a seizure life-threatening (>5 min)?",
+                "How to roll into recovery position?",
+            ],
+            "stroke": [
+                "What are the FAST signs of stroke?",
+                "Can I give water or blood thinners?",
+                "What is the golden window for tPA?",
+                "How should I position their head?",
+            ],
+            "asthma": [
+                "How many puffs of inhaler should I give?",
+                "Should the patient sit upright or lie down?",
+                "How to coach pursed-lip breathing?",
+                "When to call 108 emergency dispatch?",
+            ],
+            "snakebite": [
+                "Can I cut the bite or suck venom?",
+                "Can I use a tight tourniquet?",
+                "Where is anti-snake venom (ASV) available?",
+                "How to immobilize the bitten limb?",
+            ],
+            "medical_symptom": [
+                "When is a headache an emergency?",
+                "What are warning signs of high fever?",
+                "Can I take painkillers safely?",
+                "When should I call 108?",
+            ],
+            "general_emergency": [
+                "What should I check first (DRABC)?",
+                "When should I call 108?",
+                "Can I give oral fluids?",
+                "Am I protected under Section 134A?",
+            ],
+            "cardiac_arrest": [
                 "Can I give water or oral medicine?",
                 "How deep should chest compressions be?",
                 "When and how do I use the AED?",
                 "What if ribs crack during CPR?",
                 "Am I legally protected if I help?",
             ],
+        }
+
+        suggested_questions = quick_questions_map.get(
+            detected_condition,
+            quick_questions_map["cardiac_arrest"] if is_cardiac else quick_questions_map["general_emergency"]
+        )
+
+        severity_level = 5 if (is_cardiac or detected_condition in ["cardiac_arrest", "severe_bleeding", "choking", "stroke"]) else 4
+        if detected_condition == "burns":
+            severity_level = 3
+        elif detected_condition == "medical_symptom":
+            severity_level = 2
+        elif detected_condition == "general_emergency":
+            severity_level = 3
+
+        priority = "critical" if severity_level == 5 else ("urgent" if severity_level >= 3 else "advisory")
+
+        return AgentChatResponse(
+            session_id=request.session_id,
+            reply_text=reply,
+            highlight_text=highlight,
+            triage_state="GUIDANCE",
+            condition_id=detected_condition,
+            severity_level=severity_level,
+            priority=priority,
+            current_step_index=request.current_step_index,
+            completed_steps=request.completed_steps,
+            cpr_metronome_active=is_cardiac,
+            cpr_bpm=110 if is_cardiac else 0,
+            citations=citations,
+            contraindications=contraindications,
+            legal_shield_applied=True,
+            suggested_quick_questions=suggested_questions,
             processing_time_ms=max(0.01, round(latency_ms, 2)),
         )
 

@@ -89,7 +89,7 @@ services:
       - "${AI_SERVICE_PORT:-8001}:8001"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-models/text-embedding-004}
       - CHROMA_PERSIST_DIRECTORY=/data/chroma_db
       - ENVIRONMENT=${ENVIRONMENT:-development}
