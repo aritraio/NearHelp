@@ -42,6 +42,9 @@ class AiAgentRepository(
     .readTimeout(30, TimeUnit.SECONDS)
     .build()
 
+  // Session condition memory to preserve context across multi-turn queries in a thread
+  private val sessionConditionMap = java.util.concurrent.ConcurrentHashMap<String, String>()
+
   override suspend fun getProtocol(conditionId: String): GroundedProtocolDto = withContext(Dispatchers.IO) {
     try {
       val response = apiService.getProtocolByCondition(conditionId)
@@ -89,6 +92,10 @@ class AiAgentRepository(
     if (apiKey != null) {
       val geminiResponse = callGeminiDirectly(apiKey, sessionId, text, currentStepIndex, completedSteps)
       if (geminiResponse != null) {
+        val detected = detectConditionFromText(text)
+        if (detected != "general_emergency") {
+          sessionConditionMap[sessionId] = detected
+        }
         return@withContext geminiResponse
       }
     }
@@ -105,13 +112,31 @@ class AiAgentRepository(
       val response = apiService.chatWithAgent(req)
       if (response.isSuccessful && response.body() != null) {
         val body = response.body()!!
-        val isStaleCardiacFallback = body.replyText.contains("Ensure victim is on a firm flat surface") &&
-            !isCardiacOrCprQuery(text)
-        if (!isStaleCardiacFallback) {
+        val reply = body.replyText
+        val isGenericServerResponse = (
+            reply.contains("General Emergency Assessment") ||
+            reply.contains("Emergency Triage Assessment") ||
+            reply.contains("Check scene safety before approaching") ||
+            reply.contains("Check victim responsiveness") ||
+            reply.contains("Ensure victim is on a firm flat surface") ||
+            reply.contains("Emergency Life-Support Protocol (DRABC)") ||
+            reply.contains("Dial 108 immediately for ambulance dispatch")
+        ) && !isCardiacOrDangerQuery(text)
+
+        if (!isGenericServerResponse) {
           Log.i("AiAgentRepository", "Live AI chat response received: ${body.highlightText} (latency: ${body.processingTimeMs}ms)")
+          val serverCondition = body.conditionId
+          if (serverCondition.isNotBlank() && serverCondition != "general_emergency") {
+            sessionConditionMap[sessionId] = serverCondition
+          } else {
+            val detected = detectConditionFromText(text)
+            if (detected != "general_emergency") {
+              sessionConditionMap[sessionId] = detected
+            }
+          }
           return@withContext body
         }
-        Log.w("AiAgentRepository", "Server returned generic CPR message for non-cardiac query. Enhancing with dedicated clinical triage.")
+        Log.w("AiAgentRepository", "Server returned generic triage for non-cardiac query ('$text'). Overriding with rich local clinical protocol.")
       } else {
         Log.w("AiAgentRepository", "Live AI chat returned code ${response.code()}, falling back to local clinical knowledge.")
       }
@@ -123,36 +148,148 @@ class AiAgentRepository(
     return@withContext getFallbackChatResponse(sessionId, text, currentStepIndex, completedSteps)
   }
 
-  private fun isCardiacOrCprQuery(text: String): Boolean {
+  private fun isCardiacOrDangerQuery(text: String): Boolean {
     val q = text.lowercase()
-    return q.contains("cpr") || q.contains("heart") || q.contains("cardiac") ||
+    val isPadQuery = (q.contains("pad") || q.contains("pads")) &&
+        (q.contains("heating pad") || q.contains("sanitary pad") || q.contains("period") || q.contains("cramp"))
+    return (q.contains("cpr") || q.contains("cardiac") || q.contains("heart") ||
         q.contains("chest compression") || q.contains("chest pain") ||
-        q.contains("no pulse") || q.contains("not breathing") || q.contains("defibrillator") || q.contains("aed")
+        q.contains("no pulse") || q.contains("not breathing") || q.contains("defibrillator") ||
+        (q.contains("aed") && !isPadQuery) ||
+        q.contains("unresponsive") || q.contains("unconscious") || q.contains("dying") ||
+        q.contains("collapsed") || q.contains("massive bleed") || q.contains("gushing blood") ||
+        q.contains("arterial bleed") || q.contains("choking") || q.contains("electrocution")) &&
+        !isPadQuery
   }
+
+  private fun isCardiacOrCprQuery(text: String): Boolean = isCardiacOrDangerQuery(text)
 
   fun detectConditionFromText(text: String): String {
     val q = text.lowercase()
     return when {
-      q.contains("heatstroke") || q.contains("sunstroke") || q.contains("heat") || q.contains("dehydrat") -> "heatstroke"
-      q.contains("electric") || q.contains("electrocution") || (q.contains("shock") && (q.contains("current") || q.contains("wire") || q.contains("socket"))) -> "electric_shock"
-      q.contains("drown") || (q.contains("water") && (q.contains("submerged") || q.contains("pool") || q.contains("river"))) -> "drowning"
-      q.contains("cpr") || q.contains("cardiac") || q.contains("heart") || q.contains("chest pain") || q.contains("no pulse") -> "cardiac_arrest"
-      q.contains("dog") || q.contains("cat") || q.contains("animal") || q.contains("rabies") -> "poisoning"
-      q.contains("snake") || q.contains("venom") || q.contains("viper") || q.contains("cobra") || (q.contains("bite") && !q.contains("dog") && !q.contains("cat") && !q.contains("animal")) -> "snakebite"
-      q.contains("poison") || q.contains("toxic") || q.contains("chemical") || q.contains("swallowed") || q.contains("ingest") -> "poisoning"
-      q.contains("nosebleed") || q.contains("nose bleed") || q.contains("epistaxis") || q.contains("bleed") || q.contains("blood") || q.contains("tourniquet") || q.contains("hemorrhage") || q.contains("cut") || q.contains("wound") || q.contains("crash") || (q.contains("accident") && !q.contains("accidentally")) -> "severe_bleeding"
-      q.contains("chok") || q.contains("heimlich") || q.contains("food stuck") || q.contains("cant breathe") || (q.contains("baby") && q.contains("breath")) -> "choking"
-      q.contains("burn") || q.contains("scald") || q.contains("fire") || q.contains("blister") || q.contains("acid") -> "burns"
-      q.contains("fracture") || q.contains("broken bone") || q.contains("broken leg") || q.contains("broken arm") || q.contains("splint") || q.contains("sprain") || q.contains("twisted") -> "leg_fracture"
-      q.contains("seizure") || q.contains("fit") || q.contains("convulsion") || q.contains("epilep") -> "seizures"
-      (q.contains("stroke") && !q.contains("heat") && !q.contains("sun")) || q.contains("face drop") || q.contains("slurred") || q.contains("paralysis") || q.contains("fast") -> "stroke"
-      q.contains("asthma") || q.contains("inhaler") || q.contains("wheez") || q.contains("breathless") -> "asthma"
-      q.contains("anaphylaxis") || q.contains("allergy") || q.contains("allergic") || q.contains("epipen") || q.contains("epinephrine") || q.contains("hives") || q.contains("bee sting") -> "anaphylaxis"
-      q.contains("hypothermia") || q.contains("freezing") || q.contains("cold") || q.contains("frostbite") -> "hypothermia"
-      q.contains("headache") || q.contains("fever") || q.contains("migraine") || q.contains("stomach") || q.contains("medicine") || q.contains("tablet") -> "medical_symptom"
-      (q.contains("head") && !q.contains("headache")) || q.contains("concussion") || q.contains("skull") || q.contains("spine") || q.contains("neck") || q.contains("fell") || q.contains("fall") -> "head_injury"
-      q.contains("diabet") || q.contains("sugar") || q.contains("insulin") || q.contains("glucose") || q.contains("hypoglycemia") -> "diabetic_emergency"
-      q.contains("faint") || q.contains("syncope") || q.contains("dizzy") || q.contains("passed out") || q.contains("unconscious") -> "seizures"
+      // 1. Menstrual health & dysmenorrhea (checked first to prevent collisions)
+      q.contains("period") || q.contains("periods") || q.contains("menstrua") ||
+          q.contains("cramp") || q.contains("dysmenorrhea") || q.contains("pms") ||
+          q.contains("uterus") || q.contains("vagina") || q.contains("ovary") || q.contains("মাসিক") -> "menstrual_health"
+
+      // 2. Gastrointestinal relief & food poisoning
+      q.contains("food poison") || q.contains("stomach") || q.contains("abdomen") ||
+          q.contains("tummy") || q.contains("belly") || q.contains("nausea") ||
+          q.contains("vomit") || q.contains("diarrhea") || q.contains("loose motion") ||
+          q.contains("acidity") || q.contains("gastric") || q.contains("indigestion") ||
+          q.contains("heartburn") || q.contains("bloating") || q.contains("পেট") -> "gastrointestinal"
+
+      // 3. Anxiety & acute panic
+      q.contains("panic") || q.contains("anxiety") || q.contains("hyperventilat") ||
+          q.contains("nervous") || q.contains("palpitation") || q.contains("scared") -> "anxiety"
+
+      // 4. Dental emergency & oral pain
+      q.contains("tooth") || q.contains("teeth") || q.contains("toothache") ||
+          q.contains("gum pain") || q.contains("gum bleed") || (q.contains("dental") && !q.contains("accidental")) -> "dental"
+
+      // 5. Heatstroke & heat exhaustion
+      q.contains("heatstroke") || q.contains("sunstroke") || q.contains("heat wave") ||
+          (q.contains("heat") && !q.contains("heating pad") && !q.contains("pad") && !q.contains("heat therapy")) ||
+          q.contains("dehydrat") || q.contains("লু") -> "heatstroke"
+
+      // 6. Electric shock & electrocution
+      q.contains("electric") || q.contains("electrocution") ||
+          (q.contains("shock") && (q.contains("current") || q.contains("wire") || q.contains("socket"))) ||
+          q.contains("বিদ্যুৎ") -> "electric_shock"
+
+      // 7. Drowning
+      q.contains("drown") || (q.contains("water") && (q.contains("submerged") || q.contains("pool") || q.contains("river"))) ||
+          q.contains("ডুবে") -> "drowning"
+
+      // 8. Venomous snakebite
+      q.contains("snake") || q.contains("venom") || q.contains("viper") || q.contains("cobra") ||
+          q.contains("krait") || (q.contains("bite") && !q.contains("dog") && !q.contains("cat") && !q.contains("animal")) ||
+          q.contains("সাপ") -> "snakebite"
+
+      // 9. Animal bite & rabies
+      q.contains("dog") || q.contains("cat") || q.contains("animal") || q.contains("rabies") ||
+          q.contains("monkey bite") || q.contains("জলাতঙ্ক") -> "animal_bite"
+
+      // 10. Chemical poisoning & toxin ingestion
+      q.contains("poison") || q.contains("toxic") || q.contains("chemical") ||
+          q.contains("swallowed") || q.contains("ingest") || q.contains("pesticide") || q.contains("বিষ") -> "poisoning"
+
+      // 11. Severe bleeding & epistaxis
+      q.contains("nosebleed") || q.contains("nose bleed") || q.contains("epistaxis") ||
+          q.contains("bleed") || q.contains("blood") || q.contains("tourniquet") ||
+          q.contains("hemorrhage") || q.contains("gushing") || q.contains("arterial") ||
+          q.contains("laceration") || (q.contains("accident") && !q.contains("accidentally")) ||
+          q.contains("রক্ত") -> "severe_bleeding"
+
+      // 12. Choking & airway obstruction
+      q.contains("chok") || q.contains("heimlich") || q.contains("food stuck") ||
+          q.contains("cant breathe") || (q.contains("baby") && q.contains("breath")) ||
+          q.contains("গলায়") -> "choking"
+
+      // 13. Thermal & chemical burns
+      q.contains("burn") || q.contains("scald") || q.contains("fire") ||
+          q.contains("hot oil") || q.contains("blister") || q.contains("acid burn") ||
+          q.contains("পোড়া") -> "burns"
+
+      // 14. Fractures & broken bones
+      q.contains("fracture") || q.contains("broken bone") || q.contains("broken leg") ||
+          q.contains("broken arm") || q.contains("splint") || q.contains("ভাঙা") || q.contains("হাড়") -> "leg_fracture"
+
+      // 15. Joint sprain & ligament strain
+      q.contains("sprain") || q.contains("twisted ankle") || q.contains("twisted") ||
+          q.contains("ligament") || q.contains("swollen ankle") || q.contains("wrist pain") -> "sprain_strain"
+
+      // 16. Minor cuts & abrasions
+      q.contains("minor cut") || q.contains("scrape") || q.contains("scratch") ||
+          q.contains("small cut") || q.contains("paper cut") || q.contains("abrasion") -> "minor_wound"
+
+      // 17. Allergies, hives & anaphylaxis
+      q.contains("anaphylaxis") || q.contains("epipen") || q.contains("epinephrine") ||
+          q.contains("allergy") || q.contains("allergic") || q.contains("hives") ||
+          q.contains("bee sting") || q.contains("urticaria") -> "anaphylaxis"
+
+      // 18. Seizures & convulsions
+      q.contains("seizure") || q.contains("fit") || q.contains("convulsion") ||
+          q.contains("froth") || q.contains("epilep") || q.contains("খিঁচুনি") -> "seizures"
+
+      // 19. Stroke (FAST)
+      (q.contains("stroke") && !q.contains("heat") && !q.contains("sun")) ||
+          q.contains("face drop") || q.contains("slurred") || q.contains("paralysis") ||
+          q.contains("মুখ বাকা") -> "stroke"
+
+      // 20. Asthma & bronchospasm
+      q.contains("asthma") || q.contains("inhaler") || q.contains("wheez") ||
+          q.contains("breathless") || q.contains("শ্বাসকষ্ট") -> "asthma"
+
+      // 21. Hypothermia & cold exposure
+      q.contains("hypothermia") || q.contains("freezing") || q.contains("frostbite") -> "hypothermia"
+
+      // 22. Medical symptoms (headache, fever)
+      q.contains("headache") || q.contains("migraine") || q.contains("fever") ||
+          q.contains("temperature") || q.contains("chills") || q.contains("shivering") ||
+          q.contains("flu") || q.contains("জ্বর") -> "medical_symptom"
+
+      // 23. Head trauma & spinal injury
+      (q.contains("head") && !q.contains("headache")) || q.contains("concussion") ||
+          q.contains("skull") || q.contains("spine") || q.contains("neck") ||
+          q.contains("fell down") || q.contains("stairs") -> "head_injury"
+
+      // 24. Diabetic emergency
+      q.contains("diabet") || q.contains("sugar") || q.contains("insulin") ||
+          q.contains("glucose") || q.contains("hypoglycemia") || q.contains("ডায়াবেটিস") -> "diabetic_emergency"
+
+      // 25. Cardiac arrest / CPR (priority check for cessation of breathing or pulse)
+      q.contains("cpr") || q.contains("cardiac") || q.contains("heart") ||
+          q.contains("chest compression") || q.contains("chest pain") ||
+          q.contains("no pulse") || q.contains("not breathing") -> "cardiac_arrest"
+
+      // 26. Fainting & syncope
+      q.contains("faint") || q.contains("syncope") || q.contains("dizzy") ||
+          q.contains("passed out") || q.contains("অজ্ঞান") -> "fainting"
+
+      // 27. Eye trauma
+      q.contains("eye") || q.contains("cornea") || q.contains("splash in eye") || q.contains("চোখ") -> "eye_trauma"
+
       else -> "general_emergency"
     }
   }
@@ -160,16 +297,52 @@ class AiAgentRepository(
   fun getConditionSeverity(conditionId: String): Int {
     return when (conditionId) {
       "cardiac_arrest", "severe_bleeding", "choking", "stroke", "anaphylaxis", "head_injury", "electric_shock", "drowning", "shock", "snakebite" -> 5
-      "leg_fracture", "seizures", "asthma", "poisoning", "heatstroke", "hypothermia", "diabetic_emergency" -> 4
-      "burns" -> 3
-      "medical_symptom" -> 2
+      "leg_fracture", "seizures", "asthma", "poisoning", "heatstroke", "hypothermia", "diabetic_emergency", "animal_bite" -> 4
+      "burns", "gastrointestinal", "eye_trauma" -> 3
+      "menstrual_health", "medical_symptom", "sprain_strain", "minor_wound", "dental", "anxiety", "fainting" -> 2
       "general_emergency" -> 3
-      else -> 4
+      else -> 3
     }
   }
 
   fun getQuickQuestionsForCondition(conditionId: String): List<String> {
     return when (conditionId) {
+      "menstrual_health" -> listOf(
+        "How to relieve severe period cramps fast?",
+        "Can I take Meftal-Spas or Ibuprofen?",
+        "What warm drinks help with cramps?",
+        "What to do if pain doesn't stop?"
+      )
+      "gastrointestinal" -> listOf(
+        "What is the best way to take ORS?",
+        "When is stomach pain an emergency?",
+        "What foods should I eat after vomiting?",
+        "Can I take antacids safely?"
+      )
+      "anxiety" -> listOf(
+        "How to do 4-7-8 calming breath?",
+        "How to tell panic from heart attack?",
+        "What is 5-4-3-2-1 sensory grounding?",
+        "When to seek emergency care for panic?"
+      )
+      "dental" -> listOf(
+        "How to soothe severe toothache at night?",
+        "Is warm salt water rinse effective?",
+        "Can I apply ice pack on cheek?",
+        "When does tooth infection become emergency?"
+      )
+      "sprain_strain" -> listOf(
+        "How does the R.I.C.E. method work?",
+        "When do I need an X-ray for sprain?",
+        "How tightly should I wrap crepe bandage?",
+        "Can I take painkillers for sprain?"
+      )
+      "minor_wound" -> listOf(
+        "How to clean a cut properly?",
+        "When do I need a tetanus shot?",
+        "Should I bandage cut or let it air out?",
+        "What are signs of wound infection?"
+      )
       "medical_symptom" -> listOf(
         "When is a headache an emergency?",
         "What are warning signs of high fever?",
@@ -236,7 +409,7 @@ class AiAgentRepository(
         "Why must the patient lie down flat?",
         "What are the warning signs of throat closing?"
       )
-      "poisoning" -> listOf(
+      "poisoning", "animal_bite" -> listOf(
         "Should I induce vomiting or give raw milk?",
         "What information should I give Poison Control?",
         "How to handle corrosive chemical burns?",
@@ -1282,6 +1455,31 @@ class AiAgentRepository(
     completedSteps: List<Int>
   ): AgentChatResponseDto {
     val qLower = text.lowercase()
+    val prevCondition = sessionConditionMap[sessionId]
+    val detected = detectConditionFromText(text)
+
+    val acuteSwitchConditions = setOf(
+      "cardiac_arrest", "severe_bleeding", "choking", "leg_fracture", "seizures",
+      "stroke", "snakebite", "animal_bite", "poisoning", "electric_shock",
+      "drowning", "head_injury", "burns", "anaphylaxis", "fainting", "asthma",
+      "heatstroke", "diabetic_emergency"
+    )
+
+    // Preserve previous condition for follow-ups in the same session unless explicitly switched
+    val activeCondition = if (prevCondition != null && prevCondition != "general_emergency") {
+      if (detected in acuteSwitchConditions && detected != prevCondition) {
+        sessionConditionMap[sessionId] = detected
+        detected
+      } else {
+        prevCondition
+      }
+    } else {
+      if (detected != "general_emergency") {
+        sessionConditionMap[sessionId] = detected
+      }
+      detected
+    }
+
     val citations = mutableListOf(
       CitationDto(
         source = "AHA CPR Guidelines 2020",
@@ -1300,9 +1498,22 @@ class AiAgentRepository(
 
     var reply = ""
     var highlight = "Grounded Protocol Step"
-    var detectedCondition = detectConditionFromText(text)
 
-    if (qLower.contains("water") || qLower.contains("drink") || qLower.contains("liquid") || qLower.contains("pani") || qLower.contains("jal")) {
+    val isUnconsciousContext = qLower.contains("unconscious") || qLower.contains("unresponsive") ||
+        qLower.contains("passed out") || qLower.contains("not breathing") || qLower.contains("gasping") ||
+        qLower.contains("coma") || qLower.contains("অজ্ঞান") || activeCondition in listOf("cardiac_arrest", "drowning")
+
+    val isWaterQuery = qLower.contains("water") || qLower.contains("drink") || qLower.contains("liquid") ||
+        qLower.contains("pani") || qLower.contains("jal") || qLower.contains("fluid") || qLower.contains("tea") ||
+        qLower.contains("chai") || qLower.contains("milk") || qLower.contains("juice")
+
+    val words = qLower.split(Regex("[^a-zA-Z0-9]+"))
+    val isDietQuery = words.contains("eat") || words.contains("eating") || words.contains("foods") ||
+        words.contains("food") || words.contains("diet") || words.contains("snack") || words.contains("nutrition") ||
+        qLower.contains("খাবার")
+
+    // A. Water contraindication: STRICTLY for unconscious, gasping, or cardiac arrest victims
+    if (isWaterQuery && isUnconsciousContext) {
       reply = "❌ NO. NEVER administer water, fluids, or oral medication to an unconscious or heavily distressed victim. Doing so can enter the trachea and cause fatal pulmonary aspiration.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
       highlight = "Contraindicated Action"
       contraindications.add(
@@ -1314,168 +1525,340 @@ class AiAgentRepository(
           actionDirective = "DO NOT give fluids. Maintain open airway."
         )
       )
-    } else if (qLower.contains("deep") || qLower.contains("compress") || qLower.contains("rate") || qLower.contains("bpm") || (qLower.contains("chest") && !qLower.contains("burn"))) {
-      detectedCondition = "cardiac_arrest"
+    }
+    // B. CPR chest compression specifics
+    else if (qLower.contains("deep") || (qLower.contains("compress") && !qLower.contains("cold compress") && !qLower.contains("ice compress")) ||
+        qLower.contains("bpm") || (qLower.contains("rate") && qLower.contains("compression")) ||
+        (qLower.contains("chest") && (qLower.contains("push") || qLower.contains("press") || qLower.contains("cpr")))) {
       reply = "✅ Compress 5 to 6 cm (approx 2 inches) deep at a cadence of 110–120 compressions/minute in the center of the breastbone. Allow full recoil between pushes.\n\n[Source: AHA CPR Guidelines 2020 §3.2 • IRC BLS 2020]"
       highlight = "AHA / IRC Guideline (110 BPM)"
-    } else if (qLower.contains("aed") || qLower.contains("defibrillator") || (qLower.contains("shock") && !qLower.contains("electric")) || qLower.contains("pad")) {
-      detectedCondition = "cardiac_arrest"
+    }
+    // C. AED defibrillator pad action (NOT heating pad or sanitary pad)
+    else if (qLower.contains("defibrillator") || (qLower.contains("aed") && !qLower.contains("heating pad")) ||
+        (qLower.contains("pad") && (qLower.contains("electrode") || qLower.contains("shock") || qLower.contains("aed")))) {
       reply = "⚡ Turn ON the AED immediately. Peel electrode pads and place on bare chest (upper right / lower left). Stand clear when shock is advised!\n\n[Source: AHA CPR Guidelines 2020 §4.1]"
       highlight = "Immediate AED Action"
-    } else if (qLower.contains("rib") || qLower.contains("crack") || qLower.contains("pop") || qLower.contains("break cartilage")) {
-      detectedCondition = "cardiac_arrest"
+    }
+    // D. Rib crack reassurance
+    else if (qLower.contains("rib") || qLower.contains("crack") || qLower.contains("pop") || qLower.contains("break cartilage")) {
       reply = "⚠️ Cartilage popping or rib cracking is common during effective adult CPR. DO NOT STOP compressions. Restoring blood flow to the brain is the sole priority.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
       highlight = "Do Not Stop CPR"
-    } else if (qLower.contains("legal") || qLower.contains("police") || qLower.contains("samaritan") || qLower.contains("law") || qLower.contains("court") || qLower.contains("liability")) {
+    }
+    // E. Legal protection
+    else if (qLower.contains("legal") || qLower.contains("police") || qLower.contains("samaritan") || qLower.contains("law") || qLower.contains("court") || qLower.contains("liability")) {
       reply = "🛡️ You are 100% legally protected under Section 134A of the Motor Vehicles (Amendment) Act 2019 and Supreme Court 2016 Guidelines. You cannot be detained, harassed, or held civilly/criminally liable for providing emergency aid.\n\n[Source: Motor Vehicles (Amendment) Act 2019 Section 134A]"
       highlight = "Section 134A MV Act Shield"
-    } else if (qLower.contains("tip") || qLower.contains("hydrat") || qLower.contains("sleep") || qLower.contains("wellness")) {
-      reply = "💡 Clinical Guidance on Daily Health:\n\n1. Hydration Target: Consume 2.5 to 3 Liters of clean fluids daily. Adequate hydration maintains effective cellular perfusion and prevents orthostatic hypotension.\n\n2. Restorative Sleep: Aim for 7–8 hours of uninterrupted sleep for cardiovascular restoration.\n\n3. Heat Illness Warning: In high ambient heat, watch for dark urine, dizziness, or muscle cramps.\n\n[Source: WHO Preventive Health Guidelines & ICMR Clinical Standards]"
-      highlight = "Preventive Health & Daily Wellness"
-    } else if (qLower.contains("attached") || qLower.contains("photo") || qLower.contains("scan") || qLower.contains("doc") || qLower.contains(".jpg") || qLower.contains(".pdf")) {
-      reply = "📸 Multimodal Clinical Review:\n\n• Attachment Received: Clinical triage scan processed.\n• Preliminary Finding: Visual markers show tissue swelling with localized erythema. No active arterial hemorrhage detected in scan frame.\n• Next Immediate Action: Keep the affected area elevated and immobilized. If severe pain, deformity, or numbness is present, request emergency 108 dispatch.\n\n[Source: Gemini Multimodal Clinical AI Diagnostics • ERC Triage Guidelines]"
-      highlight = "Multimodal AI Scan Triage"
-    } else if (qLower.contains("what can you do") || qLower.contains("who are you") || qLower.contains("what is nearhelp") ||
-        qLower.contains("capabilities") || qLower.contains("features") || qLower.contains("help me") || qLower == "hello" || qLower == "hi" || qLower.contains("hey")
-    ) {
+    }
+    // F. Capabilities
+    else if (qLower.contains("what can you do") || qLower.contains("who are you") || qLower.contains("what is nearhelp") ||
+        qLower.contains("capabilities") || qLower.contains("features") || qLower.contains("help me") || qLower == "hello" || qLower == "hi" || qLower.contains("hey")) {
       reply = "👋 I am NearHelp AI, your real-time Emergency Crisis & Clinical First-Aid Assistant.\n\n" +
           "Here is how I assist in emergencies:\n" +
-          "1. 🩺 Real-Time Triage: Step-by-step guidance for Cardiac Arrest, Bleeding, Choking, Stroke, Burns, Fractures, Poisoning, and 18+ medical emergencies.\n" +
+          "1. 🩺 Real-Time Triage: Step-by-step guidance for Cardiac Arrest, Bleeding, Choking, Stroke, Burns, Menstrual Health, GI Relief, and 20+ conditions.\n" +
           "2. 🫀 CPR Rhythm & Audio Metronome: AHA/IRC-grounded chest compression rhythm at 110 BPM.\n" +
           "3. ⚠️ Contraindication Shield: Alerts against dangerous mistakes like giving oral liquids to unconscious persons or moving spinal trauma victims.\n" +
           "4. 🛡️ Good Samaritan Legal Protection: Statutory immunity under Section 134A of the Motor Vehicles Act.\n" +
           "5. 🚑 Paramedic Handover: Generates digital clinical handover summaries for arriving 108 ambulance crews.\n\n" +
-          "💡 Ask any emergency first-aid question directly (e.g., 'How to treat hot oil burn', 'Baby is choking', 'Dog bite first-aid', 'Victim fell down stairs', 'Nosebleed') for immediate guidance.\n\n" +
           "[Source: NearHelp Clinical AI & AHA Guidelines 2020]"
       highlight = "NearHelp Emergency Capabilities"
-    } else if (qLower.contains("baby") && qLower.contains("chok") || qLower.contains("infant") && qLower.contains("chok")) {
-      detectedCondition = "choking"
+    }
+    // G. Condition-Specific Handling: Menstrual Health & Follow-ups
+    else if (activeCondition == "menstrual_health") {
+      citations.add(
+        CitationDto(
+          source = "ACOG Clinical Practice Guideline No. 345: Dysmenorrhea",
+          section = "Management of Primary and Secondary Dysmenorrhea §4",
+          guidelineName = "ACOG Clinical Practice Guidelines",
+          authority = "American College of Obstetricians and Gynecologists (ACOG)"
+        )
+      )
+      if (qLower.contains("medicine") || qLower.contains("tablet") || qLower.contains("painkiller") ||
+          qLower.contains("pill") || qLower.contains("meftal") || qLower.contains("ibuprofen") ||
+          qLower.contains("paracetamol") || qLower.contains("advil") || qLower.contains("crocin") ||
+          qLower.contains("dolo") || qLower.contains("মেডিসিন") || qLower.contains("ওষুধ")) {
+        reply = "💊 Medication Guidance for Menstrual Cramps (Dysmenorrhea):\n\n" +
+            "1. First-Line Relief: Over-the-counter NSAIDs like Ibuprofen (400 mg with meals) or Mefenamic Acid (Meftal-Spas) are most effective by inhibiting uterine prostaglandin synthesis.\n" +
+            "2. Milder Alternative: Paracetamol (500–650 mg every 4–6 hours) can be taken if stomach is sensitive to NSAIDs.\n" +
+            "3. Antispasmodics: Drotaverine or Dicyclomine (under physician guidance) relieves smooth muscle contractions.\n" +
+            "⚠️ Caution: Never give aspirin under age 19. If severe pain persists despite medication, consult a gynecologist.\n\n" +
+            "[Source: ACOG Dysmenorrhea Guidelines & NHS Women's Health Standards]"
+        highlight = "Menstrual Pain Medication"
+      } else if (isWaterQuery) {
+        reply = "☕ Fluids & Hydration for Menstrual Cramps:\n\n" +
+            "• Recommended: Drink warm water, chamomile tea, ginger tea, or peppermint tea. Warm liquids increase pelvic blood circulation and relax uterine contractions.\n" +
+            "• Electrolytes: Coconut water or warm clear broths help replenish lost minerals and reduce water-retention bloating.\n" +
+            "• Avoid: Ice-cold drinks, excessive caffeine (coffee/energy drinks), and alcohol, which constrict blood vessels and amplify cramps.\n\n" +
+            "[Source: NHS Women's Health Standards & ACOG Guidelines]"
+        highlight = "Menstrual Hydration & Teas"
+      } else if (isDietQuery) {
+        reply = "🥗 Nutrition & Foods for Period Cramp Relief:\n\n" +
+            "• Beneficial: Bananas and dark leafy greens (rich in potassium and magnesium), oatmeal, dark chocolate (>70%), ginger, and walnuts.\n" +
+            "• Reduce: Salty foods, deep-fried snacks, and refined sugars, which cause fluid retention, inflammation, and bloating.\n" +
+            "• Small Frequent Meals: Eating lighter meals keeps blood sugar stable and avoids gastrointestinal cramping overlap.\n\n" +
+            "[Source: WHO Women's Health & ACOG Nutrition Guidelines]"
+        highlight = "Menstrual Diet Guidance"
+      } else if (qLower.contains("heat") || qLower.contains("heating pad") || qLower.contains("warm bag") ||
+          qLower.contains("hot water") || qLower.contains("bottle") || qLower.contains("compress") || qLower.contains("সেক")) {
+        reply = "🔥 Heat Therapy for Cramps:\n\n" +
+            "• Lower Abdomen / Back: Apply a hot water bottle or electric heating pad (around 40°C / 104°F) for 15–20 minutes at a time.\n" +
+            "• How It Works: Continuous heat penetrates abdominal wall muscles, increasing blood flow and relaxing uterine myometrial spasms as effectively as standard painkillers.\n" +
+            "• Caution: Wrap heating bottles in a thin towel to avoid thermal skin burns.\n\n" +
+            "[Source: Cochrane Review on Dysmenorrhea & ACOG]"
+        highlight = "Heat Therapy Protocol"
+      } else if (qLower.contains("not work") || qLower.contains("doesnt work") || qLower.contains("doesn't work") ||
+          qLower.contains("still pain") || qLower.contains("still hurting") || qLower.contains("severe pain") ||
+          qLower.contains("not helping") || qLower.contains("didn't help") || qLower.contains("didnt help") ||
+          qLower.contains("what next") || qLower.contains("crying") || qLower.contains("worse") ||
+          qLower.contains("not reducing") || qLower.contains("not reduce") || qLower.contains("not decrease") ||
+          qLower.contains("not decreasing") || qLower.contains("not easing") || qLower.contains("not going") ||
+          qLower.contains("unbearable") || qLower.contains("no relief") || qLower.contains("cant bear") ||
+          qLower.contains("can't bear") || qLower.contains("cannot bear")) {
+        reply = "🩸 Escalating / Persistent Period Pain Guidance:\n\n" +
+            "1. Restful Posture: Lie in fetal position with a pillow tucked between knees to release deep pelvic and lower back ligament tension.\n" +
+            "2. Acupressure & Gentle Massage: Apply gentle circular pressure to the lower abdomen using warm essential oils (lavender/clove). Firmly press the SP6 acupressure point (4 finger-widths above the inner ankle bone) for 1–2 minutes.\n" +
+            "3. Combined Heat + Medication: Ensure oral NSAID (Ibuprofen 400mg or Meftal-Spas) was taken with a light meal, and maintain continuous lower abdominal heat (40°C).\n" +
+            "🚨 Hospital Red Flags: If incapacitating '10/10' pain persists beyond 2 hours, vomiting prevents holding fluids, or she soaks >1 sanitary pad per hour, rule out acute endometriosis, pelvic infection, or ovarian cyst complications and seek urgent clinic care or call 108.\n\n" +
+            "[Source: ACOG Dysmenorrhea Guidelines & NHS Women's Health Standards]"
+        highlight = "Escalating Cramp Relief"
+      } else if (qLower.contains("hospital") || qLower.contains("doctor") || qLower.contains("clinic") ||
+          qLower.contains("emergency") || qLower.contains("108") || qLower.contains("serious") || qLower.contains("worry") || qLower.contains("ডাক্তার")) {
+        reply = "🚨 When to Seek Urgent Gynecological / Emergency Care:\n\n" +
+            "1. Incapacitating pain ('10/10') that does not lessen after taking NSAIDs.\n" +
+            "2. Heavy hemorrhage: Soaking completely through 1 or more sanitary pads/tampons every hour for >2 consecutive hours.\n" +
+            "3. Severe symptoms: Sudden fainting, high fever with chills, or severe unilateral (one-sided) pelvic pain (to rule out ectopic pregnancy or ovarian cyst torsion).\n" +
+            "• If sudden collapse occurs, dial 108 immediately.\n\n" +
+            "[Source: ACOG Dysmenorrhea & Emergency Evaluation Criteria]"
+        highlight = "Gynecological Red Flags"
+      } else {
+        reply = "🩸 Menstrual Cramp & Pain Relief (Dysmenorrhea):\n\n" +
+            "1. Heat Therapy: Apply a heating pad or warm water bottle to the lower abdomen or lower back (significantly relaxes uterine smooth muscle contractions).\n" +
+            "2. Hydration & Teas: Drink warm water, chamomile, or ginger tea. Avoid caffeine and excessive salt, which worsen water retention and cramping.\n" +
+            "3. Restful Posture: Rest in fetal position or practice gentle child's pose to relieve pelvic and lower back tension.\n" +
+            "4. Pain Relief: Over-the-counter NSAIDs (like Ibuprofen or Mefenamic acid/Meftal-Spas) taken with food reduce prostaglandin levels and relieve cramping effectively.\n" +
+            "⚠️ Warning: If pain is sudden, incapacitating ('10/10'), accompanied by heavy bleeding (soaking >1 pad/hour), high fever, or fainting, seek urgent gynecological evaluation.\n\n" +
+            "[Source: ACOG Dysmenorrhea Guidelines & NHS Women's Health Standards]"
+        highlight = "Menstrual Pain & Cramp Relief"
+      }
+    }
+    // H. Condition-Specific Handling: Gastrointestinal
+    else if (activeCondition == "gastrointestinal") {
+      citations.add(
+        CitationDto(
+          source = "WHO Diarrheal Disease & ACG Clinical Guidelines",
+          section = "Management of Acute Gastroenteritis and Dehydration",
+          guidelineName = "WHO Clinical Practice Guidelines",
+          authority = "World Health Organization (WHO)"
+        )
+      )
+      if (qLower.contains("medicine") || qLower.contains("tablet") || qLower.contains("pill") ||
+          qLower.contains("drug") || qLower.contains("antacid") || qLower.contains("মেডিসিন")) {
+        reply = "💊 Medication & Symptom Relief for Gastrointestinal Distress:\n\n" +
+            "1. Rehydration First: Oral Rehydration Salts (ORS) is the primary medical intervention to prevent electrolyte depletion.\n" +
+            "2. Acidity & Heartburn: Antacids (Magnesium/Aluminum hydroxide) or H2-blockers/PPIs reduce gastric burning.\n" +
+            "3. Nausea: Domperidone or Ondansetron under medical guidance if vomiting is persistent.\n" +
+            "⚠️ Caution: Avoid anti-diarrheal motility blockers (like Loperamide) in feverish food poisoning; allowing pathogens to clear is essential.\n\n" +
+            "[Source: WHO Diarrheal Disease & ACG Clinical Guidelines]"
+        highlight = "GI Medication Guidance"
+      } else if (isWaterQuery) {
+        reply = "💧 Fluid Hydration for Stomach Upset & Vomiting:\n\n" +
+            "• Oral Rehydration Salts (ORS): Mix 1 packet in 1 liter clean water. Sip small quantities (1-2 tablespoons every 5 minutes) rather than gulping.\n" +
+            "• Gentle Fluids: Coconut water, diluted rice water, or weak herbal tea help restore cellular potassium and sodium.\n" +
+            "• Avoid: Milk, carbonated soda, coffee, and acidic citrus juices that irritate stomach mucosa.\n\n" +
+            "[Source: WHO Clinical Management of Gastroenteritis]"
+        highlight = "GI Rehydration Protocol"
+      } else if (isDietQuery) {
+        reply = "🍌 Diet for Stomach Recovery (BRAT Protocol):\n\n" +
+            "• Follow the BRAT Diet: Bananas, Rice (plain boiled), Applesauce, and Toast (plain crackers or bread).\n" +
+            "• Transition: Slowly add boiled potatoes, oats, and clear vegetable broths once vomiting has paused for >4 hours.\n" +
+            "• Avoid: Oily, deep-fried, heavily spiced foods, and dairy for at least 48 hours.\n\n" +
+            "[Source: American Academy of Family Physicians (AAFP)]"
+        highlight = "BRAT Diet Protocol"
+      } else if (qLower.contains("hospital") || qLower.contains("doctor") || qLower.contains("clinic") ||
+          qLower.contains("emergency") || qLower.contains("108") || qLower.contains("red flag")) {
+        reply = "🚨 Urgent Medical Evaluation Criteria for Abdominal Pain:\n\n" +
+            "1. Blood in vomit (coffee-ground appearance) or dark black tarry stools.\n" +
+            "2. Rigid, rock-hard abdomen or localized sharp pain in lower right abdomen (possible appendicitis).\n" +
+            "3. Inability to retain any liquids for >12–24 hours with dark urine, extreme dizziness, or confusion.\n" +
+            "• If severe continuous pain or faintness occurs, dial 108 immediately.\n\n" +
+            "[Source: ACG Acute Abdominal Pain Guidelines]"
+        highlight = "Abdominal Red Flags"
+      } else {
+        reply = "🫄 Gastrointestinal & Food Poisoning Relief:\n\n" +
+            "1. Rehydration: Sip Oral Rehydration Salts (ORS) or electrolyte water slowly in small, frequent mouthfuls.\n" +
+            "2. Bland Nutrition: Avoid dairy, oily, fried, or spicy foods. Follow the BRAT diet (Bananas, Rice, Applesauce, Toast) once nausea subsides.\n" +
+            "3. Upright Rest: Rest with upper body slightly elevated to prevent acid reflux.\n" +
+            "⚠️ Warning: If there is blood in vomit or stool, rigid abdominal tightness, high fever, or pain radiating to shoulder/back, seek urgent emergency care.\n\n" +
+            "[Source: WHO Diarrheal Disease & ACG Clinical Guidelines]"
+        highlight = "Gastrointestinal Advisory"
+      }
+    }
+    // I. Pediatric / Infant Choking
+    else if ((qLower.contains("baby") && qLower.contains("chok")) || (qLower.contains("infant") && qLower.contains("chok"))) {
       reply = "👶 Infant Choking Protocol (<1 Year):\n\n1. Lay infant face-down along your forearm, resting on your thigh, supporting the chin.\n2. Deliver 5 firm, sharp back slaps between the shoulder blades.\n3. Turn infant face-up; deliver 5 two-finger chest thrusts just below nipple line (approx 1.5 inches deep).\n4. NEVER do blind finger sweeps! If infant becomes unresponsive, begin infant CPR immediately and call 108.\n\n[Source: AHA Pediatric Basic Life Support Guidelines 2020]"
       highlight = "Infant Choking Relief"
-    } else if (qLower.contains("chok") || qLower.contains("heimlich") || qLower.contains("food stuck") || qLower.contains("cant breathe")) {
-      detectedCondition = "choking"
+    }
+    // J. Adult Choking
+    else if (qLower.contains("chok") || qLower.contains("heimlich") || qLower.contains("food stuck") || qLower.contains("cant breathe")) {
       reply = "🚨 Stand behind the victim. Wrap arms around waist. Make a fist just above the navel. Deliver 5 quick, inward and upward abdominal thrusts (Heimlich Maneuver) until the airway clears. If unconscious, lower gently to floor and start CPR.\n\n[Source: American Red Cross & AHA Choking Guidelines 2020]"
       highlight = "Heimlich / Choking Relief"
-    } else if (qLower.contains("nosebleed") || qLower.contains("nose bleed") || qLower.contains("epistaxis") || (qLower.contains("nose") && qLower.contains("bleed"))) {
-      detectedCondition = "severe_bleeding"
+    }
+    // K. Epistaxis / Nosebleed
+    else if (qLower.contains("nosebleed") || qLower.contains("nose bleed") || qLower.contains("epistaxis") || (qLower.contains("nose") && qLower.contains("bleed"))) {
       reply = "👃 Epistaxis / Nosebleed Protocol:\n\n1. Sit upright and lean slightly FORWARD (do NOT tilt head back; swallowing blood causes nausea and airway irritation).\n2. Pinch the soft part of the nose firmly between thumb and index finger for 10–15 full minutes continuously while breathing through mouth.\n3. Apply a cold compress or ice pack wrapped in a cloth across the bridge of the nose.\n4. If bleeding does not stop after 20 minutes of firm pressure, seek emergency medical care.\n\n[Source: British Red Cross & NHS Epistaxis Protocol]"
       highlight = "Nosebleed Management"
-    } else if (qLower.contains("burn") || qLower.contains("fire") || qLower.contains("scald") || qLower.contains("blister") || qLower.contains("acid")) {
-      detectedCondition = "burns"
+    }
+    // L. Thermal & Chemical Burns
+    else if (qLower.contains("burn") || qLower.contains("fire") || qLower.contains("scald") || qLower.contains("blister") || qLower.contains("acid")) {
       reply = "💧 Cool the burn immediately under cool running tap water for 20 full minutes. Never apply ice, toothpaste, or turmeric. Cover loosely with clean plastic food wrap or sterile dressing.\n\n[Source: British Burn Association & WHO Burn Trauma Guide 2021]"
       highlight = "Thermal Burn First-Aid"
-    } else if (qLower.contains("bleed") || qLower.contains("blood") || qLower.contains("tourniquet") || qLower.contains("cut") || qLower.contains("wound") || qLower.contains("laceration")) {
-      detectedCondition = "severe_bleeding"
+    }
+    // M. Hemorrhage & Active Bleeding
+    else if (qLower.contains("bleed") || qLower.contains("blood") || qLower.contains("tourniquet") || qLower.contains("cut") || qLower.contains("wound") || qLower.contains("laceration")) {
       reply = "🩸 Expose wound and apply continuous, firm direct pressure with clean gauze/cloth using your body weight. For severe limb bleeding that won't stop, apply a tourniquet 5–7 cm above the wound (never over a joint).\n\n[Source: WHO Trauma Care & Stop The Bleed Protocol §4.1]"
       highlight = "Hemorrhage Control"
-    } else if (qLower.contains("sprain") || qLower.contains("twisted") || qLower.contains("swollen ankle") || qLower.contains("strain")) {
-      detectedCondition = "leg_fracture"
+    }
+    // N. Joint Sprain & Muscle Strain
+    else if (qLower.contains("sprain") || qLower.contains("twisted") || qLower.contains("swollen ankle") || qLower.contains("strain")) {
       reply = "🩹 Sprain & Strain Protocol (R.I.C.E.):\n\n• Rest: Stop activity and protect the injured joint.\n• Ice: Apply an ice pack wrapped in a towel for 15–20 minutes every 2–3 hours to minimize swelling.\n• Compression: Wrap with an elastic bandage firmly (not so tight that it cuts off blood flow or causes tingling).\n• Elevation: Prop the limb above heart level whenever resting.\n\n[Source: American Academy of Orthopaedic Surgeons (AAOS)]"
       highlight = "R.I.C.E. Sprain Care"
-    } else if (qLower.contains("fracture") || qLower.contains("broken bone") || qLower.contains("broken leg") || qLower.contains("broken arm") || qLower.contains("splint")) {
-      detectedCondition = "leg_fracture"
+    }
+    // O. Fractures & Broken Bones
+    else if (qLower.contains("fracture") || qLower.contains("broken bone") || qLower.contains("broken leg") || qLower.contains("broken arm") || qLower.contains("splint")) {
       reply = "🦴 Support and immobilize the injured limb in the exact position found. DO NOT attempt to push bone back or straighten deformed limbs. Apply an ice pack wrapped in a cloth to control swelling and await 108 dispatch.\n\n[Source: NDMA & ATLS Pre-Hospital Trauma Guidelines]"
       highlight = "Limb Immobilization Protocol"
-    } else if ((qLower.contains("head") && !qLower.contains("headache")) || qLower.contains("neck") || qLower.contains("spine") || qLower.contains("spinal") || qLower.contains("concussion") || qLower.contains("fell down") || qLower.contains("stairs")) {
-      detectedCondition = "head_injury"
+    }
+    // P. Head & Cervical Spine Trauma
+    else if ((qLower.contains("head") && !qLower.contains("headache")) || qLower.contains("neck") || qLower.contains("spine") || qLower.contains("spinal") || qLower.contains("concussion") || qLower.contains("fell down") || qLower.contains("stairs")) {
       reply = "⚠️ Cervical Spine & Head Trauma Warning:\n\n1. DO NOT MOVE the patient unless in immediate life-threatening danger (e.g. fire/explosion).\n2. Place hands on both sides of head to provide manual in-line stabilization, preventing neck rotation.\n3. Check responsiveness and airway. If vomiting occurs, perform a coordinated log-roll keeping head, neck, and torso perfectly aligned.\n4. Call 108 immediately for cervical collar and backboard transport.\n\n[Source: ATLS Pre-Hospital Spinal Trauma & NDMA Guidelines]"
       highlight = "Spinal Trauma & In-Line Stabilization"
-    } else if (qLower.contains("anaphylaxis") || qLower.contains("allergy") || qLower.contains("allergic") || qLower.contains("epipen") || qLower.contains("epinephrine") || qLower.contains("bee sting") || qLower.contains("hives")) {
-      detectedCondition = "anaphylaxis"
+    }
+    // Q. Anaphylaxis
+    else if (qLower.contains("anaphylaxis") || qLower.contains("allergy") || qLower.contains("allergic") || qLower.contains("epipen") || qLower.contains("epinephrine") || qLower.contains("bee sting") || qLower.contains("hives")) {
       reply = "💉 Anaphylaxis Emergency Protocol:\n\n1. Administer EpiPen / Epinephrine auto-injector immediately into the outer mid-thigh. Hold firmly for 10 seconds, then massage area for 10 seconds.\n2. Lay victim flat on back with legs elevated (if breathing difficulty, let them sit upright).\n3. Call 108 immediately. If no improvement within 5–15 minutes, administer a second epinephrine dose.\n\n[Source: World Allergy Organization (WAO) & AHA Anaphylaxis Guidelines]"
       highlight = "Anaphylaxis & EpiPen Protocol"
-    } else if (qLower.contains("accident") || qLower.contains("car crash") || qLower.contains("bike crash") || qLower.contains("collision") || qLower.contains("road")) {
-      detectedCondition = "severe_bleeding"
+    }
+    // R. Road Traffic Accidents
+    else if (qLower.contains("accident") || qLower.contains("car crash") || qLower.contains("bike crash") || qLower.contains("collision") || qLower.contains("road")) {
       reply = "🚗 Road Traffic Accident (RTA) Response:\n\n1. Scene Safety First: Turn on hazard lights, set warning triangles, do NOT enter live traffic lanes.\n2. Call 108 and 112 immediately with exact location.\n3. DO NOT remove motorcycle helmets unless airway is completely blocked.\n4. DO NOT pull victims from vehicles unless there is active fire or sinking danger.\n5. Control catastrophic bleeding with direct pressure using clean cloth.\n\n[Source: WHO Essential Trauma Care & Section 134A Good Samaritan Law]"
       highlight = "RTA Scene & Trauma Protocol"
-    } else if (qLower.contains("recovery position") || (qLower.contains("unconscious") && (qLower.contains("breath") || qLower.contains("breathing")))) {
-      detectedCondition = "seizures"
+    }
+    // S. Recovery Position
+    else if (qLower.contains("recovery position") || (qLower.contains("unconscious") && (qLower.contains("breath") || qLower.contains("breathing")))) {
       reply = "🛌 Recovery Position Protocol (Unconscious but Breathing Normally):\n\n1. Kneel beside victim. Extend nearest arm at a right angle to body, elbow bent, palm facing up.\n2. Bring far arm across chest; hold back of victim's hand against their nearest cheek.\n3. Pull far knee up so foot is flat on ground, then gently pull knee to roll victim towards you onto their side.\n4. Tilt head gently back to keep airway open and fluid draining outward. Monitor breathing continuously until 108 arrives.\n\n[Source: ERC & AHA First-Aid Guidelines 2020]"
       highlight = "Recovery Position Protocol"
-    } else if ((qLower.contains("chest pain") || qLower.contains("heart attack") || qLower.contains("tightness")) && !qLower.contains("compress") && !qLower.contains("cpr")) {
-      detectedCondition = "cardiac_arrest"
+    }
+    // T. Conscious Chest Pain / Heart Attack
+    else if ((qLower.contains("chest pain") || qLower.contains("heart attack") || qLower.contains("tightness")) && !qLower.contains("compress") && !qLower.contains("cpr")) {
       reply = "❤️ Conscious Chest Pain / Suspected Heart Attack:\n\n1. Help victim sit on the floor in a comfortable 'W' position (half-sitting with knees bent and back supported).\n2. Loosen tight collar, tie, and belt.\n3. If victim is alert and has NO allergy to aspirin or active bleeding, ask them to chew one 300mg soluble aspirin tablet slowly.\n4. Call 108 immediately. Keep patient calm; do NOT let them walk. If they lose consciousness and stop breathing, start CPR at 110 BPM.\n\n[Source: AHA Acute Coronary Syndrome Guidelines & British Heart Foundation]"
       highlight = "Heart Attack First Response"
-    } else if (qLower.contains("drabc") || qLower.contains("first step") || qLower.contains("what should i do first") || qLower.contains("check first")) {
-      detectedCondition = "cardiac_arrest"
+    }
+    // U. Primary Survey (DRABC)
+    else if (qLower.contains("drabc") || qLower.contains("first step") || qLower.contains("what should i do first") || qLower.contains("check first")) {
       reply = "📋 Emergency Primary Survey (DRABC):\n\n• D (Danger): Ensure area is safe for you, bystanders, and victim.\n• R (Response): Tap shoulders and shout: 'Can you hear me?'.\n• A (Airway): Gently tilt head back and lift chin to clear airway.\n• B (Breathing): Look, listen, and feel for normal chest rise for 10 seconds.\n• C (Circulation/CPR): If unresponsive and not breathing normally, begin 30 chest compressions at 110 BPM and send someone for an AED.\n\n[Source: Resuscitation Council UK & Indian Resuscitation Council]"
       highlight = "DRABC Primary Survey"
-    } else if (qLower.contains("seizure") || qLower.contains("fit") || qLower.contains("convulsion") || qLower.contains("froth") || qLower.contains("epilep")) {
-      detectedCondition = "seizures"
+    }
+    // V. Seizures & Convulsions
+    else if (qLower.contains("seizure") || qLower.contains("fit") || qLower.contains("convulsion") || qLower.contains("froth") || qLower.contains("epilep")) {
       reply = "🛡️ Protect victim's head with a soft folded jacket and clear hard objects. NEVER insert spoons, fingers, or objects into the mouth. Once shaking stops, roll gently into the recovery position on their side.\n\n[Source: ILAE & NHS Seizure Protocol]"
       highlight = "Seizure Safety"
-    } else if (qLower.contains("stroke") || qLower.contains("face drop") || qLower.contains("slurred") || qLower.contains("arm weak") || qLower.contains("paralysis")) {
-      detectedCondition = "stroke"
+    }
+    // W. Stroke (FAST)
+    else if (qLower.contains("stroke") || qLower.contains("face drop") || qLower.contains("slurred") || qLower.contains("arm weak") || qLower.contains("paralysis")) {
       reply = "🧠 Perform FAST check immediately:\n• F (Face): Ask to smile — does one side droop?\n• A (Arms): Ask to raise both arms — does one drift downward?\n• S (Speech): Ask to repeat a simple sentence — is it slurred?\n• T (Time): Call 108 immediately. Keep victim quiet with head slightly elevated.\n\n[Source: American Stroke Association (ASA) 2019]"
       highlight = "FAST Stroke Assessment"
-    } else if (qLower.contains("dog") || qLower.contains("animal bite") || qLower.contains("cat bite") || qLower.contains("rabies")) {
-      detectedCondition = "poisoning"
+    }
+    // X. Animal Bite (Dog/Cat/Rabies)
+    else if (qLower.contains("dog") || qLower.contains("animal bite") || qLower.contains("cat bite") || qLower.contains("rabies")) {
       reply = "🐕 Wash the animal bite vigorously with soap and clean running water for 15 full minutes immediately. Apply povidone-iodine antiseptic. Never stitch or bandage tightly. Seek hospital emergency care immediately for Anti-Rabies Vaccine (ARV) and tetanus toxoid.\n\n[Source: WHO Rabies First-Aid & Prevention Guidelines]"
       highlight = "Animal Bite / Rabies Prevention"
-    } else if (qLower.contains("snake") || qLower.contains("venom") || (qLower.contains("bite") && !qLower.contains("dog") && !qLower.contains("cat") && !qLower.contains("animal"))) {
-      detectedCondition = "snakebite"
+    }
+    // Y. Snakebite
+    else if (qLower.contains("snake") || qLower.contains("venom") || (qLower.contains("bite") && !qLower.contains("dog") && !qLower.contains("cat") && !qLower.contains("animal"))) {
       reply = "🐍 Keep victim completely calm and still to slow venom circulation. Immobilize the bitten limb at or slightly below heart level with a broad bandage. NEVER cut the wound, suck venom, or apply a tourniquet. Rush to the nearest hospital with Anti-Snake Venom (ASV).\n\n[Source: WHO Guidelines for the Management of Snakebites]"
       highlight = "Snakebite Protocol"
-    } else if (qLower.contains("asthma") || qLower.contains("inhaler") || qLower.contains("wheez") || qLower.contains("breathless")) {
-      detectedCondition = "asthma"
+    }
+    // Z. Asthma
+    else if (qLower.contains("asthma") || qLower.contains("inhaler") || qLower.contains("wheez") || qLower.contains("breathless")) {
       reply = "🫁 Help the person sit upright leaning slightly forward. Administer 4 separate puffs of their blue reliever inhaler (Salbutamol) with 4 deep breaths after each puff. If no improvement within 4 minutes, deliver 4 more puffs and call 108 immediately.\n\n[Source: Global Initiative for Asthma (GINA) 2023]"
       highlight = "Acute Asthma Relief"
-    } else if (qLower.contains("heat") || qLower.contains("sunstroke") || qLower.contains("heatstroke")) {
-      detectedCondition = "heatstroke"
+    }
+    // AA. Heatstroke
+    else if (qLower.contains("heat") || qLower.contains("sunstroke") || qLower.contains("heatstroke")) {
       reply = "☀️ Move victim to a cool, shaded environment immediately. Remove excess clothing. Apply cool, wet towels to the neck, armpits, and groin while fanning vigorously. If conscious, offer cool water in small sips.\n\n[Source: NDMA Heat Wave Guidelines & Wilderness Medical Society]"
       highlight = "Heat Emergency Management"
-    } else if (qLower.contains("poison") || qLower.contains("toxic") || qLower.contains("chemical") || qLower.contains("swallowed") || qLower.contains("pesticide")) {
-      detectedCondition = "poisoning"
+    }
+    // AB. Poisoning & Ingestion
+    else if (qLower.contains("poison") || qLower.contains("toxic") || qLower.contains("chemical") || qLower.contains("swallowed") || qLower.contains("pesticide")) {
       reply = "🧪 DO NOT induce vomiting or administer fluids unless instructed by medical professionals. Keep any container or packaging for paramedic inspection. Check breathing and place in recovery position if drowsy. Call 108 immediately.\n\n[Source: WHO International Programme on Chemical Safety]"
       highlight = "Poisoning Emergency Protocol"
-    } else if (qLower.contains("electric") || qLower.contains("current") || qLower.contains("wire") || qLower.contains("electrocution")) {
-      detectedCondition = "electric_shock"
+    }
+    // AC. Electric Shock
+    else if (qLower.contains("electric") || qLower.contains("current") || qLower.contains("wire") || qLower.contains("electrocution")) {
       reply = "⚡ DO NOT touch victim until power is disconnected at main breaker or source is pushed away with dry wood. Check breathing immediately; if unresponsive and no pulse, initiate CPR and call 108.\n\n[Source: OSHA & Red Cross Electrical Safety Protocols]"
       highlight = "Electrical Shock Protocol"
-    } else if (qLower.contains("drown") || (qLower.contains("water") && (qLower.contains("pool") || qLower.contains("submerged") || qLower.contains("river")))) {
-      detectedCondition = "drowning"
+    }
+    // AD. Drowning
+    else if (qLower.contains("drown") || (qLower.contains("water") && (qLower.contains("pool") || qLower.contains("submerged") || qLower.contains("river")))) {
       reply = "🌊 Pull victim to dry flat surface. Drowning arrest causes severe oxygen depletion: deliver 5 initial rescue breaths first, then begin 30:2 compressions and breaths. Wipe chest dry before applying AED pads.\n\n[Source: International Lifesaving Federation & AHA 2020]"
       highlight = "Water Rescue & Resuscitation"
-    } else if (qLower.contains("diabet") || qLower.contains("hypoglycemia") || qLower.contains("sugar") || qLower.contains("insulin")) {
-      detectedCondition = "diabetic_emergency"
+    }
+    // AE. Diabetic Emergency
+    else if (qLower.contains("diabet") || qLower.contains("hypoglycemia") || qLower.contains("sugar") || qLower.contains("insulin")) {
       reply = "🍬 If the person is conscious and can swallow, give 15–20g fast-acting sugar (fruit juice, 3 tsp sugar, or glucose tablets). Wait 15 minutes to re-evaluate. If unconscious, DO NOT give liquids; place in recovery position and call 108.\n\n[Source: American Diabetes Association Emergency Standards]"
       highlight = "Hypoglycemia Emergency Protocol"
-    } else if (qLower.contains("faint") || qLower.contains("syncope") || qLower.contains("dizzy") || qLower.contains("passed out")) {
-      detectedCondition = "seizures"
+    }
+    // AF. Fainting / Syncope
+    else if (qLower.contains("faint") || qLower.contains("syncope") || qLower.contains("dizzy") || qLower.contains("passed out")) {
       reply = "🛌 Lay the person flat on their back and elevate legs approximately 30 cm (12 inches) to restore cerebral blood flow. Loosen collar and tight clothing. If unresponsiveness exceeds 1 minute or breathing is abnormal, call 108 immediately.\n\n[Source: Red Cross First-Aid Guidelines]"
       highlight = "Fainting / Syncope Protocol"
-    } else if (qLower.contains("eye") || qLower.contains("cornea") || qLower.contains("vision splash")) {
+    }
+    // AG. Eye Trauma
+    else if (qLower.contains("eye") || qLower.contains("cornea") || qLower.contains("vision splash")) {
       reply = "👁️ Flush the eye continuously with clean running water or saline for 15–20 minutes with eyelids held wide open. DO NOT rub the eye or attempt to remove embedded foreign objects. Cover loosely and seek immediate ophthalmologist evaluation.\n\n[Source: American Academy of Ophthalmology Emergency Guidelines]"
       highlight = "Eye Trauma & Chemical Flush"
-    } else if (qLower.contains("headache") || qLower.contains("fever") || qLower.contains("stomach pain") || qLower.contains("medicine") || qLower.contains("tablet")) {
-      detectedCondition = "medical_symptom"
+    }
+    // AH. Headache & Medical Symptoms
+    else if (qLower.contains("headache") || qLower.contains("fever") || qLower.contains("stomach pain") || qLower.contains("medicine") || qLower.contains("tablet")) {
       reply = "🩺 Medical Advisory:\n\n• For sudden extreme 'thunderclap' headache, stiff neck, or fever with rash, seek immediate emergency hospital care (possible meningitis or aneurysm).\n• Stay hydrated and rest in a cool, dark room.\n• Do NOT self-prescribe antibiotics or strong painkillers without a physician's physical diagnosis.\n\n[Source: WHO Clinical Practice Standards & ICMR Triage]"
       highlight = "Clinical Symptom Advisory"
-    } else if (isCardiacOrCprQuery(text)) {
-      detectedCondition = "cardiac_arrest"
+    }
+    // AI. CPR & Cardiac Check
+    else if (isCardiacOrCprQuery(text)) {
       reply = "📋 Ensure victim is on a firm flat surface. Tap shoulders and shout. If unresponsive and not breathing normally, begin chest compressions at 110 BPM cadence in center of breastbone.\n\n[Source: AHA CPR Guidelines 2020 §3.2]"
       highlight = "Grounded Protocol Step"
-    } else {
-      reply = "📋 Emergency Triage Assessment:\n\n" +
-          "1. 🛑 Check Scene Safety: Ensure area is safe from traffic, electrical wires, or fire.\n" +
-          "2. 👤 Assess Response: Tap shoulders firmly and ask loudly: 'Are you okay?'.\n" +
-          "3. 🫁 Check Breathing: Look for chest rise for 5–10 seconds.\n" +
-          "4. 📞 Call 108: Dispatch ambulance immediately if unresponsive.\n\n" +
-          "💡 Mention the emergency symptom or injury (e.g., 'hot oil burn', 'choking on food', 'dog bite', 'asthma attack', 'broken leg', 'chest pain') for immediate step-by-step guidance.\n\n" +
-          "[Source: Indian Resuscitation Council & WHO Guidelines]"
-      highlight = "Emergency Triage Assessment"
+    }
+    // AJ. Adaptive Triage Fallback
+    else {
+      val isDanger = isCardiacOrDangerQuery(text)
+      if (isDanger) {
+        reply = "🚨 Emergency Life-Support Protocol (DRABC):\n\n" +
+            "1. Danger: Ensure scene is safe before approaching.\n" +
+            "2. Response: Tap shoulders firmly and shout 'Are you okay?'.\n" +
+            "3. Airway & Breathing: Tilt head, lift chin, check chest rise for 5–10 seconds.\n" +
+            "4. Circulation / Dial 108: If unresponsive and not breathing normally, begin 30 chest compressions at 110 BPM and dial 108 immediately.\n\n" +
+            "[Source: Indian Resuscitation Council & AHA BLS 2020 §3.2]"
+        highlight = "Emergency Resuscitation Directive"
+      } else {
+        reply = "🩺 Clinical Triage & First-Aid Advisory:\n\n" +
+            "1. Assessment: Check vital comfort, breathing, and alertness. Keep the person in a relaxed, well-supported position.\n" +
+            "2. Rest & Hydration: Maintain adequate oral hydration with clean water or electrolyte fluids. Avoid strenuous physical movement or heavy food intake.\n" +
+            "3. Safety Contraindications: Do NOT take strong unprescribed painkillers or antibiotics without physician diagnosis. Never ignore worsening symptoms.\n" +
+            "4. When to Seek Care: Visit a local clinic or consult a physician if symptoms persist or escalate. For acute emergency signs (difficulty breathing, sudden severe pain, loss of consciousness), call 108 immediately.\n\n" +
+            "[Source: WHO Clinical Practice Standards & National Health Guidelines]"
+        highlight = "Clinical Triage Advisory"
+      }
     }
 
-    val isCardiac = isCardiacOrCprQuery(text)
+    val isCardiac = isCardiacOrCprQuery(text) && (activeCondition == "cardiac_arrest" || qLower.contains("cpr") || qLower.contains("compress"))
 
     return AgentChatResponseDto(
       sessionId = sessionId,
       replyText = reply,
       highlightText = highlight,
       triageState = "GUIDANCE",
-      conditionId = detectedCondition,
-      severityLevel = getConditionSeverity(detectedCondition),
-      priority = if (isCardiac || detectedCondition in listOf("cardiac_arrest", "severe_bleeding", "choking", "stroke", "anaphylaxis")) "critical" else "urgent",
+      conditionId = activeCondition,
+      severityLevel = getConditionSeverity(activeCondition),
+      priority = if (isCardiac || activeCondition in listOf("cardiac_arrest", "severe_bleeding", "choking", "stroke", "anaphylaxis")) "critical" else "urgent",
       currentStepIndex = currentStepIndex,
       completedSteps = completedSteps,
       cprMetronomeActive = isCardiac,
@@ -1483,7 +1866,7 @@ class AiAgentRepository(
       citations = citations,
       contraindications = contraindications,
       legalShieldApplied = true,
-      suggestedQuickQuestions = getQuickQuestionsForCondition(detectedCondition),
+      suggestedQuickQuestions = getQuickQuestionsForCondition(activeCondition),
       processingTimeMs = 12.5
     )
   }

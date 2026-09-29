@@ -177,4 +177,99 @@ class AiAgentRepositoryTest {
     assertTrue(response.replyText.contains("headache", ignoreCase = true) || response.replyText.contains("Medical Advisory", ignoreCase = true))
     assertTrue(response.suggestedQuickQuestions.any { it.contains("headache") || it.contains("painkillers") })
   }
+
+  @Test
+  fun `fallback chat for period cramps provides dedicated menstrual protocol without generic assessment`() = runTest {
+    val response = repository.chatWithAgent(
+      sessionId = "period-session-001",
+      text = "my girlfriend having periods how to solve this"
+    )
+
+    assertEquals("menstrual_health", response.conditionId)
+    assertFalse(response.cprMetronomeActive)
+    assertEquals(0, response.cprBpm)
+    assertFalse(response.replyText.contains("Check scene safety"))
+    assertFalse(response.replyText.contains("Dial 108 immediately for ambulance"))
+    assertTrue(response.replyText.contains("Menstrual Cramp", ignoreCase = true) || response.replyText.contains("Dysmenorrhea", ignoreCase = true))
+    assertTrue(response.replyText.contains("Heat Therapy", ignoreCase = true))
+    assertTrue(response.suggestedQuickQuestions.any { it.contains("cramps", ignoreCase = true) })
+  }
+
+  @Test
+  fun `multi-turn period conversation preserves menstrual context across follow-ups`() = runTest {
+    val sessionId = "multi-turn-period-session"
+
+    // Turn 1: Initial inquiry
+    val t1 = repository.chatWithAgent(sessionId = sessionId, text = "my girlfriend having periods how to solve this")
+    assertEquals("menstrual_health", t1.conditionId)
+
+    // Turn 2: Tablet query without mentioning period
+    val t2 = repository.chatWithAgent(sessionId = sessionId, text = "what tablet can she take?")
+    assertEquals("menstrual_health", t2.conditionId)
+    assertTrue(t2.replyText.contains("Meftal") || t2.replyText.contains("Ibuprofen") || t2.replyText.contains("NSAID"))
+
+    // Turn 3: Food query
+    val t3 = repository.chatWithAgent(sessionId = sessionId, text = "what to eat?")
+    assertEquals("menstrual_health", t3.conditionId)
+    assertTrue(t3.replyText.contains("Nutrition") || t3.replyText.contains("Bananas") || t3.replyText.contains("diet", ignoreCase = true))
+
+    // Turn 4: Heating pad query
+    val t4 = repository.chatWithAgent(sessionId = sessionId, text = "can I use heating pad?")
+    assertEquals("menstrual_health", t4.conditionId)
+    assertTrue(t4.replyText.contains("Heat Therapy", ignoreCase = true))
+    assertFalse(t4.replyText.contains("AED"))
+
+    // Turn 5: Hydration query
+    val t5 = repository.chatWithAgent(sessionId = sessionId, text = "can she drink cold water?")
+    assertEquals("menstrual_health", t5.conditionId)
+    assertTrue(t5.contraindications.isEmpty())
+    assertTrue(t5.replyText.contains("tea") || t5.replyText.contains("warm water", ignoreCase = true))
+
+    // Turn 6: Escalating pain
+    val t6 = repository.chatWithAgent(sessionId = sessionId, text = "what if that doesn't work?")
+    assertEquals("menstrual_health", t6.conditionId)
+    assertTrue(t6.replyText.contains("Escalating", ignoreCase = true) || t6.replyText.contains("fetal position", ignoreCase = true))
+  }
+
+  @Test
+  fun `server returning generic triage is intercepted and overridden for non-cardiac query`() = runTest {
+    val mockService = object : com.example.nearhelp.data.api.AiAgentApiService {
+      override suspend fun getProtocolByCondition(conditionId: String) = throw UnsupportedOperationException()
+      override suspend fun getAllProtocols() = throw UnsupportedOperationException()
+      override suspend fun chatWithAgent(request: com.example.nearhelp.data.model.AgentChatRequestDto): retrofit2.Response<com.example.nearhelp.data.model.AgentChatResponseDto> {
+        val genericBody = com.example.nearhelp.data.model.AgentChatResponseDto(
+          sessionId = request.sessionId,
+          replyText = "📋 General Emergency Assessment:\n\n1. Check scene safety before approaching.\n2. Check victim responsiveness (tap shoulders and shout).\n3. Check for normal breathing.\n4. Dial 108 immediately for ambulance dispatch.\n\nPlease state the specific emergency (e.g. CPR, bleeding, burns, choking, fracture, snakebite) for step-by-step guidance.\n\n[Source: Indian Resuscitation Council & WHO First-Aid Guidelines]",
+          highlightText = "Emergency Triage Assessment",
+          triageState = "GUIDANCE",
+          conditionId = "general_emergency",
+          severityLevel = 3,
+          priority = "urgent",
+          currentStepIndex = 0,
+          completedSteps = emptyList(),
+          cprMetronomeActive = false,
+          cprBpm = 0,
+          citations = emptyList(),
+          contraindications = emptyList(),
+          legalShieldApplied = true,
+          suggestedQuickQuestions = listOf("What should I check first (DRABC)?", "When should I call 108?"),
+          processingTimeMs = 120.0
+        )
+        return retrofit2.Response.success(genericBody)
+      }
+      override suspend fun generateHandoverReport(request: com.example.nearhelp.data.model.AgentChatRequestDto) = throw UnsupportedOperationException()
+    }
+
+    val interceptingRepo = com.example.nearhelp.data.repository.AiAgentRepository(mockService)
+    val response = interceptingRepo.chatWithAgent(
+      sessionId = "intercept-session-001",
+      text = "my girlfriend having periods how to solve this"
+    )
+
+    // Verify the generic response from the server was REJECTED and replaced with rich menstrual protocol!
+    assertEquals("menstrual_health", response.conditionId)
+    assertFalse(response.replyText.contains("General Emergency Assessment"))
+    assertFalse(response.replyText.contains("Check scene safety"))
+    assertTrue(response.replyText.contains("Menstrual Cramp", ignoreCase = true) || response.replyText.contains("Dysmenorrhea", ignoreCase = true))
+  }
 }
