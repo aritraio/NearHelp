@@ -53,6 +53,7 @@ class LiveTrackingWebSocketClient(
 
   private val tag = "LiveTrackingWS"
 
+  @Volatile private var sessionGeneration = 0
   private var webSocket: WebSocket? = null
   private var currentIncidentId: String? = null
   private var currentToken: String? = null
@@ -100,9 +101,9 @@ class LiveTrackingWebSocketClient(
   fun connect(incidentId: String, token: String? = null) {
     currentIncidentId = incidentId
     currentToken = token
-    shouldAutoReconnect = true
-
     disconnect(closeCode = 1000, reason = "Reconnecting to new session")
+    shouldAutoReconnect = true
+    val generation = sessionGeneration
     _connectionStatus.value = ConnectionStatus.CONNECTING
 
     val wsUrl = buildString {
@@ -112,7 +113,7 @@ class LiveTrackingWebSocketClient(
       }
     }
 
-    logI("Connecting to WebSocket URL: $wsUrl")
+    logI("Connecting to incident: $incidentId")
 
     val request = Request.Builder()
       .url(wsUrl)
@@ -120,25 +121,31 @@ class LiveTrackingWebSocketClient(
 
     webSocket = okHttpClient.newWebSocket(request, object : WebSocketListener() {
       override fun onOpen(webSocket: WebSocket, response: Response) {
+        if (generation != sessionGeneration) { webSocket.close(1000, "Superseded"); return }
         _connectionStatus.value = ConnectionStatus.CONNECTED
         startHeartbeat()
         logI("WebSocket connection established.")
       }
 
       override fun onMessage(webSocket: WebSocket, text: String) {
+        if (generation != sessionGeneration) return
         scope.launch {
+          if (generation != sessionGeneration) return@launch
           handleIncomingMessage(text)
         }
-        logD("Incoming WS Frame: $text")
+
       }
 
       override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+        if (generation != sessionGeneration) return
         _connectionStatus.value = ConnectionStatus.DISCONNECTED
         stopHeartbeat()
+        webSocket.close(code, reason)
         logI("WebSocket closing (code=$code, reason=$reason)")
       }
 
       override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        if (generation != sessionGeneration) return
         _connectionStatus.value = ConnectionStatus.DISCONNECTED
         stopHeartbeat()
         logI("WebSocket closed (code=$code, reason=$reason)")
@@ -146,6 +153,7 @@ class LiveTrackingWebSocketClient(
       }
 
       override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        if (generation != sessionGeneration) return
         _connectionStatus.value = ConnectionStatus.ERROR
         stopHeartbeat()
         logE("WebSocket failure: ${t.message}", t)
@@ -210,6 +218,7 @@ class LiveTrackingWebSocketClient(
   }
 
   private fun scheduleReconnect() {
+    if (!shouldAutoReconnect) return
     reconnectJob?.cancel()
     reconnectJob = scope.launch {
       _connectionStatus.value = ConnectionStatus.RECONNECTING
@@ -292,6 +301,7 @@ class LiveTrackingWebSocketClient(
   }
 
   fun disconnect(closeCode: Int = 1000, reason: String = "Client Disconnected") {
+    sessionGeneration++
     shouldAutoReconnect = false
     reconnectJob?.cancel()
     stopHeartbeat()
@@ -304,6 +314,8 @@ class LiveTrackingWebSocketClient(
       _connectionStatus.value = ConnectionStatus.DISCONNECTED
     }
   }
+
+  fun close() { disconnect(); scope.coroutineContext[Job]?.cancel() }
 
   private fun logD(msg: String) {
     try {

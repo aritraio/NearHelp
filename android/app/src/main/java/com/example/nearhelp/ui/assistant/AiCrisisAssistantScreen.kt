@@ -312,7 +312,7 @@ fun AiCrisisAssistantScreen(
       )
     },
     bottomBar = {
-      androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxWidth()) {
+      androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxWidth().imePadding()) {
         if (attachedMediaName != null && !uiState.isChatDrawerOpen) {
           Row(
             modifier = Modifier

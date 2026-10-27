@@ -130,3 +130,9 @@ class DeviceRegisterRequest(BaseModel):
     device_id: str | None = None
     platform: str | None = Field(default="android", description="'android', 'ios', or 'web'")
     device_info: dict[str, Any] | None = Field(default_factory=dict)
+
+
+class DeviceLocationRequest(BaseModel):
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+    available: bool = False

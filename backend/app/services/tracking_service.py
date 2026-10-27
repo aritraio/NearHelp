@@ -107,10 +107,7 @@ class TrackingService:
                 user_speed_mps = user.device_info.get("last_speed")
 
             if user_lat is None or user_lon is None:
-                # Deterministic fallback coordinate offset for simulation
-                offset_val = (user.id.int % 1000) / 10000.0
-                user_lat = event.latitude + (offset_val if (user.id.int % 2 == 0) else -offset_val)
-                user_lon = event.longitude + (offset_val if (user.id.int % 3 == 0) else -offset_val)
+                continue
 
             (
                 dist_m,
@@ -259,6 +256,15 @@ class TrackingService:
         location_data: LocationUpdateMessage,
     ) -> tuple[ResponderTrackingUpdate | None, TimelineTrackingEvent | None]:
         """Process incoming GPS stream packet, update DB/cache, calculate dynamic ETA, and check arrival trigger."""
+        engagement = (await db.execute(select(SOSResponse).where(
+            SOSResponse.sos_event_id == incident_id,
+            SOSResponse.responder_id == responder_id,
+            SOSResponse.status.in_(["ACCEPTED", "EN_ROUTE", "ARRIVED", "ON_SCENE"]),
+        ))).scalars().first()
+        incident = (await db.execute(select(SOSEvent).where(SOSEvent.id == incident_id))).scalars().first()
+        if not engagement or not incident or incident.status in ("RESOLVED", "CANCELLED"):
+            return None, None
+
         # 1. Update in-memory live telemetry cache
         cls.cache_responder_location(
             incident_id=incident_id,
@@ -283,7 +289,7 @@ class TrackingService:
             return None, None
 
         # 3. Update user entity device telemetry
-        current_info = user.device_info or {}
+        current_info = dict(user.device_info or {})
         if isinstance(current_info, dict):
             current_info["last_latitude"] = location_data.latitude
             current_info["last_longitude"] = location_data.longitude
@@ -395,6 +401,11 @@ class TrackingService:
         note: str | None = None,
     ) -> tuple[SOSResponse | None, TimelineTrackingEvent | None]:
         """Transition responder status and log timeline milestone."""
+        incident = (await db.execute(select(SOSEvent).where(SOSEvent.id == incident_id))).scalars().first()
+        if not incident or incident.status in ("RESOLVED", "CANCELLED"):
+            return None, None
+        if new_status not in ("ACCEPTED", "EN_ROUTE", "ARRIVED", "ON_SCENE", "HANDOVER_108", "DECLINED"):
+            return None, None
         stmt = select(SOSResponse, User).join(User, SOSResponse.responder_id == User.id).where(
             SOSResponse.sos_event_id == incident_id,
             SOSResponse.responder_id == responder_id,

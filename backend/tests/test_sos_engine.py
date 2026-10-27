@@ -1,6 +1,7 @@
 """NearHelp AI — Module 6 Smart SOS Engine Test Suite."""
 
 import uuid
+from datetime import UTC, datetime
 
 import pytest
 from httpx import AsyncClient
@@ -54,7 +55,7 @@ async def _create_user(
             if trust_score is not None:
                 db_user.trust_score = trust_score
             if lat is not None and lon is not None:
-                db_user.device_info = {"last_latitude": lat, "last_longitude": lon}
+                db_user.device_info = {"last_latitude": lat, "last_longitude": lon, "available": True, "location_updated_at": datetime.now(UTC).isoformat()}
             await session.commit()
 
     headers = {"Authorization": f"Bearer {token}"}

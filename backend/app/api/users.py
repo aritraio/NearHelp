@@ -13,6 +13,7 @@ from app.schemas.skill import (
     SkillVerificationResponse,
 )
 from app.schemas.user import (
+    DeviceLocationRequest,
     DeviceRegisterRequest,
     EmergencyContactCreateSchema,
     EmergencyContactSchema,
@@ -318,3 +319,22 @@ async def list_my_skills(
     """Retrieve history of all skill verification requests submitted by current user."""
     return await SkillService.list_user_verifications(db, current_user)
 
+
+
+@router.put("/me/location", response_model=MessageResponse)
+async def update_device_location(
+    req: DeviceLocationRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Publish a real device fix and explicit availability for nearby dispatch."""
+    from datetime import UTC, datetime
+
+    from app.services.geo_service import geo_service
+    current_user.device_info = {
+        **(current_user.device_info or {}),
+        "available": req.available,
+        "location_updated_at": datetime.now(UTC).isoformat(),
+    }
+    await geo_service.update_user_location(db, current_user.id, req.latitude, req.longitude)
+    return MessageResponse(message="Location and availability updated.", success=True)

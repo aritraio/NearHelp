@@ -93,6 +93,18 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
 
   override fun getFcmToken(): String? = sharedPreferences.getString(KEY_FCM_TOKEN, null)
 
+  fun savePendingSos(key: String?, payload: String?) {
+    sharedPreferences.edit().putString("pending_sos_key", key).putString("pending_sos_payload", payload).apply()
+  }
+  fun getPendingSosKey(): String? = sharedPreferences.getString("pending_sos_key", null)
+  fun getPendingSosPayload(): String? = sharedPreferences.getString("pending_sos_payload", null)
+
+  fun saveActiveIncidentId(id: String?) {
+    sharedPreferences.edit().putString("active_incident_id", id).apply()
+  }
+
+  fun getActiveIncidentId(): String? = sharedPreferences.getString("active_incident_id", null)
+
   fun saveServerBaseUrl(url: String) {
     sharedPreferences.edit().putString(KEY_SERVER_BASE_URL, url).apply()
   }

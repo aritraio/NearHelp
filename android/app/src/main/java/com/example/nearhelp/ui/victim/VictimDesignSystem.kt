@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -755,7 +758,7 @@ fun VictimBottomNavBar(
                     VictimNavItem(
                         label = when (tab) {
                             VictimNavTab.HOME -> "Home"
-                            VictimNavTab.CHAT -> "Chat"
+                            VictimNavTab.CHAT -> "AI Help"
                             VictimNavTab.MAP -> "Map"
                             VictimNavTab.PROFILE -> "Profile"
                         },
@@ -826,15 +829,19 @@ private fun VictimNavItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .clickable(
+            .heightIn(min = 48.dp)
+            .selectable(
+                selected = isSelected,
+                role = Role.Tab,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(bounded = true, color = VictimPrimary.copy(alpha = 0.12f)),
-            ) {
-                if (!isSelected) {
-                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                    onClick()
-                }
-            }
+                onClick = {
+                    if (!isSelected) {
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                        onClick()
+                    }
+                },
+            )
             .padding(vertical = 2.dp),
     ) {
         Box(
@@ -845,7 +852,7 @@ private fun VictimNavItem(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = label,
+                contentDescription = null,
                 tint = contentColor,
                 modifier = Modifier
                     .size(24.dp)

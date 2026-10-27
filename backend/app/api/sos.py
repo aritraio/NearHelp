@@ -2,7 +2,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import (
@@ -44,11 +44,12 @@ router = APIRouter(prefix="", tags=["Smart SOS Engine"])
 )
 async def create_sos_emergency(
     req: SOSCreateRequest,
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     current_user: User | None = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Trigger an emergency alert broadcast with AI triage and PostGIS geospatial dispatch."""
-    return await sos_service.create_sos_event(db=db, user=current_user, req=req)
+    return await sos_service.create_sos_event(db=db, user=current_user, req=req, idempotency_key=idempotency_key)
 
 
 @router.get(
@@ -154,3 +155,12 @@ async def get_emergency_timeline(
     """Retrieve chronological audit timeline events for an emergency."""
     detail = await sos_service.get_sos_details(db=db, sos_id=id)
     return detail.timeline
+
+
+@router.put("/{id}/cancel")
+async def cancel_sos_emergency(
+    id: uuid.UUID,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await sos_service.cancel_sos(db, current_user, id)

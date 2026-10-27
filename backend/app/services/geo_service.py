@@ -18,7 +18,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     
     Formula:
       a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
-      c = 2 ⋅ atan2( √a, √(1−a) )
+      c = 2 ⋅ atan2( √a, √(1-a) )
       d = R ⋅ c
     Where R is Earth's mean radius (6,371,000 meters).
     """
@@ -39,6 +39,18 @@ class GeoService:
     """Service providing PostGIS spatial queries and geodesic dispatch logic."""
 
     @staticmethod
+    def is_available(user: User) -> bool:
+        from datetime import UTC, datetime
+        info = user.device_info or {}
+        if not info.get("available"):
+            return False
+        try:
+            updated = datetime.fromisoformat(info["location_updated_at"])
+            return 0 <= (datetime.now(UTC) - updated).total_seconds() < 900
+        except (KeyError, ValueError, TypeError):
+            return False
+
+    @staticmethod
     def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """Return distance in meters between two coordinates."""
         return haversine_distance(lat1, lon1, lat2, lon2)
@@ -55,7 +67,7 @@ class GeoService:
             return None
 
         # Store latitude/longitude in device_info or WKT point
-        current_info = user.device_info or {}
+        current_info = dict(user.device_info or {})
         if isinstance(current_info, dict):
             current_info["last_latitude"] = latitude
             current_info["last_longitude"] = longitude
@@ -108,7 +120,7 @@ class GeoService:
                     FROM users
                     WHERE is_active = true
                       AND location IS NOT NULL
-                      AND (:exclude_id IS NULL OR id != :exclude_id)
+                      AND (CAST(:exclude_id AS UUID) IS NULL OR id != CAST(:exclude_id AS UUID))
                       AND ST_DWithin(
                             location::geography,
                             ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
@@ -117,15 +129,16 @@ class GeoService:
                     ORDER BY distance_meters ASC;
                 """)
 
-                query_res = await db.execute(
-                    sql,
-                    {
-                        "lat": latitude,
-                        "lon": longitude,
-                        "radius_meters": radius_meters,
-                        "exclude_id": exclude_id if (exclude_id := str(exclude_user_id) if exclude_user_id else None) else None,
-                    },
-                )
+                async with db.begin_nested():
+                    query_res = await db.execute(
+                        sql,
+                        {
+                            "lat": latitude,
+                            "lon": longitude,
+                            "radius_meters": radius_meters,
+                            "exclude_id": exclude_id if (exclude_id := str(exclude_user_id) if exclude_user_id else None) else None,
+                        },
+                    )
                 rows = query_res.fetchall()
                 if rows:
                     user_ids = [row[0] for row in rows]
@@ -139,7 +152,9 @@ class GeoService:
                     user_entity_map = {u.id: u for u in users}
                     for uid in user_ids:
                         if uid in user_entity_map:
-                            results.append((user_entity_map[uid], distance_map[uid]))
+                            user = user_entity_map[uid]
+                            if cls.is_available(user):
+                                results.append((user, distance_map[uid]))
                     return results
             except Exception as e:
                 logger.warning(f"PostGIS spatial query failed ({e}), falling back to geodesic filtering.")
@@ -153,6 +168,8 @@ class GeoService:
         candidates = all_users_res.scalars().all()
 
         for user in candidates:
+            if not cls.is_available(user):
+                continue
             # Extract coordinates from user device_info or mock/seed coordinate
             user_lat = None
             user_lon = None
@@ -161,12 +178,8 @@ class GeoService:
                 user_lat = user.device_info.get("last_latitude")
                 user_lon = user.device_info.get("last_longitude")
 
-            # If user has no active coordinate yet, derive deterministic sample position for testing/demo
             if user_lat is None or user_lon is None:
-                # Deterministic offset based on UUID to simulate spatial distribution around incident
-                offset_val = (user.id.int % 1000) / 10000.0  # ~0 to 1.1 km offset
-                user_lat = latitude + (offset_val if (user.id.int % 2 == 0) else -offset_val)
-                user_lon = longitude + (offset_val if (user.id.int % 3 == 0) else -offset_val)
+                continue
 
             dist = haversine_distance(latitude, longitude, float(user_lat), float(user_lon))
             if dist <= radius_meters:

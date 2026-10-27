@@ -1,11 +1,13 @@
 """NearHelp AI — Smart SOS Engine Business Logic Service."""
 
+import hashlib
 import logging
 import uuid
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import desc, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.response import SOSResponse
@@ -14,7 +16,6 @@ from app.models.timeline_event import TimelineEvent
 from app.models.user import User
 from app.schemas.ai import SeverityRequest
 from app.schemas.sos import (
-    RankedResponderItem,
     SOSActiveListItem,
     SOSActiveListResponse,
     SOSCreateRequest,
@@ -92,8 +93,17 @@ class SOSService:
         db: AsyncSession,
         user: User | None,
         req: SOSCreateRequest,
+        idempotency_key: str | None = None,
     ) -> SOSCreateResponse:
-        """Create and dispatch a new SOS emergency event."""
+        """Create and dispatch a new SOS emergency event, safely replaying mobile retries."""
+        fingerprint = hashlib.sha256(req.model_dump_json().encode()).hexdigest()
+        event_id = uuid.uuid5(uuid.NAMESPACE_URL, f"nearhelp:sos:{user.id if user else 'guest'}:{idempotency_key}") if idempotency_key else uuid.uuid4()
+        existing = (await db.execute(select(SOSEvent).where(SOSEvent.id == event_id))).scalars().first()
+        if existing:
+            if (existing.metadata_info or {}).get("request_fingerprint") != fingerprint:
+                raise HTTPException(status_code=409, detail="This request key was already used with different SOS details.")
+            detail = await cls.get_sos_details(db, event_id)
+            return SOSCreateResponse(**detail.model_dump())
         # 1. Parallel AI Triage Prediction
         severity_req = SeverityRequest(
             crisis_type=req.crisis_type,
@@ -111,7 +121,6 @@ class SOSService:
             initial_radius = float(ai_triage.recommended_radius_km * 1000.0)
 
         # 3. Create SOSEvent DB Entity
-        event_id = uuid.uuid4()
         broadcaster_id = user.id if (user and not req.is_anonymous) else None
 
         sos_event = SOSEvent(
@@ -128,8 +137,8 @@ class SOSService:
             required_skills=ai_triage.required_responder_skills,
             latitude=req.latitude,
             longitude=req.longitude,
-            address=req.address or "Salt Lake Sector V",
-            sub_address=req.sub_address or "Kolkata, West Bengal",
+            address=req.address,
+            sub_address=req.sub_address,
             status="SOS_TRIGGERED",
             is_anonymous=req.is_anonymous,
             current_radius_meters=initial_radius,
@@ -141,6 +150,7 @@ class SOSService:
                 "voice_transcript": req.voice_transcript,
                 "photo_url": req.photo_url,
                 "created_via": "smart_sos_engine",
+                "request_fingerprint": fingerprint,
             },
         )
 
@@ -181,7 +191,17 @@ class SOSService:
         )
         db.add(timeline_ai)
 
-        await db.commit()
+        try:
+            await db.commit()
+        except IntegrityError:
+            await db.rollback()
+            if not idempotency_key:
+                raise
+            existing = (await db.execute(select(SOSEvent).where(SOSEvent.id == event_id))).scalars().first()
+            if not existing or (existing.metadata_info or {}).get("request_fingerprint") != fingerprint:
+                raise HTTPException(status_code=409, detail="SOS request conflicts with an existing incident.") from None
+            detail = await cls.get_sos_details(db, event_id)
+            return SOSCreateResponse(**detail.model_dump())
         await db.refresh(sos_event)
 
         # 6. PostGIS Spatial Dispatch & Responder Ranking
@@ -201,10 +221,13 @@ class SOSService:
         )
 
         # 7. Fan-out Push Notifications to Ranked Candidates
+        candidate_tokens = {str(user.id): user.fcm_token for user, _ in candidates}
+        delivered_count = 0
         for responder in ranked_responders:
             try:
-                await notification_service.send_emergency_dispatch_alert(
+                delivery = await notification_service.send_emergency_dispatch_alert(
                     user_id=responder.responder_id,
+                    fcm_token=candidate_tokens.get(str(responder.responder_id)),
                     sos_event_id=event_id,
                     crisis_type=sos_event.crisis_type,
                     severity=sos_event.priority,
@@ -212,6 +235,7 @@ class SOSService:
                     eta_str=f"{responder.eta_minutes} min",
                     required_skills=sos_event.required_skills,
                 )
+                delivered_count += int(delivery.get("delivered", False))
             except Exception as e:
                 logger.debug(f"Notification delivery log: {e}")
 
@@ -236,7 +260,7 @@ class SOSService:
             current_radius_meters=sos_event.current_radius_meters,
             escalation=escalation_status,
             top_ranked_responders=ranked_responders,
-            candidates_notified_count=len(ranked_responders),
+            candidates_notified_count=delivered_count,
             created_at=sos_event.created_at,
         )
 
@@ -383,6 +407,9 @@ class SOSService:
                 detail=f"Cannot respond to an emergency with status '{event.status}'.",
             )
 
+        if responder.id == event.broadcaster_id:
+            raise HTTPException(status_code=400, detail="You cannot respond to your own SOS.")
+
         # 2. Update responder coordinate if provided
         if req.current_latitude is not None and req.current_longitude is not None:
             await geo_service.update_user_location(db, responder.id, req.current_latitude, req.current_longitude)
@@ -453,9 +480,11 @@ class SOSService:
         await db.refresh(response_record)
 
         # 5. Notify broadcaster if not anonymous
-        if event.broadcaster_id:
+        if event.broadcaster_id and req.status in ("ACCEPTED", "EN_ROUTE", "ARRIVED"):
             try:
+                victim = (await db.execute(select(User).where(User.id == event.broadcaster_id))).scalars().first()
                 await notification_service.send_responder_arrival_notification(
+                    fcm_token=victim.fcm_token if victim else None,
                     victim_id=event.broadcaster_id,
                     sos_event_id=sos_id,
                     responder_name=responder.name or "A verified volunteer",
@@ -574,10 +603,12 @@ class SOSService:
                 required_skills=event.required_skills,
                 severity_level=event.severity_level,
             )
+            candidate_tokens = {str(user.id): user.fcm_token for user, _ in candidates}
             for resp in ranked_new:
                 try:
                     await notification_service.send_emergency_dispatch_alert(
                         user_id=resp.responder_id,
+                        fcm_token=candidate_tokens.get(str(resp.responder_id)),
                         sos_event_id=sos_id,
                         crisis_type=event.crisis_type,
                         severity=event.priority,
@@ -599,7 +630,7 @@ class SOSService:
         req: SOSResolveRequest,
     ) -> SOSResolveResponse:
         """Mark an SOS emergency resolved, recording post-incident feedback and updating reputation scores."""
-        stmt = select(SOSEvent).where(SOSEvent.id == sos_id)
+        stmt = select(SOSEvent).where(SOSEvent.id == sos_id).with_for_update()
         res = await db.execute(stmt)
         event = res.scalars().first()
 
@@ -608,6 +639,11 @@ class SOSService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="SOS emergency event not found.",
             )
+
+        if actor.id != event.broadcaster_id and not actor.is_superuser:
+            raise HTTPException(status_code=403, detail="Only the incident owner or an administrator can resolve this SOS.")
+        if event.status in ("RESOLVED", "CANCELLED"):
+            raise HTTPException(status_code=409, detail="This incident has already ended.")
 
         event.status = "RESOLVED"
         event.resolved_at = datetime.now(UTC)
@@ -668,6 +704,20 @@ class SOSService:
             message="Emergency successfully resolved. Responder trust scores updated.",
             reputation_updates=reputation_updates,
         )
+
+    @classmethod
+    async def cancel_sos(cls, db: AsyncSession, actor: User, sos_id: uuid.UUID) -> dict:
+        event = (await db.execute(select(SOSEvent).where(SOSEvent.id == sos_id).with_for_update())).scalars().first()
+        if not event:
+            raise HTTPException(status_code=404, detail="Incident not found.")
+        if event.broadcaster_id != actor.id and not actor.is_superuser:
+            raise HTTPException(status_code=403, detail="Only the incident owner can cancel this SOS.")
+        if event.status not in ("CANCELLED", "RESOLVED"):
+            event.status = "CANCELLED"
+            event.resolved_at = datetime.now(UTC)
+            db.add(TimelineEvent(sos_event_id=sos_id, actor_id=actor.id, event_type="sos_cancelled", details={}))
+            await db.commit()
+        return {"id": str(event.id), "status": event.status}
 
     @classmethod
     async def get_active_events(

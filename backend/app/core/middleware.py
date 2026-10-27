@@ -1,5 +1,6 @@
 """NearHelp AI — Custom Middleware: Idempotency & Rate Limiting."""
 
+import hashlib
 import json
 import logging
 import time
@@ -62,7 +63,8 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
         if not idempotency_key:
             return await call_next(request)
 
-        cache_key = f"idempotency:{idempotency_key}"
+        scope = f"{request.method}:{request.url.path}:{request.headers.get('authorization', '')}:{idempotency_key}"
+        cache_key = "idempotency:" + hashlib.sha256(scope.encode() + await request.body()).hexdigest()
         redis = await get_redis_client()
 
         # Check Redis cache
@@ -84,8 +86,8 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
         else:
             # Check in-memory store
             now = time.time()
-            if idempotency_key in _in_memory_idempotency:
-                exp, status_code, body, headers = _in_memory_idempotency[idempotency_key]
+            if cache_key in _in_memory_idempotency:
+                exp, status_code, body, headers = _in_memory_idempotency[cache_key]
                 if now < exp:
                     h = dict(headers)
                     h["X-Idempotent-Replay"] = "true"
@@ -96,7 +98,7 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
                         media_type="application/json",
                     )
                 else:
-                    del _in_memory_idempotency[idempotency_key]
+                    del _in_memory_idempotency[cache_key]
 
         # Execute downstream request
         response = await call_next(request)
@@ -129,7 +131,7 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
                     logger.warning(f"Error caching idempotency response to Redis: {e}")
             else:
                 # Store in memory
-                _in_memory_idempotency[idempotency_key] = (
+                _in_memory_idempotency[cache_key] = (
                     time.time() + self.ttl_seconds,
                     response.status_code,
                     full_body,

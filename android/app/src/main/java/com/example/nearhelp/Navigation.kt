@@ -2,6 +2,8 @@ package com.example.nearhelp
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import com.example.nearhelp.ui.incident.IncidentScreen
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -19,24 +21,15 @@ import androidx.navigation3.scene.Scene
 import androidx.navigationevent.NavigationEvent
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.nearhelp.ui.assistant.AiCrisisAssistantScreen
-import com.example.nearhelp.ui.assistant.AiCrisisAssistantViewModel
 import com.example.nearhelp.ui.auth.AuthViewModel
 import com.example.nearhelp.ui.auth.screens.LoginScreen
 import com.example.nearhelp.ui.auth.screens.PhoneOtpScreen
 import com.example.nearhelp.ui.auth.screens.SignUpScreen
 import com.example.nearhelp.ui.auth.screens.SplashScreen
-import com.example.nearhelp.ui.home.HomeScreen
 import com.example.nearhelp.ui.home.VictimMainScreen
-import com.example.nearhelp.ui.map.CommunityGeoMapScreen
-import com.example.nearhelp.ui.map.CommunityGeoMapViewModel
-import com.example.nearhelp.ui.navigation.RescueNavigationScreen
-import com.example.nearhelp.ui.navigation.RescueNavigationViewModel
-import com.example.nearhelp.ui.profile.ProfileScreen
-import com.example.nearhelp.ui.profile.ProfileViewModel
-import com.example.nearhelp.ui.tracking.LiveTrackingScreen
-import com.example.nearhelp.ui.tracking.LiveTrackingViewModel
 import com.example.nearhelp.ui.victim.VictimNavTab
 
 private const val NAV_TRANSITION_DURATION = 280
@@ -245,14 +238,26 @@ private fun <T : Any> appPredictivePopTransitionSpec():
 
 @Composable
 fun MainNavigation(
+  pendingIncidentId: String? = null,
+  onIncidentConsumed: () -> Unit = {},
   authViewModel: AuthViewModel = viewModel {
     AuthViewModel(NearHelpApplication.instance.authRepository)
   }
 ) {
   val backStack = rememberNavBackStack(SplashNavKey)
+  LaunchedEffect(pendingIncidentId, backStack.lastOrNull()) {
+    if (pendingIncidentId != null && backStack.lastOrNull() !in listOf(SplashNavKey, LoginNavKey, SignUpNavKey, PhoneOtpNavKey)) {
+      backStack.add(LiveTrackingNavKey(pendingIncidentId))
+      onIncidentConsumed()
+    }
+  }
 
   NavDisplay(
     backStack = backStack,
+    entryDecorators = listOf(
+      rememberSaveableStateHolderNavEntryDecorator(),
+      rememberViewModelStoreNavEntryDecorator(),
+    ),
     onBack = { backStack.removeLastOrNull() },
     transitionSpec = appTransitionSpec(),
     popTransitionSpec = appPopTransitionSpec(),
@@ -323,19 +328,10 @@ fun MainNavigation(
         }
 
         entry<CrisisDispatchNavKey> {
-          com.example.nearhelp.ui.screens.CrisisDispatchScreen(
-            onCancel = { backStack.removeLastOrNull() },
-            onDispatch = { _, _ ->
-              backStack.add(LiveTrackingNavKey())
-            },
-            onNavigateToAssistant = {
-              backStack.add(AiCrisisAssistantNavKey())
-            },
-            onNavigateToMap = {
-              backStack.add(CommunityMapNavKey)
-            },
-            modifier = Modifier.fillMaxSize(),
-          )
+          IncidentScreen(createMode = true, onBack = { backStack.removeLastOrNull() })
+        }
+        entry<SosCreateNavKey> {
+          IncidentScreen(createMode = true, onBack = { backStack.removeLastOrNull() })
         }
 
         entry<HomeNavKey> {
@@ -351,6 +347,7 @@ fun MainNavigation(
             onNavigateToNavigation = {
               backStack.add(RescueNavigationNavKey())
             },
+            onCreateSos = { backStack.add(SosCreateNavKey) },
             authViewModel = authViewModel,
             modifier = Modifier.fillMaxSize(),
           )
@@ -369,6 +366,7 @@ fun MainNavigation(
             onNavigateToNavigation = {
               backStack.add(RescueNavigationNavKey())
             },
+            onCreateSos = { backStack.add(SosCreateNavKey) },
             authViewModel = authViewModel,
             modifier = Modifier.fillMaxSize(),
           )
@@ -387,36 +385,18 @@ fun MainNavigation(
             onNavigateToNavigation = {
               backStack.add(RescueNavigationNavKey())
             },
+            onCreateSos = { backStack.add(SosCreateNavKey) },
             authViewModel = authViewModel,
             modifier = Modifier.fillMaxSize(),
           )
         }
 
-        entry<LiveTrackingNavKey> {
-          val trackingViewModel: LiveTrackingViewModel = viewModel()
-          val storedToken = NearHelpApplication.instance.authRepository.getStoredAccessToken()
-          LiveTrackingScreen(
-            onNavigateBack = { backStack.removeLastOrNull() },
-            onNavigateToNavigation = {
-              backStack.add(RescueNavigationNavKey())
-            },
-            viewModel = trackingViewModel,
-            token = storedToken,
-            modifier = Modifier.fillMaxSize(),
-          )
+        entry<LiveTrackingNavKey> { key ->
+          IncidentScreen(initialId = key.incidentId, onBack = { backStack.removeLastOrNull() })
         }
 
-        entry<RescueNavigationNavKey> {
-          val navViewModel: RescueNavigationViewModel = viewModel {
-            RescueNavigationViewModel(NearHelpApplication.instance.routingRepository)
-          }
-          val storedToken = NearHelpApplication.instance.authRepository.getStoredAccessToken()
-          RescueNavigationScreen(
-            onNavigateBack = { backStack.removeLastOrNull() },
-            viewModel = navViewModel,
-            token = storedToken,
-            modifier = Modifier.fillMaxSize(),
-          )
+        entry<RescueNavigationNavKey> { key ->
+          IncidentScreen(initialId = key.incidentId, onBack = { backStack.removeLastOrNull() })
         }
 
         entry<AiCrisisAssistantNavKey> {
@@ -432,6 +412,7 @@ fun MainNavigation(
             onNavigateToNavigation = {
               backStack.add(RescueNavigationNavKey())
             },
+            onCreateSos = { backStack.add(SosCreateNavKey) },
             authViewModel = authViewModel,
             modifier = Modifier.fillMaxSize(),
           )

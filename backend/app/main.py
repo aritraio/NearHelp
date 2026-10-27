@@ -4,9 +4,12 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import api_router
 from app.api.admin import router as admin_compat_router
@@ -24,7 +27,7 @@ from app.core.middleware import (
     RateLimitMiddleware,
     get_redis_client,
 )
-from app.db.session import init_db
+from app.db.session import get_db, init_db
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -51,15 +54,14 @@ app = FastAPI(
 )
 
 # 1. Global Exception Handler
-from fastapi import Request
-from fastapi.responses import JSONResponse
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.exception(f"Unhandled exception on {request.method} {request.url.path}: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {str(exc)}"},
+        content={"detail": f"Internal server error: {exc!s}"},
     )
 
 # 2. CORS Middleware
@@ -108,15 +110,19 @@ app.include_router(ai_ws_router)
 
 
 @app.get("/health", tags=["Health"])
-async def health_check():
-    """System health check endpoint."""
+async def health_check(db: AsyncSession = Depends(get_db)):
+    """Readiness reflects an actual database round trip."""
+    try:
+        await db.execute(text("SELECT 1"))
+        spatial_engine = "SQLite (test)"
+        if db.bind.dialect.name == "postgresql":
+            spatial_engine = "PostGIS " + str(await db.scalar(text("SELECT PostGIS_Lib_Version()")))
+    except Exception:
+        return JSONResponse(status_code=503, content={"status": "unavailable", "database": "disconnected"})
     return {
-        "status": "healthy",
-        "service": "nearhelp-backend",
-        "version": "1.0.0",
-        "spatial_engine": "PostGIS 3.4",
-        "database": "connected",
-        "environment": settings.ENVIRONMENT,
+        "status": "healthy", "service": "nearhelp-backend", "version": "1.0.0",
+        "database": "connected", "environment": settings.ENVIRONMENT,
+        "spatial_engine": spatial_engine,
     }
 
 

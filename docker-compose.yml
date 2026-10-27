@@ -63,6 +63,8 @@ services:
       - DATABASE_SYNC_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-nearhelp_db}
       - REDIS_URL=redis://redis:6379/0
       - AI_SERVICE_URL=http://ai_service:8001
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-nearhelp-ai}
+      - FIREBASE_CREDENTIALS_JSON=${FIREBASE_CREDENTIALS_JSON:-}
       - SECRET_KEY=${SECRET_KEY:-nearhelp_super_secret_jwt_key_change_in_production_32bytes_min}
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - DEBUG=${DEBUG:-True}

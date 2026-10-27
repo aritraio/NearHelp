@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -82,7 +83,7 @@ class SOSCreateResponse(BaseModel):
 
 class SOSResponseRequest(BaseModel):
     """Payload for responder accepting or declining an SOS dispatch."""
-    status: str = Field("ACCEPTED", description="Engagement response: ACCEPTED, DECLINED, EN_ROUTE, ARRIVED")
+    status: Literal["ACCEPTED", "DECLINED", "EN_ROUTE", "ARRIVED"] = Field("ACCEPTED", description="Engagement response: ACCEPTED, DECLINED, EN_ROUTE, ARRIVED")
     eta_minutes: float | None = Field(None, description="Responder declared ETA in minutes")
     current_latitude: float | None = Field(None, ge=-90.0, le=90.0)
     current_longitude: float | None = Field(None, ge=-180.0, le=180.0)

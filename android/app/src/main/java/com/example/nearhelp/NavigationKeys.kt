@@ -10,13 +10,14 @@ import kotlinx.serialization.Serializable
 @Serializable data object HomeNavKey : NavKey
 @Serializable data object GuardianRadarNavKey : NavKey
 @Serializable data object CrisisDispatchNavKey : NavKey
+@Serializable data object SosCreateNavKey : NavKey
 @Serializable data object ProfileNavKey : NavKey
 @Serializable data object CommunityMapNavKey : NavKey
-@Serializable data class LiveTrackingNavKey(val incidentId: String = "KOL-SOS-8821") : NavKey
-@Serializable data class RescueNavigationNavKey(val incidentId: String = "KOL-SOS-8821") : NavKey
+@Serializable data class LiveTrackingNavKey(val incidentId: String = "") : NavKey
+@Serializable data class RescueNavigationNavKey(val incidentId: String = "") : NavKey
 @Serializable data class AiCrisisAssistantNavKey(
   val conditionId: String = "cardiac_arrest",
-  val incidentId: String = "KOL-SOS-8821"
+  val incidentId: String = ""
 ) : NavKey
 
 

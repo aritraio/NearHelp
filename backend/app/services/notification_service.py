@@ -1,9 +1,14 @@
 """NearHelp AI — Notification & Push Dispatch Service."""
 
+import asyncio
+import json
 import logging
 from typing import Any
 
+from firebase_admin import messaging
+
 from app.models.user import User
+from app.services.firebase_service import init_firebase
 
 logger = logging.getLogger(__name__)
 
@@ -33,22 +38,7 @@ class NotificationService:
             "delivered": False,
         }
 
-        if user.fcm_token:
-            try:
-                # Attempt to dispatch via Firebase Cloud Messaging if token exists
-                # from firebase_admin import messaging
-                # message = messaging.Message(
-                #     notification=messaging.Notification(title=title, body=body),
-                #     data={k: str(v) for k, v in (data or {}).items()},
-                #     token=user.fcm_token,
-                # )
-                # messaging.send(message)
-                payload["delivered"] = True
-                logger.info(f"FCM Push delivered to user {user.id} ({user.email}): {title}")
-            except Exception as e:
-                logger.warning(f"FCM Push delivery failed for user {user.id}: {e}")
-        else:
-            logger.info(f"In-app notification generated for user {user.id} (no FCM token): {title}")
+        payload["delivered"] = await cls._send(user.fcm_token, title, body, data or {})
 
         DISPATCHED_NOTIFICATIONS.append(payload)
         return payload
@@ -93,62 +83,52 @@ class NotificationService:
         }
         return await cls.send_notification(user, title, body, data)
 
+    @staticmethod
+    async def _send(token: str | None, title: str, body: str, data: dict) -> bool:
+        if not token:
+            return False
+        try:
+            if not init_firebase():
+                return False
+            message = messaging.Message(
+                token=token,
+                data={"title": title, "body": body, **{
+                    k: v if isinstance(v, str) else json.dumps(v) for k, v in data.items()
+                }},
+                android=messaging.AndroidConfig(priority="high", ttl=300),
+            )
+            await asyncio.to_thread(messaging.send, message)
+            return True  # Accepted by FCM; this is not an acknowledgement from the phone.
+        except Exception as exc:
+            logger.warning("FCM send failed (%s)", type(exc).__name__)
+            return False
+
     @classmethod
     async def send_emergency_dispatch_alert(
-        cls,
-        user_id: Any,
-        sos_event_id: Any,
-        crisis_type: str,
-        severity: str,
-        distance_str: str,
-        eta_str: str,
-        required_skills: list[str] | None = None,
+        cls, user_id: Any, sos_event_id: Any, crisis_type: str, severity: str,
+        distance_str: str, eta_str: str, required_skills: list[str] | None = None,
+        fcm_token: str | None = None,
     ) -> dict[str, Any]:
-        """Dispatch high-priority wake alert to candidate volunteer/responder."""
-        title = f"EMERGENCY ALERT: {crisis_type.upper()} ({severity.upper()}) 🚨"
-        body = f"Nearby emergency ({distance_str} away, ETA {eta_str}). Your immediate assistance is requested."
-        payload = {
-            "user_id": str(user_id),
-            "title": title,
-            "body": body,
-            "data": {
-                "sos_event_id": str(sos_event_id),
-                "crisis_type": crisis_type,
-                "severity": severity,
-                "distance": distance_str,
-                "eta": eta_str,
-                "required_skills": required_skills or [],
-            },
-            "delivered": True,
-        }
+        title = f"Emergency: {crisis_type} ({severity})"
+        body = f"Nearby incident {distance_str} away. Open NearHelp to respond."
+        data = {"sos_event_id": str(sos_event_id), "crisis_type": crisis_type,
+                "severity": severity, "required_skills": required_skills or []}
+        payload = {"user_id": str(user_id), "title": title, "body": body, "data": data,
+                   "delivered": await cls._send(fcm_token, title, body, data)}
         DISPATCHED_NOTIFICATIONS.append(payload)
-        logger.info(f"Dispatched SOS Alert to responder {user_id} for event {sos_event_id}")
         return payload
 
     @classmethod
     async def send_responder_arrival_notification(
-        cls,
-        victim_id: Any,
-        sos_event_id: Any,
-        responder_name: str,
-        eta_str: str,
+        cls, victim_id: Any, sos_event_id: Any, responder_name: str, eta_str: str,
+        fcm_token: str | None = None,
     ) -> dict[str, Any]:
-        """Notify victim that a volunteer responder has accepted the dispatch."""
-        title = "Help is on the Way! 🚑"
-        body = f"{responder_name} has accepted your emergency (ETA {eta_str}). Stay calm."
-        payload = {
-            "user_id": str(victim_id),
-            "title": title,
-            "body": body,
-            "data": {
-                "sos_event_id": str(sos_event_id),
-                "responder_name": responder_name,
-                "eta": eta_str,
-            },
-            "delivered": True,
-        }
+        title = "A responder has accepted your SOS"
+        body = f"{responder_name} is responding (estimated ETA {eta_str})."
+        data = {"sos_event_id": str(sos_event_id), "responder_name": responder_name}
+        payload = {"user_id": str(victim_id), "title": title, "body": body, "data": data,
+                   "delivered": await cls._send(fcm_token, title, body, data)}
         DISPATCHED_NOTIFICATIONS.append(payload)
-        logger.info(f"Dispatched arrival notice to victim {victim_id} for event {sos_event_id}")
         return payload
 
 

@@ -3,6 +3,8 @@
 import json
 import logging
 import uuid
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from datetime import datetime
 
 from fastapi import (
@@ -17,15 +19,13 @@ from fastapi import (
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
-
 from app.core.dependencies import get_current_user
 from app.core.security import decode_token, verify_token_type
 from app.core.websocket_manager import ws_manager
 from app.db.session import AsyncSessionLocal, get_db
 from app.models.response import SOSResponse
 from app.models.sos_event import SOSEvent
+from app.models.timeline_event import TimelineEvent
 from app.models.user import User
 from app.schemas.tracking import (
     ActionLogMessage,
@@ -91,6 +91,8 @@ async def _authenticate_ws_token(
         stmt = select(User).where(User.id == user_id)
         res = await db.execute(stmt)
         user = res.scalars().first()
+        if not user or not user.is_active:
+            return None, None, None, False
         user_name = user.name if user else ("Anonymous User" if is_anon else None)
         return user, user_id, user_name, is_anon
     except Exception as e:
@@ -137,7 +139,7 @@ async def _handle_tracking_websocket(
         # Determine user role in this incident
         role = "guest"
         if user_id:
-            if event.broadcaster_id == user_id or is_anon:
+            if event.broadcaster_id == user_id:
                 role = "victim"
             elif getattr(user, "is_superuser", False):
                 role = "admin"
@@ -261,7 +263,7 @@ async def _handle_tracking_websocket(
                     continue
 
                 async with _get_db_session() as db_session:
-                    sos_resp, timeline_evt = await tracking_service.process_status_update(
+                    _sos_resp, timeline_evt = await tracking_service.process_status_update(
                         db=db_session,
                         incident_id=incident_id,
                         responder_id=user_id,
@@ -289,6 +291,9 @@ async def _handle_tracking_websocket(
                     )
 
             elif msg_type == "action_log":
+                if role not in ("victim", "responder", "admin"):
+                    await ws_manager.send_personal_json(websocket, ErrorMessage(code="FORBIDDEN", message="Accept this incident before logging actions."))
+                    continue
                 try:
                     act_msg = ActionLogMessage(**data)
                     log_evt = TimelineTrackingEvent(
@@ -306,9 +311,23 @@ async def _handle_tracking_websocket(
                     logger.debug(f"Action log parse notice: {e}")
 
             elif msg_type == "chat_message":
+                if role not in ("victim", "responder", "admin"):
+                    await ws_manager.send_personal_json(websocket, ErrorMessage(code="FORBIDDEN", message="Accept this incident before sending messages."))
+                    continue
                 try:
                     chat_msg = ChatMessage(**data)
+                    async with _get_db_session() as chat_db:
+                        current = (await chat_db.execute(select(SOSEvent).where(SOSEvent.id == incident_id))).scalars().first()
+                        if not current or current.status in ("RESOLVED", "CANCELLED"):
+                            await ws_manager.send_personal_json(websocket, ErrorMessage(code="INCIDENT_ENDED", message="This incident has ended."))
+                            continue
+                        entry = TimelineEvent(sos_event_id=incident_id, actor_id=user_id, event_type="chat_message", details={"text": chat_msg.text, "language": chat_msg.language})
+                        chat_db.add(entry)
+                        await chat_db.commit()
+                        await chat_db.refresh(entry)
+                        message_id = str(entry.id)
                     broadcast_chat = {
+                        "id": message_id,
                         "type": "new_message",
                         "sender_id": str(user_id) if user_id else None,
                         "sender_name": user_name or "Participant",

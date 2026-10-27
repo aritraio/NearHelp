@@ -16,7 +16,7 @@ async def test_health_and_root_endpoints(client: AsyncClient):
     data_health = res_health.json()
     assert data_health["status"] == "healthy"
     assert data_health["service"] == "nearhelp-backend"
-    assert data_health["spatial_engine"] == "PostGIS 3.4"
+    assert data_health["spatial_engine"] == "SQLite (test)"
 
     res_root = await client.get("/")
     assert res_root.status_code == 200

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.math.abs
@@ -28,6 +29,9 @@ data class UserLocationState(
     val coordinatesText: String = "22.5726° N 88.3639° E",
     val safetyIndex: Int = 92,
     val isLocating: Boolean = true,
+    val hasFix: Boolean = false,
+    val fixElapsedMillis: Long = 0L,
+    val accuracyMeters: Float? = null,
     val hasPermission: Boolean = false
 )
 
@@ -75,6 +79,7 @@ class LocationHelper(private val context: Context) {
         if (!hasLocationPermission()) {
             _locationState.value = _locationState.value.copy(
                 hasPermission = false,
+                hasFix = false,
                 isLocating = false,
                 localityName = "Location permission needed"
             )
@@ -95,7 +100,7 @@ class LocationHelper(private val context: Context) {
             val bestLastLocation = listOfNotNull(lastKnownGps, lastKnownNetwork, lastKnownPassive)
                 .maxByOrNull { it.time }
 
-            if (bestLastLocation != null) {
+            if (bestLastLocation != null && android.os.SystemClock.elapsedRealtimeNanos() - bestLastLocation.elapsedRealtimeNanos < 120_000_000_000L) {
                 updateFromLocation(bestLastLocation)
             }
 
@@ -138,6 +143,8 @@ class LocationHelper(private val context: Context) {
         }
     }
 
+    fun close() { stopLocationUpdates(); scope.cancel() }
+
     private fun updateFromLocation(location: Location) {
         val lat = location.latitude
         val lon = location.longitude
@@ -147,6 +154,9 @@ class LocationHelper(private val context: Context) {
         val calculatedSafetyIndex = 88 + (abs((lat * 100).toInt() + (lon * 100).toInt()) % 11)
 
         _locationState.value = _locationState.value.copy(
+            hasFix = true,
+            fixElapsedMillis = location.elapsedRealtimeNanos / 1_000_000,
+            accuracyMeters = location.accuracy,
             latitude = lat,
             longitude = lon,
             coordinatesText = coordText,

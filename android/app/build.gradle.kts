@@ -4,6 +4,10 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
 }
 
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.example.nearhelp"
     compileSdk = 36
@@ -13,6 +17,9 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        val backendUrl = providers.gradleProperty("nearhelpBaseUrl").orElse("https://nearhelp-backend-7sfj.onrender.com/").get().trimEnd('/') + "/"
+        require(backendUrl.startsWith("https://") || backendUrl.startsWith("http://")) { "nearhelpBaseUrl must be an HTTP(S) URL" }
+        buildConfigField("String", "API_BASE_URL", "\"$backendUrl\"")
     }
 
     buildTypes {
@@ -28,7 +35,7 @@ android {
     buildFeatures {
       compose = true
       aidl = false
-      buildConfig = false
+      buildConfig = true
       shaders = false
     }
 
@@ -48,6 +55,7 @@ kotlin {
 }
 
 dependencies {
+  implementation("com.google.firebase:firebase-messaging:25.0.1")
   val composeBom = platform(libs.androidx.compose.bom)
   implementation(composeBom)
   androidTestImplementation(composeBom)
@@ -73,6 +81,7 @@ dependencies {
 
   // Local tests: jUnit, coroutines, Android runner
   testImplementation(libs.junit)
+  testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
   testImplementation(libs.kotlinx.coroutines.test)
 
   // Instrumented tests: jUnit rules and runners

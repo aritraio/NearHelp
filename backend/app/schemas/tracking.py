@@ -53,7 +53,7 @@ class ActionLogMessage(BaseModel):
 class ChatMessage(BaseModel):
     """Quick tactical message transmitted across incident tracking room."""
     type: Literal["chat_message"] = "chat_message"
-    text: str = Field(..., max_length=1000, description="Message body")
+    text: str = Field(..., min_length=1, max_length=1000, description="Message body")
     language: str | None = Field("en", description="Source language code (e.g. 'en', 'bn', 'hi')")
 
 

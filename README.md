@@ -17,6 +17,7 @@ All primary project design, governance, and planning specifications have been or
 | **Project Proposal** | Complete academic proposal, problem statement, research questions, deliverables | [docs/proposal.md](docs/proposal.md) |
 | **Team Task Allocation** | Governance, 6-member team roles, zero-conflict rules, contingency matrix | [docs/Task.md](docs/Task.md) |
 | **Mobile UI/UX Guidance** | Jetpack Compose guidelines, color tokens, wireframes, disclaimer rules | [docs/UI_GUIDANCE.md](docs/UI_GUIDANCE.md) |
+| **Two-Phone Readiness Review** | Current integration gaps and device acceptance checklist | [docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md) |
 
 ---
 

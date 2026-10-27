@@ -9,7 +9,7 @@ import firebase_admin
 from firebase_admin import auth, credentials
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token as google_id_token
-import jwt
+from jose import jwt
 
 from app.core.config import settings
 
@@ -78,7 +78,7 @@ def verify_firebase_id_token(id_token: str) -> dict[str, Any]:
     init_firebase()
 
     # 1. Support dev mock tokens and direct email selection
-    if "@" in id_token and not id_token.startswith("ey"):
+    if settings.ENVIRONMENT in ("development", "test", "testing") and "@" in id_token and not id_token.startswith("ey"):
         email_clean = id_token.strip().lower()
         name_part = email_clean.split("@")[0].replace(".", " ").replace("_", " ").title()
         return {
@@ -90,7 +90,7 @@ def verify_firebase_id_token(id_token: str) -> dict[str, Any]:
             "firebase": {"sign_in_provider": "google.com"},
         }
 
-    if id_token.startswith(("mock_", "test_", "dev_", "google_", "demo_")):
+    if settings.ENVIRONMENT in ("development", "test", "testing") and id_token.startswith(("mock_", "test_", "dev_", "google_", "demo_")):
         logger.info(f"Verifying token using development/test mock handler: {id_token[:20]}...")
         if "google" in id_token:
             return {
@@ -143,7 +143,7 @@ def verify_firebase_id_token(id_token: str) -> dict[str, Any]:
     # 4. Fallback in development mode: decode unverified JWT claims to extract profile
     if settings.ENVIRONMENT in ("development", "test", "testing"):
         try:
-            unverified_claims = jwt.decode(id_token, options={"verify_signature": False})
+            unverified_claims = jwt.get_unverified_claims(id_token)
             email = unverified_claims.get("email") or "google_dev_user@nearhelp.ai"
             name = unverified_claims.get("name") or unverified_claims.get("display_name") or email.split("@")[0]
             uid = unverified_claims.get("sub") or unverified_claims.get("user_id") or f"dev_{email}"

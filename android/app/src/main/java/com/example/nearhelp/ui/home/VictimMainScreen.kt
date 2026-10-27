@@ -17,8 +17,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +56,7 @@ fun VictimMainScreen(
     sessionId: String = "KOL-SOS-8821",
     onNavigateToLogin: () -> Unit,
     onNavigateToTracking: () -> Unit = {},
+    onCreateSos: () -> Unit = onNavigateToTracking,
     onNavigateToNavigation: () -> Unit = {},
     authViewModel: AuthViewModel,
     modifier: Modifier = Modifier,
@@ -110,6 +113,7 @@ fun VictimMainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = innerPadding.calculateBottomPadding())
+                .consumeWindowInsets(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
         ) {
             AnimatedContent(
                 targetState = currentTab,
@@ -178,6 +182,7 @@ fun VictimMainScreen(
                                     currentTab = VictimNavTab.MAP
                                 },
                                 onNavigateToTracking = onNavigateToTracking,
+                                onCreateSos = onCreateSos,
                                 onNavigateToAssistant = {
                                     currentTab = VictimNavTab.CHAT
                                 },
