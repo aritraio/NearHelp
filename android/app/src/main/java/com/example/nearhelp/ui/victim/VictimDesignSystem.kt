@@ -709,12 +709,12 @@ fun VictimBottomNavBar(
     val tabs = remember { listOf(VictimNavTab.HOME, VictimNavTab.CHAT, VictimNavTab.MAP, VictimNavTab.PROFILE) }
     val selectedIndex = tabs.indexOf(selected).coerceAtLeast(0)
 
-    // Smooth gliding pill indicator across tabs with organic spring dynamics
+    // Smooth gliding pill indicator across tabs with responsive spring dynamics
     val animatedTabIndex by animateFloatAsState(
         targetValue = selectedIndex.toFloat(),
         animationSpec = spring(
-            dampingRatio = 0.76f,
-            stiffness = Spring.StiffnessMediumLow
+            dampingRatio = 0.82f,
+            stiffness = Spring.StiffnessMedium
         ),
         label = "nav_pill_glide"
     )

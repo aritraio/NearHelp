@@ -3,14 +3,13 @@ package com.example.nearhelp.ui.home
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -121,41 +120,29 @@ fun VictimMainScreen(
                     val isForward = targetState.ordinal > initialState.ordinal
                     if (isForward) {
                         (slideInHorizontally(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            initialOffsetX = { (it * 0.16f).toInt() }
-                        ) + scaleIn(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            initialScale = 0.94f
+                            animationSpec = tween(220, easing = FastOutSlowInEasing),
+                            initialOffsetX = { (it * 0.25f).toInt() }
                         ) + fadeIn(
-                            animationSpec = tween(240, easing = FastOutSlowInEasing)
+                            animationSpec = tween(220, easing = FastOutSlowInEasing)
                         )) togetherWith (
                         slideOutHorizontally(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            targetOffsetX = { -(it * 0.16f).toInt() }
-                        ) + scaleOut(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            targetScale = 0.96f
+                            animationSpec = tween(180, easing = FastOutLinearInEasing),
+                            targetOffsetX = { -(it * 0.20f).toInt() }
                         ) + fadeOut(
-                            animationSpec = tween(180, easing = FastOutSlowInEasing)
+                            animationSpec = tween(160, easing = FastOutLinearInEasing)
                         ))
                     } else {
                         (slideInHorizontally(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            initialOffsetX = { -(it * 0.16f).toInt() }
-                        ) + scaleIn(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            initialScale = 0.94f
+                            animationSpec = tween(220, easing = FastOutSlowInEasing),
+                            initialOffsetX = { -(it * 0.25f).toInt() }
                         ) + fadeIn(
-                            animationSpec = tween(240, easing = FastOutSlowInEasing)
+                            animationSpec = tween(220, easing = FastOutSlowInEasing)
                         )) togetherWith (
                         slideOutHorizontally(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            targetOffsetX = { (it * 0.16f).toInt() }
-                        ) + scaleOut(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-                            targetScale = 0.96f
+                            animationSpec = tween(180, easing = FastOutLinearInEasing),
+                            targetOffsetX = { (it * 0.20f).toInt() }
                         ) + fadeOut(
-                            animationSpec = tween(180, easing = FastOutSlowInEasing)
+                            animationSpec = tween(160, easing = FastOutLinearInEasing)
                         ))
                     }
                 },
