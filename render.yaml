@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: nearhelp-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: PROJECT_NAME
+        value: "NearHelp AI"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+        # Supabase transaction pooler URL:
+        # postgresql+asyncpg://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+      - key: DATABASE_SYNC_URL
+        sync: false
+        # postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+        # e.g. nearhelp-emergencies
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false
+        # Paste the complete contents of firebase_service_account.json here
+      - key: GEMINI_API_KEY
+        sync: false
+        # Google AI Studio Gemini API Key
