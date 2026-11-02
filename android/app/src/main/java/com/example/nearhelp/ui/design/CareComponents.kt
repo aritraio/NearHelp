@@ -16,7 +16,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -45,6 +44,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.delay
 
 @Composable
 fun CarePage(title: String? = null, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
@@ -67,9 +67,9 @@ fun CareTopBar(title: String, onBack: (() -> Unit)?) {
 }
 
 @Composable
-fun CareHeading(title: String, subtitle: String? = null) {
+fun CareHeading(title: String, subtitle: String? = null, compact: Boolean = false) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineLarge)
+        Text(title, style = if (compact) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineLarge)
         if (subtitle != null) CareMuted(subtitle)
     }
 }
@@ -133,7 +133,7 @@ fun CareRow(title: String, description: String? = null, icon: ImageVector? = nul
                 Text(title, style = MaterialTheme.typography.titleSmall)
                 if (!description.isNullOrBlank()) CareMuted(description)
             }
-            if (onClick != null) Icon(Icons.AutoMirrored.Outlined.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (onClick != null) Icon(Icons.Outlined.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
@@ -216,6 +216,11 @@ fun CareMap(location: UserLocationState, modifier: Modifier = Modifier, height: 
     var loaded by remember { mutableStateOf(false) }
     val routeColor = MaterialTheme.colorScheme.primary
     val dark = ThemeManager.isDarkMode
+    var now by remember { mutableLongStateOf(android.os.SystemClock.elapsedRealtime()) }
+    LaunchedEffect(Unit) { while (true) { delay(5_000); now = android.os.SystemClock.elapsedRealtime() } }
+    val fresh = location.hasFix && now - location.fixElapsedMillis in 0 until 120_000
+    val centerMarker = remember { MarkerState(target) }
+    SideEffect { centerMarker.position = target }
     val style = remember(dark) { if (!dark) null else MapStyleOptions("""[{"elementType":"geometry","stylers":[{"color":"#101817"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#afc3c0"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#101817"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"}]}]""") }
     LaunchedEffect(target, pins.map { it.position }, loaded) {
         if (loaded) {
@@ -227,19 +232,22 @@ fun CareMap(location: UserLocationState, modifier: Modifier = Modifier, height: 
         }
     }
     Box(modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
-        GoogleMap(Modifier.fillMaxSize(), cameraPositionState = camera,
+        GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = camera,
             properties = MapProperties(mapStyleOptions = style),
             uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false, myLocationButtonEnabled = false, compassEnabled = false),
             onMapLoaded = { loaded = true }) {
-            if (center != null || location.hasFix) Marker(state = MarkerState(target), title = if (center != null) "Medical SOS location" else "You", icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-            pins.forEach { pin -> key(pin.id) { Marker(state = MarkerState(pin.position), title = pin.title, snippet = pin.snippet,
+            if (center != null || location.hasFix) Marker(state = centerMarker, title = if (center != null) "Medical SOS location" else if (fresh) "You" else "Your last known location", icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+            pins.forEach { pin -> key(pin.id) {
+                val marker = remember { MarkerState(pin.position) }
+                SideEffect { marker.position = pin.position }
+                Marker(state = marker, title = pin.title, snippet = pin.snippet,
                 icon = BitmapDescriptorFactory.defaultMarker(pin.hueColor), onClick = { onPinClick?.invoke(pin); true }) } }
             if (route.size > 1) Polyline(points = route, color = routeColor, width = 9f)
         }
         Surface(Modifier.align(Alignment.TopStart).padding(12.dp), shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.background) {
             Row(Modifier.padding(horizontal = 10.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(Icons.Outlined.MyLocation, null, Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
-                Text(status ?: if (location.hasFix) "Live location" else "Waiting for GPS", style = MaterialTheme.typography.labelSmall)
+                Text(status ?: if (fresh) "Live location" else if (location.hasFix) "Last known location" else "Waiting for GPS", style = MaterialTheme.typography.labelSmall)
             }
         }
     }

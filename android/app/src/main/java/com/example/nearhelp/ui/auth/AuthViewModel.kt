@@ -30,6 +30,9 @@ class AuthViewModel(
   val otpForm: StateFlow<OtpFormData> = _otpForm.asStateFlow()
 
   private var timerJob: Job? = null
+  private var emergencyEntryPending = false
+
+  fun consumeEmergencyEntry(): Boolean = emergencyEntryPending.also { emergencyEntryPending = false }
 
   // -------------------------------------------------------------
   // Login Form Updates & Validation
@@ -255,6 +258,7 @@ class AuthViewModel(
       val result = authRepository.createAnonymousEmergencySession(tempName)
       result.fold(
         onSuccess = { tokenResponse ->
+          emergencyEntryPending = true
           _uiState.value = AuthUiState.Success(
             user = tokenResponse.user,
             message = "Emergency mode active. 1-Tap SOS ready.",
@@ -279,7 +283,10 @@ class AuthViewModel(
     _uiState.value = AuthUiState.Idle
   }
 
+  fun showError(message: String) { _uiState.value = AuthUiState.Error(message) }
+
   fun logout() {
+    emergencyEntryPending = false
     authRepository.logout()
     _uiState.value = AuthUiState.Idle
   }

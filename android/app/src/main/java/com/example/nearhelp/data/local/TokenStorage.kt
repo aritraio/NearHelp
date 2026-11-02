@@ -5,6 +5,11 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.nearhelp.data.api.models.UserResponse
+import com.example.nearhelp.data.api.Incident
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
+data class RecordedIncident(val id: String, val address: String, val status: String, val timestamp: String, val receivedHelp: Boolean)
 
 interface ITokenStorage {
   fun saveSession(accessToken: String, refreshToken: String, user: UserResponse)
@@ -53,6 +58,11 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     user: UserResponse,
   ) {
     sharedPreferences.edit().apply {
+      if (getUserId() != user.id) {
+        remove("active_incident_id")
+        remove("pending_sos_key")
+        remove("pending_sos_payload")
+      }
       putString(KEY_ACCESS_TOKEN, accessToken)
       putString(KEY_REFRESH_TOKEN, refreshToken)
       putString(KEY_USER_ID, user.id)
@@ -104,6 +114,20 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
   }
 
   fun getActiveIncidentId(): String? = sharedPreferences.getString("active_incident_id", null)
+
+  fun getIncidentHistory(): List<RecordedIncident> = runCatching {
+    Gson().fromJson<List<RecordedIncident>>(sharedPreferences.getString("history_${getUserId()}", "[]"), object : TypeToken<List<RecordedIncident>>() {}.type) ?: emptyList()
+  }.getOrDefault(emptyList())
+
+  fun recordIncident(incident: Incident) {
+    val userId = getUserId() ?: return
+    val received = incident.broadcasterId == userId
+    if (!received && incident.responses.none { it.responderId == userId && it.status != "DECLINED" }) return
+    val record = RecordedIncident(incident.id, incident.address.orEmpty(), incident.status,
+      incident.timeline.lastOrNull()?.timestamp?.take(10).orEmpty(), received)
+    val history = (listOf(record) + getIncidentHistory().filterNot { it.id == record.id }).take(100)
+    sharedPreferences.edit().putString("history_$userId", Gson().toJson(history)).apply()
+  }
 
   fun saveServerBaseUrl(url: String) {
     sharedPreferences.edit().putString(KEY_SERVER_BASE_URL, url).apply()

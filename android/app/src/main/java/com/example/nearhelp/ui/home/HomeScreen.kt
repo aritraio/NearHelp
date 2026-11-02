@@ -2,6 +2,7 @@ package com.example.nearhelp.ui.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -59,9 +60,8 @@ fun HomeScreen(
                 else CareButton("SOS · Get medical help", onCreateSos, style = CareButtonStyle.SOS, subtitle = "Optional details · sends in 4 seconds")
                 Column {
                     CareRow("Nearby medical requests", "Help someone in your community", Icons.Outlined.Groups, onNavigateToTracking)
-                    CareRow("First-aid guidance", "Find a topic or ask the assistant", Icons.Outlined.MenuBook, onNavigateToAssistant)
+                    CareRow("First-aid guidance", "Find a topic or ask the assistant", Icons.AutoMirrored.Outlined.MenuBook, onNavigateToAssistant)
                     CareRow("Become a responder", "Add your qualifications", Icons.Outlined.VerifiedUser, onNavigateToResponderProfile)
-                    CareRow("Emergency history", "Your previous requests and responses", Icons.Outlined.History, onNavigateToHistory)
                 }
             }
         }

@@ -29,72 +29,7 @@ data class ChatHistorySession(
   val messages: List<AiChatMessageUiModel> = emptyList()
 )
 
-fun defaultChatHistory(): List<ChatHistorySession> = listOf(
-  ChatHistorySession(
-    id = "hist-cpr",
-    title = "CPR Compressions & Cadence",
-    snippet = "Compress 5 to 6 cm deep at 110-120 BPM cadence in center of chest...",
-    timestamp = "Today, 10:15",
-    group = "Today",
-    messages = listOf(
-      AiChatMessageUiModel("u-1", true, "Bystander", "How deep should chest compressions be?", "10:14"),
-      AiChatMessageUiModel(
-        "a-1", false, "NearHelp Emergency Agent",
-        "✅ Compress 5 to 6 cm (approx 2 inches) deep at a cadence of 110–120 compressions/minute in the center of the breastbone. Allow full recoil between pushes.\n\n[Source: AHA CPR Guidelines 2020 §3.2 • IRC BLS 2020]",
-        "10:15",
-        highlightBadge = "AHA / IRC Guideline (110 BPM)"
-      )
-    )
-  ),
-  ChatHistorySession(
-    id = "hist-bleeding",
-    title = "Severe Bleeding & Direct Pressure",
-    snippet = "Apply continuous direct pressure with sterile gauze...",
-    timestamp = "Yesterday, 17:30",
-    group = "Yesterday",
-    messages = listOf(
-      AiChatMessageUiModel("u-2", true, "Bystander", "How to manage heavy bleeding from an arm cut?", "17:29"),
-      AiChatMessageUiModel(
-        "a-2", false, "NearHelp Emergency Agent",
-        "⚠️ Apply firm, continuous direct pressure with sterile gauze. Elevate above heart level. If blood soaks through, do NOT remove original gauze—apply more layers on top.\n\n[Source: International Red Cross Trauma Protocols]",
-        "17:30",
-        highlightBadge = "Trauma Management"
-      )
-    )
-  ),
-  ChatHistorySession(
-    id = "hist-burn",
-    title = "Thermal Burn First Aid",
-    snippet = "Cool the burn under cool running tap water for 10-20 min...",
-    timestamp = "Sep 10",
-    group = "Earlier",
-    messages = listOf(
-      AiChatMessageUiModel("u-3", true, "Bystander", "Can I put ice or butter on a boiling oil burn?", "14:02"),
-      AiChatMessageUiModel(
-        "a-3", false, "NearHelp Emergency Agent",
-        "❌ NEVER use bare ice, butter, or toothpaste. Cool the burn immediately under cool, gentle running tap water for 10–20 minutes. Cover loosely with sterile dressing.\n\n[Source: WHO Burns Management Guide]",
-        "14:03",
-        highlightBadge = "Contraindicated Action"
-      )
-    )
-  ),
-  ChatHistorySession(
-    id = "hist-choking",
-    title = "Choking & Heimlich Protocol",
-    snippet = "5 back blows between shoulder blades followed by 5 abdominal thrusts...",
-    timestamp = "Sep 5",
-    group = "Earlier",
-    messages = listOf(
-      AiChatMessageUiModel("u-4", true, "Bystander", "Person is choking and holding their throat", "11:20"),
-      AiChatMessageUiModel(
-        "a-4", false, "NearHelp Emergency Agent",
-        "🚨 Perform 5 back blows between shoulder blades followed by 5 abdominal thrusts (Heimlich maneuver). If victim becomes unresponsive, lower safely and begin CPR.\n\n[Source: AHA Airway Obstruction Guidelines]",
-        "11:21",
-        highlightBadge = "Airway Emergency"
-      )
-    )
-  )
-)
+fun defaultChatHistory(): List<ChatHistorySession> = emptyList()
 
 data class AiCrisisAssistantUiState(
   val sessionId: String = "DEMO-SESSION-001",
@@ -112,6 +47,7 @@ data class AiCrisisAssistantUiState(
   val isHandoverModalOpen: Boolean = false,
   val handoverSummary: ClinicalHandoverSummaryDto? = null,
   val isLoading: Boolean = false,
+  val error: String? = null,
   val chatHistory: List<ChatHistorySession> = defaultChatHistory(),
   val quickQuestions: List<String> = listOf(
     "Can I give water or oral medicine?",
@@ -292,13 +228,13 @@ class AiCrisisAssistantViewModel(
     return listOf(updatedSession) + remaining
   }
 
-  fun sendChatMessage(text: String) {
+  fun sendChatMessage(text: String, imageBase64: String? = null) {
     if (text.isBlank()) return
 
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val nowStr = timeFormat.format(Date())
 
-    val threadId = _uiState.value.activeThreadId ?: "thread-${System.currentTimeMillis()}"
+    val threadId = _uiState.value.activeThreadId ?: _uiState.value.sessionId.takeIf { runCatching { java.util.UUID.fromString(it) }.isSuccess } ?: "thread-${System.currentTimeMillis()}"
 
     val userMsg = AiChatMessageUiModel(
       id = "user-${System.currentTimeMillis()}",
@@ -315,45 +251,54 @@ class AiCrisisAssistantViewModel(
         isChatDrawerOpen = true,
         chatMessages = updatedMessages,
         isLoading = true,
+        error = null,
         chatHistory = updateHistoryWithThread(it.chatHistory, threadId, updatedMessages, nowStr)
       )
     }
 
     viewModelScope.launch {
-      val response = repository.chatWithAgent(
-        sessionId = threadId,
-        text = text,
-        currentStepIndex = _uiState.value.currentStepIndex,
-        completedSteps = _uiState.value.completedSteps
-      )
-
-      val aiMsg = AiChatMessageUiModel(
-        id = "ai-${System.currentTimeMillis()}",
-        isUser = false,
-        senderName = "NearHelp Emergency Agent",
-        text = response.replyText,
-        timestamp = nowStr,
-        highlightBadge = response.highlightText,
-        citations = response.citations,
-        contraindications = response.contraindications
-      )
-
-      val finalMessages = _uiState.value.chatMessages + aiMsg
-      _uiState.update { state ->
-        if (state.activeThreadId == threadId) {
-          state.copy(
-            chatMessages = finalMessages,
-            activeContraindication = response.contraindications.firstOrNull(),
-            quickQuestions = if (response.suggestedQuickQuestions.isNotEmpty()) response.suggestedQuickQuestions else state.quickQuestions,
-            isLoading = false,
-            chatHistory = updateHistoryWithThread(state.chatHistory, threadId, finalMessages, nowStr)
-          )
-        } else {
-          state.copy(
-            chatHistory = updateHistoryWithThread(state.chatHistory, threadId, finalMessages, nowStr)
-          )
+      try {
+        val inputText = if (imageBase64 == null) text else {
+          val imageDescription = repository.describeImage(imageBase64).getOrThrow()
+          "$text\n\nImage description from automated analysis (may be inaccurate): $imageDescription"
         }
-      }
+        val response = repository.chatWithAgent(
+          sessionId = threadId,
+          text = inputText,
+          currentStepIndex = _uiState.value.currentStepIndex,
+          completedSteps = _uiState.value.completedSteps
+        )
+
+        val aiMsg = AiChatMessageUiModel(
+          id = "ai-${System.currentTimeMillis()}",
+          isUser = false,
+          senderName = "NearHelp Emergency Agent",
+          text = response.replyText,
+          timestamp = nowStr,
+          highlightBadge = response.highlightText,
+          citations = response.citations,
+          contraindications = response.contraindications
+        )
+
+        val finalMessages = updatedMessages + aiMsg
+        _uiState.update { state ->
+          if (state.activeThreadId == threadId) {
+            state.copy(
+              chatMessages = finalMessages,
+              activeContraindication = response.contraindications.firstOrNull(),
+              quickQuestions = if (response.suggestedQuickQuestions.isNotEmpty()) response.suggestedQuickQuestions else state.quickQuestions,
+              isLoading = false,
+              chatHistory = updateHistoryWithThread(state.chatHistory, threadId, finalMessages, nowStr)
+            )
+          } else {
+            state.copy(
+              isLoading = false,
+              chatHistory = updateHistoryWithThread(state.chatHistory, threadId, finalMessages, nowStr)
+            )
+          }
+        }
+      } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+      catch (e: Exception) { _uiState.update { it.copy(isLoading = false, error = e.message ?: "Your message could not be processed. Please try again.") } }
     }
   }
 

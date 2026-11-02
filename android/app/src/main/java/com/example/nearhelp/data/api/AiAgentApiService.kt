@@ -11,6 +11,8 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface AiAgentApiService {
+  @POST("api/v1/ai/classify")
+  suspend fun describeImage(@Body request: com.example.nearhelp.data.model.ImageAnalysisRequest): Response<com.example.nearhelp.data.model.ImageAnalysisResponse>
 
   @POST("api/v1/ai/agent/chat")
   suspend fun chatWithAgent(

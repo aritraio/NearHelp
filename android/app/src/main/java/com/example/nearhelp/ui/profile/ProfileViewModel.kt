@@ -11,6 +11,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
+import android.content.Context
+import android.net.Uri
+import com.example.nearhelp.data.api.RetrofitClient
+import com.example.nearhelp.data.api.SessionTokens
+import com.example.nearhelp.data.api.models.SkillVerificationResponse
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MultipartBody
 
 data class ProfileUiState(
   val isLoading: Boolean = false,
@@ -26,6 +37,7 @@ data class ProfileUiState(
   val editingContact: EmergencyContact? = null,
   val showQualificationsDialog: Boolean = false,
   val showEmergencyHistoryDialog: Boolean = false,
+  val skillClaims: List<SkillVerificationResponse> = emptyList(),
 )
 
 class ProfileViewModel(
@@ -327,11 +339,48 @@ class ProfileViewModel(
   fun closeEmergencyHistoryDialog() = _uiState.update { it.copy(showEmergencyHistoryDialog = false) }
 
   fun saveQualification(title: String, organization: String, idNumber: String) {
-    _uiState.update {
-      it.copy(
-        showQualificationsDialog = false,
-        successMessage = "Qualification '$title' submitted for verification.",
-      )
+    _uiState.update { it.copy(error = "Attach your certificate before submitting a qualification.") }
+  }
+
+  fun loadSkillClaims() {
+    viewModelScope.launch {
+      try {
+        val result = RetrofitClient.getUserApiService().listMySkills(SessionTokens.bearer())
+        if (result.isSuccessful) _uiState.update { it.copy(skillClaims = result.body().orEmpty()) }
+      } catch (e: CancellationException) { throw e }
+      catch (_: Exception) { /* Profile data remains available while offline. */ }
+    }
+  }
+
+  fun submitQualification(title: String, organization: String, idNumber: String, uri: Uri?, context: Context) {
+    if (_uiState.value.isSaving) return
+    if (uri == null) { _uiState.update { it.copy(error = "Attach your certificate before submitting.") }; return }
+    viewModelScope.launch {
+      _uiState.update { it.copy(isSaving = true, error = null) }
+      try {
+        val result = withContext(Dispatchers.IO) {
+          val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
+          val extension = mapOf("application/pdf" to "pdf", "image/jpeg" to "jpg", "image/png" to "png", "image/webp" to "webp")[mime]
+            ?: error("Choose a PDF, PNG, JPG or WebP certificate.")
+          val output = java.io.ByteArrayOutputStream()
+          context.contentResolver.openInputStream(uri)?.use { input ->
+            val buffer = ByteArray(8192)
+            while (true) {
+              val count = input.read(buffer); if (count < 0) break
+              check(output.size() + count <= 10 * 1024 * 1024) { "Certificate must be smaller than 10 MB." }
+              output.write(buffer, 0, count)
+            }
+          } ?: error("Could not open the certificate.")
+          val code = when (title) { "CPR / AED certified" -> "CPR_CERTIFIED"; "First-aid provider" -> "FIRST_AID"; "EMT / Paramedic" -> "EMT"; "Doctor / Physician" -> "DOCTOR"; "Registered nurse" -> "NURSE"; else -> "COMMUNITY_FIRST_RESPONDER" }
+          RetrofitClient.getUserApiService().claimSkillWithCertificate(SessionTokens.bearer(), code.toRequestBody("text/plain".toMediaType()),
+            MultipartBody.Part.createFormData("file", "certificate.$extension", output.toByteArray().toRequestBody(mime.toMediaType())),
+            "Issuing organization: $organization\nCertificate ID: $idNumber".toRequestBody("text/plain".toMediaType()))
+        }
+        check(result.isSuccessful) { "The certificate could not be submitted (${result.code()}). Please try again." }
+        val claim = result.body() ?: error("The server returned an empty response.")
+        _uiState.update { it.copy(isSaving = false, skillClaims = it.skillClaims + claim, successMessage = "Qualification submitted for verification.") }
+      } catch (e: CancellationException) { throw e }
+      catch (e: Exception) { _uiState.update { it.copy(isSaving = false, error = e.message ?: "Could not submit certificate.") } }
     }
   }
 

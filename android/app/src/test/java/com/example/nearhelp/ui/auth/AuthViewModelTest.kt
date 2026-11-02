@@ -111,6 +111,8 @@ class AuthViewModelTest {
     assertTrue(state is AuthUiState.Success)
     val success = state as AuthUiState.Success
     assertTrue(success.user.isAnonymous)
+    assertTrue(viewModel.consumeEmergencyEntry())
+    assertFalse(viewModel.consumeEmergencyEntry())
   }
 
   @Test

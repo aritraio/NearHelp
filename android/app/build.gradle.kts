@@ -56,6 +56,10 @@ kotlin {
 
 dependencies {
   implementation("com.google.firebase:firebase-messaging:25.0.1")
+  implementation("com.google.firebase:firebase-auth:25.0.0")
+  implementation("androidx.credentials:credentials:1.6.0")
+  implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+  implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
   val composeBom = platform(libs.androidx.compose.bom)
   implementation(composeBom)
   androidTestImplementation(composeBom)

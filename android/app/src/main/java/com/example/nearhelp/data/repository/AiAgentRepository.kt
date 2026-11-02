@@ -21,6 +21,7 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 interface IAiAgentRepository {
+  suspend fun describeImage(base64: String): Result<String> = Result.failure(IllegalStateException("Image analysis is unavailable."))
   suspend fun getProtocol(conditionId: String): GroundedProtocolDto
   suspend fun getAllProtocols(): List<GroundedProtocolDto>
   suspend fun chatWithAgent(
@@ -36,6 +37,17 @@ class AiAgentRepository(
   private val apiService: AiAgentApiService,
   private val tokenStorage: TokenStorage? = null
 ) : IAiAgentRepository {
+
+  override suspend fun describeImage(base64: String): Result<String> = withContext(Dispatchers.IO) {
+    try {
+      val response = apiService.describeImage(com.example.nearhelp.data.model.ImageAnalysisRequest(base64))
+      if (!response.isSuccessful) error("Image analysis is unavailable. Please describe the situation in words.")
+      val description = response.body()?.description?.takeIf { it.isNotBlank() }
+        ?: error("The image could not be read. Please describe the situation in words.")
+      Result.success(description)
+    } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+    catch (e: Exception) { Result.failure(e) }
+  }
 
   private val okHttpClient = OkHttpClient.Builder()
     .connectTimeout(15, TimeUnit.SECONDS)

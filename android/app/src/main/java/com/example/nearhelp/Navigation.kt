@@ -18,7 +18,6 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.ui.NavDisplay
 import com.example.nearhelp.ui.auth.AuthViewModel
 import com.example.nearhelp.ui.auth.screens.LoginScreen
-import com.example.nearhelp.ui.auth.screens.PhoneOtpScreen
 import com.example.nearhelp.ui.auth.screens.SignUpScreen
 import com.example.nearhelp.ui.auth.screens.SplashScreen
 import com.example.nearhelp.ui.home.VictimMainScreen
@@ -93,10 +92,11 @@ fun MainNavigation(
         entry<LoginNavKey> {
           LoginScreen(
             onNavigateToSignUp = { backStack.add(SignUpNavKey) },
-            onNavigateToPhoneOtp = { backStack.add(PhoneOtpNavKey) },
             onNavigateToHome = {
+              val emergency = authViewModel.consumeEmergencyEntry()
               backStack.clear()
               backStack.add(HomeNavKey)
+              if (emergency) backStack.add(SosCreateNavKey)
             },
             viewModel = authViewModel,
             modifier = Modifier.fillMaxSize(),
@@ -116,8 +116,9 @@ fun MainNavigation(
         }
 
         entry<PhoneOtpNavKey> {
-          PhoneOtpScreen(
-            onNavigateToLogin = { backStack.removeLastOrNull() },
+          // Old saved navigation states return to supported email / Google sign-in.
+          LoginScreen(
+            onNavigateToSignUp = { backStack.add(SignUpNavKey) },
             onNavigateToHome = {
               backStack.clear()
               backStack.add(HomeNavKey)

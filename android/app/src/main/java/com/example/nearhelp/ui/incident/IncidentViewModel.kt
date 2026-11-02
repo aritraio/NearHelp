@@ -14,6 +14,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import retrofit2.Response
 import java.util.UUID
+import android.os.SystemClock
+import com.example.nearhelp.ui.navigation.DirectionsRequestDto
+import com.example.nearhelp.ui.navigation.RouteLocationPoint
 
 data class IncidentUiState(
     val incident: Incident? = null,
@@ -23,6 +26,8 @@ data class IncidentUiState(
     val busy: Boolean = false,
     val error: String? = null,
     val role: String = "guest",
+    val lastTrackingUpdateElapsed: Long? = null,
+    val routePoints: List<RouteLocationPoint> = emptyList(),
 )
 
 class IncidentViewModel(private val savedState: SavedStateHandle = SavedStateHandle()) : ViewModel() {
@@ -35,6 +40,8 @@ class IncidentViewModel(private val savedState: SavedStateHandle = SavedStateHan
     private var poll: Job? = null
     private var requestJob: Job? = null
     private var connectedId: String? = null
+    private var routeJob: Job? = null
+    private var lastRouteRequestElapsed = 0L
     val userId get() = storage.getUserId()
     val activeId: String? get() = savedState["incidentId"]
 
@@ -48,13 +55,18 @@ class IncidentViewModel(private val savedState: SavedStateHandle = SavedStateHan
                 is TrackingIncomingEvent.ConnectionAckReceived -> _state.update { it.copy(role = event.role) }
                 is TrackingIncomingEvent.SnapshotReceived -> runCatching {
                     val snapshot = gson.fromJson(event.rawJson, TrackingSnapshotDto::class.java)
-                    _state.update { it.copy(snapshot = snapshot) }
+                    _state.update { previous ->
+                        val changed = previous.snapshot == null || previous.snapshot.responders.map { Triple(it.responderId, it.latitude, it.longitude) } != snapshot.responders.map { Triple(it.responderId, it.latitude, it.longitude) }
+                        previous.copy(snapshot = snapshot, lastTrackingUpdateElapsed = if (changed) SystemClock.elapsedRealtime() else previous.lastTrackingUpdateElapsed)
+                    }
+                    updateRoute(snapshot)
                 }
                 is TrackingIncomingEvent.ResponderUpdateReceived -> runCatching {
                     val responder = gson.fromJson(event.rawJson, ResponderTrackingUpdateDto::class.java)
                     _state.update { current -> current.copy(snapshot = current.snapshot?.let { snapshot ->
                         snapshot.copy(responders = snapshot.responders.filterNot { it.responderId == responder.responderId } + responder)
-                    }) }
+                    }, lastTrackingUpdateElapsed = SystemClock.elapsedRealtime()) }
+                    _state.value.snapshot?.let(::updateRoute)
                 }
                 is TrackingIncomingEvent.TimelineEventReceived -> refreshIncident()
                 is TrackingIncomingEvent.RawMessageReceived -> if (event.type == "new_message") refreshIncident()
@@ -92,6 +104,7 @@ class IncidentViewModel(private val savedState: SavedStateHandle = SavedStateHan
     }
 
     fun browse() {
+        routeJob?.cancel()
         poll?.cancel()
         connectedId = null
         socket.disconnect()
@@ -114,6 +127,8 @@ class IncidentViewModel(private val savedState: SavedStateHandle = SavedStateHan
         }
         savedState["incidentId"] = id
         if (connectedId == id) return
+        routeJob?.cancel()
+        lastRouteRequestElapsed = 0L
         poll?.cancel()
         socket.disconnect()
         connectedId = id
@@ -136,6 +151,7 @@ class IncidentViewModel(private val savedState: SavedStateHandle = SavedStateHan
         try {
             val detail = checked(api.detail(id))
             if (activeId == id) _state.update { it.copy(incident = detail) }
+            storage.recordIncident(detail)
             if (detail.status in listOf("RESOLVED", "CANCELLED") && storage.getActiveIncidentId() == id) storage.saveActiveIncidentId(null)
         } catch (e: CancellationException) { throw e }
         catch (e: Exception) { _state.update { it.copy(error = e.message) } }
@@ -201,5 +217,28 @@ class IncidentViewModel(private val savedState: SavedStateHandle = SavedStateHan
         catch (e: CancellationException) { throw e }
         catch (e: Exception) { _state.update { it.copy(error = e.message) } }
     } } }
+    fun markArrived() {
+        if (!socket.sendStatusUpdate("ARRIVED")) _state.update { it.copy(error = "Reconnect before updating your arrival status.") }
+    }
+
+    private fun updateRoute(snapshot: TrackingSnapshotDto) {
+        val closest = snapshot.responders.filter { it.status in listOf("ACCEPTED", "EN_ROUTE", "ARRIVED", "ON_SCENE") }.minByOrNull { it.distanceMeters } ?: return
+        val now = SystemClock.elapsedRealtime()
+        if (routeJob?.isActive == true || (lastRouteRequestElapsed != 0L && now - lastRouteRequestElapsed < 30_000)) return
+        lastRouteRequestElapsed = now
+        val id = activeId
+        routeJob = viewModelScope.launch {
+            try {
+                // Use server route geometry, never the legacy demo route fallback.
+                val response = RetrofitClient.getRoutingApiService().getDirections(DirectionsRequestDto(
+                    originLatitude = closest.latitude, originLongitude = closest.longitude,
+                    destinationLatitude = snapshot.incidentLatitude, destinationLongitude = snapshot.incidentLongitude,
+                    includeAedDetour = false, aedLatitude = null, aedLongitude = null, aedName = null,
+                ))
+                if (activeId == id && response.isSuccessful) _state.update { it.copy(routePoints = response.body()?.data?.primaryRoute?.polylinePoints.orEmpty()) }
+            } catch (e: CancellationException) { throw e }
+            catch (_: Exception) { /* Position tracking continues when directions are unavailable. */ }
+        }
+    }
     override fun onCleared() { socket.close(); super.onCleared() }
 }

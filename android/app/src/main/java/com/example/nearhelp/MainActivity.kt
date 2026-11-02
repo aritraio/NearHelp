@@ -9,6 +9,8 @@ import java.util.UUID
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,6 +34,11 @@ class MainActivity : ComponentActivity() {
     readIncident(intent)
     enableEdgeToEdge()
     setContent {
+      LaunchedEffect(ThemeManager.selectedTheme) {
+        val bars = if (ThemeManager.isDarkMode) SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+          else SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+        enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+      }
       NearHelpTheme(darkTheme = ThemeManager.isDarkMode) {
         Surface(
           modifier = Modifier.fillMaxSize(),

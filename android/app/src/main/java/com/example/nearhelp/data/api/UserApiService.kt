@@ -20,8 +20,20 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Multipart
+import retrofit2.http.Part
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 interface UserApiService {
+  @Multipart
+  @POST("api/v1/users/me/skills/form")
+  suspend fun claimSkillWithCertificate(
+    @Header("Authorization") token: String,
+    @Part("skill_type") skillType: RequestBody,
+    @Part file: MultipartBody.Part,
+    @Part("notes") notes: RequestBody,
+  ): Response<SkillVerificationResponse>
 
   @GET("api/v1/users/me")
   suspend fun getCurrentUserProfile(
