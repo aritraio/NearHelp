@@ -70,6 +70,7 @@ services:
       - DEBUG=${DEBUG:-True}
     volumes:
       - ./backend:/app
+      - ./data:/data
     depends_on:
       db:
         condition: service_healthy
@@ -96,7 +97,6 @@ services:
       - ENVIRONMENT=${ENVIRONMENT:-development}
     volumes:
       - ./ai_service:/app
-      - ./data:/data
     networks:
       - nearhelp_network
 

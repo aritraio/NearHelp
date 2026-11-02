@@ -129,9 +129,17 @@ class AiCrisisAssistantViewModel(
   private val _uiState = MutableStateFlow(AiCrisisAssistantUiState())
   val uiState: StateFlow<AiCrisisAssistantUiState> = _uiState.asStateFlow()
 
+  private var initializationRequest: Pair<String, String>? = null
+  private var initializationJob: Job? = null
+
   fun initialize(conditionId: String = "cardiac_arrest", sessionId: String = "DEMO-SESSION-001") {
+    val request = conditionId to sessionId
+    // Returning to a composed tab must not reload or replace the user's selected protocol.
+    if (initializationRequest == request) return
+    initializationRequest = request
+    initializationJob?.cancel()
     _uiState.update { it.copy(conditionId = conditionId, sessionId = sessionId, isLoading = true) }
-    viewModelScope.launch {
+    initializationJob = viewModelScope.launch {
       val all = repository.getAllProtocols()
       val activeProto = all.firstOrNull { it.conditionId == conditionId } ?: all.firstOrNull() ?: repository.getProtocol(conditionId)
       _uiState.update { state ->
@@ -140,6 +148,13 @@ class AiCrisisAssistantViewModel(
           protocol = activeProto,
           isLoading = false
         )
+      }
+    }.also { job ->
+      job.invokeOnCompletion { cause ->
+        if (cause != null && initializationRequest == request) {
+          initializationRequest = null
+          _uiState.update { it.copy(isLoading = false) }
+        }
       }
     }
   }

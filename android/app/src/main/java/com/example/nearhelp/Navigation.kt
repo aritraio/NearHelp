@@ -8,14 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
+import com.example.nearhelp.ui.navigation.AppMotion
 import androidx.navigation3.scene.Scene
 import androidx.navigationevent.NavigationEvent
 import androidx.navigation3.runtime.entryProvider
@@ -31,148 +24,27 @@ import com.example.nearhelp.ui.auth.screens.SplashScreen
 import com.example.nearhelp.ui.home.VictimMainScreen
 import com.example.nearhelp.ui.victim.VictimNavTab
 
-private const val NAV_TRANSITION_DURATION = 240
-
-private fun isBottomNavKey(key: Any): Boolean =
-  key is HomeNavKey || key is ProfileNavKey || key is CommunityMapNavKey || key is AiCrisisAssistantNavKey
-
-private fun getBottomNavIndex(key: Any): Int = when (key) {
-  is HomeNavKey -> 0
-  is AiCrisisAssistantNavKey -> 1
-  is CommunityMapNavKey -> 2
-  is ProfileNavKey -> 3
-  else -> 0
-}
-
 private fun <T : Any> appTransitionSpec():
     AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
   if (initialState.key is SplashNavKey || targetState.key is SplashNavKey) {
-    fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)) togetherWith
-    fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing))
-  } else if (isBottomNavKey(initialState.key) && isBottomNavKey(targetState.key)) {
-    val isForward = getBottomNavIndex(targetState.key) >= getBottomNavIndex(initialState.key)
-    if (isForward) {
-      (slideInHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-        initialOffsetX = { (it * 0.25f).toInt() }
-      ) + fadeIn(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-      )) togetherWith
-      (slideOutHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutLinearInEasing),
-        targetOffsetX = { -(it * 0.20f).toInt() }
-      ) + fadeOut(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-      ))
-    } else {
-      (slideInHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-        initialOffsetX = { -(it * 0.25f).toInt() }
-      ) + fadeIn(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-      )) togetherWith
-      (slideOutHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutLinearInEasing),
-        targetOffsetX = { (it * 0.20f).toInt() }
-      ) + fadeOut(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-      ))
-    }
+    AppMotion.fade()
   } else {
-    (slideInHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialOffsetX = { fullWidth -> fullWidth }
-    ) + fadeIn(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-    )) togetherWith
-    (slideOutHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing),
-      targetOffsetX = { fullWidth -> -fullWidth / 4 }
-    ) + fadeOut(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-    ))
+    AppMotion.page(forward = true)
   }
 }
 
 private fun <T : Any> appPopTransitionSpec():
     AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
   if (initialState.key is SplashNavKey || targetState.key is SplashNavKey) {
-    fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)) togetherWith
-    fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing))
-  } else if (isBottomNavKey(initialState.key) && isBottomNavKey(targetState.key)) {
-    val isForward = getBottomNavIndex(targetState.key) >= getBottomNavIndex(initialState.key)
-    if (isForward) {
-      (slideInHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-        initialOffsetX = { (it * 0.25f).toInt() }
-      ) + fadeIn(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-      )) togetherWith
-      (slideOutHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutLinearInEasing),
-        targetOffsetX = { -(it * 0.20f).toInt() }
-      ) + fadeOut(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-      ))
-    } else {
-      (slideInHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-        initialOffsetX = { -(it * 0.25f).toInt() }
-      ) + fadeIn(
-        animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-      )) togetherWith
-      (slideOutHorizontally(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutLinearInEasing),
-        targetOffsetX = { (it * 0.20f).toInt() }
-      ) + fadeOut(
-        animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-      ))
-    }
+    AppMotion.fade()
   } else {
-    (slideInHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialOffsetX = { fullWidth -> -fullWidth / 4 }
-    ) + fadeIn(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-    )) togetherWith
-    (slideOutHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing),
-      targetOffsetX = { fullWidth -> fullWidth }
-    ) + fadeOut(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-    ))
+    AppMotion.page(forward = false)
   }
 }
 
 private fun <T : Any> appPredictivePopTransitionSpec():
     AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform = { swipeEdge ->
-  if (swipeEdge == NavigationEvent.EDGE_RIGHT) {
-    (slideInHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialOffsetX = { fullWidth -> fullWidth / 4 }
-    ) + fadeIn(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-    )) togetherWith
-    (slideOutHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing),
-      targetOffsetX = { fullWidth -> -fullWidth }
-    ) + fadeOut(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-    ))
-  } else {
-    (slideInHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing),
-      initialOffsetX = { fullWidth -> -fullWidth / 4 }
-    ) + fadeIn(
-      animationSpec = tween(NAV_TRANSITION_DURATION, easing = FastOutSlowInEasing)
-    )) togetherWith
-    (slideOutHorizontally(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 40, easing = FastOutSlowInEasing),
-      targetOffsetX = { fullWidth -> fullWidth }
-    ) + fadeOut(
-      animationSpec = tween(NAV_TRANSITION_DURATION - 60, easing = FastOutLinearInEasing)
-    ))
-  }
+  AppMotion.page(forward = swipeEdge == NavigationEvent.EDGE_RIGHT)
 }
 
 @Composable

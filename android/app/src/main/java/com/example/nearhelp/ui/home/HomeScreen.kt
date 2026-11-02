@@ -48,7 +48,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +56,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.onClick
@@ -122,7 +123,7 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val locationHelper = remember { LocationHelper(context.applicationContext) }
-    val locationState by locationHelper.locationState.collectAsState()
+    val locationState by locationHelper.locationState.collectAsStateWithLifecycle()
     var customLocation by rememberSaveable { mutableStateOf<String?>(null) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         locationHelper.startLocationUpdates()
@@ -399,33 +400,31 @@ private fun HoldForSosButton(
         label = "SosIdleScale"
     )
 
-    // Rapid holding emission pulse for shockwaves
-    val holdTransition = rememberInfiniteTransition(label = "SosHoldingEmission")
-    val holdEmission by holdTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 450, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "SosHoldEmission"
-    )
-
     val pillShape = RoundedCornerShape(percent = 50)
-    val effectiveScale = if (isHolding) {
-        0.98f + (holdProgress.value * 0.04f)
-    } else {
-        idleScale
-    }
-
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .scale(effectiveScale),
+            .graphicsLayer {
+                // Read frame-by-frame pulse state in the layer, not in composition.
+                val pulse = if (isHolding) 0.98f + holdProgress.value * 0.04f else idleScale
+                scaleX = pulse
+                scaleY = pulse
+            },
         contentAlignment = Alignment.Center
     ) {
         // Holding Emission Aura (pill-shaped shockwaves around the button when holding)
         if (isHolding) {
+            // Rapid holding emission pulse for shockwaves
+            val holdTransition = rememberInfiniteTransition(label = "SosHoldingEmission")
+            val holdEmission by holdTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 450, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Restart
+                ),
+                label = "SosHoldEmission"
+            )
             Canvas(
                 modifier = Modifier
                     .matchParentSize()

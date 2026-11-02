@@ -92,7 +92,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import com.example.nearhelp.NearHelpApplication
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -166,7 +166,7 @@ fun AiCrisisAssistantScreen(
   showBottomBar: Boolean = true,
 ) {
   val context = LocalContext.current
-  val uiState by viewModel.uiState.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var inputQuestion by remember { mutableStateOf("") }
   var isTopicsExpanded by remember { mutableStateOf(false) }
   var attachedMediaName by remember { mutableStateOf<String?>(null) }

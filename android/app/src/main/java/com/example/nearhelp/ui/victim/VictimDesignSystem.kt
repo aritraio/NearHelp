@@ -1,5 +1,7 @@
 package com.example.nearhelp.ui.victim
 
+import com.example.nearhelp.ui.navigation.AppMotion
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -709,13 +711,10 @@ fun VictimBottomNavBar(
     val tabs = remember { listOf(VictimNavTab.HOME, VictimNavTab.CHAT, VictimNavTab.MAP, VictimNavTab.PROFILE) }
     val selectedIndex = tabs.indexOf(selected).coerceAtLeast(0)
 
-    // Smooth gliding pill indicator across tabs with responsive spring dynamics
+    // Draw-phase movement avoids relaying out the bar on every animation frame.
     val animatedTabIndex by animateFloatAsState(
         targetValue = selectedIndex.toFloat(),
-        animationSpec = spring(
-            dampingRatio = 0.82f,
-            stiffness = Spring.StiffnessMedium
-        ),
+        animationSpec = tween(AppMotion.DURATION, easing = FastOutSlowInEasing),
         label = "nav_pill_glide"
     )
 
@@ -737,10 +736,12 @@ fun VictimBottomNavBar(
             val pillHeight = 32.dp
 
             // Active Sliding Capsule (Visual Guide)
-            val indicatorLeft = (tabWidth * animatedTabIndex) + (tabWidth - pillWidth) / 2
             Box(
                 modifier = Modifier
-                    .offset(x = indicatorLeft, y = 2.dp)
+                    .graphicsLayer {
+                        translationX = ((tabWidth * animatedTabIndex) + (tabWidth - pillWidth) / 2).toPx()
+                        translationY = 2.dp.toPx()
+                    }
                     .width(pillWidth)
                     .height(pillHeight)
                     .clip(RoundedCornerShape(16.dp))
@@ -791,37 +792,28 @@ private fun VictimNavItem(
     // Smooth color transition
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) VictimPrimary else VictimTextMuted,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = AppMotion.DURATION, easing = FastOutSlowInEasing),
         label = "nav_item_color"
     )
 
-    // Bouncy pop-in / pop-out icon scale
+    // Restrained selection feedback shares the page transition cadence.
     val iconScale by animateFloatAsState(
-        targetValue = if (isSelected) 1.18f else 1.0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        targetValue = if (isSelected) 1.08f else 1.0f,
+        animationSpec = tween(AppMotion.DURATION, easing = FastOutSlowInEasing),
         label = "nav_icon_scale"
     )
 
     // Active vertical lift
     val iconElevation by animateDpAsState(
-        targetValue = if (isSelected) (-2.5).dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = 0.8f,
-            stiffness = Spring.StiffnessMedium
-        ),
+        targetValue = if (isSelected) (-1).dp else 0.dp,
+        animationSpec = tween(AppMotion.DURATION, easing = FastOutSlowInEasing),
         label = "nav_icon_elevation"
     )
 
     // Active indicator dot alpha and scale
     val dotScale by animateFloatAsState(
         targetValue = if (isSelected) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        animationSpec = tween(AppMotion.DURATION, easing = FastOutSlowInEasing),
         label = "nav_dot_scale"
     )
 

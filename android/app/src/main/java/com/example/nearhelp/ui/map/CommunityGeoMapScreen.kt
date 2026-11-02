@@ -58,7 +58,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -221,12 +221,12 @@ fun CommunityGeoMapScreen(
   showBottomBar: Boolean = true,
 ) {
   val context = LocalContext.current
-  val uiState by viewModel.uiState.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val coroutineScope = rememberCoroutineScope()
 
   // 1. LIVE GPS & NETWORK USER LOCATION HELPER
   val locationHelper = remember { LocationHelper(context.applicationContext) }
-  val locationState by locationHelper.locationState.collectAsState()
+  val locationState by locationHelper.locationState.collectAsStateWithLifecycle()
 
   val permissionLauncher = rememberLauncherForActivityResult(
     ActivityResultContracts.RequestMultiplePermissions()

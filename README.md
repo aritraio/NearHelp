@@ -17,7 +17,6 @@ The root-level decision register and data-flow guide describe the current implem
 | **Design System Specification** | Material 3 Expressive, Neomorphic tokens, screen wireframes, animations | [docs/design.md](docs/design.md) |
 | **Master TODO List** | Comprehensive task tracking (~238 tasks) across 3 MoSCoW phases | [docs/todos.md](docs/todos.md) |
 | **Project Proposal** | Complete academic proposal, problem statement, research questions, deliverables | [docs/proposal.md](docs/proposal.md) |
-| **Team Task Allocation** | Governance, 6-member team roles, zero-conflict rules, contingency matrix | [docs/Task.md](docs/Task.md) |
 | **Mobile UI/UX Guidance** | Jetpack Compose guidelines, color tokens, wireframes, disclaimer rules | [docs/UI_GUIDANCE.md](docs/UI_GUIDANCE.md) |
 | **Two-Phone Readiness Review** | Current integration gaps and device acceptance checklist | [docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md) |
 
@@ -44,14 +43,13 @@ NearHelp/
 │   ├── design.md                   # Comprehensive UI/UX Design System Specification
 │   ├── todos.md                    # Master TODO List (~238 tasks)
 │   ├── proposal.md                 # Master Project Proposal
-│   ├── Task.md                     # Team Task Allocations & Governance
-│   └── UI_GUIDANCE.md              # Android UI/UX & Jetpack Compose Specs
+│   ├── UI_GUIDANCE.md              # Android UI/UX & Jetpack Compose Specs
+│   └── DEVICE_READINESS.md         # Two-Phone Verification Checklist
 │
 ├── android/                        # Android Client (Kotlin + Jetpack Compose)
 ├── backend/                        # Backend API Service (FastAPI + PostgreSQL/PostGIS)
 ├── ai_service/                     # AI Microservice (Gemini 2.5 + LangGraph)
-├── data/                           # Emergency Protocols & Kolkata Regional JSON Data
-│   ├── protocols/                  # WHO, Red Cross, NDMA Guidelines (JSON/MD)
+├── data/                           # Kolkata Regional JSON Data
 │   └── regional/                   # Hospitals, Police, Fire Station JSONs
 │
 └── docker-compose.yml              # Local Multi-Container Development Infrastructure

@@ -2,19 +2,6 @@ package com.example.nearhelp.ui.home
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,10 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
@@ -40,12 +25,13 @@ import com.example.nearhelp.ui.map.CommunityGeoMapScreen
 import com.example.nearhelp.ui.map.CommunityGeoMapViewModel
 import com.example.nearhelp.ui.profile.ProfileScreen
 import com.example.nearhelp.ui.profile.ProfileViewModel
+import com.example.nearhelp.ui.navigation.AppMotion
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
 
 /**
  * Unified container for victim bottom navigation tabs (Home, Chat, Map, Profile).
- * Provides fluid, directional Pop-In / Pop-Out page transitions between tabs with spatial awareness
+ * Provides subtle directional transitions and a stable content viewport
  * while preserving scroll states and keeping ViewModels cached.
  */
 @Composable
@@ -60,19 +46,9 @@ fun VictimMainScreen(
     authViewModel: AuthViewModel,
     modifier: Modifier = Modifier,
 ) {
-    var currentTab by rememberSaveable { mutableStateOf(initialTab) }
-    var isHomeOverlayActive by remember { mutableStateOf(false) }
+    var currentTab by rememberSaveable(initialTab) { mutableStateOf(initialTab) }
     val saveableStateHolder = rememberSaveableStateHolder()
 
-    LaunchedEffect(initialTab) {
-        currentTab = initialTab
-    }
-
-    // Persist ViewModels across tab switches to avoid re-fetching and jank
-    val assistantViewModel: AiCrisisAssistantViewModel = viewModel {
-        AiCrisisAssistantViewModel(NearHelpApplication.instance.aiAgentRepository)
-    }
-    val mapViewModel: CommunityGeoMapViewModel = viewModel()
     val profileViewModel: ProfileViewModel = viewModel {
         ProfileViewModel(NearHelpApplication.instance.userRepository)
     }
@@ -82,28 +58,13 @@ fun VictimMainScreen(
         currentTab = VictimNavTab.HOME
     }
 
-    val isBottomNavVisible = currentTab != VictimNavTab.HOME || !isHomeOverlayActive
-
+    // The shared bar stays mounted so tab changes never resize the content viewport.
     Scaffold(
         bottomBar = {
-            AnimatedVisibility(
-                visible = isBottomNavVisible,
-                enter = slideInVertically(
-                    animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow),
-                    initialOffsetY = { it }
-                ) + fadeIn(animationSpec = tween(200)),
-                exit = slideOutVertically(
-                    animationSpec = tween(180, easing = FastOutSlowInEasing),
-                    targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(140)),
-            ) {
-                VictimBottomNavBar(
-                    selected = currentTab,
-                    onSelect = { tab ->
-                        currentTab = tab
-                    }
-                )
-            }
+            VictimBottomNavBar(
+                selected = currentTab,
+                onSelect = { tab -> if (tab != currentTab) currentTab = tab },
+            )
         },
         containerColor = VictimBackground,
         modifier = modifier.fillMaxSize(),
@@ -117,33 +78,11 @@ fun VictimMainScreen(
             AnimatedContent(
                 targetState = currentTab,
                 transitionSpec = {
-                    val isForward = targetState.ordinal > initialState.ordinal
-                    if (isForward) {
-                        (slideInHorizontally(
-                            animationSpec = tween(220, easing = FastOutSlowInEasing),
-                            initialOffsetX = { (it * 0.25f).toInt() }
-                        ) + fadeIn(
-                            animationSpec = tween(220, easing = FastOutSlowInEasing)
-                        )) togetherWith (
-                        slideOutHorizontally(
-                            animationSpec = tween(180, easing = FastOutLinearInEasing),
-                            targetOffsetX = { -(it * 0.20f).toInt() }
-                        ) + fadeOut(
-                            animationSpec = tween(160, easing = FastOutLinearInEasing)
-                        ))
+                    // Avoid translating the native map surface during tab changes.
+                    if (initialState == VictimNavTab.MAP || targetState == VictimNavTab.MAP) {
+                        AppMotion.fade()
                     } else {
-                        (slideInHorizontally(
-                            animationSpec = tween(220, easing = FastOutSlowInEasing),
-                            initialOffsetX = { -(it * 0.25f).toInt() }
-                        ) + fadeIn(
-                            animationSpec = tween(220, easing = FastOutSlowInEasing)
-                        )) togetherWith (
-                        slideOutHorizontally(
-                            animationSpec = tween(180, easing = FastOutLinearInEasing),
-                            targetOffsetX = { (it * 0.20f).toInt() }
-                        ) + fadeOut(
-                            animationSpec = tween(160, easing = FastOutLinearInEasing)
-                        ))
+                        AppMotion.tab(forward = targetState.ordinal > initialState.ordinal)
                     }
                 },
                 label = "victim_main_tab_transition",
@@ -175,11 +114,13 @@ fun VictimMainScreen(
                                 },
                                 viewModel = authViewModel,
                                 showBottomBar = false,
-                                onOverlayStateChanged = { isHomeOverlayActive = it },
                                 modifier = Modifier.fillMaxSize(),
                             )
                         }
                         VictimNavTab.CHAT -> {
+                            val assistantViewModel: AiCrisisAssistantViewModel = viewModel {
+                                AiCrisisAssistantViewModel(NearHelpApplication.instance.aiAgentRepository)
+                            }
                             AiCrisisAssistantScreen(
                                 onNavigateBack = { currentTab = VictimNavTab.HOME },
                                 onNavigateToHome = { currentTab = VictimNavTab.HOME },
@@ -197,6 +138,7 @@ fun VictimMainScreen(
                             )
                         }
                         VictimNavTab.MAP -> {
+                            val mapViewModel: CommunityGeoMapViewModel = viewModel()
                             CommunityGeoMapScreen(
                                 onNavigateBack = { currentTab = VictimNavTab.HOME },
                                 onNavigateToHome = { currentTab = VictimNavTab.HOME },
