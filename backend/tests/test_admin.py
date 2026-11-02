@@ -15,7 +15,9 @@ from app.models.user_presence import UserPresence
 
 
 async def account(db, **fields):
-    user = User(email=f"{uuid.uuid4().hex}@example.com", name="Admin test", **fields)
+    data = {"email": f"{uuid.uuid4().hex}@example.com", "name": "Admin test"}
+    data.update(fields)
+    user = User(**data)
     db.add(user)
     await db.commit()
     await db.refresh(user)
@@ -137,3 +139,33 @@ async def test_dashboard_delivery(client):
     assert "frame-ancestors 'none'" in response.headers['content-security-policy']
     for asset in ['style.css', 'app.js']:
         assert (await client.get('/admin/assets/'+asset)).status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_purge_demo_users_and_filtering(client, db_session):
+    admin, headers = await account(db_session, is_superuser=True)
+    real_user, _ = await account(db_session, name="Real Person", is_anonymous=False)
+    anon_user, _ = await account(db_session, name="Anonymous Victim", is_anonymous=True, auth_provider="anonymous")
+
+    # Real users default filter
+    res_real = await client.get('/api/v1/admin/users?user_type=real', headers=headers)
+    assert res_real.status_code == 200
+    ids_real = [u['id'] for u in res_real.json()['users']]
+    assert str(real_user.id) in ids_real
+    assert str(anon_user.id) not in ids_real
+
+    # All users filter
+    res_all = await client.get('/api/v1/admin/users?user_type=all', headers=headers)
+    assert res_all.status_code == 200
+    ids_all = [u['id'] for u in res_all.json()['users']]
+    assert str(anon_user.id) in ids_all
+
+    # Purge demo users endpoint
+    res_purge = await client.post('/api/v1/admin/maintenance/purge-demo-users', headers=headers)
+    assert res_purge.status_code == 200
+    assert res_purge.json()['purged'] >= 1
+
+    # Check that anonymous user is gone, real user and admin remain
+    assert await db_session.scalar(select(User).where(User.id == anon_user.id)) is None
+    assert await db_session.scalar(select(User).where(User.id == real_user.id)) is not None
+    assert await db_session.scalar(select(User).where(User.id == admin.id)) is not None

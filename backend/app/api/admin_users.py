@@ -65,14 +65,18 @@ async def dashboard_stats(db: AsyncSession = Depends(get_db)):
         return await db.scalar(select(func.count()).select_from(model).where(*conditions))
 
     return {
-        "total_users": await count(User),
-        "active_users": await count(User, User.is_active.is_(True)),
+        "total_users": await count(User, User.is_anonymous.is_(False)),
+        "active_users": await count(User, User.is_active.is_(True), User.is_anonymous.is_(False)),
         "online_users": await db.scalar(
             select(func.count()).select_from(UserPresence).join(User)
-            .where(UserPresence.last_seen_at >= online_cutoff(), User.is_active.is_(True))
+            .where(UserPresence.last_seen_at >= online_cutoff(), User.is_active.is_(True), User.is_anonymous.is_(False))
         ),
         "admin_users": await count(User, User.is_superuser.is_(True)),
-        "new_users_today": await count(User, User.created_at >= datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)),
+        "new_users_today": await count(
+            User,
+            User.created_at >= datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0),
+            User.is_anonymous.is_(False),
+        ),
         "pending_verifications": await count(SkillVerification, SkillVerification.status == "PENDING"),
         "active_emergencies": await count(SOSEvent, SOSEvent.status.notin_(["RESOLVED", "CANCELLED", "IDLE"])),
         "online_window_seconds": ONLINE_WINDOW_SECONDS,
@@ -85,11 +89,17 @@ async def list_users(
     q: str = Query("", max_length=100),
     state: Literal["all", "active", "inactive", "online"] = "all",
     role: Literal["all", "admin", "user"] = "all",
+    user_type: Literal["real", "all", "anonymous"] = "real",
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     filters = []
+    if user_type == "real":
+        filters.append(User.is_anonymous.is_(False))
+    elif user_type == "anonymous":
+        filters.append(User.is_anonymous.is_(True))
+
     if q.strip():
         filters.append(or_(*(column.icontains(q.strip(), autoescape=True) for column in (User.name, User.email, User.phone))))
     if state in {"active", "inactive"}:
@@ -102,6 +112,28 @@ async def list_users(
     total = await db.scalar(select(func.count()).select_from(query.subquery()))
     rows = (await db.execute(query.order_by(User.created_at.desc(), User.id).offset(offset).limit(limit))).all()
     return AdminUserList(users=[user_response(user, seen) for user, seen in rows], total=total, limit=limit, offset=offset)
+
+
+@router.post("/maintenance/purge-demo-users")
+async def purge_demo_users(
+    admin: User = Depends(get_current_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Purge all temporary anonymous/demo logins and their associations."""
+    anon_user_ids = (await db.scalars(select(User.id).where(User.is_anonymous.is_(True)))).all()
+    if not anon_user_ids:
+        return {"purged": 0, "message": "No demo/anonymous users found."}
+
+    await db.execute(delete(UserPresence).where(UserPresence.user_id.in_(anon_user_ids)))
+    await db.execute(delete(SkillVerification).where(SkillVerification.user_id.in_(anon_user_ids)))
+    await db.execute(update(SkillVerification).where(SkillVerification.reviewed_by.in_(anon_user_ids)).values(reviewed_by=None))
+    await db.execute(delete(SOSResponse).where(SOSResponse.responder_id.in_(anon_user_ids)))
+    await db.execute(update(SOSEvent).where(SOSEvent.broadcaster_id.in_(anon_user_ids)).values(broadcaster_id=None))
+    await db.execute(update(TimelineEvent).where(TimelineEvent.actor_id.in_(anon_user_ids)).values(actor_id=None))
+    await db.execute(delete(User).where(User.id.in_(anon_user_ids)))
+    await db.commit()
+
+    return {"purged": len(anon_user_ids), "message": f"Successfully purged {len(anon_user_ids)} demo/anonymous accounts."}
 
 
 @router.post("/users", response_model=AdminUserResponse, status_code=201)

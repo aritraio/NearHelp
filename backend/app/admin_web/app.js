@@ -75,7 +75,7 @@ function action(text, type, id, disabled = false) {
 }
 async function loadUsers() {
   const request = ++userRequest;
-  const params = new URLSearchParams({q:$('search').value, state:$('state-filter').value, role:$('role-filter').value, limit:pageSize, offset});
+  const params = new URLSearchParams({q:$('search').value, state:$('state-filter').value, role:$('role-filter').value, user_type:$('type-filter').value, limit:pageSize, offset});
   const data = await api(`/admin/users?${params}`);
   if (request !== userRequest || !currentAdmin) return;
   if (offset && offset >= data.total) {offset = Math.max(0, Math.floor((data.total-1)/pageSize)*pageSize); return loadUsers();}
@@ -143,7 +143,13 @@ function changeTab(nextTab) {
 $('users-tab').addEventListener('click', () => changeTab('users'));
 $('queue-tab').addEventListener('click', () => changeTab('queue'));
 $('search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { offset = 0; reloadView(); }, 250); });
-for (const id of ['state-filter','role-filter']) $(id).addEventListener('change', () => {offset = 0; reloadView();});
+for (const id of ['state-filter','role-filter','type-filter']) $(id).addEventListener('change', () => {offset = 0; reloadView();});
+$('purge-demo-btn').addEventListener('click', () => {
+  confirmAction('Clean demo logins?', 'This will permanently remove all temporary demo and anonymous victim accounts from the database. Real registered users and administrators will not be affected.', 'Clean demo logins', async () => {
+    const res = await api('/admin/maintenance/purge-demo-users', {method:'POST'});
+    showNotice(res?.message || 'Demo logins cleaned successfully.');
+  });
+});
 $('queue-filter').addEventListener('change', () => {queueOffset = 0; reloadView();});
 $('previous').addEventListener('click', () => { offset = Math.max(0,offset-pageSize); reloadView(); });
 $('next').addEventListener('click', () => { offset += pageSize; reloadView(); });
