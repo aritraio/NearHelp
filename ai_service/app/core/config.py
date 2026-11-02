@@ -23,9 +23,6 @@ class AISettings(BaseSettings):
     GOOGLE_CLOUD_PROJECT: str = "nearhelp-ai"
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
 
-    # ChromaDB Vector Store
-    CHROMA_PERSIST_DIRECTORY: str = "./data/chroma_db"
-
     # CORS
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",

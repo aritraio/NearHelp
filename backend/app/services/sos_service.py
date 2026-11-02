@@ -65,7 +65,7 @@ class SOSService:
         descriptions = {
             1: f"Layer 1: Community Network Radial Dispatch ({int(event.current_radius_meters)}m)",
             2: "Layer 2: Direct 108/112 Municipal Ambulance Gateway Active",
-            3: "Layer 3: Guided Self-Care AI Fallback (Cached RAG Protocol)",
+            3: "Layer 3: Guided Self-Care AI Fallback (Cached Protocol)",
         }
 
         emergency_number_map = {

@@ -1,7 +1,7 @@
 """NearHelp AI — Clinical Hallucination Guardrails Unit Tests."""
 
 import pytest
-from app.rag.guardrails import HallucinationGuardrails
+from app.agent.guardrails import HallucinationGuardrails
 
 
 def test_guardrail_unconscious_water_rejection():

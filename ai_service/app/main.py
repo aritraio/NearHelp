@@ -1,4 +1,4 @@
-"""NearHelp AI — AI Microservice Entrypoint (Gemini 2.5 + LangGraph + RAG)."""
+"""NearHelp AI — AI Microservice Entrypoint (Gemini 2.5 + LangGraph)."""
 
 import logging
 from contextlib import asynccontextmanager
@@ -6,11 +6,9 @@ from contextlib import asynccontextmanager
 from app.api.agent import router as agent_router
 from app.api.agent_ws import router as agent_ws_router
 from app.api.classify import router as classify_router
-from app.api.rag import router as rag_router
 from app.api.severity import router as severity_router
 from app.classifiers.embedding_service import embedding_service
 from app.core.config import settings
-from app.rag.store import vector_store
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -26,16 +24,14 @@ async def lifespan(app: FastAPI):
     """Application lifecycle manager for warming up embedding models and caches."""
     logger.info("Initializing NearHelp AI Microservice & Pre-warming Vector Embeddings...")
     await embedding_service.initialize()
-    logger.info("Initializing ChromaDB Protocol Vector Store...")
-    await vector_store.initialize()
     logger.info("NearHelp AI Microservice Startup Complete.")
     yield
     logger.info("Shutting down NearHelp AI Microservice.")
 
 
 app = FastAPI(
-    title="NearHelp AI — AI Triage & RAG Service",
-    description="Multimodal Emergency Detection, Severity Scoring, and LangGraph First-Aid RAG Agent",
+    title="NearHelp AI — AI Triage & Agent Service",
+    description="Multimodal Emergency Detection, Severity Scoring, and LangGraph First-Aid Agent",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -59,8 +55,6 @@ app.include_router(agent_router, prefix="/api/v1")
 app.include_router(agent_router)
 app.include_router(agent_ws_router, prefix="/api/v1")
 app.include_router(agent_ws_router)
-app.include_router(rag_router, prefix="/api/v1")
-app.include_router(rag_router)
 
 
 @app.get("/health", tags=["Health"])
@@ -72,7 +66,6 @@ async def health_check():
         "version": "1.0.0",
         "model": settings.GEMINI_MODEL,
         "embedding_model": settings.EMBEDDING_MODEL,
-        "rag_engine": "ChromaDB",
         "agent_framework": "LangGraph",
     }
 

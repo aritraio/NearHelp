@@ -79,7 +79,7 @@ services:
       - nearhelp_network
 
   # ----------------------------------------------------------------------------
-  # 4. AI Microservice (Gemini 2.5 + LangGraph + ChromaDB)
+  # 4. AI Microservice (Gemini 2.5 + LangGraph)
   # ----------------------------------------------------------------------------
   ai_service:
     build:
@@ -93,7 +93,6 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-models/text-embedding-004}
-      - CHROMA_PERSIST_DIRECTORY=/data/chroma_db
       - ENVIRONMENT=${ENVIRONMENT:-development}
     volumes:
       - ./ai_service:/app
@@ -112,6 +111,4 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
-    driver: local
-  chroma_data:
     driver: local
