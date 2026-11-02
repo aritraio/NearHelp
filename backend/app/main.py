@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -92,6 +92,21 @@ os.makedirs(uploads_path, exist_ok=True)
 os.makedirs(os.path.join(uploads_path, "avatars"), exist_ok=True)
 os.makedirs(os.path.join(uploads_path, "certificates"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
+
+# Same-origin dashboard; all account data is protected by admin API dependencies.
+admin_web_path = os.path.join(os.path.dirname(__file__), "admin_web")
+app.mount("/admin/assets", StaticFiles(directory=admin_web_path), name="admin-assets")
+
+
+@app.get("/admin", include_in_schema=False)
+@app.get("/admin/", include_in_schema=False)
+async def admin_panel():
+    return FileResponse(os.path.join(admin_web_path, "index.html"), headers={
+        "Cache-Control": "no-store",
+        "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer",
+    })
 
 # Route Mounts
 # Versioned API routes: /api/v1/auth, /api/v1/users, /api/v1/admin, /api/v1/ai, /api/v1/facilities

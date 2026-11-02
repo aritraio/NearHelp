@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.admin_users import router as users_router
 from app.core.dependencies import get_current_admin_user
 from app.db.session import get_db
 from app.models.user import User
@@ -16,6 +17,8 @@ from app.schemas.skill import (
 from app.services.skill_service import SkillService
 
 router = APIRouter(prefix="", tags=["Admin Verification & Management"])
+
+router.include_router(users_router)
 
 
 # ==============================================================================

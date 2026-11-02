@@ -10,6 +10,7 @@ from app.core.security import decode_token, verify_token_type
 from app.db.session import get_db
 from app.models.user import User
 from app.services.auth_service import AuthService
+from app.services.presence_service import record_activity
 
 # HTTP Bearer security scheme
 security_scheme = HTTPBearer(auto_error=False)
@@ -76,6 +77,7 @@ async def get_current_user(
             detail="User account is deactivated.",
         )
 
+    await record_activity(db, user.id)
     return user
 
 
@@ -114,6 +116,12 @@ async def get_optional_current_user(
         if not user_id_str:
             return None
         user_id = uuid.UUID(user_id_str)
-        return await AuthService.get_user_by_id(db, user_id)
+        user = await AuthService.get_user_by_id(db, user_id)
     except Exception:
         return None
+
+    if user is not None:
+        if not user.is_active:
+            raise HTTPException(status_code=403, detail="User account is deactivated.")
+        await record_activity(db, user.id)
+    return user

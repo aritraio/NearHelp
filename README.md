@@ -128,3 +128,36 @@ NearHelp/
 ---
 
 *For detailed technical specifications, check out [docs/architecture.md](docs/architecture.md) and [docs/todos.md](docs/todos.md).*
+
+## Admin panel
+
+The backend serves the admin command center at **[http://localhost:8000/admin](http://localhost:8000/admin)**. It uses the same database and authentication as Android and requires an active superuser account. No separate frontend build or hosting is needed.
+
+Start the backend normally, then create your first administrator. With Docker Compose:
+
+```sh
+docker compose up -d --build backend
+docker compose exec backend python -m app.cli create-admin --email you@example.com --name "Administrator"
+```
+
+For a local Python backend, run the command from `backend/` in your backend virtual environment:
+
+```sh
+python -m app.cli create-admin --email you@example.com --name "Administrator"
+```
+
+The command prompts for a password without displaying it. For an existing email/password account it sets the supplied password, enables the account, and grants administrator access. Run it only against the database you intend to administer. There are no default administrator credentials.
+
+The dashboard supports:
+
+- User totals, enabled accounts, online users, pending credentials, active emergencies, and new accounts today (UTC), refreshed every 10 seconds.
+- Search, pagination, and status/role filters, including online members.
+- Creating email/password users; editing name, email, phone, trust score, enabled status, and administrator role; resetting passwords for email accounts.
+- Suspending/re-enabling accounts and permanently deleting accounts with confirmation. Administrators cannot delete, suspend, or demote themselves.
+- Viewing skill verification submissions and approving or rejecting credentials with feedback.
+
+“Online” means an enabled account made an authenticated HTTP API request in the last five minutes. This includes the administrator viewing the dashboard. It measures recent activity, not exact open-app/socket connections. Presence is shared through the database across API workers; timestamp writes are throttled to once per 30 seconds. The new `user_presence` table is created during normal backend startup; restart existing backends after updating.
+
+Deleting an account removes its profile, presence, verification submissions, and response engagements. Emergency incidents and timelines remain with nullable account links cleared. Uploaded files and external Google/Firebase identities are not deleted; an external identity can register again after local deletion. Use suspension to block that identity's existing account. Password resets change future logins; existing JWT sessions retain their normal lifetime. Suspension and deletion block subsequent authenticated HTTP API requests immediately. Already-open WebSocket connections retain the project's existing lifecycle behavior.
+
+All account management APIs under `/api/v1/admin` (also `/api/admin`) enforce superuser permissions on the server. Account lists omit password hashes, medical records, and device tokens. Dashboard tokens are kept in page memory and cleared on sign-out; reloading requires signing in again. Serve the backend over HTTPS and configure a private production `SECRET_KEY` when deploying.

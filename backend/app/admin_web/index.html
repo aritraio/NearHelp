@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NearHelp · Admin command center</title>
+  <link rel="stylesheet" href="/admin/assets/style.css">
+  <script src="/admin/assets/app.js" defer></script>
+</head>
+<body>
+  <div id="notice" role="status" aria-live="polite" hidden></div>
+  <section id="login-view" class="login-shell">
+    <div class="login-story"><a class="brand" href="/admin"><span class="brand-icon">✚</span> NearHelp<span class="brand-ai">AI</span></a>
+      <div><span class="eyebrow">COMMUNITY CARE, CONNECTED</span><h1>A clearer view.<br>A stronger network.</h1><p>Manage the people who make help possible.<br>Your community command center starts here.</p></div>
+      <span class="story-footer">NEARHELP / ADMINISTRATION</span>
+    </div>
+    <div class="login-form-wrap"><form id="login-form"><span class="eyebrow">ADMIN COMMAND CENTER</span><h2>Welcome back.</h2><p class="muted">Sign in with your administrator account.</p>
+      <label>Email address<input id="login-email" type="email" autocomplete="username" placeholder="you@example.com" required></label>
+      <label>Password<input id="login-password" type="password" autocomplete="current-password" required></label>
+      <p id="login-error" class="error" role="alert"></p><button class="primary" type="submit">Sign in to dashboard <span>↗</span></button>
+      <p class="login-help">First time here? Create your superuser using the setup command in the project README.</p>
+    </form></div>
+  </section>
+  <div id="dashboard" class="app-shell" hidden>
+    <aside class="sidebar"><a class="brand" href="/admin"><span class="brand-icon">✚</span> NearHelp<span class="brand-ai">AI</span></a><div class="workspace-label">ADMIN WORKSPACE</div>
+      <nav aria-label="Main navigation"><button class="nav-item selected" id="users-tab"><span>▦</span> Overview & users</button><button class="nav-item" id="queue-tab"><span>✓</span> Skill verifications <span id="queue-badge" class="nav-count">0</span></button></nav>
+      <div class="sidebar-note"><span class="pulse"></span><strong>People helping people.</strong><p>A safer community starts with a trusted network.</p></div>
+      <div class="account"><div class="avatar">A</div><div><strong id="admin-name">Administrator</strong><small>Superuser access</small></div></div><button id="logout" class="logout">↪ &nbsp; Sign out</button>
+    </aside>
+    <main><header class="topbar"><span>Workspace <span class="slash">/</span> <strong>Command center</strong></span><span class="environment">ADMINISTRATOR</span></header>
+      <section class="page"><div class="page-heading"><div><span class="eyebrow">YOUR COMMUNITY, AT A GLANCE</span><h1>Command center<span class="title-dot">.</span></h1><p class="muted">Keep your network healthy, connected, and ready to help.</p></div><div class="refresh-group"><span id="sync-status" class="sync"><span class="pulse"></span> Connecting…</span><button id="refresh" class="secondary">↻ &nbsp; Refresh</button></div></div>
+        <div class="stats"><article class="stat"><span>Total users <span>◉</span></span><strong id="total-users">—</strong><small>Across your community</small></article><article class="stat online-stat"><span>Online now <span class="pulse"></span></span><strong id="online-users">—</strong><small>API activity in the last 5 minutes</small></article><article class="stat"><span>Enabled accounts <span>✓</span></span><strong id="active-users">—</strong><small>Accounts permitted to sign in</small></article><article class="stat"><span>Pending reviews <span>◷</span></span><strong id="pending-reviews">—</strong><small>Skills awaiting verification</small></article></div>
+        <div class="context-strip"><span><span class="pulse"></span> <strong id="active-emergencies">—</strong> active emergencies</span><span><strong id="new-users">—</strong> new users today <small>(UTC)</small></span><span><strong id="admin-users">—</strong> administrators</span><span class="auto-refresh">Auto-refresh every 10 seconds</span></div>
+        <section id="users-section" class="panel"><div class="panel-heading"><div><h2>Community members <span id="user-total" class="count-pill">—</span></h2><p class="muted">Manage accounts, permissions, and access.</p></div><button id="add-user" class="primary">＋ &nbsp; Add user</button></div>
+          <div class="filters"><label class="search-label"><span>⌕</span><input id="search" type="search" aria-label="Search users" placeholder="Search name, email, or phone…"></label><select id="state-filter" aria-label="Account status"><option value="all">All statuses</option><option value="online">Online now</option><option value="active">Enabled</option><option value="inactive">Suspended</option></select><select id="role-filter" aria-label="User role"><option value="all">All roles</option><option value="admin">Administrators</option><option value="user">Members</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>MEMBER</th><th>STATUS</th><th>ROLE</th><th>TRUST SCORE</th><th>JOINED</th><th class="right">ACTIONS</th></tr></thead><tbody id="user-rows"></tbody></table><div id="users-empty" class="empty" hidden>No members found. Try a different search or add your first user.</div></div>
+          <footer class="pagination"><span id="page-label">Loading members…</span><div><button id="previous" class="secondary">← Previous</button><button id="next" class="secondary">Next →</button></div></footer>
+        </section>
+        <section id="queue-section" class="panel" hidden><div class="panel-heading"><div><h2>Skill verification queue</h2><p class="muted">Review credentials before awarding verified responder status.</p></div><select id="queue-filter" aria-label="Verification status"><option>PENDING</option><option>APPROVED</option><option>REJECTED</option><option>ALL</option></select></div><div id="queue-list"></div><footer class="pagination"><span id="queue-page-label"></span><div><button id="queue-previous" class="secondary">← Previous</button><button id="queue-next" class="secondary">Next →</button></div></footer></section>
+        <p class="page-footer">NEARHELP AI <span>Community care. Thoughtfully coordinated.</span></p>
+      </section>
+    </main>
+  </div>
+  <dialog id="user-dialog"><form id="user-form"><div class="dialog-heading"><div><span class="eyebrow">ACCOUNT MANAGEMENT</span><h2 id="user-dialog-title">Add user</h2></div><button type="button" class="icon-button close-dialog" aria-label="Close">×</button></div><input id="edit-id" type="hidden">
+    <label>Full name<input id="edit-name" required maxlength="100" autocomplete="off"></label><label>Email address<input id="edit-email" type="email" required autocomplete="off"></label><label>Phone number <small>Optional, including country code</small><input id="edit-phone" type="tel" placeholder="+919876543210" pattern="\+[1-9][0-9]{7,14}"></label><label id="password-label">Password <small id="password-hint">At least 8 characters</small><input id="edit-password" type="password" minlength="8" maxlength="72" autocomplete="new-password"></label>
+    <div class="form-grid"><label>Role<select id="edit-role"><option value="false">Member</option><option value="true">Administrator</option></select></label><label>Trust score<input id="edit-trust" type="number" min="0" max="100" step="0.1" value="50" required></label></div><label class="checkbox-label"><input id="edit-active" type="checkbox" checked> Account enabled</label><p id="user-form-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary close-dialog">Cancel</button><button type="submit" class="primary">Save user</button></div>
+  </form></dialog>
+  <dialog id="confirm-dialog"><form id="confirm-form"><div class="dialog-heading"><h2 id="confirm-title">Confirm action</h2><button type="button" class="icon-button close-dialog" aria-label="Close">×</button></div><p id="confirm-message"></p><label id="review-label" hidden>Reason for rejection<textarea id="review-reason" maxlength="1000" rows="3"></textarea></label><p id="confirm-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary close-dialog">Cancel</button><button id="confirm-submit" type="submit" class="danger">Confirm</button></div></form></dialog>
+</body></html>
