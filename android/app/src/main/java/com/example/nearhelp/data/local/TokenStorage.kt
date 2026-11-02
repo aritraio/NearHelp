@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.nearhelp.data.api.models.UserResponse
+import com.example.nearhelp.data.api.models.TokenResponse
 import com.example.nearhelp.data.api.Incident
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -52,6 +53,7 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     }
   }
 
+  @Synchronized
   override fun saveSession(
     accessToken: String,
     refreshToken: String,
@@ -79,6 +81,14 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
   override fun getAccessToken(): String? = sharedPreferences.getString(KEY_ACCESS_TOKEN, null)
 
   override fun getRefreshToken(): String? = sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
+
+  /** An in-flight refresh cannot restore a session after logout or an account switch. */
+  @Synchronized
+  fun saveRefreshedSession(expectedRefresh: String, expectedUserId: String?, session: TokenResponse): Boolean {
+    if (getRefreshToken() != expectedRefresh || getUserId() != expectedUserId || session.user.id != expectedUserId) return false
+    saveSession(session.accessToken, session.refreshToken, session.user)
+    return true
+  }
 
   override fun getUserId(): String? = sharedPreferences.getString(KEY_USER_ID, null)
 
@@ -141,6 +151,7 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
 
   fun getGeminiApiKey(): String? = sharedPreferences.getString(KEY_GEMINI_API_KEY, null)
 
+  @Synchronized
   override fun clear() {
     sharedPreferences.edit().clear().apply()
   }

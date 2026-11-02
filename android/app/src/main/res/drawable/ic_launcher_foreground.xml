@@ -1,55 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- Heart silhouette: vibrant medical red #E52538.
-         Bounds x=27..81, y=26..78 — centered on (54,52), comfortably
-         inside the 66dp adaptive-icon safe circle (center 54,54 r=33).
-         Diagonal gloss on the left lobe via low-alpha white overlay. -->
-    <path
-        android:fillColor="#E52538"
-        android:pathData="M54,78 C40,66 27,55 27,42 C27,32 34,26 42.5,26 C47.5,26 51.5,28.8 54,32.5 C56.5,28.8 60.5,26 65.5,26 C74,26 81,32 81,42 C81,55 68,66 54,78 Z" />
-
-    <!-- Gentle diagonal gloss / crease on the left lobe -->
-    <path
-        android:fillColor="#2EFFFFFF"
-        android:pathData="M54,32.5 L35.5,56.5 L33.8,53.5 C32.6,50 32.2,46.2 32.8,42.4 C33.8,34.6 38.4,28.6 45.2,26.9 Z" />
-
-    <!-- Subtle top-left to bottom-right depth gradient (#FF334B -> #D61B2E).
-         Applied as a low-alpha overlay so the base stays exactly #E52538. -->
-    <path
-        android:pathData="M54,78 C40,66 27,55 27,42 C27,32 34,26 42.5,26 C47.5,26 51.5,28.8 54,32.5 C56.5,28.8 60.5,26 65.5,26 C74,26 81,32 81,42 C81,55 68,66 54,78 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:startX="27"
-                android:startY="26"
-                android:endX="81"
-                android:endY="78"
-                android:type="linear">
-                <item android:color="#33FF334B" android:offset="0.0" />
-                <item android:color="#00FF334B" android:offset="0.45" />
-                <item android:color="#00D61B2E" android:offset="0.55" />
-                <item android:color="#33D61B2E" android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
-
-    <!-- Medical cross: clean white, softly rounded caps (~2-3dp via round line caps).
-         Centered at (54,51). Vertical bar 40..62, horizontal bar 43..65. -->
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="10"
-        android:strokeLineCap="round"
-        android:pathData="M54,40 L54,62" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="10"
-        android:strokeLineCap="round"
-        android:pathData="M43,51 L65,51" />
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Both strokes fit within the adaptive icon's centered 66dp safe circle. -->
+    <group android:translateX="18.16" android:translateY="18.16" android:scaleX="1.12" android:scaleY="1.12">
+        <path android:fillColor="#00000000" android:strokeColor="#FFFFFF"
+            android:strokeWidth="3.8" android:strokeLineCap="round" android:strokeLineJoin="round"
+            android:pathData="M32,58 C27,53 12,41.3 12,27.2 C12,16.4 20.5,8 32,8 C43.5,8 52,16.4 52,27.2 C52,41.3 37,53 32,58 Z" />
+        <path android:fillColor="#00000000" android:strokeColor="#FFFFFF"
+            android:strokeWidth="3.5" android:strokeLineCap="round" android:strokeLineJoin="round"
+            android:pathData="M20,28 L25.5,28 L29,21 L34,36 L38.5,28 L44,28" />
+    </group>
 </vector>

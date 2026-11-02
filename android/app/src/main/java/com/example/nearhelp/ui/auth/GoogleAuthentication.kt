@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.ClearCredentialStateRequest
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -11,6 +12,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -41,4 +43,12 @@ private suspend fun <T> Task<T>.awaitResult(): T = suspendCancellableCoroutine {
         if (task.isSuccessful) continuation.resume(task.result)
         else continuation.resumeWithException(task.exception ?: IllegalStateException("Google sign-in was cancelled."))
     }
+}
+
+/** Local logout must work even when Google services are missing or unavailable. */
+suspend fun clearGoogleAuthentication(context: Context) {
+    runCatching { if (FirebaseApp.getApps(context).isNotEmpty()) FirebaseAuth.getInstance().signOut() }
+    try { CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest()) }
+    catch (e: CancellationException) { throw e }
+    catch (_: Exception) { /* The NearHelp session has already been removed. */ }
 }

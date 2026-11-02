@@ -370,9 +370,7 @@ fun CareSelect(label: String, selected: String, options: List<String>, onChange:
 @Composable
 fun CareBrand() {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
-            Icon(Icons.Outlined.MonitorHeart, null, Modifier.size(29.dp), tint = MaterialTheme.colorScheme.onPrimary)
-        }
+        com.example.nearhelp.ui.components.NearHelpSymbol(size = 48.dp)
         Row { Text("Near", style = MaterialTheme.typography.headlineMedium); Text("Help", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary) }
     }
 }

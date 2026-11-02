@@ -46,6 +46,7 @@ class NearHelpMessagingService : FirebaseMessagingService() {
         PushRegistration.register(token)
     }
     override fun onMessageReceived(message: RemoteMessage) {
+        if (!NearHelpApplication.instance.tokenStorage.isLoggedIn()) return
         val id = message.data["sos_event_id"] ?: return
         if (runCatching { UUID.fromString(id) }.isFailure) return
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return

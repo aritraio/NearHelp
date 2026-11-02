@@ -18,11 +18,12 @@ object SessionTokens {
             JsonParser.parseString(payload).asJsonObject.get("exp").asLong
         }.getOrDefault(0L)
         if (expires <= System.currentTimeMillis() / 1000 + 60) {
+            val userId = storage.getUserId()
             val refresh = storage.getRefreshToken() ?: error("Your session expired. Please sign in again.")
             val response = RetrofitClient.getAuthApiService().refreshToken(TokenRefreshRequest(refresh))
             val session = response.body()
             check(response.isSuccessful && session != null) { "Your session expired. Please sign in again." }
-            storage.saveSession(session.accessToken, session.refreshToken, session.user)
+            check(storage.saveRefreshedSession(refresh, userId, session)) { "Your session ended. Please sign in again." }
             access = session.accessToken
         }
         "Bearer $access"

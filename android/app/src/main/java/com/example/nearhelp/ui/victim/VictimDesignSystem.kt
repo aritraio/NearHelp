@@ -130,46 +130,13 @@ object VictimShapes {
 }
 
 @Composable
-fun NearHelpWordmark(
-    fontSize: Int = 30,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = buildAnnotatedString {
-            withStyle(SpanStyle(color = VictimTextDark)) { append("Near") }
-            withStyle(SpanStyle(color = VictimPrimary)) { append("Help") }
-        },
-        style = MaterialTheme.typography.headlineMedium.copy(
-            fontWeight = FontWeight.Black,
-            fontSize = fontSize.sp,
-            letterSpacing = (-0.5).sp,
-        ),
-        modifier = modifier,
-    )
+fun NearHelpWordmark(fontSize: Int = 30, modifier: Modifier = Modifier) {
+    com.example.nearhelp.ui.components.NearHelpWordmarkText(fontSize, modifier)
 }
 
 @Composable
-fun NearHelpLogoMark(
-    size: Int = 56,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.size(size.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Default.Favorite,
-            contentDescription = "NearHelp heart",
-            tint = VictimPrimary,
-            modifier = Modifier.size(size.dp),
-        )
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size((size * 0.5).dp),
-        )
-    }
+fun NearHelpLogoMark(size: Int = 56, modifier: Modifier = Modifier) {
+    com.example.nearhelp.ui.components.NearHelpSymbol(modifier, size.dp)
 }
 
 @Composable

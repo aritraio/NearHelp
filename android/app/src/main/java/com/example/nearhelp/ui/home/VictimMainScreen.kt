@@ -14,7 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nearhelp.NearHelpApplication
 import com.example.nearhelp.theme.VictimBackground
@@ -28,6 +30,9 @@ import com.example.nearhelp.ui.profile.ProfileViewModel
 import com.example.nearhelp.ui.navigation.AppMotion
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
+import com.example.nearhelp.ui.auth.clearGoogleAuthentication
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Unified container for victim bottom navigation tabs (Home, Chat, Map, Profile).
@@ -47,6 +52,20 @@ fun VictimMainScreen(
     modifier: Modifier = Modifier,
 ) {
     var currentTab by rememberSaveable(initialTab) { mutableStateOf(initialTab) }
+    var loggingOut by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current.applicationContext
+    val scope = rememberCoroutineScope()
+    val logout: () -> Unit = {
+        if (!loggingOut) {
+            loggingOut = true
+            authViewModel.logout()
+            context.getSystemService(android.app.NotificationManager::class.java)?.cancelAll()
+            scope.launch {
+                try { withTimeoutOrNull(2_000) { clearGoogleAuthentication(context) } }
+                finally { onNavigateToLogin() }
+            }
+        }
+    }
     val saveableStateHolder = rememberSaveableStateHolder()
 
     val profileViewModel: ProfileViewModel = viewModel {
@@ -54,8 +73,8 @@ fun VictimMainScreen(
     }
 
     // Return to Home tab on back press before exiting/popping
-    BackHandler(enabled = currentTab != VictimNavTab.HOME) {
-        currentTab = VictimNavTab.HOME
+    BackHandler(enabled = loggingOut || currentTab != VictimNavTab.HOME) {
+        if (!loggingOut) currentTab = VictimNavTab.HOME
     }
 
     // The shared bar stays mounted so tab changes never resize the content viewport.
@@ -63,7 +82,7 @@ fun VictimMainScreen(
         bottomBar = {
             VictimBottomNavBar(
                 selected = currentTab,
-                onSelect = { tab -> if (tab != currentTab) currentTab = tab },
+                onSelect = { tab -> if (!loggingOut && tab != currentTab) currentTab = tab },
             )
         },
         containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
@@ -158,6 +177,8 @@ fun VictimMainScreen(
                         VictimNavTab.PROFILE -> {
                             ProfileScreen(
                                 onNavigateBack = { currentTab = VictimNavTab.HOME },
+                                onLogout = logout,
+                                loggingOut = loggingOut,
                                 onNavigateToHome = { currentTab = VictimNavTab.HOME },
                                 onNavigateToAssistant = {
                                     currentTab = VictimNavTab.CHAT

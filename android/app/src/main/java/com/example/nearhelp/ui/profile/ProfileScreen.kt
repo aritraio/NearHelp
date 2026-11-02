@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,10 +36,10 @@ import com.example.nearhelp.ui.victim.VictimNavTab
 private val bloodGroups = listOf("A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−")
 
 @Composable
-fun ProfileScreen(onNavigateBack: () -> Unit, onNavigateToHome: () -> Unit = onNavigateBack,
+fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateToHome: () -> Unit = onNavigateBack,
     onNavigateToAssistant: () -> Unit = {}, onNavigateToMap: () -> Unit = {},
     modifier: Modifier = Modifier, viewModel: ProfileViewModel = viewModel { ProfileViewModel(NearHelpApplication.instance.userRepository) },
-    showBottomBar: Boolean = true) {
+    showBottomBar: Boolean = true, loggingOut: Boolean = false) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var page by rememberSaveable { mutableStateOf("profile") }
@@ -209,7 +210,11 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onNavigateToHome: () -> Unit = onN
                         CareRow("Emergency contacts", "People to reach in an emergency", Icons.Outlined.Phone) { page = "contacts" }
                         CareRow("Languages", user?.languages?.joinToString(", ") ?: "Languages you communicate in", Icons.Outlined.Language) { selectedLanguages = user?.languages ?: listOf("en"); page = "languages" }
                     }
-                    ProfileSection("Settings") { CareRow("Appearance", "${ThemeManager.selectedTheme.title} · 4 themes available", Icons.Outlined.Palette) { page = "appearance" } }
+                    ProfileSection("Settings") {
+                        CareRow("Appearance", "${ThemeManager.selectedTheme.title} · 4 themes available", Icons.Outlined.Palette) { page = "appearance" }
+                        CareButton(if (loggingOut) "Logging out…" else "Log out", onLogout, style = CareButtonStyle.QUIET,
+                            icon = Icons.AutoMirrored.Outlined.Logout, enabled = !loggingOut && !state.isSaving)
+                    }
                     ProfileSection("Responder") {
                         CareRow("Qualifications", "Training and certifications", Icons.Outlined.VerifiedUser) { page = "qualifications" }
                         CareRow("Verification status", "View identity and training status", Icons.Outlined.Verified) { viewModel.loadSkillClaims(); page = "verification" }

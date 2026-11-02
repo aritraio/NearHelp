@@ -19,7 +19,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit, onNavigateToHome: () -> Unit, vi
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).systemBarsPadding().padding(24.dp), verticalArrangement = Arrangement.SpaceBetween) {
         CareBrand()
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            Icon(Icons.Outlined.MonitorHeart, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+            com.example.nearhelp.ui.components.NearHelpSymbol(size = 80.dp)
             Text("Help, closer to you.", style = MaterialTheme.typography.headlineLarge)
             CareMuted("Connect. Respond. Save time.")
         }

@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- Material You monochrome: single-color heart silhouette with cut-out
-         cross. Combined with fillType="evenOdd" so the cross punches a
-         transparent hole; the system tints the silhouette with
-         @android:color/white (single-color requirement for themed icons). -->
-    <path
-        android:fillColor="@android:color/white"
-        android:fillType="evenOdd"
-        android:pathData="M54,78 C40,66 27,55 27,42 C27,32 34,26 42.5,26 C47.5,26 51.5,28.8 54,32.5 C56.5,28.8 60.5,26 65.5,26 C74,26 81,32 81,42 C81,55 68,66 54,78 Z M49,40 L59,40 L59,46 L65,46 L65,56 L59,56 L59,62 L49,62 L49,56 L43,56 L43,46 L49,46 Z" />
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Both strokes fit within the adaptive icon's centered 66dp safe circle. -->
+    <group android:translateX="18.16" android:translateY="18.16" android:scaleX="1.12" android:scaleY="1.12">
+        <path android:fillColor="#00000000" android:strokeColor="#FFFFFF"
+            android:strokeWidth="3.8" android:strokeLineCap="round" android:strokeLineJoin="round"
+            android:pathData="M32,58 C27,53 12,41.3 12,27.2 C12,16.4 20.5,8 32,8 C43.5,8 52,16.4 52,27.2 C52,41.3 37,53 32,58 Z" />
+        <path android:fillColor="#00000000" android:strokeColor="#FFFFFF"
+            android:strokeWidth="3.5" android:strokeLineCap="round" android:strokeLineJoin="round"
+            android:pathData="M20,28 L25.5,28 L29,21 L34,36 L38.5,28 L44,28" />
+    </group>
 </vector>

@@ -287,7 +287,11 @@ class AuthViewModel(
 
   fun logout() {
     emergencyEntryPending = false
+    timerJob?.cancel()
     authRepository.logout()
+    _loginForm.value = LoginFormData()
+    _signUpForm.value = SignUpFormData()
+    _otpForm.value = OtpFormData()
     _uiState.value = AuthUiState.Idle
   }
 

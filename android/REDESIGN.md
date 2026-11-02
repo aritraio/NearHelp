@@ -3,6 +3,8 @@
 The Compose screens implement the approved NearHelp mockups using a shared visual system in `ui/design/CareComponents.kt`.
 
 - Four saved themes: Pure White, Soft White, OLED Teal and OLED Blue. The OLED page surfaces are true black. Appearance is under Profile → Settings → Appearance. Status/navigation-bar icons also follow this preference.
+- The CarePin logo combines a location pin and medical pulse. Launcher, round/monochrome icons, notifications, splash and in-app branding share the same geometry. Editable artwork is in `design/nearhelp-logo.svg`.
+- Profile → Settings → Log out clears the local session and saved sign-in fields, clears Google provider state, dismisses current notifications and returns to sign-in with the app back stack cleared. Session refresh cannot restore a session after logout. Appearance is preserved.
 - 20 dp page margins, 28 sp headings, 16 sp body/input text, 14 sp supporting copy, 56 dp minimum action/field heights, restrained dividers and icon-only back arrows.
 - Home shows the device location map. Medical SOS opens a map plus medical prompt. Tapping a symptom sends immediately; otherwise a generic description is selected after four seconds. Dispatch waits for a fresh GPS fix. A saved deadline and single dispatch claim prevent rotation from restarting the timer or duplicating the request. Network retries reuse the existing idempotency key.
 - Active incidents show real accepted responders, position updates, server route geometry, ETA/distance, arrival, participant messages and AI conversation without stopping tracking. Unavailable/stale updates have explicit labels.
