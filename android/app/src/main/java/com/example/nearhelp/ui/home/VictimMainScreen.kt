@@ -66,7 +66,7 @@ fun VictimMainScreen(
                 onSelect = { tab -> if (tab != currentTab) currentTab = tab },
             )
         },
-        containerColor = VictimBackground,
+        containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
         modifier = modifier.fillMaxSize(),
     ) { innerPadding ->
         Box(

@@ -32,6 +32,7 @@ class NearHelpApplication : Application() {
   override fun onCreate() {
     super.onCreate()
     instance = this
+    com.example.nearhelp.theme.ThemeManager.initialize(this)
 
     tokenStorage = TokenStorage(this)
     val savedServerUrl = tokenStorage.getServerBaseUrl()
