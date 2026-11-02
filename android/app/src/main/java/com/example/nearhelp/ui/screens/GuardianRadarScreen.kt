@@ -41,7 +41,13 @@ fun GuardianRadarScreen(onExit: () -> Unit, onNavigateToCrisis: (String) -> Unit
                 busy = false
             }
         }, style = CareButtonStyle.PRIMARY, icon = Icons.Outlined.CheckCircle, enabled = !busy && location.hasFix)
-        CareButton("SOS · Get medical help", { onNavigateToCrisis("medical") }, style = CareButtonStyle.SOS, icon = Icons.Outlined.MonitorHeart)
+        CareSosHoldButton(
+            title = "SOS · Get medical help",
+            subtitle = "Hold for 2 seconds to trigger SOS",
+            onTrigger = { onNavigateToCrisis("medical") },
+            holdDurationMillis = 2000L,
+            icon = Icons.Outlined.MonitorHeart
+        )
         CareButton("Emergency contacts", onNavigateToProfile, icon = Icons.Outlined.Contacts)
         CareButton("Open nearby facilities", onNavigateToMap, icon = Icons.Outlined.LocationOn)
         CareButton("Exit guardian mode", onExit, style = CareButtonStyle.QUIET)

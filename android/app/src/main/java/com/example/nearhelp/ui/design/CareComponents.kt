@@ -45,6 +45,25 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import android.os.SystemClock
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 
 @Composable
 fun CarePage(title: String? = null, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
@@ -81,7 +100,19 @@ enum class CareButtonStyle { PRIMARY, SECONDARY, SOS, QUIET }
 
 @Composable
 fun CareButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, style: CareButtonStyle = CareButtonStyle.SECONDARY,
-               icon: ImageVector? = null, enabled: Boolean = true, subtitle: String? = null) {
+               icon: ImageVector? = null, enabled: Boolean = true, subtitle: String? = null, holdDurationMillis: Long? = null) {
+    if (holdDurationMillis != null) {
+        CareSosHoldButton(
+            onTrigger = onClick,
+            modifier = modifier,
+            title = text,
+            subtitle = subtitle ?: "Hold for ${holdDurationMillis / 1000} seconds to trigger SOS",
+            holdDurationMillis = holdDurationMillis,
+            icon = icon ?: if (style == CareButtonStyle.SOS) Icons.Outlined.Sos else null,
+            enabled = enabled
+        )
+        return
+    }
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(12.dp)
     val contents: @Composable RowScope.() -> Unit = {
@@ -100,6 +131,167 @@ fun CareButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
         CareButtonStyle.SECONDARY -> OutlinedButton(onClick, sizing, enabled = enabled, shape = shape,
             border = BorderStroke(1.dp, colors.outline), contentPadding = PaddingValues(16.dp), content = contents)
         CareButtonStyle.QUIET -> TextButton(onClick, sizing, enabled = enabled, shape = shape, contentPadding = PaddingValues(12.dp), content = contents)
+    }
+}
+
+/**
+ * Emergency SOS button requiring a continuous hold (default 2 seconds) to prevent accidental triggers.
+ * Provides progressive fill animation, countdown timer, and tactile haptic feedback.
+ */
+@Composable
+fun CareSosHoldButton(
+    onTrigger: () -> Unit,
+    modifier: Modifier = Modifier,
+    title: String = "SOS · Get medical help",
+    subtitle: String = "Hold for 2 seconds to trigger SOS",
+    holdDurationMillis: Long = 2000L,
+    icon: ImageVector? = Icons.Outlined.Sos,
+    enabled: Boolean = true,
+) {
+    val haptic = LocalHapticFeedback.current
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(12.dp)
+    val scope = rememberCoroutineScope()
+
+    var isHolding by remember { mutableStateOf(false) }
+    var showReleaseHint by remember { mutableStateOf(false) }
+    var triggered by remember { mutableStateOf(false) }
+    val progress = remember { Animatable(0f) }
+
+    LaunchedEffect(showReleaseHint) {
+        if (showReleaseHint) {
+            delay(2500)
+            showReleaseHint = false
+        }
+    }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isHolding) 0.98f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "sos_hold_scale"
+    )
+
+    val currentOnTrigger by rememberUpdatedState(onTrigger)
+    val remainingSeconds = ((1f - progress.value) * (holdDurationMillis / 1000f)).coerceAtLeast(0f)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 94.dp)
+            .scale(scale)
+            .clip(shape)
+            .background(if (enabled) colors.error else colors.surfaceVariant)
+            .drawBehind {
+                if (progress.value > 0f) {
+                    drawRect(
+                        color = Color.White.copy(alpha = 0.22f),
+                        size = size.copy(width = size.width * progress.value)
+                    )
+                }
+            }
+            .semantics {
+                contentDescription = "$title. Press and hold for 2 seconds to trigger SOS."
+                onClick(label = "Trigger SOS") {
+                    currentOnTrigger()
+                    true
+                }
+            }
+            .pointerInput(enabled, holdDurationMillis) {
+                if (!enabled) return@pointerInput
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    isHolding = true
+                    showReleaseHint = false
+                    triggered = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                    val startTime = SystemClock.elapsedRealtime()
+                    var completed = false
+
+                    val holdJob = scope.launch {
+                        progress.snapTo(0f)
+                        progress.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(
+                                durationMillis = holdDurationMillis.toInt(),
+                                easing = LinearEasing
+                            )
+                        )
+                        completed = true
+                        triggered = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        currentOnTrigger()
+                    }
+
+                    val up = waitForUpOrCancellation()
+                    holdJob.cancel()
+                    isHolding = false
+
+                    if (!completed) {
+                        val elapsed = SystemClock.elapsedRealtime() - startTime
+                        scope.launch {
+                            progress.animateTo(0f, tween(150))
+                        }
+                        if (up != null && elapsed < holdDurationMillis) {
+                            showReleaseHint = true
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        }
+                    }
+                }
+            }
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (enabled) colors.onError else colors.onSurfaceVariant
+                )
+                Spacer(Modifier.width(10.dp))
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = when {
+                        triggered -> "SOS TRIGGERED"
+                        isHolding -> "HOLDING FOR SOS..."
+                        else -> title
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (enabled) colors.onError else colors.onSurfaceVariant
+                )
+                Text(
+                    text = when {
+                        triggered -> "Connecting to responders..."
+                        isHolding -> "Keep holding · ${String.format(java.util.Locale.US, "%.1f", remainingSeconds)}s"
+                        showReleaseHint -> "⚠️ Hold for 2 seconds to trigger SOS"
+                        else -> subtitle
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (enabled) colors.onError.copy(alpha = 0.9f) else colors.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
+        if (isHolding || progress.value > 0f) {
+            LinearProgressIndicator(
+                progress = { progress.value },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .align(Alignment.BottomCenter),
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.2f)
+            )
+        }
     }
 }
 

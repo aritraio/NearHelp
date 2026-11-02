@@ -57,7 +57,7 @@ fun HomeScreen(
                 }
                 if (!location.hasPermission) CareButton("Allow location access", requestLocation, icon = Icons.Outlined.MyLocation)
                 if (activeIncident != null) CareButton("Track your medical SOS", onNavigateToTracking, style = CareButtonStyle.PRIMARY, subtitle = "View acceptance and live arrival status", icon = Icons.Outlined.Navigation)
-                else CareButton("SOS · Get medical help", onCreateSos, style = CareButtonStyle.SOS, subtitle = "Optional details · sends in 4 seconds")
+                else CareSosHoldButton(onTrigger = onCreateSos, holdDurationMillis = 2000L)
                 Column {
                     CareRow("Nearby medical requests", "Help someone in your community", Icons.Outlined.Groups, onNavigateToTracking)
                     CareRow("First-aid guidance", "Find a topic or ask the assistant", Icons.AutoMirrored.Outlined.MenuBook, onNavigateToAssistant)
