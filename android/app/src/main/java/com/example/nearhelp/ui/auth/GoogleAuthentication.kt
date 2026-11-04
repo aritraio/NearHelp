@@ -16,11 +16,20 @@ import kotlinx.coroutines.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+/** Checks if Firebase and default_web_client_id have been configured for the app. */
+fun isFirebaseGoogleSignInConfigured(context: Context): Boolean {
+    val clientIdResource = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
+    if (clientIdResource == 0) return false
+    return runCatching {
+        FirebaseApp.getApps(context).isNotEmpty() || FirebaseApp.initializeApp(context) != null
+    }.getOrDefault(false)
+}
+
 /** Returns the Firebase ID token expected by the existing backend, never an account name. */
 suspend fun googleFirebaseToken(context: Context): String {
     val clientIdResource = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
-    check(clientIdResource != 0 && FirebaseApp.initializeApp(context) != null) {
-        "Google sign-in is unavailable right now. Please sign in with email."
+    check(clientIdResource != 0 && (FirebaseApp.getApps(context).isNotEmpty() || FirebaseApp.initializeApp(context) != null)) {
+        "Google sign-in is not configured with Firebase."
     }
     val clientId = context.getString(clientIdResource)
     val option = GetSignInWithGoogleOption.Builder(clientId).build()

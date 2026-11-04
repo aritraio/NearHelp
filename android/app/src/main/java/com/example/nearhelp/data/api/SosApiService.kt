@@ -12,7 +12,7 @@ data class SosCreateRequest(
     val address: String,
 )
 data class Incident(
-    val id: String,
+    val id: String = "",
     @SerializedName("broadcaster_id") val broadcasterId: String? = null,
     @SerializedName("crisis_type") val crisisType: String = "medical",
     val status: String = "",
@@ -29,6 +29,7 @@ data class IncidentResponse(
     @SerializedName("responder_id") val responderId: String,
     @SerializedName("responder_name") val responderName: String,
     val status: String,
+    @SerializedName("initial_eta_seconds") val initialEtaSeconds: Int? = null,
 )
 data class IncidentEvent(
     val id: String,
@@ -52,6 +53,8 @@ interface SosApiService {
     suspend fun active(@Header("Authorization") token: String, @Query("lat") lat: Double?, @Query("lon") lon: Double?): Response<IncidentFeed>
     @GET("api/v1/sos/{id}")
     suspend fun detail(@Path("id") id: String): Response<Incident>
+    @GET("api/v1/sos/{id}/tracking")
+    suspend fun tracking(@Path("id") id: String): Response<com.example.nearhelp.ui.tracking.TrackingSnapshotDto>
     @POST("api/v1/sos/{id}/respond")
     suspend fun respond(@Path("id") id: String, @Header("Authorization") token: String, @Body body: SosRespondRequest): Response<IncidentResponse>
     @PUT("api/v1/sos/{id}/resolve")

@@ -1,5 +1,6 @@
 package com.example.nearhelp.ui.assistant
 
+import com.example.nearhelp.i18n.LocalizedText as Text
 import android.app.Activity
 import android.Manifest
 import android.content.pm.PackageManager
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.content.ContextCompat
@@ -113,10 +115,11 @@ fun AiCrisisAssistantScreen(onNavigateBack: () -> Unit, onNavigateToHome: () -> 
 /** The same conversation is used in Assistant and inside an active incident; leaving the panel never clears it. */
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
-fun CareAiConversation(viewModel: AiCrisisAssistantViewModel) {
+fun CareAiConversation(viewModel: AiCrisisAssistantViewModel, emergencyDescription: String? = null) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var message by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
+    val speechLanguage = LocalConfiguration.current.locales[0].toLanguageTag()
     var attachment by remember { mutableStateOf<AssistantAttachment?>(null) }
     var readingAttachment by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -145,7 +148,7 @@ fun CareAiConversation(viewModel: AiCrisisAssistantViewModel) {
         if (result.resultCode == Activity.RESULT_OK) result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { message = it }
     }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        if (state.chatMessages.isEmpty()) ChatBubble(false, "NearHelp AI Assistant", "I’m here to help. Tell me what’s happening.")
+        if (state.chatMessages.isEmpty()) ChatBubble(false, "NearHelp AI Assistant", com.example.nearhelp.i18n.uiText("I’m here to help. Tell me what’s happening."))
         state.chatMessages.forEach { msg ->
             ChatBubble(msg.isUser, if (msg.isUser) "You" else "NearHelp AI Assistant", msg.text)
             msg.contraindications.forEach { CareNote(it.warningTitle, "${it.warningMessage}\n${it.actionDirective}", Icons.Outlined.WarningAmber, true) }
@@ -163,13 +166,13 @@ fun CareAiConversation(viewModel: AiCrisisAssistantViewModel) {
                 if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) runCatching { camera.launch(null) }.onFailure { attachmentError = "Camera is unavailable on this device." }
                 else cameraPermission.launch(Manifest.permission.CAMERA)
             }, enabled = !readingAttachment && !state.isLoading) { Icon(Icons.Outlined.CameraAlt, null); Text("Camera") }
-            TextButton(onClick = { runCatching { speech.launch(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)) }.onFailure { attachmentError = "Voice input is unavailable on this device." } }) { Icon(Icons.Outlined.MicNone, null); Text("Voice") }
+            TextButton(onClick = { runCatching { speech.launch(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM).putExtra(RecognizerIntent.EXTRA_LANGUAGE, speechLanguage)) }.onFailure { attachmentError = "Voice input is unavailable on this device." } }) { Icon(Icons.Outlined.MicNone, null); Text("Voice") }
         }
         CareButton("Send to AI assistant", {
             val content = attachment
             val question = message.ifBlank { "Please help me understand the attached photo or document." }
             val text = if (content?.text.isNullOrBlank()) question else "$question\n\nDocument contents:\n${content.text}"
-            viewModel.sendChatMessage(text, content?.jpeg); message = ""; attachment = null
+            viewModel.sendChatMessage(text, content?.jpeg, emergencyDescription); message = ""; attachment = null
         }, style = CareButtonStyle.PRIMARY, enabled = !state.isLoading && !readingAttachment && (message.isNotBlank() || attachment != null), icon = Icons.AutoMirrored.Outlined.Send)
         CareMuted("AI guidance may be inaccurate. For urgent help, call emergency services.")
     }
@@ -181,7 +184,7 @@ private fun ChatBubble(user: Boolean, sender: String, text: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (user) Arrangement.End else Arrangement.Start) {
         Column(Modifier.fillMaxWidth(.94f).background(if (user) c.primary else c.surfaceVariant, RoundedCornerShape(12.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(sender, style = MaterialTheme.typography.labelMedium, color = if (user) c.onPrimary else c.onSurfaceVariant)
-            Text(text, style = MaterialTheme.typography.bodyLarge, color = if (user) c.onPrimary else c.onSurface)
+            androidx.compose.material3.Text(text, style = MaterialTheme.typography.bodyLarge, color = if (user) c.onPrimary else c.onSurface)
         }
     }
 }

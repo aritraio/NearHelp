@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 const val GENERIC_MEDICAL_SOS = "Medical emergency. I need urgent medical help at my live location."
+const val MEDICAL_PROMPT_DURATION_MILLIS = 5_000L
 
-data class MedicalPromptState(val remainingMillis: Long = 4_000, val description: String? = null, val claimed: Boolean = false, val cancelled: Boolean = false)
+data class MedicalPromptState(val remainingMillis: Long = MEDICAL_PROMPT_DURATION_MILLIS, val description: String? = null, val claimed: Boolean = false, val cancelled: Boolean = false)
 
 /** Deadline and dispatch claim survive rotation. A timed-out draft is never treated as submitted. */
 class MedicalSosPromptViewModel(
@@ -25,7 +26,7 @@ class MedicalSosPromptViewModel(
 
     fun start() {
         if (timer?.isActive == true || _state.value.description != null || _state.value.cancelled) return
-        val deadline = saved.get<Long>("deadline") ?: (elapsedTime() + 4_000).also { saved["deadline"] = it }
+        val deadline = saved.get<Long>("deadline") ?: (elapsedTime() + MEDICAL_PROMPT_DURATION_MILLIS).also { saved["deadline"] = it }
         timer = viewModelScope.launch {
             while (_state.value.description == null && !_state.value.cancelled) {
                 val remaining = (deadline - elapsedTime()).coerceAtLeast(0)

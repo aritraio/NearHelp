@@ -77,7 +77,7 @@ class AiCrisisAssistantViewModel(
     _uiState.update { it.copy(conditionId = conditionId, sessionId = sessionId, isLoading = true) }
     initializationJob = viewModelScope.launch {
       val all = repository.getAllProtocols()
-      val activeProto = all.firstOrNull { it.conditionId == conditionId } ?: all.firstOrNull() ?: repository.getProtocol(conditionId)
+      val activeProto = if (conditionId == "general_emergency") null else all.firstOrNull { it.conditionId == conditionId } ?: all.firstOrNull() ?: repository.getProtocol(conditionId)
       _uiState.update { state ->
         state.copy(
           protocols = all,
@@ -228,7 +228,7 @@ class AiCrisisAssistantViewModel(
     return listOf(updatedSession) + remaining
   }
 
-  fun sendChatMessage(text: String, imageBase64: String? = null) {
+  fun sendChatMessage(text: String, imageBase64: String? = null, emergencyDescription: String? = null) {
     if (text.isBlank()) return
 
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -258,9 +258,12 @@ class AiCrisisAssistantViewModel(
 
     viewModelScope.launch {
       try {
-        val inputText = if (imageBase64 == null) text else {
+        val question = emergencyDescription?.trim()?.takeIf(String::isNotBlank)?.let {
+          "Reported medical emergency: ${it.take(1000)}\n\nUser question: $text"
+        } ?: text
+        val inputText = if (imageBase64 == null) question else {
           val imageDescription = repository.describeImage(imageBase64).getOrThrow()
-          "$text\n\nImage description from automated analysis (may be inaccurate): $imageDescription"
+          "$question\n\nImage description from automated analysis (may be inaccurate): $imageDescription"
         }
         val response = repository.chatWithAgent(
           sessionId = threadId,

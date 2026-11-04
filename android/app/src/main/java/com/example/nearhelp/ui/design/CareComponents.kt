@@ -1,5 +1,7 @@
 package com.example.nearhelp.ui.design
 
+import com.example.nearhelp.i18n.LocalizedText as Text
+import com.example.nearhelp.i18n.uiText
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -78,7 +80,7 @@ fun CarePage(title: String? = null, onBack: (() -> Unit)? = null, modifier: Modi
 fun CareTopBar(title: String, onBack: (() -> Unit)?) {
     Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(start = 10.dp, end = 20.dp), verticalAlignment = Alignment.CenterVertically) {
         if (onBack != null) {
-            IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Go back", tint = MaterialTheme.colorScheme.onBackground) }
+            IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, uiText("Go back"), tint = MaterialTheme.colorScheme.onBackground) }
             Spacer(Modifier.width(8.dp))
         }
         Text(title, style = MaterialTheme.typography.titleLarge)
@@ -106,9 +108,9 @@ fun CareButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
             onTrigger = onClick,
             modifier = modifier,
             title = text,
-            subtitle = subtitle ?: "Hold for ${holdDurationMillis / 1000} seconds to trigger SOS",
+            subtitle = subtitle ?: "Hold for 2 seconds to trigger it",
             holdDurationMillis = holdDurationMillis,
-            icon = icon ?: if (style == CareButtonStyle.SOS) Icons.Outlined.Sos else null,
+            icon = icon,
             enabled = enabled
         )
         return
@@ -142,10 +144,10 @@ fun CareButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
 fun CareSosHoldButton(
     onTrigger: () -> Unit,
     modifier: Modifier = Modifier,
-    title: String = "SOS · Get medical help",
-    subtitle: String = "Hold for 2 seconds to trigger SOS",
+    title: String = "SOS",
+    subtitle: String = "Hold for 2 seconds to trigger it",
     holdDurationMillis: Long = 2000L,
-    icon: ImageVector? = Icons.Outlined.Sos,
+    icon: ImageVector? = null,
     enabled: Boolean = true,
 ) {
     val haptic = LocalHapticFeedback.current
@@ -173,6 +175,8 @@ fun CareSosHoldButton(
 
     val currentOnTrigger by rememberUpdatedState(onTrigger)
     val remainingSeconds = ((1f - progress.value) * (holdDurationMillis / 1000f)).coerceAtLeast(0f)
+    val accessibleDescription = "${uiText(title)}. ${uiText(subtitle)}"
+    val triggerLabel = uiText("Trigger SOS")
 
     Box(
         modifier = modifier
@@ -190,8 +194,8 @@ fun CareSosHoldButton(
                 }
             }
             .semantics {
-                contentDescription = "$title. Press and hold for 2 seconds to trigger SOS."
-                onClick(label = "Trigger SOS") {
+                contentDescription = accessibleDescription
+                onClick(label = triggerLabel) {
                     currentOnTrigger()
                     true
                 }
@@ -258,24 +262,19 @@ fun CareSosHoldButton(
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = when {
-                        triggered -> "SOS TRIGGERED"
-                        isHolding -> "HOLDING FOR SOS..."
-                        else -> title
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
                     color = if (enabled) colors.onError else colors.onSurfaceVariant
                 )
                 Text(
                     text = when {
-                        triggered -> "Connecting to responders..."
+                        triggered -> "Triggered"
                         isHolding -> "Keep holding · ${String.format(java.util.Locale.US, "%.1f", remainingSeconds)}s"
-                        showReleaseHint -> "⚠️ Hold for 2 seconds to trigger SOS"
                         else -> subtitle
                     },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (enabled) colors.onError.copy(alpha = 0.9f) else colors.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (enabled) colors.onError.copy(alpha = 0.92f) else colors.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -308,7 +307,7 @@ fun CareField(label: String, value: String, onChange: (String) -> Unit, modifier
             isError = error != null, placeholder = if (hint != null) ({ Text(hint, style = MaterialTheme.typography.bodyLarge) }) else null,
             visualTransformation = if (password && !visible) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = if (password) KeyboardType.Password else keyboard),
-            trailingIcon = if (password) ({ IconButton(onClick = { visible = !visible }) { Icon(if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility, if (visible) "Hide password" else "Show password") } }) else null,
+            trailingIcon = if (password) ({ IconButton(onClick = { visible = !visible }) { Icon(if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility, uiText(if (visible) "Hide password" else "Show password")) } }) else null,
             colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                 focusedContainerColor = MaterialTheme.colorScheme.background, unfocusedContainerColor = MaterialTheme.colorScheme.background))
         if (error != null) Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -400,7 +399,17 @@ fun rememberCareLocation(): Pair<UserLocationState, () -> Unit> {
 @Composable
 fun CareMap(location: UserLocationState, modifier: Modifier = Modifier, height: Dp = 270.dp,
             center: LatLng? = null, pins: List<MapPinItem> = emptyList(), route: List<LatLng> = emptyList(),
-            status: String? = null, onPinClick: ((MapPinItem) -> Unit)? = null) {
+            status: String? = null, onPinClick: ((MapPinItem) -> Unit)? = null, nearbyRadiusMeters: Double? = null) {
+    if (center == null && !location.hasFix) {
+        Box(modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+            Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Outlined.MyLocation, null, tint = MaterialTheme.colorScheme.primary)
+                Text(if (location.hasPermission) "Waiting for GPS" else "Location access needed", style = MaterialTheme.typography.titleSmall)
+                CareMuted("Your live map appears when your location is available.")
+            }
+        }
+        return
+    }
     val target = center ?: LatLng(location.latitude, location.longitude)
     val camera = rememberCameraPositionState { position = com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(target, 15f) }
     var loaded by remember { mutableStateOf(false) }
@@ -408,13 +417,18 @@ fun CareMap(location: UserLocationState, modifier: Modifier = Modifier, height: 
     val dark = ThemeManager.isDarkMode
     var now by remember { mutableLongStateOf(android.os.SystemClock.elapsedRealtime()) }
     LaunchedEffect(Unit) { while (true) { delay(5_000); now = android.os.SystemClock.elapsedRealtime() } }
-    val fresh = location.hasFix && now - location.fixElapsedMillis in 0 until 120_000
+    val fresh = location.hasFix && maxOf(now, SystemClock.elapsedRealtime()) - location.fixElapsedMillis in 0 until 120_000
     val centerMarker = remember { MarkerState(target) }
     SideEffect { centerMarker.position = target }
     val style = remember(dark) { if (!dark) null else MapStyleOptions("""[{"elementType":"geometry","stylers":[{"color":"#101817"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#afc3c0"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#101817"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"}]}]""") }
-    LaunchedEffect(target, pins.map { it.position }, loaded) {
+    LaunchedEffect(target, pins.map { it.position }, loaded, nearbyRadiusMeters) {
         if (loaded) {
-            val points = pins.map { it.position } + target
+            val points = if (nearbyRadiusMeters != null) {
+                val latDelta = nearbyRadiusMeters / 111_320.0
+                val lngDelta = latDelta / kotlin.math.cos(Math.toRadians(target.latitude)).coerceAtLeast(0.01)
+                listOf(LatLng((target.latitude - latDelta).coerceIn(-90.0, 90.0), target.longitude - lngDelta),
+                    LatLng((target.latitude + latDelta).coerceIn(-90.0, 90.0), target.longitude + lngDelta))
+            } else pins.map { it.position } + target
             if (points.distinct().size > 1) {
                 val bounds = LatLngBounds.builder().also { b -> points.forEach(b::include) }.build()
                 camera.animate(CameraUpdateFactory.newLatLngBounds(bounds, 90))
@@ -426,7 +440,8 @@ fun CareMap(location: UserLocationState, modifier: Modifier = Modifier, height: 
             properties = MapProperties(mapStyleOptions = style),
             uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false, myLocationButtonEnabled = false, compassEnabled = false),
             onMapLoaded = { loaded = true }) {
-            if (center != null || location.hasFix) Marker(state = centerMarker, title = if (center != null) "Medical SOS location" else if (fresh) "You" else "Your last known location", icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+            if (nearbyRadiusMeters != null && location.hasFix) Circle(center = target, radius = nearbyRadiusMeters, strokeColor = routeColor.copy(alpha = .35f), fillColor = routeColor.copy(alpha = .04f), strokeWidth = 2f)
+            if (center != null || location.hasFix) Marker(state = centerMarker, title = uiText(if (center != null) "Medical SOS location" else if (fresh) "You" else "Your last known location"), icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
             pins.forEach { pin -> key(pin.id) {
                 val marker = remember { MarkerState(pin.position) }
                 SideEffect { marker.position = pin.position }

@@ -64,6 +64,7 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
         remove("active_incident_id")
         remove("pending_sos_key")
         remove("pending_sos_payload")
+        remove("pending_sos_cancel")
       }
       putString(KEY_ACCESS_TOKEN, accessToken)
       putString(KEY_REFRESH_TOKEN, refreshToken)
@@ -118,6 +119,8 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
   }
   fun getPendingSosKey(): String? = sharedPreferences.getString("pending_sos_key", null)
   fun getPendingSosPayload(): String? = sharedPreferences.getString("pending_sos_payload", null)
+  fun savePendingSosCancellation(value: Boolean) { sharedPreferences.edit().putBoolean("pending_sos_cancel", value).apply() }
+  fun getPendingSosCancellation(): Boolean = sharedPreferences.getBoolean("pending_sos_cancel", false)
 
   fun saveActiveIncidentId(id: String?) {
     sharedPreferences.edit().putString("active_incident_id", id).apply()

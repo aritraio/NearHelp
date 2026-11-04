@@ -1,5 +1,6 @@
 package com.example.nearhelp.ui.screens
 
+import com.example.nearhelp.i18n.LocalizedText as Text
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.Icons
@@ -42,11 +43,10 @@ fun GuardianRadarScreen(onExit: () -> Unit, onNavigateToCrisis: (String) -> Unit
             }
         }, style = CareButtonStyle.PRIMARY, icon = Icons.Outlined.CheckCircle, enabled = !busy && location.hasFix)
         CareSosHoldButton(
-            title = "SOS · Get medical help",
-            subtitle = "Hold for 2 seconds to trigger SOS",
+            title = "SOS",
+            subtitle = "Hold for 2 seconds to trigger it",
             onTrigger = { onNavigateToCrisis("medical") },
-            holdDurationMillis = 2000L,
-            icon = Icons.Outlined.MonitorHeart
+            holdDurationMillis = 2000L
         )
         CareButton("Emergency contacts", onNavigateToProfile, icon = Icons.Outlined.Contacts)
         CareButton("Open nearby facilities", onNavigateToMap, icon = Icons.Outlined.LocationOn)

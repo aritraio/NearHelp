@@ -1,5 +1,6 @@
 package com.example.nearhelp.ui.victim
 
+import com.example.nearhelp.i18n.LocalizedText as Text
 import com.example.nearhelp.ui.navigation.AppMotion
 
 import androidx.compose.foundation.background
@@ -97,7 +98,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier

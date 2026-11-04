@@ -29,6 +29,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -41,6 +42,7 @@ android {
 
     testOptions {
       unitTests.isReturnDefaultValues = true
+      unitTests.isIncludeAndroidResources = true
     }
 
     packaging {
@@ -55,6 +57,8 @@ kotlin {
 }
 
 dependencies {
+  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+  implementation("com.google.android.libraries.places:places:6.0.2")
   implementation("com.google.firebase:firebase-messaging:25.0.1")
   implementation("com.google.firebase:firebase-auth:25.0.0")
   implementation("androidx.credentials:credentials:1.6.0")
@@ -85,6 +89,7 @@ dependencies {
 
   // Local tests: jUnit, coroutines, Android runner
   testImplementation(libs.junit)
+  testImplementation("org.robolectric:robolectric:4.17")
   testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
   testImplementation(libs.kotlinx.coroutines.test)
 

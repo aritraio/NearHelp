@@ -15,9 +15,9 @@ class MedicalSosPromptViewModelTest {
     @Before fun setUp() { Dispatchers.setMain(dispatcher) }
     @After fun tearDown() { Dispatchers.resetMain() }
 
-    @Test fun noSubmission_sendsGenericOnlyAtFourSeconds() = runTest {
+    @Test fun noSubmission_sendsGenericOnlyAtFiveSeconds() = runTest {
         val vm = MedicalSosPromptViewModel(elapsedTime = { testScheduler.currentTime })
-        vm.start(); runCurrent(); advanceTimeBy(3999); runCurrent()
+        vm.start(); runCurrent(); advanceTimeBy(4999); runCurrent()
         assertNull(vm.state.value.description)
         advanceTimeBy(1); runCurrent()
         assertEquals(GENERIC_MEDICAL_SOS, vm.state.value.description)
@@ -27,7 +27,7 @@ class MedicalSosPromptViewModelTest {
 
     @Test fun selectedSymptom_cancelsFallbackAndCanOnlyBeDispatchedOnce() = runTest {
         val vm = MedicalSosPromptViewModel(elapsedTime = { testScheduler.currentTime })
-        vm.start(); runCurrent(); advanceTimeBy(3900); runCurrent()
+        vm.start(); runCurrent(); advanceTimeBy(4900); runCurrent()
         vm.submit("Breathing trouble")
         val sent = vm.claim()
         advanceTimeBy(5000); runCurrent()
@@ -47,9 +47,9 @@ class MedicalSosPromptViewModelTest {
         assertTrue(vm.state.value.cancelled)
     }
 
-    @Test fun restoredDeadline_doesNotGiveAnotherFourSeconds() = runTest {
-        val saved = SavedStateHandle(mapOf("deadline" to 4000L))
-        val vm = MedicalSosPromptViewModel(saved, elapsedTime = { testScheduler.currentTime + 3000 })
+    @Test fun restoredDeadline_doesNotGiveAnotherFiveSeconds() = runTest {
+        val saved = SavedStateHandle(mapOf("deadline" to 5000L))
+        val vm = MedicalSosPromptViewModel(saved, elapsedTime = { testScheduler.currentTime + 4000 })
         vm.start(); runCurrent(); advanceTimeBy(999); runCurrent()
         assertNull(vm.state.value.description)
         advanceTimeBy(1); runCurrent()

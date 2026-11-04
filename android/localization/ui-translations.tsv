@@ -1,0 +1,436 @@
+Go back	ফিরে যান	वापस जाएँ
+Hold for 2 seconds to trigger it	চালু করতে ২ সেকেন্ড ধরে রাখুন	शुरू करने के लिए 2 सेकंड दबाए रखें
+Trigger SOS	SOS পাঠান	SOS भेजें
+Triggered	পাঠানো হয়েছে	भेज दिया गया
+Keep holding · %1$ss	ধরে রাখুন · %1$s সেকেন্ড	दबाए रखें · %1$s सेकंड
+Hide password	পাসওয়ার্ড লুকান	पासवर्ड छिपाएँ
+Show password	পাসওয়ার্ড দেখান	पासवर्ड दिखाएँ
+Call emergency services · 112	জরুরি পরিষেবায় কল করুন · 112	आपातकालीन सेवा को कॉल करें · 112
+Medical SOS location	চিকিৎসার SOS-এর অবস্থান	चिकित्सा SOS का स्थान
+You	আপনি	आप
+Your last known location	আপনার সর্বশেষ জানা অবস্থান	आपका आखिरी ज्ञात स्थान
+Live location	বর্তমান অবস্থান	वर्तमान स्थान
+Last known location	সর্বশেষ জানা অবস্থান	आखिरी ज्ञात स्थान
+Waiting for GPS	GPS-এর জন্য অপেক্ষা করা হচ্ছে	GPS की प्रतीक्षा है
+Your location	আপনার অবস্থান	आपका स्थान
+Medical help, nearby.	কাছেই চিকিৎসার সাহায্য।	चिकित्सा सहायता, आपके पास।
+Your location stays in view.	আপনার অবস্থান সব সময় দেখা যাবে।	आपका स्थान हमेशा दिखाई देगा।
+Confirm your location	আপনার অবস্থান নিশ্চিত করুন	अपना स्थान सुनिश्चित करें
+Address or landmark	ঠিকানা বা কাছের পরিচিত স্থান	पता या पास का कोई पहचान स्थल
+Add a nearby landmark	কাছের একটি পরিচিত স্থান যোগ করুন	पास का कोई पहचान स्थल जोड़ें
+Use current GPS location	বর্তমান GPS অবস্থান ব্যবহার করুন	वर्तमान GPS स्थान इस्तेमाल करें
+Add a nearby landmark so responders can find you.	সাহায্যকারী যাতে আপনাকে খুঁজে পান, কাছের একটি পরিচিত স্থান যোগ করুন।	मदद करने वाले आपको ढूँढ़ सकें, इसलिए पास का कोई पहचान स्थल जोड़ें।
+Save location	অবস্থান সংরক্ষণ করুন	स्थान सहेजें
+Cancel	বাতিল করুন	रद्द करें
+GPS location is shared with your SOS	আপনার SOS-এর সঙ্গে GPS অবস্থান পাঠানো হয়	आपके SOS के साथ GPS स्थान भेजा जाता है
+Edit	সম্পাদনা করুন	बदलें
+Allow location access	অবস্থান ব্যবহারের অনুমতি দিন	स्थान इस्तेमाल करने की अनुमति दें
+Track your medical SOS	আপনার চিকিৎসার SOS দেখুন	अपना चिकित्सा SOS ट्रैक करें
+View acceptance and live arrival status	কে সাহায্য গ্রহণ করেছেন এবং পৌঁছানোর বর্তমান অবস্থা দেখুন	अनुरोध स्वीकार होने और मदद पहुँचने की स्थिति देखें
+Nearby medical requests	কাছাকাছি চিকিৎসার অনুরোধ	आसपास के चिकित्सा अनुरोध
+Help someone in your community	আপনার এলাকার কাউকে সাহায্য করুন	अपने क्षेत्र में किसी की मदद करें
+First-aid guidance	প্রাথমিক চিকিৎসার নির্দেশনা	प्राथमिक उपचार का मार्गदर्शन
+Find a topic or ask the assistant	বিষয় খুঁজুন বা সহকারীকে জিজ্ঞাসা করুন	विषय खोजें या सहायक से पूछें
+Become a responder	সাহায্যকারী হিসেবে যোগ দিন	मदद करने वाले बनें
+Add your qualifications	আপনার যোগ্যতা যোগ করুন	अपनी योग्यताएँ जोड़ें
+All incidents	সব ঘটনা	सभी घटनाएँ
+Parent	মা / বাবা	माता / पिता
+CPR / AED certified	CPR / AED প্রশিক্ষণপ্রাপ্ত	CPR / AED प्रमाणित
+Appearance	থিম ও রং	थीम और रंग
+Edit personal details	ব্যক্তিগত তথ্য সম্পাদনা করুন	व्यक्तिगत जानकारी बदलें
+Medical information	চিকিৎসা সংক্রান্ত তথ্য	चिकित्सा संबंधी जानकारी
+Emergency contacts	জরুরি যোগাযোগ	आपातकालीन संपर्क
+Add emergency contact	জরুরি যোগাযোগ যোগ করুন	आपातकालीन संपर्क जोड़ें
+Edit emergency contact	জরুরি যোগাযোগ সম্পাদনা করুন	आपातकालीन संपर्क बदलें
+Languages you speak	আপনি যে ভাষাগুলি বলতে পারেন	आप जो भाषाएँ बोलते हैं
+Communication	ভাষা ও যোগাযোগ	भाषा और संचार
+App language	অ্যাপের ভাষা	ऐप की भाषा
+Responder qualifications	সাহায্যকারীর যোগ্যতা	मदद करने वाले की योग्यताएँ
+Verification status	যাচাইয়ের অবস্থা	सत्यापन की स्थिति
+Emergency history	জরুরি ঘটনার ইতিহাস	आपातकालीन घटनाओं का इतिहास
+Impact and statistics	অবদান ও পরিসংখ্যান	योगदान और आँकड़े
+Could not complete that action	কাজটি সম্পূর্ণ করা যায়নি	यह काम पूरा नहीं हो सका
+Retry profile	প্রোফাইল আবার লোড করুন	प्रोफ़ाइल दोबारा लोड करें
+Choose your theme	আপনার থিম বেছে নিন	अपनी थीम चुनें
+Find the look that feels comfortable to read.	পড়তে সুবিধা হয় এমন থিম বেছে নিন।	ऐसी थीम चुनें जिसमें पढ़ना आसान हो।
+%1$s is selected. Applies throughout NearHelp.	%1$s বেছে নেওয়া হয়েছে। পুরো NearHelp-এ প্রযোজ্য।	%1$s चुनी गई है। पूरे NearHelp पर लागू होगी।
+OLED themes use a true-black background.	OLED থিমে সম্পূর্ণ কালো পটভূমি থাকে।	OLED थीम में पूरी तरह काली पृष्ठभूमि होती है।
+Done	হয়ে গেছে	हो गया
+Full name	পুরো নাম	पूरा नाम
+Phone number	ফোন নম্বর	फ़ोन नंबर
+Blood group	রক্তের গ্রুপ	ब्लड ग्रुप
+Choose blood group	রক্তের গ্রুপ বেছে নিন	ब्लड ग्रुप चुनें
+Save personal details	ব্যক্তিগত তথ্য সংরক্ষণ করুন	व्यक्तिगत जानकारी सहेजें
+I have a cardiac pacemaker	আমার হৃদযন্ত্রে পেসমেকার আছে	मेरे हृदय में पेसमेकर है
+I am an organ donor	আমি অঙ্গদাতা	मैं अंगदाता हूँ
+Medical conditions	রোগ ও শারীরিক সমস্যা	बीमारियाँ और स्वास्थ्य समस्याएँ
+Add a condition	রোগ বা সমস্যা লিখুন	बीमारी या समस्या लिखें
+Example: asthma	উদাহরণ: হাঁপানি	उदाहरण: दमा
+Add condition	রোগ বা সমস্যা যোগ করুন	बीमारी या समस्या जोड़ें
+Remove condition	রোগ বা সমস্যা সরান	बीमारी या समस्या हटाएँ
+Allergies	অ্যালার্জি	एलर्जी
+Add an allergy	অ্যালার্জি লিখুন	एलर्जी लिखें
+Example: penicillin	উদাহরণ: পেনিসিলিন	उदाहरण: पेनिसिलिन
+Add allergy	অ্যালার্জি যোগ করুন	एलर्जी जोड़ें
+Remove allergy	অ্যালার্জি সরান	एलर्जी हटाएँ
+Physician notes · optional	চিকিৎসকের মন্তব্য · ঐচ্ছিক	डॉक्टर की टिप्पणी · वैकल्पिक
+Save medical information	চিকিৎসার তথ্য সংরক্ষণ করুন	चिकित्सा जानकारी सहेजें
+%1$s of 5 contacts added	৫ জনের মধ্যে %1$s জন যোগাযোগ যোগ করা হয়েছে	5 में से %1$s संपर्क जोड़े गए
+Call	কল করুন	कॉल करें
+Message	বার্তা	संदेश
+Delete	মুছে ফেলুন	हटाएँ
+No emergency contacts yet	এখনও জরুরি যোগাযোগ নেই	अभी कोई आपातकालीन संपर्क नहीं है
+Add someone you can reach in an emergency.	জরুরি অবস্থায় যোগাযোগ করতে পারবেন এমন কাউকে যোগ করুন।	किसी ऐसे व्यक्ति को जोड़ें जिससे आप आपातकाल में संपर्क कर सकें।
+Contact name	যোগাযোগের ব্যক্তির নাম	संपर्क का नाम
+Relationship	সম্পর্ক	रिश्ता
+Spouse	স্বামী / স্ত্রী	पति / पत्नी
+Sibling	ভাই / বোন	भाई / बहन
+Friend	বন্ধু	दोस्त
+Other	অন্যান্য	अन्य
+Save contact	যোগাযোগ সংরক্ষণ করুন	संपर्क सहेजें
+Communication settings	ভাষা ও যোগাযোগের সেটিংস	भाषा और संचार की सेटिंग
+Choose how you read the app and communicate with others.	অ্যাপ পড়ার ভাষা এবং অন্যদের সঙ্গে যোগাযোগের ভাষা বেছে নিন।	ऐप पढ़ने और दूसरों से बातचीत करने की भाषाएँ चुनें।
+Choose communication languages	যোগাযোগের ভাষা বেছে নিন	बातचीत की भाषाएँ चुनें
+App language changes the interface. Spoken languages help others communicate with you.	অ্যাপের ভাষা বদলালে পর্দার লেখার ভাষা বদলাবে। আপনি যে ভাষায় কথা বলেন, তা অন্যদের আপনার সঙ্গে যোগাযোগ করতে সাহায্য করবে।	ऐप की भाषा बदलने से स्क्रीन की भाषा बदलती है। आपकी बोली जाने वाली भाषाएँ दूसरों को आपसे बात करने में मदद करती हैं।
+Choose a language. The interface changes immediately.	একটি ভাষা বেছে নিন। পর্দার লেখার ভাষা সঙ্গে সঙ্গে বদলাবে।	एक भाषा चुनें। स्क्रीन की भाषा तुरंत बदल जाएगी।
+Your languages	আপনার ভাষাগুলি	आपकी भाषाएँ
+Select the languages you can communicate in.	আপনি যে ভাষাগুলিতে কথা বলতে পারেন সেগুলি বেছে নিন।	वे भाषाएँ चुनें जिनमें आप बातचीत कर सकते हैं।
+Save language preferences	ভাষার পছন্দ সংরক্ষণ করুন	भाषा की पसंद सहेजें
+Add your training and qualifications.	আপনার প্রশিক্ষণ ও যোগ্যতা যোগ করুন।	अपना प्रशिक्षण और योग्यताएँ जोड़ें।
+Primary qualification	প্রধান যোগ্যতা	मुख्य योग्यता
+First-aid provider	প্রাথমিক চিকিৎসায় প্রশিক্ষণপ্রাপ্ত	प्राथमिक उपचार में प्रशिक्षित
+EMT / Paramedic	EMT / প্যারামেডিক	EMT / पैरामेडिक
+Doctor / Physician	চিকিৎসক	डॉक्टर / चिकित्सक
+Registered nurse	নিবন্ধিত নার্স	पंजीकृत नर्स
+Community first responder	স্থানীয় স্বেচ্ছাসেবী সাহায্যকারী	स्थानीय स्वयंसेवी मददगार
+Issuing organization	সনদ প্রদানকারী সংস্থা	प्रमाणपत्र जारी करने वाली संस्था
+License or certificate ID	লাইসেন্স বা সনদের নম্বর	लाइसेंस या प्रमाणपत्र नंबर
+Certificate attached · change	সনদ যুক্ত হয়েছে · বদলান	प्रमाणपत्र जुड़ा है · बदलें
+Attach certificate or ID	সনদ বা পরিচয়পত্র যুক্ত করুন	प्रमाणपत्र या पहचान पत्र जोड़ें
+PDF, PNG, JPG or WebP · up to 10 MB	PDF, PNG, JPG বা WebP · সর্বোচ্চ 10 MB	PDF, PNG, JPG या WebP · अधिकतम 10 MB
+Submit for verification	যাচাইয়ের জন্য জমা দিন	सत्यापन के लिए भेजें
+Trust score	বিশ্বাসযোগ্যতার স্কোর	विश्वसनीयता स्कोर
+Not available	পাওয়া যায়নি	उपलब्ध नहीं है
+Contact phone	যোগাযোগের ফোন	संपर्क फ़ोन
+Not added	যোগ করা হয়নি	जोड़ा नहीं गया
+Saved for emergency contact purposes	জরুরি যোগাযোগের জন্য সংরক্ষিত	आपातकालीन संपर्क के लिए सहेजा गया
+No verified qualifications yet	এখনও কোনও যোগ্যতা যাচাই হয়নি	अभी कोई योग्यता सत्यापित नहीं हुई है
+Add your training to apply as a responder.	সাহায্যকারী হওয়ার আবেদন করতে প্রশিক্ষণের তথ্য যোগ করুন।	मदद करने वाले के रूप में आवेदन करने के लिए प्रशिक्षण की जानकारी जोड़ें।
+Verified	যাচাই হয়েছে	सत्यापित
+Pending verification	যাচাই বাকি আছে	सत्यापन बाकी है
+Refresh verification	যাচাইয়ের অবস্থা আবার দেখুন	सत्यापन की स्थिति दोबारा देखें
+Show	দেখান	दिखाएँ
+Help I received	আমি যে সাহায্য পেয়েছি	मुझे मिली मदद
+People I helped	যাঁদের আমি সাহায্য করেছি	जिनकी मैंने मदद की
+No recorded incidents yet	এখনও কোনও ঘটনা নথিভুক্ত নেই	अभी कोई घटना दर्ज नहीं है
+Requests and responses recorded on this device will appear here.	এই ডিভাইসে নথিভুক্ত অনুরোধ ও সাড়াগুলি এখানে দেখা যাবে।	इस डिवाइस पर दर्ज अनुरोध और जवाब यहाँ दिखाई देंगे।
+Medical emergency · %1$s	চিকিৎসার জরুরি অবস্থা · %1$s	चिकित्सा आपातकाल · %1$s
+Your impact	আপনার অবদান	आपका योगदान
+Your contribution to the community.	আপনার এলাকার জন্য আপনার অবদান।	अपने क्षेत्र के लिए आपका योगदान।
+%1$s responses	%1$s বার সাহায্যে সাড়া	%1$s बार मदद के लिए जवाब
+Recorded on this device	এই ডিভাইসে নথিভুক্ত	इस डिवाइस पर दर्ज
+%1$s requests	%1$sটি অনুরোধ	%1$s अनुरोध
+View emergency history	জরুরি ঘটনার ইতিহাস দেখুন	आपातकालीन घटनाओं का इतिहास देखें
+Your profile	আপনার প্রোফাইল	आपकी प्रोफ़ाइल
+Your health and safety profile	আপনার স্বাস্থ্য ও নিরাপত্তার প্রোফাইল	आपकी स्वास्थ्य और सुरक्षा प्रोफ़ाइल
+Personal	ব্যক্তিগত	व्यक्तिगत
+Blood group, allergies and conditions	রক্তের গ্রুপ, অ্যালার্জি ও রোগ	ब्लड ग्रुप, एलर्जी और बीमारियाँ
+People to reach in an emergency	জরুরি অবস্থায় যাঁদের সঙ্গে যোগাযোগ করবেন	आपातकाल में संपर्क करने वाले लोग
+Settings	সেটিংস	सेटिंग
+App language and languages you speak	অ্যাপের ভাষা এবং আপনার কথ্য ভাষা	ऐप की भाषा और आपकी बोलचाल की भाषाएँ
+%1$s · 4 themes available	%1$s · ৪টি থিম আছে	%1$s · 4 थीम उपलब्ध हैं
+Logging out…	লগ আউট হচ্ছে…	लॉग आउट हो रहा है…
+Log out	লগ আউট করুন	लॉग आउट करें
+Responder	সাহায্যকারী	मदद करने वाला
+Qualifications	যোগ্যতা	योग्यताएँ
+Training and certifications	প্রশিক্ষণ ও সনদ	प्रशिक्षण और प्रमाणपत्र
+View identity and training status	পরিচয় ও প্রশিক্ষণের অবস্থা দেখুন	पहचान और प्रशिक्षण की स्थिति देखें
+Activity	কার্যকলাপ	गतिविधि
+Requests and responses	অনুরোধ ও সাড়া	अनुरोध और जवाब
+Your community contribution	আপনার এলাকার জন্য অবদান	अपने क्षेत्र के लिए आपका योगदान
+Remove %1$s?	%1$s-কে সরাবেন?	%1$s को हटाएँ?
+They will be removed from your emergency contacts.	তাঁকে আপনার জরুরি যোগাযোগ থেকে সরানো হবে।	उन्हें आपके आपातकालीन संपर्कों से हटा दिया जाएगा।
+Remove contact	যোগাযোগ সরান	संपर्क हटाएँ
+Keep contact	যোগাযোগ রাখুন	संपर्क रखें
+Medical SOS	চিকিৎসার SOS	चिकित्सा SOS
+AI help while waiting	অপেক্ষার সময় AI-এর সাহায্য	इंतज़ार के दौरान AI की मदद
+Incident messages	ঘটনা সংক্রান্ত বার্তা	घटना से जुड़े संदेश
+Add medical details	চিকিৎসার তথ্য যোগ করুন	चिकित्सा जानकारी जोड़ें
+Medical requests	চিকিৎসার অনুরোধ	चिकित्सा अनुरोध
+Your medical SOS	আপনার চিকিৎসার SOS	आपका चिकित्सा SOS
+Last known responder location	সাহায্যকারীর সর্বশেষ জানা অবস্থান	मदद करने वाले का आखिरी ज्ञात स्थान
+We couldn’t complete that action	কাজটি সম্পূর্ণ করা যায়নি	यह काम पूरा नहीं हो सका
+Retry sending medical SOS	চিকিৎসার SOS আবার পাঠান	चिकित्सा SOS दोबारा भेजें
+Retry connection	আবার সংযোগ করুন	दोबारा कनेक्ट करें
+What’s the medical emergency?	কী ধরনের চিকিৎসার জরুরি অবস্থা?	किस तरह की चिकित्सा आपातस्थिति है?
+Tap a symptom or condition to send it now.	এখনই পাঠাতে একটি উপসর্গ বা রোগে চাপ দিন।	अभी भेजने के लिए किसी लक्षण या बीमारी पर टैप करें।
+%1$ss until a general medical SOS	সাধারণ চিকিৎসার SOS পাঠাতে আর %1$s সেকেন্ড	सामान्य चिकित्सा SOS भेजने में %1$s सेकंड
+Your SOS sends even without details.	বিস্তারিত না দিলেও আপনার SOS পাঠানো হবে।	जानकारी दिए बिना भी आपका SOS भेजा जाएगा।
+Chest pain	বুকে ব্যথা	सीने में दर्द
+Breathing trouble	শ্বাসকষ্ট	साँस लेने में परेशानी
+Injury / bleeding	আঘাত / রক্তপাত	चोट / रक्तस्राव
+Fainting	অজ্ঞান হওয়া	बेहोशी
+Seizure	খিঁচুনি	दौरा
+Other / not sure	অন্যান্য / নিশ্চিত নই	अन्य / पता नहीं
+Or describe what happened	অথবা কী হয়েছে লিখুন	या बताएँ कि क्या हुआ
+Symptoms or a known condition	উপসর্গ বা জানা কোনও রোগ	लक्षण या पहले से ज्ञात बीमारी
+Send medical SOS now	এখনই চিকিৎসার SOS পাঠান	अभी चिकित्सा SOS भेजें
+Sending medical SOS…	চিকিৎসার SOS পাঠানো হচ্ছে…	चिकित्सा SOS भेजा जा रहा है…
+Waiting for your location	আপনার অবস্থানের জন্য অপেক্ষা করা হচ্ছে	आपके स्थान की प्रतीक्षा है
+Medical SOS pending	চিকিৎসার SOS পাঠানো বাকি	चिकित्सा SOS भेजना बाकी है
+Your request: %1$s	আপনার অনুরোধ: %1$s	आपका अनुरोध: %1$s
+Location access needed	অবস্থানের অনুমতি প্রয়োজন	स्थान की अनुमति चाहिए
+Turn on location and allow GPS access to send your medical SOS.	চিকিৎসার SOS পাঠাতে অবস্থান চালু করুন এবং GPS ব্যবহারের অনুমতি দিন।	चिकित्सा SOS भेजने के लिए स्थान चालू करें और GPS की अनुमति दें।
+Sending has not been confirmed. Retry to check your request.	পাঠানো নিশ্চিত হয়নি। আপনার অনুরোধ পরীক্ষা করতে আবার চেষ্টা করুন।	भेजने की पुष्टि नहीं हुई है। अपना अनुरोध जाँचने के लिए दोबारा कोशिश करें।
+Retry medical SOS	চিকিৎসার SOS আবার পাঠান	चिकित्सा SOS दोबारा भेजें
+Cancel SOS	SOS বাতিল করুন	SOS रद्द करें
+Available to help nearby	কাছাকাছি সাহায্য করতে প্রস্তুত	आसपास मदद करने के लिए उपलब्ध
+Share your location to receive nearby medical alerts.	কাছের চিকিৎসা সংক্রান্ত সতর্কবার্তা পেতে আপনার অবস্থান জানান।	आसपास के चिकित्सा अलर्ट पाने के लिए अपना स्थान साझा करें।
+No active medical requests	এখন কোনও সক্রিয় চিকিৎসার অনুরোধ নেই	अभी कोई सक्रिय चिकित्सा अनुरोध नहीं है
+The feed updates automatically.	তালিকা নিজে থেকেই আপডেট হয়।	सूची अपने आप अपडेट होती है।
+Medical emergency	চিকিৎসার জরুরি অবস্থা	चिकित्सा आपातकाल
+Your responder has arrived	আপনার সাহায্যকারী পৌঁছেছেন	आपकी मदद करने वाला पहुँच गया है
+Your medical SOS is active	আপনার চিকিৎসার SOS সক্রিয় আছে	आपका चिकित्सा SOS सक्रिय है
+Your responder is on the way	আপনার সাহায্যকারী আসছেন	आपकी मदद करने वाला रास्ते में है
+Waiting for someone to accept	কেউ অনুরোধ গ্রহণ করার অপেক্ষা করা হচ্ছে	किसी के अनुरोध स्वीकार करने की प्रतीक्षा है
+Location updates are delayed	অবস্থান আপডেটে দেরি হচ্ছে	स्थान अपडेट में देरी है
+%1$s · %2$s away	%1$s · %2$s দূরে	%1$s · %2$s दूर
+View my medical SOS	আমার চিকিৎসার SOS দেখুন	मेरा चिकित्सा SOS देखें
+Your SOS is already active. These details will be shared with its participants.	আপনার SOS ইতিমধ্যেই সক্রিয়। এই তথ্য অংশগ্রহণকারীদের জানানো হবে।	आपका SOS पहले से सक्रिय है। यह जानकारी इसमें शामिल लोगों को भेजी जाएगी।
+Symptoms or known condition	উপসর্গ বা জানা রোগ	लक्षण या ज्ञात बीमारी
+Message participants	অংশগ্রহণকারীদের বার্তা লিখুন	शामिल लोगों को संदेश लिखें
+Update my medical SOS	আমার চিকিৎসার SOS আপডেট করুন	मेरा चिकित्सा SOS अपडेट करें
+Send message	বার্তা পাঠান	संदेश भेजें
+Medical request resolved	চিকিৎসার অনুরোধ সম্পূর্ণ হয়েছে	चिकित्सा अनुरोध पूरा हुआ
+Medical SOS cancelled	চিকিৎসার SOS বাতিল হয়েছে	चिकित्सा SOS रद्द हुआ
+Back to Home	হোমে ফিরুন	होम पर वापस जाएँ
+Medical SOS sent	চিকিৎসার SOS পাঠানো হয়েছে	चिकित्सा SOS भेज दिया गया
+ETA updating…	পৌঁছানোর সময় আপডেট হচ্ছে…	पहुँचने का समय अपडेट हो रहा है…
+Arriving in %1$s	পৌঁছাতে সময় %1$s	पहुँचने में %1$s
+Responder accepted	সাহায্যকারী অনুরোধ গ্রহণ করেছেন	मदद करने वाले ने अनुरोध स्वीकार किया
+Waiting for a nearby responder to accept.	কাছের কোনও সাহায্যকারী অনুরোধ গ্রহণ করার অপেক্ষা করা হচ্ছে।	आसपास के किसी मददगार के अनुरोध स्वीकार करने की प्रतीक्षा है।
+I’m responding	আমি সাহায্য করতে আসছি	मैं मदद करने आ रहा/रही हूँ
+Ask AI for help	AI-এর সাহায্য নিন	AI से मदद माँगें
+Guidance while you wait for a responder	সাহায্যকারীর অপেক্ষার সময় নির্দেশনা	मदद आने तक मार्गदर्शन
+Medical SOS details	চিকিৎসার SOS-এর বিবরণ	चिकित्सा SOS की जानकारी
+Location update delayed	অবস্থান আপডেটে দেরি হচ্ছে	स्थान अपडेट में देरी
+Showing the last known responder position. Arrival estimates are unavailable.	সাহায্যকারীর সর্বশেষ জানা অবস্থান দেখানো হচ্ছে। পৌঁছানোর আনুমানিক সময় পাওয়া যাচ্ছে না।	मदद करने वाले का आखिरी ज्ञात स्थान दिखाया जा रहा है। पहुँचने का अनुमानित समय उपलब्ध नहीं है।
+%1$s · waiting for GPS	%1$s · GPS-এর অপেক্ষা করা হচ্ছে	%1$s · GPS की प्रतीक्षा है
+Sharing your location	আপনার অবস্থান জানানো হচ্ছে	आपका स्थान साझा हो रहा है
+The requester can follow your arrival while this screen is open.	এই পর্দা খোলা থাকলে অনুরোধকারী আপনার আসার অবস্থান দেখতে পারবেন।	यह स्क्रीन खुली रहने पर अनुरोध करने वाला आपके पहुँचने की स्थिति देख सकता है।
+Open directions	পথ দেখুন	रास्ता देखें
+I have arrived	আমি পৌঁছেছি	मैं पहुँच गया/गई हूँ
+View incident messages	ঘটনার বার্তাগুলি দেখুন	घटना के संदेश देखें
+Mark incident resolved	ঘটনা সমাধান হয়েছে জানান	घटना पूरी होने की पुष्टि करें
+Cancel this medical SOS?	এই চিকিৎসার SOS বাতিল করবেন?	यह चिकित्सा SOS रद्द करें?
+Resolve this medical request?	এই চিকিৎসার অনুরোধ সম্পূর্ণ করবেন?	यह चिकित्सा अनुरोध पूरा करें?
+This updates the incident for everyone participating.	এই পরিবর্তন সব অংশগ্রহণকারী দেখতে পাবেন।	यह बदलाव इसमें शामिल सभी लोगों को दिखाई देगा।
+Yes, cancel SOS	হ্যাঁ, SOS বাতিল করুন	हाँ, SOS रद्द करें
+Yes, mark resolved	হ্যাঁ, সম্পূর্ণ হয়েছে জানান	हाँ, पूरा होने की पुष्टि करें
+Keep SOS active	SOS সক্রিয় রাখুন	SOS सक्रिय रखें
+SOS sent	SOS পাঠানো হয়েছে	SOS भेजा गया
+Accepted	গ্রহণ করা হয়েছে	स्वीकार किया गया
+On the way	পথে আছেন	रास्ते में
+Arrived	পৌঁছেছেন	पहुँच गए
+First-aid topics	প্রাথমিক চিকিৎসার বিষয়	प्राथमिक उपचार के विषय
+Emergency protocol	জরুরি অবস্থার নির্দেশনা	आपातकालीन निर्देश
+Your conversations	আপনার কথোপকথন	आपकी बातचीत
+Paramedic handover	প্যারামেডিককে তথ্য প্রদান	पैरामेडिक को जानकारी देना
+AI conversation	AI-এর সঙ্গে কথোপকথন	AI से बातचीत
+New conversation	নতুন কথোপকথন	नई बातचीत
+No conversations yet	এখনও কোনও কথোপকথন নেই	अभी कोई बातचीत नहीं है
+Start a conversation to get help from the assistant.	সহকারীর সাহায্য পেতে কথোপকথন শুরু করুন।	सहायक से मदद पाने के लिए बातचीत शुरू करें।
+Delete conversation	কথোপকথন মুছুন	बातचीत हटाएँ
+Report not available	প্রতিবেদন পাওয়া যায়নি	रिपोर्ट उपलब्ध नहीं है
+Try generating the handover again.	তথ্য প্রদানের প্রতিবেদন আবার তৈরি করার চেষ্টা করুন।	जानकारी देने की रिपोर्ट दोबारा बनाने की कोशिश करें।
+Report %1$s	প্রতিবেদন %1$s	रिपोर्ट %1$s
+Clinical summary	চিকিৎসার সারাংশ	चिकित्सा सारांश
+Destination hospital	গন্তব্য হাসপাতাল	गंतव्य अस्पताल
+Incident location	ঘটনাস্থল	घटनास्थल
+Close report	প্রতিবেদন বন্ধ করুন	रिपोर्ट बंद करें
+Loading protocol	নির্দেশনা লোড হচ্ছে	निर्देश लोड हो रहे हैं
+Please wait for first-aid guidance.	প্রাথমিক চিকিৎসার নির্দেশনার জন্য অপেক্ষা করুন।	प्राथमिक उपचार के मार्गदर्शन की प्रतीक्षा करें।
+AI-generated guidance	AI-এর তৈরি নির্দেশনা	AI का तैयार किया गया मार्गदर्शन
+Follow the emergency operator’s instructions.	জরুরি পরিষেবার অপারেটরের নির্দেশ মেনে চলুন।	आपातकालीन सेवा के ऑपरेटर के निर्देशों का पालन करें।
+All steps completed	সব ধাপ সম্পূর্ণ হয়েছে	सभी चरण पूरे हुए
+Step %1$s of %2$s	%2$s-এর মধ্যে ধাপ %1$s	%2$s में से चरण %1$s
+Precaution	সতর্কতা	सावधानी
+Mark step complete	ধাপ সম্পূর্ণ হয়েছে জানান	चरण पूरा होने की पुष्टि करें
+Ask about this step	এই ধাপ সম্পর্কে জিজ্ঞাসা করুন	इस चरण के बारे में पूछें
+View handover report	তথ্য প্রদানের প্রতিবেদন দেখুন	जानकारी देने की रिपोर्ट देखें
+How can I help?	আমি কীভাবে সাহায্য করতে পারি?	मैं कैसे मदद कर सकता हूँ?
+Ask about first aid or choose a topic.	প্রাথমিক চিকিৎসা সম্পর্কে জিজ্ঞাসা করুন বা বিষয় বেছে নিন।	प्राथमिक उपचार के बारे में पूछें या विषय चुनें।
+AI guidance may be inaccurate	AI-এর নির্দেশনায় ভুল থাকতে পারে	AI के मार्गदर्शन में गलती हो सकती है
+For urgent help, call emergency services.	জরুরি সাহায্যের জন্য জরুরি পরিষেবায় কল করুন।	तुरंत मदद के लिए आपातकालीन सेवा को कॉल करें।
+Start a conversation	কথোপকথন শুরু করুন	बातचीत शुरू करें
+View all %1$s topics	সব %1$sটি বিষয় দেখুন	सभी %1$s विषय देखें
+Recent conversations	সাম্প্রতিক কথোপকথন	हाल की बातचीत
+Continue a previous conversation	আগের কথোপকথন চালিয়ে যান	पिछली बातचीत जारी रखें
+Could not read this attachment. Please type your question instead.	যুক্ত ফাইলটি পড়া যায়নি। আপনার প্রশ্ন লিখুন।	जुड़ी फ़ाइल पढ़ी नहीं जा सकी। कृपया अपना सवाल लिखें।
+Camera is unavailable on this device.	এই ডিভাইসে ক্যামেরা ব্যবহার করা যাচ্ছে না।	इस डिवाइस पर कैमरा उपलब्ध नहीं है।
+Allow camera access to attach a photo, or describe the situation in words.	ছবি যুক্ত করতে ক্যামেরার অনুমতি দিন, অথবা কী হয়েছে লিখুন।	फ़ोटो जोड़ने के लिए कैमरे की अनुमति दें या स्थिति लिखकर बताएँ।
+NearHelp AI Assistant	NearHelp AI সহকারী	NearHelp AI सहायक
+I’m here to help. Tell me what’s happening.	আমি সাহায্য করতে আছি। কী হয়েছে বলুন।	मैं मदद के लिए हूँ। बताएँ क्या हो रहा है।
+The assistant is preparing a response…	সহকারী উত্তর তৈরি করছে…	सहायक जवाब तैयार कर रहा है…
+Could not process your message	আপনার বার্তা প্রক্রিয়া করা যায়নি	आपके संदेश पर काम नहीं हो सका
+Attachment unavailable	যুক্ত ফাইল পাওয়া যাচ্ছে না	जुड़ी फ़ाइल उपलब्ध नहीं है
+Attachment ready	যুক্ত ফাইল প্রস্তুত	जुड़ी फ़ाइल तैयार है
+Attached photo or PDF first-page preview	যুক্ত ছবি বা PDF-এর প্রথম পাতার প্রিভিউ	जुड़ी फ़ोटो या PDF के पहले पन्ने का पूर्वावलोकन
+Remove attachment	যুক্ত ফাইল সরান	जुड़ी फ़ाइल हटाएँ
+Ask the AI assistant	AI সহকারীকে জিজ্ঞাসা করুন	AI सहायक से पूछें
+What do you need help with?	কোন বিষয়ে সাহায্য দরকার?	किस बारे में मदद चाहिए?
+Attach	ফাইল যোগ করুন	फ़ाइल जोड़ें
+Camera	ক্যামেরা	कैमरा
+Voice input is unavailable on this device.	এই ডিভাইসে কণ্ঠে লেখা ব্যবহার করা যাচ্ছে না।	इस डिवाइस पर बोलकर लिखना उपलब्ध नहीं है।
+Voice	কথা বলে লিখুন	बोलकर लिखें
+Send to AI assistant	AI সহকারীকে পাঠান	AI सहायक को भेजें
+AI guidance may be inaccurate. For urgent help, call emergency services.	AI-এর নির্দেশনায় ভুল থাকতে পারে। জরুরি সাহায্যের জন্য জরুরি পরিষেবায় কল করুন।	AI के मार्गदर्शन में गलती हो सकती है। तुरंत मदद के लिए आपातकालीन सेवा को कॉल करें।
+Place details	স্থানের বিবরণ	स्थान की जानकारी
+Nearby help	কাছাকাছি সাহায্য	आसपास मदद
+Hospitals, pharmacies and police within 3 km.	৩ কিমির মধ্যে হাসপাতাল, ওষুধের দোকান ও থানা।	3 किमी के भीतर अस्पताल, दवा की दुकानें और थाने।
+Search nearby results	কাছের ফলাফলে খুঁজুন	आसपास के नतीजों में खोजें
+Name or address nearby	কাছের স্থানের নাম বা ঠিকানা	पास के स्थान का नाम या पता
+Refresh nearby places	কাছের স্থানগুলি আবার খুঁজুন	आसपास के स्थान दोबारा खोजें
+Current location needed	বর্তমান অবস্থান প্রয়োজন	वर्तमान स्थान चाहिए
+Turn on location and wait for a recent GPS fix. Nearby results use your current position.	অবস্থান চালু করুন এবং বর্তমান GPS অবস্থানের জন্য অপেক্ষা করুন। কাছের ফলাফল আপনার বর্তমান অবস্থান থেকে দেখানো হয়।	स्थान चालू करें और वर्तमान GPS स्थान मिलने की प्रतीक्षा करें। आसपास के नतीजे आपके वर्तमान स्थान के आधार पर दिखते हैं।
+Finding nearby places on Google Maps…	Google Maps-এ কাছের স্থান খোঁজা হচ্ছে…	Google Maps पर आसपास के स्थान खोजे जा रहे हैं…
+Nearby search unavailable	কাছের স্থান খোঁজা যাচ্ছে না	आसपास की खोज उपलब्ध नहीं है
+We couldn’t load places from Google Maps. Try again or open Google Maps.	Google Maps থেকে স্থানগুলি লোড করা যায়নি। আবার চেষ্টা করুন বা Google Maps খুলুন।	Google Maps से स्थान लोड नहीं हो सके। दोबारा कोशिश करें या Google Maps खोलें।
+Open Google Maps	Google Maps খুলুন	Google Maps खोलें
+%1$s away · Google Maps	%1$s দূরে · Google Maps	%1$s दूर · Google Maps
+Confirm availability	পরিষেবা পাওয়া যাবে কি না নিশ্চিত করুন	सेवा की उपलब्धता सुनिश्चित करें
+Call the facility to confirm opening hours and emergency services.	খোলার সময় এবং জরুরি পরিষেবা নিশ্চিত করতে সেখানে কল করুন।	खुलने का समय और आपातकालीन सेवाएँ सुनिश्चित करने के लिए वहाँ कॉल करें।
+Get directions	পথ দেখুন	रास्ता देखें
+Call this place	এখানে কল করুন	यहाँ कॉल करें
+View on Google Maps	Google Maps-এ দেখুন	Google Maps पर देखें
+Within 3 km · closest first · straight-line distance	৩ কিমির মধ্যে · সবচেয়ে কাছেরটি আগে · সরলরেখার দূরত্ব	3 किमी के भीतर · सबसे पास पहले · सीधी रेखा की दूरी
+No matching places within 3 km	৩ কিমির মধ্যে মিলে যায় এমন স্থান নেই	3 किमी के भीतर मेल खाने वाला स्थान नहीं है
+Try another category or clear the search. The search area stays close to you.	অন্য বিভাগ বেছে নিন বা অনুসন্ধান মুছুন। অনুসন্ধান আপনার কাছাকাছিই সীমাবদ্ধ থাকে।	दूसरी श्रेणी चुनें या खोज साफ़ करें। खोज का क्षेत्र आपके आसपास ही रहता है।
+Places from Google Maps. Call to confirm hours and availability.	স্থানগুলি Google Maps থেকে নেওয়া। খোলার সময় ও পরিষেবা নিশ্চিত করতে কল করুন।	स्थान Google Maps से लिए गए हैं। समय और उपलब्धता सुनिश्चित करने के लिए कॉल करें।
+Hospitals	হাসপাতাল	अस्पताल
+Pharmacies	ওষুধের দোকান	दवा की दुकानें
+Police stations	থানা	थाने
+Welcome to NearHelp	NearHelp-এ স্বাগতম	NearHelp में आपका स्वागत है
+Care starts with connection.	যোগাযোগ থেকেই যত্নের শুরু।	जुड़ने से देखभाल की शुरुआत होती है।
+Get emergency help	জরুরি সাহায্য নিন	आपातकालीन मदद लें
+Continue with Google	Google দিয়ে এগিয়ে যান	Google से आगे बढ़ें
+Google sign-in could not be completed. Please sign in with email.	Google দিয়ে সাইন ইন হয়নি। ইমেইল দিয়ে সাইন ইন করুন।	Google से साइन इन नहीं हो सका। ईमेल से साइन इन करें।
+or sign in with email	অথবা ইমেইল দিয়ে সাইন ইন করুন	या ईमेल से साइन इन करें
+Could not sign in	সাইন ইন করা যায়নি	साइन इन नहीं हो सका
+Email address	ইমেইল ঠিকানা	ईमेल पता
+Password	পাসওয়ার্ড	पासवर्ड
+Sign in with email	ইমেইল দিয়ে সাইন ইন করুন	ईमेल से साइन इन करें
+Create an account	অ্যাকাউন্ট তৈরি করুন	खाता बनाएँ
+Create account	অ্যাকাউন্ট তৈরি করুন	खाता बनाएँ
+Create your account	আপনার অ্যাকাউন্ট তৈরি করুন	अपना खाता बनाएँ
+Your details help people reach you.	আপনার তথ্য অন্যদের আপনার কাছে পৌঁছাতে সাহায্য করে।	आपकी जानकारी लोगों को आप तक पहुँचने में मदद करती है।
+Could not create account	অ্যাকাউন্ট তৈরি করা যায়নি	खाता नहीं बन सका
+At least 6 characters	অন্তত ৬টি অক্ষর	कम से कम 6 अक्षर
+Contact phone · optional	যোগাযোগের ফোন · ঐচ্ছিক	संपर्क फ़ोन · वैकल्पिक
+For emergency contact purposes	জরুরি যোগাযোগের জন্য	आपातकालीन संपर्क के लिए
+I agree to the emergency response terms and Good Samaritan protocols.	আমি জরুরি সাড়াদানের শর্ত এবং সাহায্যকারীর নীতিমালায় সম্মত।	मैं आपातकालीन सहायता की शर्तों और मददगार के नियमों से सहमत हूँ।
+Already have an account? Sign in	ইতিমধ্যেই অ্যাকাউন্ট আছে? সাইন ইন করুন	पहले से खाता है? साइन इन करें
+Please wait...	অপেক্ষা করুন…	कृपया प्रतीक्षा करें…
+Email cannot be empty	ইমেইল লিখুন	ईमेल लिखें
+Invalid email address format	সঠিক ইমেইল ঠিকানা লিখুন	सही ईमेल पता लिखें
+Password cannot be empty	পাসওয়ার্ড লিখুন	पासवर्ड लिखें
+Password must be at least 6 characters	পাসওয়ার্ডে অন্তত ৬টি অক্ষর থাকতে হবে	पासवर्ड में कम से कम 6 अक्षर होने चाहिए
+Invalid email or password	ইমেইল বা পাসওয়ার্ড ভুল	ईमेल या पासवर्ड गलत है
+Full name is required	পুরো নাম লিখুন	पूरा नाम लिखें
+Invalid phone number	ফোন নম্বর সঠিক নয়	फ़ोन नंबर सही नहीं है
+Registration failed	নিবন্ধন করা যায়নি	पंजीकरण नहीं हो सका
+Google sign-in failed	Google দিয়ে সাইন ইন হয়নি	Google से साइन इन नहीं हो सका
+Medical guardian	চিকিৎসা সহায়ক	चिकित्सा सहायक
+Keep your contacts close.	প্রিয়জনদের সঙ্গে যোগাযোগ রাখুন।	अपनों से जुड़े रहें।
+Send a check-in or request medical help.	আপনি কেমন আছেন জানান বা চিকিৎসার সাহায্য চান।	अपना हाल बताएँ या चिकित्सा सहायता माँगें।
+Check-in	খোঁজ জানান	हाल बताएँ
+Send a check-in	নিজের খোঁজ জানান	अपना हाल भेजें
+Add an emergency contact in your profile first.	আগে আপনার প্রোফাইলে জরুরি যোগাযোগ যোগ করুন।	पहले अपनी प्रोफ़ाइल में आपातकालीन संपर्क जोड़ें।
+Your check-in message is ready to send.	আপনার খোঁজ জানানোর বার্তা পাঠানোর জন্য প্রস্তুত।	आपका हाल बताने वाला संदेश भेजने के लिए तैयार है।
+Messaging is unavailable on this device.	এই ডিভাইসে বার্তা পাঠানো যাচ্ছে না।	इस डिवाइस पर संदेश भेजना उपलब्ध नहीं है।
+Open nearby facilities	কাছের পরিষেবাগুলি দেখুন	आसपास की सेवाएँ देखें
+Exit guardian mode	সহায়ক মোড থেকে বেরোন	सहायक मोड से बाहर निकलें
+Home	হোম	होम
+Assistant	সহকারী	सहायक
+Nearby	কাছাকাছি	आसपास
+Profile	প্রোফাইল	प्रोफ़ाइल
+Pure White	সাদা	सफ़ेद
+Soft White	নরম সাদা	हल्का सफ़ेद
+OLED Teal	OLED সবুজাভ	OLED हरा-नीला
+OLED Blue	OLED নীল	OLED नीला
+Clean white with calm teal accents	শান্ত সবুজাভ রঙের সঙ্গে সাদা	शांत हरे-नीले रंग के साथ साफ़ सफ़ेद
+Warm off-white for gentle contrast	সহজে পড়ার জন্য হালকা উষ্ণ সাদা	आसानी से पढ़ने के लिए हल्का गर्म सफ़ेद
+True black with teal accents	সবুজাভ রঙের সঙ্গে সম্পূর্ণ কালো	हरे-नीले रंग के साथ पूरी तरह काला
+True black with blue accents	নীল রঙের সঙ্গে সম্পূর্ণ কালো	नीले रंग के साथ पूरी तरह काला
+ACCEPTED	গ্রহণ করা হয়েছে	स्वीकार किया गया
+EN ROUTE	পথে আছেন	रास्ते में
+ARRIVED	পৌঁছেছেন	पहुँच गए
+ON SCENE	ঘটনাস্থলে	घटनास्थल पर
+HANDOVER 108	১০৮ পরিষেবার কাছে হস্তান্তর	108 सेवा को सौंपा गया
+RESOLVED	সমাধান হয়েছে	पूरा हुआ
+CANCELLED	বাতিল হয়েছে	रद्द हुआ
+Resolved	সমাধান হয়েছে	पूरा हुआ
+Cancelled	বাতিল হয়েছে	रद्द हुआ
+ACTIVE	সক্রিয়	सक्रिय
+Pending	অপেক্ষমাণ	लंबित
+General medical emergency. Please send help.	চিকিৎসার জরুরি অবস্থা। দয়া করে সাহায্য পাঠান।	चिकित्सा आपातकाल है। कृपया मदद भेजें।
+%1$s · %2$s · %3$s	%1$s · %2$s · %3$s	%1$s · %2$s · %3$s
+Clean white · teal accents	সাদা · সবুজাভ রং	सफ़ेद · हरा-नीला रंग
+Soft white · blue accents	নরম সাদা · নীল রং	हल्का सफ़ेद · नीला रंग
+True black · teal accents	সম্পূর্ণ কালো · সবুজাভ রং	पूरी तरह काला · हरा-नीला रंग
+True black · blue accents	সম্পূর্ণ কালো · নীল রং	पूरी तरह काला · नीला रंग
+%1$s km	%1$s কিমি	%1$s किमी
+%1$s m	%1$s মিটার	%1$s मीटर
+%1$s min	%1$s মিনিট	%1$s मिनट
+%1$s sec	%1$s সেকেন্ড	%1$s सेकंड
+Medical emergency: %1$s	চিকিৎসার জরুরি অবস্থা: %1$s	चिकित्सा आपातकाल: %1$s
+General medical emergency — please send help.	চিকিৎসার জরুরি অবস্থা — দয়া করে সাহায্য পাঠান।	चिकित्सा आपातकाल — कृपया मदद भेजें।
+Medical emergency. I need urgent medical help at my live location.	চিকিৎসার জরুরি অবস্থা। আমার বর্তমান অবস্থানে জরুরি চিকিৎসার সাহায্য দরকার।	चिकित्सा आपातकाल है। मुझे अपने वर्तमान स्थान पर तत्काल चिकित्सा सहायता चाहिए।
+Help, closer to you.	সাহায্য, আপনার আরও কাছে।	मदद, आपके और करीब।
+Connect. Respond. Save time.	যোগাযোগ করুন। সাড়া দিন। সময় বাঁচান।	जुड़ें। मदद करें। समय बचाएँ।
+Opening NearHelp…	NearHelp খুলছে…	NearHelp खुल रहा है…
+Locating...	অবস্থান খোঁজা হচ্ছে…	स्थान खोजा जा रहा है…
+Location permission needed	অবস্থানের অনুমতি প্রয়োজন	स्थान की अनुमति चाहिए
+Fracture / Leg & Limb Injury	হাড় ভাঙা / হাত-পায়ে আঘাত	हड्डी टूटना / हाथ-पैर में चोट
+Severe Bleeding & Hemorrhage	গুরুতর রক্তপাত	गंभीर रक्तस्राव
+Choking / Airway Obstruction	গলায় কিছু আটকে শ্বাসরোধ	गले में कुछ फँसना / साँस का रास्ता बंद होना
+Severe Burns & Scalds	আগুন বা গরম জিনিসে গুরুতর পোড়া	आग या गर्म चीज़ से गंभीर जलना
+Seizures & Convulsions	খিঁচুনি ও দেহ কাঁপা	दौरे और ऐंठन
+Stroke / Brain Attack (FAST)	স্ট্রোক / মস্তিষ্কে রক্তসঞ্চালনের সমস্যা (FAST)	स्ट्रोक / मस्तिष्क का दौरा (FAST)
+Asthma & Respiratory Distress	হাঁপানি ও শ্বাসকষ্ট	दमा और साँस लेने में परेशानी
+Anaphylaxis & Severe Allergy	অ্যানাফাইল্যাক্সিস ও গুরুতর অ্যালার্জি	एनाफिलैक्सिस और गंभीर एलर्जी
+Poisoning & Toxic Ingestion	বিষক্রিয়া ও বিষাক্ত কিছু খাওয়া	विषाक्तता और ज़हरीली चीज़ निगलना
+Heatstroke & Hyperthermia	হিটস্ট্রোক ও শরীর অতিরিক্ত গরম হওয়া	लू लगना और शरीर का अत्यधिक गर्म होना
+Hypothermia & Severe Cold	শরীরের তাপমাত্রা কমে যাওয়া ও তীব্র ঠান্ডা	शरीर का तापमान गिरना और गंभीर ठंड
+Snakebite & Envenomation	সাপের কামড় ও বিষক্রিয়া	साँप का काटना और विष का असर
+Head & Spinal Injury	মাথা ও মেরুদণ্ডে আঘাত	सिर और रीढ़ की चोट
+Diabetic Coma / Hypoglycemia	ডায়াবেটিক কোমা / রক্তে শর্করা কমে যাওয়া	डायबिटिक कोमा / रक्त में शर्करा कम होना
+High Voltage Electric Shock	উচ্চ ভোল্টেজে বিদ্যুৎস্পৃষ্ট হওয়া	तेज़ वोल्टेज का बिजली का झटका
+Drowning & Submersion Recovery	জলে ডুবে যাওয়া ও উদ্ধার	डूबना और बचाव
+Circulatory Shock & Collapse	রক্তসঞ্চালনের শক ও অজ্ঞান হয়ে পড়া	रक्तसंचार का शॉक और गिर पड़ना
+Cardiac / Chest Pain	হৃদযন্ত্রের সমস্যা / বুকে ব্যথা	हृदय की समस्या / सीने में दर्द
+Searching for nearby responders	কাছাকাছি সাহায্যকারী খোঁজা হচ্ছে	आसपास मदद करने वालों को खोजा जा रहा है
+Your medical SOS is active. You can ask the AI assistant for help while we wait for someone to accept.	আপনার চিকিৎসার SOS সক্রিয় আছে। কেউ অনুরোধ গ্রহণ করার অপেক্ষায় AI সহকারীর সাহায্য নিতে পারেন।	आपका चिकित्सा SOS सक्रिय है। किसी के अनुरोध स्वीकार करने तक आप AI सहायक से मदद माँग सकते हैं।
+Loading your medical SOS…	আপনার চিকিৎসার SOS লোড হচ্ছে…	आपका चिकित्सा SOS लोड हो रहा है…
+Your request is saved. Waiting for its latest status.	আপনার অনুরোধ সংরক্ষিত আছে। সর্বশেষ অবস্থার জন্য অপেক্ষা করা হচ্ছে।	आपका अनुरोध सहेजा गया है। नई स्थिति की प्रतीक्षा है।
+Sending not confirmed	পাঠানো নিশ্চিত হয়নি	भेजने की पुष्टि नहीं हुई है
+Cancellation not confirmed	বাতিল করা নিশ্চিত হয়নি	रद्द होने की पुष्टि नहीं हुई है
+Retry cancellation	বাতিল করার চেষ্টা আবার করুন	रद्द करने की दोबारा कोशिश करें
+Refresh status	বর্তমান অবস্থা আবার দেখুন	स्थिति दोबारा देखें
+Cancelling your SOS…	আপনার SOS বাতিল করা হচ্ছে…	आपका SOS रद्द किया जा रहा है…
+Refresh GPS location	GPS অবস্থান আবার খুঁজুন	GPS स्थान दोबारा खोजें
+Open location settings	অবস্থানের সেটিংস খুলুন	स्थान की सेटिंग खोलें
+Your SOS may have reached the server. Retry uses the same request to avoid duplicates.	আপনার SOS সার্ভারে পৌঁছে থাকতে পারে। আবার চেষ্টা করলে একই অনুরোধ ব্যবহার করা হবে, যাতে একাধিক অনুরোধ না যায়।	आपका SOS सर्वर तक पहुँच गया हो सकता है। दोबारा कोशिश करने पर वही अनुरोध इस्तेमाल होगा, ताकि एक से अधिक अनुरोध न बनें।
+We’ll confirm the cancellation with the server. Keep this request available until it is confirmed.	সার্ভার থেকে বাতিলের নিশ্চয়তা নেওয়া হবে। নিশ্চিত না হওয়া পর্যন্ত এই অনুরোধটি রাখুন।	सर्वर से रद्द होने की पुष्टि ली जाएगी। पुष्टि होने तक यह अनुरोध उपलब्ध रखें।
+Live updates unavailable	বর্তমান আপডেট পাওয়া যাচ্ছে না	वर्तमान अपडेट उपलब्ध नहीं हैं
+Live updates are unavailable. We’ll keep trying.	বর্তমান আপডেট পাওয়া যাচ্ছে না। আবার চেষ্টা চলবে।	वर्तमान अपडेट उपलब्ध नहीं हैं। दोबारा कोशिश जारी रहेगी।
+Waiting for the server to confirm cancellation.	সার্ভার থেকে বাতিলের নিশ্চয়তার অপেক্ষা করা হচ্ছে।	सर्वर से रद्द होने की पुष्टि की प्रतीक्षा है।
+Estimated arrival: %1$s	পৌঁছানোর আনুমানিক সময়: %1$s	पहुँचने का अनुमानित समय: %1$s
+Arrival estimate pending	পৌঁছানোর আনুমানিক সময় এখনও পাওয়া যায়নি	पहुँचने का अनुमानित समय अभी उपलब्ध नहीं है
+I’m on the way	আমি পথে আছি	मैं रास्ते में हूँ
+Ask for help while responders are being found or are on the way.	সাহায্যকারী খোঁজার সময় বা তিনি আসার পথে থাকলে সাহায্য চাইতে পারেন।	मदद करने वाले को खोजने या उनके पहुँचने तक सहायता माँगें।
+Call 112	112-এ কল করুন	112 पर कॉल करें
+Use this if the SOS was accidental or help is no longer needed. We’ll confirm cancellation with the server.	ভুল করে SOS পাঠানো হলে বা সাহায্য আর না লাগলে এটি ব্যবহার করুন। সার্ভার থেকে বাতিলের নিশ্চয়তা নেওয়া হবে।	SOS गलती से भेजा गया हो या अब मदद की ज़रूरत न हो तो इसका इस्तेमाल करें। सर्वर से रद्द होने की पुष्टि ली जाएगी।
+Your live map appears when your location is available.	আপনার অবস্থান পাওয়া গেলে বর্তমান মানচিত্র দেখা যাবে।	आपका स्थान उपलब्ध होने पर वर्तमान नक्शा दिखाई देगा।
+Resume pending SOS	অসম্পূর্ণ SOS আবার খুলুন	लंबित SOS दोबारा खोलें
+Check sending or cancellation without creating a duplicate	একাধিক অনুরোধ না পাঠিয়ে পাঠানো বা বাতিলের অবস্থা দেখুন	नया अनुरोध बनाए बिना भेजने या रद्द होने की स्थिति जाँचें

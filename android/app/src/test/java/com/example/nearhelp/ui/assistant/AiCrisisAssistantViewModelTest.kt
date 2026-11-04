@@ -17,6 +17,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
@@ -85,6 +86,21 @@ class AiCrisisAssistantViewModelTest {
         assertEquals("Image unavailable", viewModel.uiState.value.error)
         assertEquals("", repository.chatText)
         assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test fun generalSosDoesNotAssumeCardiacArrest_andReportedSymptomsReachTheAssistant() = runTest {
+        viewModel.initialize("general_emergency", "incident-conversation")
+        advanceUntilIdle()
+        assertNull(viewModel.uiState.value.protocol)
+        viewModel.sendChatMessage("What can I do?", emergencyDescription = "Medical emergency: Seizure")
+        advanceUntilIdle()
+        assertTrue(repository.chatText.contains("Medical emergency: Seizure"))
+        assertTrue(repository.chatText.contains("What can I do?"))
+        assertEquals("What can I do?", viewModel.uiState.value.chatMessages.first().text)
+        viewModel.initialize("general_emergency", "incident-conversation")
+        advanceUntilIdle()
+        assertEquals(2, viewModel.uiState.value.chatMessages.size)
+        assertEquals(1, repository.loads)
     }
 
     private class ProtocolRepository : IAiAgentRepository {

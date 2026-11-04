@@ -1,5 +1,6 @@
 package com.example.nearhelp.ui.profile
 
+import com.example.nearhelp.i18n.LocalizedText as Text
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -8,6 +9,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,6 +35,8 @@ import com.example.nearhelp.theme.appColorScheme
 import com.example.nearhelp.ui.design.*
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
+import com.example.nearhelp.i18n.AppLanguages
+import com.example.nearhelp.i18n.activity
 
 private val bloodGroups = listOf("A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−")
 
@@ -67,7 +72,7 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
     var certificateUri by rememberSaveable { mutableStateOf<String?>(null) }
     val certificatePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> certificateUri = uri?.toString() }
     val history = remember(page, user?.id) { NearHelpApplication.instance.tokenStorage.getIncidentHistory() }
-    fun goBack() { if (!state.isSaving) { page = if (page == "add-contact" || page == "edit-contact") "contacts" else "profile"; viewModel.clearError() } }
+    fun goBack() { if (!state.isSaving) { page = when (page) { "add-contact", "edit-contact" -> "contacts"; "app-language", "languages" -> "communication"; else -> "profile" }; viewModel.clearError() } }
     fun editDetails() { name = user?.name.orEmpty(); phone = user?.phone.orEmpty(); blood = user?.bloodGroup.orEmpty(); page = "edit-profile" }
     fun editMedical() {
         blood = medical?.bloodGroup.orEmpty(); conditions = medical?.medicalConditions.orEmpty().joinToString("\n")
@@ -84,13 +89,13 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
     }
     LaunchedEffect(state.successMessage) {
         if (state.successMessage != null) {
-            page = when (page) { "add-contact", "edit-contact" -> "contacts"; "contacts" -> "contacts"; "qualifications" -> "verification"; else -> "profile" }
+            page = when (page) { "add-contact", "edit-contact" -> "contacts"; "contacts" -> "contacts"; "languages" -> "communication"; "qualifications" -> "verification"; else -> "profile" }
             viewModel.clearSuccessMessage()
         }
     }
     BackHandler(enabled = page != "profile") { goBack() }
     Column(modifier.fillMaxSize()) {
-        CarePage(if (page == "profile") null else when (page) { "appearance" -> "Appearance"; "edit-profile" -> "Edit personal details"; "medical" -> "Medical information"; "contacts" -> "Emergency contacts"; "add-contact" -> "Add emergency contact"; "edit-contact" -> "Edit emergency contact"; "languages" -> "Languages"; "qualifications" -> "Responder qualifications"; "verification" -> "Verification status"; "history" -> "Emergency history"; else -> "Impact and statistics" },
+        CarePage(if (page == "profile") null else when (page) { "appearance" -> "Appearance"; "edit-profile" -> "Edit personal details"; "medical" -> "Medical information"; "contacts" -> "Emergency contacts"; "add-contact" -> "Add emergency contact"; "edit-contact" -> "Edit emergency contact"; "languages" -> "Languages you speak"; "communication" -> "Communication"; "app-language" -> "App language"; "qualifications" -> "Responder qualifications"; "verification" -> "Verification status"; "history" -> "Emergency history"; else -> "Impact and statistics" },
             if (page == "profile") null else ({ goBack() }), Modifier.weight(1f)) {
             if (state.isLoading || state.isSaving) LinearProgressIndicator(Modifier.fillMaxWidth())
             state.error?.let { CareNote("Could not complete that action", it, error = true); if (page == "profile") CareButton("Retry profile", viewModel::loadProfile) }
@@ -154,9 +159,27 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
                     }, style = CareButtonStyle.PRIMARY, enabled = !state.isSaving && name.isNotBlank() && phone.count(Char::isDigit) >= 8)
                     CareButton("Cancel", { goBack() }, style = CareButtonStyle.QUIET, enabled = !state.isSaving)
                 }
+                "communication" -> {
+                    CareHeading("Communication settings", "Choose how you read the app and communicate with others.")
+                    CareRow("App language", AppLanguages.interfaceLanguages.first { it.code == AppLanguages.selected(context) }.label, Icons.Outlined.Translate) { page = "app-language" }
+                    CareRow("Languages you speak", user?.languages?.mapNotNull { code -> AppLanguages.communicationLanguages.firstOrNull { it.code == code }?.label }?.joinToString(", ") ?: "Choose communication languages", Icons.Outlined.Language) {
+                        selectedLanguages = user?.languages.orEmpty().filter { code -> AppLanguages.communicationLanguages.any { it.code == code } }.ifEmpty { listOf(AppLanguages.selected(context)) }; page = "languages"
+                    }
+                    CareMuted("App language changes the interface. Spoken languages help others communicate with you.")
+                }
+                "app-language" -> {
+                    CareHeading("App language", "Choose a language. The interface changes immediately.")
+                    AppLanguages.interfaceLanguages.forEach { option ->
+                        Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).selectable(selected = AppLanguages.selected(context) == option.code, role = Role.RadioButton,
+                            onClick = { if (AppLanguages.selected(context) != option.code) context.activity()?.let { AppLanguages.select(it, option.code) } }).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(AppLanguages.selected(context) == option.code, onClick = null)
+                            Text(option.label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
                 "languages" -> {
                     CareHeading("Your languages", "Select the languages you can communicate in.")
-                    listOf("en" to "English", "bn" to "বাংলা · Bengali", "hi" to "हिन्दी · Hindi", "es" to "Español · Spanish").forEach { (code, label) ->
+                    AppLanguages.communicationLanguages.forEach { (code, label) ->
                         CareCheck(label, code in selectedLanguages, { checked -> selectedLanguages = if (checked) selectedLanguages + code else selectedLanguages - code }, !state.isSaving)
                     }
                     CareButton("Save language preferences", { viewModel.updateLanguages(selectedLanguages) }, style = CareButtonStyle.PRIMARY, enabled = selectedLanguages.isNotEmpty() && !state.isSaving)
@@ -208,9 +231,9 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
                     ProfileSection("Personal") {
                         CareRow("Medical information", "Blood group, allergies and conditions", Icons.Outlined.MonitorHeart) { editMedical() }
                         CareRow("Emergency contacts", "People to reach in an emergency", Icons.Outlined.Phone) { page = "contacts" }
-                        CareRow("Languages", user?.languages?.joinToString(", ") ?: "Languages you communicate in", Icons.Outlined.Language) { selectedLanguages = user?.languages ?: listOf("en"); page = "languages" }
                     }
                     ProfileSection("Settings") {
+                        CareRow("Communication", "App language and languages you speak", Icons.Outlined.Language) { page = "communication" }
                         CareRow("Appearance", "${ThemeManager.selectedTheme.title} · 4 themes available", Icons.Outlined.Palette) { page = "appearance" }
                         CareButton(if (loggingOut) "Logging out…" else "Log out", onLogout, style = CareButtonStyle.QUIET,
                             icon = Icons.AutoMirrored.Outlined.Logout, enabled = !loggingOut && !state.isSaving)

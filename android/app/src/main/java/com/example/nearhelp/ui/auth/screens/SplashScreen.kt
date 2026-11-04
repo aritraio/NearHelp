@@ -1,5 +1,6 @@
 package com.example.nearhelp.ui.auth.screens
 
+import com.example.nearhelp.i18n.LocalizedText as Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

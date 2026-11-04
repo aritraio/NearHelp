@@ -1,5 +1,6 @@
 package com.example.nearhelp.ui.home
 
+import com.example.nearhelp.i18n.LocalizedText as Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -38,6 +39,7 @@ fun HomeScreen(
     var draft by rememberSaveable { mutableStateOf(landmark) }
     // Read again whenever Home is re-entered after an incident is created or closed.
     val activeIncident = NearHelpApplication.instance.tokenStorage.getActiveIncidentId()
+    val pendingSos = NearHelpApplication.instance.tokenStorage.getPendingSosKey() != null
     LaunchedEffect(editLocation) { onOverlayStateChanged(editLocation) }
     Column(modifier.fillMaxSize()) {
         CarePage(if (editLocation) "Your location" else null, if (editLocation) ({ editLocation = false }) else null, Modifier.weight(1f)) {
@@ -57,6 +59,8 @@ fun HomeScreen(
                 }
                 if (!location.hasPermission) CareButton("Allow location access", requestLocation, icon = Icons.Outlined.MyLocation)
                 if (activeIncident != null) CareButton("Track your medical SOS", onNavigateToTracking, style = CareButtonStyle.PRIMARY, subtitle = "View acceptance and live arrival status", icon = Icons.Outlined.Navigation)
+                else if (pendingSos) CareButton("Resume pending SOS", onCreateSos, style = CareButtonStyle.PRIMARY,
+                    subtitle = "Check sending or cancellation without creating a duplicate", icon = Icons.Outlined.Refresh)
                 else CareSosHoldButton(onTrigger = onCreateSos, holdDurationMillis = 2000L)
                 Column {
                     CareRow("Nearby medical requests", "Help someone in your community", Icons.Outlined.Groups, onNavigateToTracking)

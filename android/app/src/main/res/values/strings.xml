@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">NearHelp</string>
-    <string name="google_maps_key">AIzaSyDGsy83HJ_ziz-EzyYatfN9l12pTY75TSE</string>
+    <string name="app_name" translatable="false">NearHelp</string>
+    <string name="google_maps_key" translatable="false">AIzaSyDGsy83HJ_ziz-EzyYatfN9l12pTY75TSE</string>
 </resources>

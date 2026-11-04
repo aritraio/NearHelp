@@ -19,6 +19,9 @@ import com.example.nearhelp.theme.NearHelpTheme
 import com.example.nearhelp.theme.ThemeManager
 
 class MainActivity : ComponentActivity() {
+  override fun attachBaseContext(newBase: android.content.Context) {
+    super.attachBaseContext(com.example.nearhelp.i18n.AppLanguages.wrap(newBase))
+  }
   private var pendingIncident by mutableStateOf<String?>(null)
   private fun readIncident(intent: Intent?) {
     pendingIncident = intent?.getStringExtra("incident_id")?.takeIf { runCatching { UUID.fromString(it) }.isSuccess }
