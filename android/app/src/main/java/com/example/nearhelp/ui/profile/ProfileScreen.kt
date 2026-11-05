@@ -37,6 +37,10 @@ import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
 import com.example.nearhelp.i18n.AppLanguages
 import com.example.nearhelp.i18n.activity
+import com.example.nearhelp.data.api.RetrofitClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
 private val bloodGroups = listOf("A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−")
 
@@ -70,6 +74,10 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
     var organization by rememberSaveable { mutableStateOf("") }
     var certificateId by rememberSaveable { mutableStateOf("") }
     var certificateUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var serverUrlInput by rememberSaveable { mutableStateOf(RetrofitClient.getEffectiveBaseUrl()) }
+    var pingResult by remember { mutableStateOf<String?>(null) }
+    var pingLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     val certificatePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> certificateUri = uri?.toString() }
     val history = remember(page, user?.id) { NearHelpApplication.instance.tokenStorage.getIncidentHistory() }
     fun goBack() { if (!state.isSaving) { page = when (page) { "add-contact", "edit-contact" -> "contacts"; "app-language", "languages" -> "communication"; else -> "profile" }; viewModel.clearError() } }
@@ -83,6 +91,39 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
         contactId = item?.id; name = item?.name.orEmpty(); phone = item?.phone.orEmpty(); relationship = item?.relationship ?: "Parent"
         page = if (item == null) "add-contact" else "edit-contact"
     }
+    fun testServer(url: String) {
+        pingLoading = true
+        pingResult = null
+        coroutineScope.launch(Dispatchers.IO) {
+            val start = System.currentTimeMillis()
+            try {
+                val cleanUrl = url.trim().trimEnd('/') + "/health"
+                val request = okhttp3.Request.Builder().url(cleanUrl).build()
+                val client = okhttp3.OkHttpClient.Builder()
+                    .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                    .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                    .build()
+                val response = client.newCall(request).execute()
+                val elapsed = System.currentTimeMillis() - start
+                val body = response.body?.string().orEmpty()
+                withContext(Dispatchers.Main) {
+                    pingLoading = false
+                    if (response.isSuccessful && body.contains("healthy")) {
+                        val dbConnected = body.contains("\"database\":\"connected\"") || body.contains("connected")
+                        val engine = if (body.contains("PostGIS")) "PostGIS" else if (body.contains("SQLite")) "SQLite" else "Active"
+                        pingResult = "Database: " + (if (dbConnected) "Connected ($engine)" else "Disconnected") + " · Latency: ${elapsed}ms"
+                    } else {
+                        pingResult = "Server status ${response.code} · ${elapsed}ms"
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    pingLoading = false
+                    pingResult = "Connection error: ${e.message ?: "Server unreachable"}"
+                }
+            }
+        }
+    }
     LaunchedEffect(state.showQualificationsDialog, state.showEmergencyHistoryDialog) {
         if (state.showQualificationsDialog) { page = "qualifications"; viewModel.closeQualificationsDialog() }
         if (state.showEmergencyHistoryDialog) { page = "history"; viewModel.closeEmergencyHistoryDialog() }
@@ -95,11 +136,40 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
     }
     BackHandler(enabled = page != "profile") { goBack() }
     Column(modifier.fillMaxSize()) {
-        CarePage(if (page == "profile") null else when (page) { "appearance" -> "Appearance"; "edit-profile" -> "Edit personal details"; "medical" -> "Medical information"; "contacts" -> "Emergency contacts"; "add-contact" -> "Add emergency contact"; "edit-contact" -> "Edit emergency contact"; "languages" -> "Languages you speak"; "communication" -> "Communication"; "app-language" -> "App language"; "qualifications" -> "Responder qualifications"; "verification" -> "Verification status"; "history" -> "Emergency history"; else -> "Impact and statistics" },
+        CarePage(if (page == "profile") null else when (page) { "appearance" -> "Appearance"; "server" -> "Server & DB connection"; "edit-profile" -> "Edit personal details"; "medical" -> "Medical information"; "contacts" -> "Emergency contacts"; "add-contact" -> "Add emergency contact"; "edit-contact" -> "Edit emergency contact"; "languages" -> "Languages you speak"; "communication" -> "Communication"; "app-language" -> "App language"; "qualifications" -> "Responder qualifications"; "verification" -> "Verification status"; "history" -> "Emergency history"; else -> "Impact and statistics" },
             if (page == "profile") null else ({ goBack() }), Modifier.weight(1f)) {
             if (state.isLoading || state.isSaving) LinearProgressIndicator(Modifier.fillMaxWidth())
             state.error?.let { CareNote("Could not complete that action", it, error = true); if (page == "profile") CareButton("Retry profile", viewModel::loadProfile) }
             when (page) {
+                "server" -> {
+                    CareHeading("Server & Database Connection", "Verify connectivity, latency, and database status.")
+                    CareField("Server Base URL", serverUrlInput, { serverUrlInput = it })
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CareButton("Cloud (Render)", {
+                            serverUrlInput = "https://nearhelp-backend-7sfj.onrender.com/"
+                            testServer(serverUrlInput)
+                        }, Modifier.weight(1f))
+                        CareButton("Local (10.0.2.2)", {
+                            serverUrlInput = "http://10.0.2.2:8000/"
+                            testServer(serverUrlInput)
+                        }, Modifier.weight(1f))
+                    }
+                    CareButton(if (pingLoading) "Testing connection…" else "Test connection & check DB", {
+                        testServer(serverUrlInput)
+                    }, icon = Icons.Outlined.Speed, enabled = !pingLoading && serverUrlInput.isNotBlank())
+                    pingResult?.let {
+                        val isSuccess = it.contains("Connected") || it.contains("status 200")
+                        CareNote(if (isSuccess) "Connection verified" else "Connection result", it, icon = if (isSuccess) Icons.Outlined.CheckCircle else Icons.Outlined.ErrorOutline, error = !isSuccess)
+                    }
+                    CareButton("Save & Switch Server", {
+                        val target = serverUrlInput.trim().trimEnd('/') + "/"
+                        NearHelpApplication.instance.tokenStorage.saveServerBaseUrl(target)
+                        RetrofitClient.setBaseUrl(target)
+                        viewModel.loadProfile()
+                        page = "profile"
+                    }, style = CareButtonStyle.PRIMARY, enabled = serverUrlInput.isNotBlank())
+                    CareButton("Cancel", { goBack() }, style = CareButtonStyle.QUIET)
+                }
                 "appearance" -> {
                     CareHeading("Choose your theme", "Find the look that feels comfortable to read.")
                     AppTheme.entries.chunked(2).forEach { pair -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -233,6 +303,10 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
                         CareRow("Emergency contacts", "People to reach in an emergency", Icons.Outlined.Phone) { page = "contacts" }
                     }
                     ProfileSection("Settings") {
+                        CareRow("Server connection", RetrofitClient.getEffectiveBaseUrl().removePrefix("https://").removePrefix("http://").trimEnd('/'), Icons.Outlined.Dns) {
+                            serverUrlInput = RetrofitClient.getEffectiveBaseUrl()
+                            page = "server"
+                        }
                         CareRow("Communication", "App language and languages you speak", Icons.Outlined.Language) { page = "communication" }
                         CareRow("Appearance", "${ThemeManager.selectedTheme.title} · 4 themes available", Icons.Outlined.Palette) { page = "appearance" }
                         CareButton(if (loggingOut) "Logging out…" else "Log out", onLogout, style = CareButtonStyle.QUIET,

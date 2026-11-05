@@ -125,6 +125,7 @@ app.include_router(ai_ws_router)
 
 
 @app.get("/health", tags=["Health"])
+@app.get("/api/v1/health", tags=["Health"])
 async def health_check(db: AsyncSession = Depends(get_db)):
     """Readiness reflects an actual database round trip."""
     try:

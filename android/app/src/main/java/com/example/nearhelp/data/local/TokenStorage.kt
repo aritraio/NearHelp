@@ -25,6 +25,8 @@ interface ITokenStorage {
   fun isLoggedIn(): Boolean
   fun saveFcmToken(token: String)
   fun getFcmToken(): String?
+  fun saveCachedUserProfile(user: UserResponse) {}
+  fun getCachedUserProfile(): UserResponse? = null
   fun clear()
 }
 
@@ -59,6 +61,7 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     refreshToken: String,
     user: UserResponse,
   ) {
+    saveCachedUserProfile(user)
     sharedPreferences.edit().apply {
       if (getUserId() != user.id) {
         remove("active_incident_id")
@@ -76,6 +79,21 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
       putBoolean(KEY_IS_ANONYMOUS, user.isAnonymous)
       putString(KEY_AUTH_PROVIDER, user.authProvider)
       apply()
+    }
+  }
+
+  override fun saveCachedUserProfile(user: UserResponse) {
+    try {
+      sharedPreferences.edit().putString(KEY_CACHED_USER_PROFILE, Gson().toJson(user)).apply()
+    } catch (_: Exception) {}
+  }
+
+  override fun getCachedUserProfile(): UserResponse? {
+    val json = sharedPreferences.getString(KEY_CACHED_USER_PROFILE, null) ?: return null
+    return try {
+      Gson().fromJson(json, UserResponse::class.java)
+    } catch (_: Exception) {
+      null
     }
   }
 
@@ -175,5 +193,6 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     private const val KEY_FCM_TOKEN = "fcm_token"
     private const val KEY_SERVER_BASE_URL = "server_base_url"
     private const val KEY_GEMINI_API_KEY = "gemini_api_key"
+    private const val KEY_CACHED_USER_PROFILE = "cached_user_profile"
   }
 }

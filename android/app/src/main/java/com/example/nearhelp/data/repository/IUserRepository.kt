@@ -56,4 +56,5 @@ interface IUserRepository {
   fun getStoredUserName(): String?
   fun getStoredUserEmail(): String?
   fun isAnonymous(): Boolean
+  fun getCachedProfile(): UserResponse? = null
 }

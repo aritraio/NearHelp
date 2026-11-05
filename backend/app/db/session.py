@@ -45,21 +45,33 @@ def compile_geometry_sqlite(element, compiler, **kw):
 
 is_sqlite = "sqlite" in settings.DATABASE_URL
 
-# Asynchronous SQLAlchemy Engine with NullPool for robust event loop lifecycle
-async_engine = create_async_engine(
-    _get_async_url(settings.DATABASE_URL),
-    echo=False,
-    future=True,
-    poolclass=StaticPool if is_sqlite else NullPool,
-    connect_args=(
-        {"check_same_thread": False}
-        if is_sqlite
-        else {
+# Asynchronous SQLAlchemy Engine:
+# SQLite uses StaticPool for in-memory or single-file test workflows.
+# PostgreSQL uses AsyncAdaptedQueuePool with pre-ping to reuse warm TLS connections
+# rather than renegotiating SSL/auth handshakes on every single request.
+if is_sqlite:
+    async_engine = create_async_engine(
+        _get_async_url(settings.DATABASE_URL),
+        echo=False,
+        future=True,
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False},
+    )
+else:
+    async_engine = create_async_engine(
+        _get_async_url(settings.DATABASE_URL),
+        echo=False,
+        future=True,
+        pool_size=10,
+        max_overflow=20,
+        pool_timeout=30,
+        pool_recycle=1800,
+        pool_pre_ping=True,
+        connect_args={
             "statement_cache_size": 0,
             "prepared_statement_cache_size": 0,
-        }
-    ),
-)
+        },
+    )
 
 
 @event.listens_for(async_engine.sync_engine, "connect")

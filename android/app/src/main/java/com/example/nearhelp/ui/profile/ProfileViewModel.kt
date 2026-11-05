@@ -48,12 +48,32 @@ class ProfileViewModel(
   val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
   init {
+    val cachedUser = userRepository.getCachedProfile()
+    if (cachedUser != null) {
+      _uiState.value = ProfileUiState(
+        isLoading = false,
+        user = cachedUser,
+        emergencyContacts = cachedUser.emergencyContacts,
+        medicalId = MedicalIdResponse(
+          bloodGroup = cachedUser.bloodGroup,
+          medicalConditions = cachedUser.medicalConditions,
+          knownAllergies = cachedUser.knownAllergies,
+          hasPacemaker = cachedUser.hasPacemaker,
+          isOrganDonor = cachedUser.isOrganDonor,
+          medicalNotes = cachedUser.medicalNotes,
+          emergencyContacts = cachedUser.emergencyContacts,
+          isEncryptedAtRest = true,
+        ),
+      )
+    }
     loadProfile()
   }
 
   fun loadProfile() {
     viewModelScope.launch {
-      _uiState.update { it.copy(isLoading = true, error = null) }
+      if (_uiState.value.user == null) {
+        _uiState.update { it.copy(isLoading = true, error = null) }
+      }
       val result = userRepository.getProfile()
       result.fold(
         onSuccess = { user ->
@@ -80,7 +100,7 @@ class ProfileViewModel(
           _uiState.update {
             it.copy(
               isLoading = false,
-              error = err.message ?: "Failed to load profile",
+              error = if (it.user == null) (err.message ?: "Failed to load profile") else null,
             )
           }
         },
@@ -360,20 +380,60 @@ class ProfileViewModel(
       try {
         val result = withContext(Dispatchers.IO) {
           val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
-          val extension = mapOf("application/pdf" to "pdf", "image/jpeg" to "jpg", "image/png" to "png", "image/webp" to "webp")[mime]
+          val rawExtension = mapOf("application/pdf" to "pdf", "image/jpeg" to "jpg", "image/png" to "png", "image/webp" to "webp")[mime]
             ?: error("Choose a PDF, PNG, JPG or WebP certificate.")
-          val output = java.io.ByteArrayOutputStream()
-          context.contentResolver.openInputStream(uri)?.use { input ->
-            val buffer = ByteArray(8192)
-            while (true) {
-              val count = input.read(buffer); if (count < 0) break
-              check(output.size() + count <= 10 * 1024 * 1024) { "Certificate must be smaller than 10 MB." }
-              output.write(buffer, 0, count)
+
+          val (uploadBytes, uploadMime, uploadExtension) = if (mime.startsWith("image/") || rawExtension in listOf("jpg", "jpeg", "png", "webp")) {
+            val compressed = runCatching {
+              val boundsOptions = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+              context.contentResolver.openInputStream(uri)?.use { input ->
+                android.graphics.BitmapFactory.decodeStream(input, null, boundsOptions)
+              }
+              if (boundsOptions.outWidth > 0 && boundsOptions.outHeight > 0) {
+                var inSampleSize = 1
+                val maxDim = maxOf(boundsOptions.outWidth, boundsOptions.outHeight)
+                while (maxDim / inSampleSize > 1600) { inSampleSize *= 2 }
+                val decodeOptions = android.graphics.BitmapFactory.Options().apply { this.inSampleSize = inSampleSize }
+                val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
+                  android.graphics.BitmapFactory.decodeStream(input, null, decodeOptions)
+                }
+                if (bitmap != null) {
+                  val bos = java.io.ByteArrayOutputStream()
+                  bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 82, bos)
+                  bitmap.recycle()
+                  Triple(bos.toByteArray(), "image/jpeg", "jpg")
+                } else null
+              } else null
+            }.getOrNull()
+
+            compressed ?: run {
+              val output = java.io.ByteArrayOutputStream()
+              context.contentResolver.openInputStream(uri)?.use { input ->
+                val buffer = ByteArray(8192)
+                while (true) {
+                  val count = input.read(buffer); if (count < 0) break
+                  check(output.size() + count <= 10 * 1024 * 1024) { "Certificate must be smaller than 10 MB." }
+                  output.write(buffer, 0, count)
+                }
+              } ?: error("Could not open the certificate.")
+              Triple(output.toByteArray(), mime, rawExtension)
             }
-          } ?: error("Could not open the certificate.")
+          } else {
+            val output = java.io.ByteArrayOutputStream()
+            context.contentResolver.openInputStream(uri)?.use { input ->
+              val buffer = ByteArray(8192)
+              while (true) {
+                val count = input.read(buffer); if (count < 0) break
+                check(output.size() + count <= 10 * 1024 * 1024) { "Certificate must be smaller than 10 MB." }
+                output.write(buffer, 0, count)
+              }
+            } ?: error("Could not open the certificate.")
+            Triple(output.toByteArray(), mime, rawExtension)
+          }
+
           val code = when (title) { "CPR / AED certified" -> "CPR_CERTIFIED"; "First-aid provider" -> "FIRST_AID"; "EMT / Paramedic" -> "EMT"; "Doctor / Physician" -> "DOCTOR"; "Registered nurse" -> "NURSE"; else -> "COMMUNITY_FIRST_RESPONDER" }
           RetrofitClient.getUserApiService().claimSkillWithCertificate(SessionTokens.bearer(), code.toRequestBody("text/plain".toMediaType()),
-            MultipartBody.Part.createFormData("file", "certificate.$extension", output.toByteArray().toRequestBody(mime.toMediaType())),
+            MultipartBody.Part.createFormData("file", "certificate.$uploadExtension", uploadBytes.toRequestBody(uploadMime.toMediaType())),
             "Issuing organization: $organization\nCertificate ID: $idNumber".toRequestBody("text/plain".toMediaType()))
         }
         check(result.isSuccessful) { "The certificate could not be submitted (${result.code()}). Please try again." }
