@@ -28,6 +28,7 @@ class UserRepository(
       val response = apiService.getCurrentUserProfile(getBearerToken())
       if (response.isSuccessful && response.body() != null) {
         val user = response.body()!!
+        tokenStorage.saveCachedUserProfile(user)
         Result.success(user)
       } else {
         val errorMsg = response.errorBody()?.string() ?: "Failed to load profile (${response.code()})"
@@ -65,7 +66,9 @@ class UserRepository(
       )
       val response = apiService.updateUserProfile(getBearerToken(), req)
       if (response.isSuccessful && response.body() != null) {
-        Result.success(response.body()!!)
+        val updated = response.body()!!
+        tokenStorage.saveCachedUserProfile(updated)
+        Result.success(updated)
       } else {
         val errorMsg = response.errorBody()?.string() ?: "Failed to update profile (${response.code()})"
         Result.failure(Exception(errorMsg))
@@ -202,7 +205,9 @@ class UserRepository(
       val req = LanguagePreferencesRequest(languages = languages)
       val response = apiService.updateLanguages(getBearerToken(), req)
       if (response.isSuccessful && response.body() != null) {
-        Result.success(response.body()!!)
+        val updated = response.body()!!
+        tokenStorage.saveCachedUserProfile(updated)
+        Result.success(updated)
       } else {
         val errorMsg = response.errorBody()?.string() ?: "Failed to update languages (${response.code()})"
         Result.failure(Exception(errorMsg))
@@ -216,4 +221,5 @@ class UserRepository(
   override fun getStoredUserName(): String? = tokenStorage.getUserName()
   override fun getStoredUserEmail(): String? = tokenStorage.getUserEmail()
   override fun isAnonymous(): Boolean = tokenStorage.isAnonymous()
+  override fun getCachedProfile(): UserResponse? = tokenStorage.getCachedUserProfile()
 }

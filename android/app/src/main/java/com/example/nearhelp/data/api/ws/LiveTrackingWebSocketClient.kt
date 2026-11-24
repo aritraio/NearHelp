@@ -42,6 +42,18 @@ sealed class TrackingIncomingEvent {
   data class RawMessageReceived(val type: String, val rawJson: String) : TrackingIncomingEvent()
 }
 
+interface IncidentRealtime {
+  val connectionStatus: StateFlow<ConnectionStatus>
+  val incomingEvents: SharedFlow<TrackingIncomingEvent>
+  fun connect(incidentId: String, token: String? = null)
+  fun disconnect(closeCode: Int = 1000, reason: String = "Client Disconnected")
+  fun close()
+  fun requestSnapshot(): Boolean
+  fun sendLocationUpdate(latitude: Double, longitude: Double, heading: Float? = null, speedMps: Double? = null, accuracy: Float? = null): Boolean
+  fun sendChatMessage(text: String, language: String = "en"): Boolean
+  fun sendStatusUpdate(status: String, note: String? = null): Boolean
+}
+
 class LiveTrackingWebSocketClient(
   private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
     .readTimeout(0, TimeUnit.MILLISECONDS)
@@ -49,7 +61,7 @@ class LiveTrackingWebSocketClient(
     .build(),
   private val gson: Gson = Gson(),
   private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + Job())
-) {
+) : IncidentRealtime {
 
   private val tag = "LiveTrackingWS"
 
@@ -79,10 +91,10 @@ class LiveTrackingWebSocketClient(
   }
 
   private val _connectionStatus = MutableStateFlow(ConnectionStatus.DISCONNECTED)
-  val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
+  override val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
 
   private val _incomingEvents = MutableSharedFlow<TrackingIncomingEvent>(extraBufferCapacity = 64)
-  val incomingEvents: SharedFlow<TrackingIncomingEvent> = _incomingEvents.asSharedFlow()
+  override val incomingEvents: SharedFlow<TrackingIncomingEvent> = _incomingEvents.asSharedFlow()
 
   private var heartbeatJob: Job? = null
   private var reconnectJob: Job? = null
@@ -98,7 +110,7 @@ class LiveTrackingWebSocketClient(
     }
   }
 
-  fun connect(incidentId: String, token: String? = null) {
+  override fun connect(incidentId: String, token: String?) {
     currentIncidentId = incidentId
     currentToken = token
     disconnect(closeCode = 1000, reason = "Reconnecting to new session")
@@ -230,12 +242,12 @@ class LiveTrackingWebSocketClient(
     }
   }
 
-  fun sendLocationUpdate(
+  override fun sendLocationUpdate(
     latitude: Double,
     longitude: Double,
-    heading: Float? = null,
-    speedMps: Double? = null,
-    accuracy: Float? = null
+    heading: Float?,
+    speedMps: Double?,
+    accuracy: Float?
   ): Boolean {
     val payload = JsonObject().apply {
       addProperty("type", "location_update")
@@ -249,7 +261,7 @@ class LiveTrackingWebSocketClient(
     return sendMessage(payload.toString())
   }
 
-  fun sendStatusUpdate(status: String, note: String? = null): Boolean {
+  override fun sendStatusUpdate(status: String, note: String?): Boolean {
     val payload = JsonObject().apply {
       addProperty("type", "status_update")
       addProperty("status", status)
@@ -267,7 +279,7 @@ class LiveTrackingWebSocketClient(
     return sendMessage(payload.toString())
   }
 
-  fun sendChatMessage(text: String, language: String = "en"): Boolean {
+  override fun sendChatMessage(text: String, language: String): Boolean {
     val payload = JsonObject().apply {
       addProperty("type", "chat_message")
       addProperty("text", text)
@@ -284,7 +296,7 @@ class LiveTrackingWebSocketClient(
     return sendMessage(payload.toString())
   }
 
-  fun requestSnapshot(): Boolean {
+  override fun requestSnapshot(): Boolean {
     val payload = JsonObject().apply {
       addProperty("type", "get_snapshot")
     }
@@ -300,7 +312,7 @@ class LiveTrackingWebSocketClient(
     return false
   }
 
-  fun disconnect(closeCode: Int = 1000, reason: String = "Client Disconnected") {
+  override fun disconnect(closeCode: Int, reason: String) {
     sessionGeneration++
     shouldAutoReconnect = false
     reconnectJob?.cancel()
@@ -315,7 +327,7 @@ class LiveTrackingWebSocketClient(
     }
   }
 
-  fun close() { disconnect(); scope.coroutineContext[Job]?.cancel() }
+  override fun close() { disconnect(); scope.coroutineContext[Job]?.cancel() }
 
   private fun logD(msg: String) {
     try {

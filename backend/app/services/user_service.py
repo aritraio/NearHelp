@@ -22,7 +22,11 @@ from app.schemas.user import (
 logger = logging.getLogger(__name__)
 
 # Valid ISO 639-1 language code subset supported by NearHelp
-ALLOWED_LANGUAGES = {"en", "bn", "hi", "es", "fr", "ar", "de", "zh", "ja", "ta", "te", "mr", "gu", "ur"}
+ALLOWED_LANGUAGES = {
+    "en", "bn", "hi", "es", "fr", "ar", "de", "zh", "ja", "ta", "te", "mr", "gu", "ur",
+    "as", "brx", "doi", "kn", "ks", "kok", "mai", "ml", "mni", "ne", "or", "pa", "sa", "sat", "sd",
+    "bho", "raj", "hne", "mag", "gbm", "kfy", "tcy", "kha",
+}
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg"}
 MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
 MAX_EMERGENCY_CONTACTS = 5
@@ -329,7 +333,7 @@ class UserService:
 
     @classmethod
     def validate_languages(cls, languages: list[str]) -> None:
-        """Validate ISO 639-1 language codes."""
+        """Accept legacy ISO 639-1 preferences and supported ISO 639-3 Indian languages."""
         if not languages:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -340,5 +344,5 @@ class UserService:
             if clean not in ALLOWED_LANGUAGES and len(clean) != 2:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid ISO 639-1 language code '{code}'.",
+                    detail=f"Unsupported language code '{code}'.",
                 )

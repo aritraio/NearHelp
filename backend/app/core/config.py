@@ -58,6 +58,11 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-2.0-flash"
 
+    # Initial Administrator Bootstrap (For environments without shell access like Render Free tier)
+    INITIAL_ADMIN_EMAIL: str = "admin@nearhelp.ai"
+    INITIAL_ADMIN_PASSWORD: str = "AdminPassword123!"
+    INITIAL_ADMIN_NAME: str = "Administrator"
+
     from pydantic import model_validator
 
     @model_validator(mode="after")

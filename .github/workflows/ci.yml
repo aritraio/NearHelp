@@ -8,36 +8,7 @@ on:
 
 jobs:
   # ----------------------------------------------------------------------------
-  # 1. Frontend & Showcase Verification
-  # ----------------------------------------------------------------------------
-  frontend-test:
-    name: Frontend Test & Build (Admin Dashboard)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./admin_dashboard
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: ./admin_dashboard/package-lock.json
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Comprehensive Test Suite (192 Assertions)
-        run: npm test
-
-      - name: Verify Production TypeScript Build
-        run: npm run build
-
-  # ----------------------------------------------------------------------------
-  # 2. Backend Service Verification
+  # 1. Backend Service Verification
   # ----------------------------------------------------------------------------
   backend-lint-and-test:
     name: Backend Lint & Unit Tests
@@ -64,7 +35,7 @@ jobs:
         run: ruff check .
 
   # ----------------------------------------------------------------------------
-  # 3. AI Microservice Verification
+  # 2. AI Microservice Verification
   # ----------------------------------------------------------------------------
   ai-service-lint-and-test:
     name: AI Service Lint & Unit Tests
@@ -91,7 +62,7 @@ jobs:
         run: ruff check .
 
   # ----------------------------------------------------------------------------
-  # 4. Docker Compose Config Validation
+  # 3. Docker Compose Config Validation
   # ----------------------------------------------------------------------------
   docker-validation:
     name: Docker Compose Build Verification

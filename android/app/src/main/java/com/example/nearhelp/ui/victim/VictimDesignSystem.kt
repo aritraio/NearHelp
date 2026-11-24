@@ -1,5 +1,8 @@
 package com.example.nearhelp.ui.victim
 
+import com.example.nearhelp.i18n.LocalizedText as Text
+import com.example.nearhelp.ui.navigation.AppMotion
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -95,7 +98,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,46 +130,13 @@ object VictimShapes {
 }
 
 @Composable
-fun NearHelpWordmark(
-    fontSize: Int = 30,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = buildAnnotatedString {
-            withStyle(SpanStyle(color = VictimTextDark)) { append("Near") }
-            withStyle(SpanStyle(color = VictimPrimary)) { append("Help") }
-        },
-        style = MaterialTheme.typography.headlineMedium.copy(
-            fontWeight = FontWeight.Black,
-            fontSize = fontSize.sp,
-            letterSpacing = (-0.5).sp,
-        ),
-        modifier = modifier,
-    )
+fun NearHelpWordmark(fontSize: Int = 30, modifier: Modifier = Modifier) {
+    com.example.nearhelp.ui.components.NearHelpWordmarkText(fontSize, modifier)
 }
 
 @Composable
-fun NearHelpLogoMark(
-    size: Int = 56,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.size(size.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Default.Favorite,
-            contentDescription = "NearHelp heart",
-            tint = VictimPrimary,
-            modifier = Modifier.size(size.dp),
-        )
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size((size * 0.5).dp),
-        )
-    }
+fun NearHelpLogoMark(size: Int = 56, modifier: Modifier = Modifier) {
+    com.example.nearhelp.ui.components.NearHelpSymbol(modifier, size.dp)
 }
 
 @Composable
@@ -701,188 +670,23 @@ fun SectionHeader(
 enum class VictimNavTab { HOME, CHAT, MAP, PROFILE }
 
 @Composable
-fun VictimBottomNavBar(
-    selected: VictimNavTab,
-    onSelect: (VictimNavTab) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val tabs = remember { listOf(VictimNavTab.HOME, VictimNavTab.CHAT, VictimNavTab.MAP, VictimNavTab.PROFILE) }
-    val selectedIndex = tabs.indexOf(selected).coerceAtLeast(0)
-
-    // Smooth gliding pill indicator across tabs with organic spring dynamics
-    val animatedTabIndex by animateFloatAsState(
-        targetValue = selectedIndex.toFloat(),
-        animationSpec = spring(
-            dampingRatio = 0.76f,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "nav_pill_glide"
-    )
-
-    Surface(
-        color = VictimBackground,
-        tonalElevation = 8.dp,
-        shadowElevation = 8.dp,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(top = 6.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
-        ) {
-            val totalWidth = maxWidth
-            val tabWidth = totalWidth / tabs.size
-            val pillWidth = 58.dp
-            val pillHeight = 32.dp
-
-            // Active Sliding Capsule (Visual Guide)
-            val indicatorLeft = (tabWidth * animatedTabIndex) + (tabWidth - pillWidth) / 2
-            Box(
-                modifier = Modifier
-                    .offset(x = indicatorLeft, y = 2.dp)
-                    .width(pillWidth)
-                    .height(pillHeight)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(VictimPinkCard)
-                    .border(0.5.dp, VictimPrimary.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                tabs.forEach { tab ->
-                    val isSelected = tab == selected
-                    VictimNavItem(
-                        label = when (tab) {
-                            VictimNavTab.HOME -> "Home"
-                            VictimNavTab.CHAT -> "AI Help"
-                            VictimNavTab.MAP -> "Map"
-                            VictimNavTab.PROFILE -> "Profile"
-                        },
-                        icon = when (tab) {
-                            VictimNavTab.HOME -> Icons.Default.Home
-                            VictimNavTab.CHAT -> Icons.Default.ChatBubbleOutline
-                            VictimNavTab.MAP -> Icons.Default.Map
-                            VictimNavTab.PROFILE -> Icons.Default.Person
-                        },
-                        isSelected = isSelected,
-                        onClick = { onSelect(tab) },
-                        modifier = Modifier.weight(1f),
-                    )
+fun VictimBottomNavBar(selected: VictimNavTab, onSelect: (VictimNavTab) -> Unit, modifier: Modifier = Modifier) {
+    val colors = androidx.compose.material3.MaterialTheme.colorScheme
+    Column(modifier.fillMaxWidth().background(colors.background)) {
+        androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
+        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = 9.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+            VictimNavTab.entries.forEach { tab ->
+                val active = selected == tab
+                val label = when (tab) { VictimNavTab.HOME -> "Home"; VictimNavTab.CHAT -> "Assistant"; VictimNavTab.MAP -> "Nearby"; VictimNavTab.PROFILE -> "Profile" }
+                val icon = when (tab) { VictimNavTab.HOME -> Icons.Default.Home; VictimNavTab.CHAT -> Icons.Default.ChatBubbleOutline; VictimNavTab.MAP -> Icons.Default.Map; VictimNavTab.PROFILE -> Icons.Default.Person }
+                Column(Modifier.weight(1f).heightIn(min = 56.dp).selectable(active, role = Role.Tab, onClick = { onSelect(tab) }).padding(vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Box(Modifier.clip(RoundedCornerShape(6.dp)).background(if (active) colors.surfaceVariant else colors.background).padding(horizontal = 7.dp, vertical = 3.dp)) {
+                        Icon(icon, null, Modifier.size(23.dp), tint = if (active) colors.primary else colors.onSurfaceVariant)
+                    }
+                    Text(label, fontSize = 12.sp, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal, color = if (active) colors.primary else colors.onSurfaceVariant)
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun VictimNavItem(
-    label: String,
-    icon: ImageVector,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val haptic = LocalHapticFeedback.current
-
-    // Smooth color transition
-    val contentColor by animateColorAsState(
-        targetValue = if (isSelected) VictimPrimary else VictimTextMuted,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "nav_item_color"
-    )
-
-    // Bouncy pop-in / pop-out icon scale
-    val iconScale by animateFloatAsState(
-        targetValue = if (isSelected) 1.18f else 1.0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "nav_icon_scale"
-    )
-
-    // Active vertical lift
-    val iconElevation by animateDpAsState(
-        targetValue = if (isSelected) (-2.5).dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = 0.8f,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "nav_icon_elevation"
-    )
-
-    // Active indicator dot alpha and scale
-    val dotScale by animateFloatAsState(
-        targetValue = if (isSelected) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "nav_dot_scale"
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .heightIn(min = 48.dp)
-            .selectable(
-                selected = isSelected,
-                role = Role.Tab,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(bounded = true, color = VictimPrimary.copy(alpha = 0.12f)),
-                onClick = {
-                    if (!isSelected) {
-                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                        onClick()
-                    }
-                },
-            )
-            .padding(vertical = 2.dp),
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .height(32.dp)
-                .fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier
-                    .size(24.dp)
-                    .graphicsLayer {
-                        scaleX = iconScale
-                        scaleY = iconScale
-                        translationY = iconElevation.toPx()
-                    },
-            )
-        }
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = label,
-            fontSize = 11.5.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = contentColor,
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        // Micro-indicator dot
-        Box(
-            modifier = Modifier
-                .size(3.5.dp)
-                .graphicsLayer {
-                    scaleX = dotScale
-                    scaleY = dotScale
-                    alpha = dotScale
-                }
-                .clip(CircleShape)
-                .background(VictimPrimary)
-        )
     }
 }
 

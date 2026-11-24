@@ -391,3 +391,33 @@ async def test_tracking_rest_endpoints(client: AsyncClient):
     assert post_data["type"] == "responder_update"
     assert post_data["responder_name"] == "Dr. Anirban Roy"
     assert post_data["distance_meters"] > 0
+
+
+@pytest.mark.asyncio
+async def test_snapshot_preserves_fix_age_and_rest_supersedes_old_socket_cache(client: AsyncClient):
+    """Snapshot polling must neither refresh stale GPS nor hide newer REST positions."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.tracking_service import tracking_service
+
+    _, responder, _, _, responder_token, incident_id = await _setup_test_incident(client)
+    responder_id = uuid.UUID(responder["user"]["id"])
+    old = datetime.now(UTC) - timedelta(minutes=10)
+    tracking_service.cache_responder_location(incident_id, responder_id, 22.5835, 88.4410)
+    cached = tracking_service.get_cached_responder_location(incident_id, responder_id)
+    cached["updated_at"] = old
+    try:
+        first = (await client.get(f"/api/v1/sos/{incident_id}/tracking")).json()["responders"][0]
+        assert datetime.fromisoformat(first["last_updated"].replace("Z", "+00:00")) == old
+        second = (await client.get(f"/api/v1/sos/{incident_id}/tracking")).json()["responders"][0]
+        assert second["last_updated"] == first["last_updated"]
+
+        response = await client.put("/api/v1/users/me/location", json={"latitude": 22.582, "longitude": 88.439, "available": True},
+            headers={"Authorization": f"Bearer {responder_token}"})
+        assert response.status_code == 200
+        fresh = (await client.get(f"/api/v1/sos/{incident_id}/tracking")).json()["responders"][0]
+        assert fresh["latitude"] == 22.582
+        assert fresh["longitude"] == 88.439
+        assert datetime.fromisoformat(fresh["last_updated"].replace("Z", "+00:00")) > old
+    finally:
+        tracking_service._live_telemetry_cache.pop(f"{incident_id}:{responder_id}", None)

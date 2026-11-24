@@ -2,6 +2,12 @@ package com.example.nearhelp.data.model
 
 import com.google.gson.annotations.SerializedName
 
+data class ImageAnalysisRequest(
+  @SerializedName("image_base64") val imageBase64: String,
+  @SerializedName("image_mime_type") val mimeType: String = "image/jpeg",
+)
+data class ImageAnalysisResponse(@SerializedName("image_description") val description: String? = null)
+
 data class CitationDto(
   @SerializedName("source") val source: String,
   @SerializedName("section") val section: String,

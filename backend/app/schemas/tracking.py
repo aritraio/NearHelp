@@ -87,7 +87,7 @@ class ResponderTrackingUpdate(BaseModel):
     is_cpr_certified: bool = False
     verified_skills: list[str] = Field(default_factory=list)
     phone: str | None = None
-    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    last_updated: datetime | None = None
 
 
 class TrackingFacilityItem(BaseModel):

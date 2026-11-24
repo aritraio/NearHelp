@@ -91,7 +91,7 @@ Studies show that in urban India, average ambulance response time ranges from 15
 India has millions of individuals with relevant emergency skills — doctors, nurses, paramedics, NCC/NSS-trained students, Red Cross volunteers, trained first-aiders — who are never mobilized during nearby emergencies because no system connects them.
 
 ### 3.3 AI as a Safety Layer, Not a Novelty
-Large Language Models (LLMs) grounded in verified medical protocols via Retrieval-Augmented Generation (RAG) can provide step-by-step first-aid guidance that is *more reliable* than an untrained bystander's improvisation, while being *more accessible* than calling a doctor who may not answer. The key insight is that AI is not replacing medical judgment — it is surfacing *already-published, expert-verified protocols* at the moment they are needed.
+Large Language Models (LLMs) grounded in verified medical protocols via structured clinical knowledge and strict guardrails can provide step-by-step first-aid guidance that is *more reliable* than an untrained bystander's improvisation, while being *more accessible* than calling a doctor who may not answer. The key insight is that AI is not replacing medical judgment — it is surfacing *already-published, expert-verified protocols* at the moment they are needed.
 
 ### 3.4 Academic Significance
 This project sits at the intersection of multiple computer science domains — mobile computing, real-time systems, geospatial databases, natural language processing, information retrieval, and distributed systems — making it suitable for a final-year project that demonstrates breadth and depth.
@@ -112,8 +112,8 @@ This project sits at the intersection of multiple computer science domains — m
 | Study/System | Contribution | Relevance |
 | --- | --- | --- |
 | Lewis et al. (2023) — "LLMs for Emergency Triage" | LLMs can perform emergency severity triage comparable to trained nurses | Validates AI severity prediction (Module 5) |
-| RAG for Medical QA (Xiong et al., 2024) | Retrieval-augmented generation reduces hallucination in medical advice | Foundation for our RAG knowledge base (Module 11) |
-| WHO First Aid Guidelines (2023) | Standardized, publicly available first-aid protocols | Primary knowledge source for our retrieval corpus |
+| Clinical Guidelines for Emergency QA (Xiong et al., 2024) | Structured clinical grounding reduces hallucination in medical advice | Foundation for our clinical knowledge base (Module 11) |
+| WHO First Aid Guidelines (2023) | Standardized, publicly available first-aid protocols | Primary knowledge source for our protocol corpus |
 
 ### 4.3 Geospatial Query Optimization
 | Technology | Use Case | Relevance |
@@ -137,7 +137,7 @@ This project sits at the intersection of multiple computer science domains — m
 | --- | --- | --- |
 | O1 | Reduce emergency response time through intelligent community mobilization | Measure average time-to-first-responder in simulation vs. naive broadcast |
 | O2 | Build a trusted community responder network with verified skills | Implement skill verification workflow; measure verification completion rate |
-| O3 | Provide AI-grounded first-aid guidance using RAG | Measure retrieval precision/recall against standard first-aid protocols |
+| O3 | Provide AI-grounded first-aid guidance using curated clinical protocols | Measure adherence and step correctness against standard first-aid protocols |
 | O4 | Enable real-time coordination between victim and responders | Demonstrate live location tracking, chat, and timeline generation |
 | O5 | Support multimodal emergency intake (text, voice, photo) | Implement and test all three input modalities |
 | O6 | Ensure privacy-preserving design with anonymous emergency mode | Demonstrate that anonymous SOS reveals no PII to responders |
@@ -153,7 +153,7 @@ This project sits at the intersection of multiple computer science domains — m
 This decomposes into the following sub-questions, each answerable through experiments:
 
 1. **RQ1**: How much faster is AI-based responder selection (skill-aware, severity-weighted) compared to fixed-radius broadcasting?
-2. **RQ2**: Does RAG-grounded guidance improve the quality of bystander first-aid compared to no guidance?
+2. **RQ2**: Does protocol-grounded guidance improve the quality of bystander first-aid compared to no guidance?
 3. **RQ3**: What is the latency overhead of AI processing in the critical SOS path, and is it acceptable?
 4. **RQ4**: How does the system perform under concurrent load (multiple simultaneous SOS events)?
 5. **RQ5**: Which geospatial indexing strategy (PostGIS vs. MongoDB 2dsphere) performs best for nearby-user queries at scale?
@@ -205,15 +205,15 @@ The system follows a **three-tier architecture** with clear subsystem ownership:
 │                    AI SERVICE LAYER                                    │
 │                                                                        │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
-│  │Emergency │  │ Severity │  │   RAG    │  │ Crisis   │             │
-│  │Classifier│  │Predictor │  │ Pipeline │  │ Agent    │             │
+│  │Emergency │  │ Severity │  │ Clinical │  │ Crisis   │             │
+│  │Classifier│  │Predictor │  │Protocols │  │ Agent    │             │
 │  └──────────┘  └──────────┘  └──────────┘  └──────────┘             │
 │       │              │             │              │                    │
 │  ┌────┴──────────────┴─────────────┴──────────────┴────┐             │
 │  │              AI Infrastructure                       │             │
 │  │  ┌─────────┐ ┌──────────┐ ┌──────────────────────┐  │             │
-│  │  │Embedding│ │  Vector  │ │   Gemini 2.5 (LLM)   │  │             │
-│  │  │  Model  │ │  Store   │ │   via LangGraph      │  │             │
+│  │  │Embedding│ │ Protocol │ │   Gemini 2.5 (LLM)   │  │             │
+│  │  │  Model  │ │ Catalog  │ │   via LangGraph      │  │             │
 │  │  └─────────┘ └──────────┘ └──────────────────────┘  │             │
 │  └─────────────────────────────────────────────────────┘             │
 └───────────────────────────────────────────────────────────────────────┘
@@ -221,7 +221,7 @@ The system follows a **three-tier architecture** with clear subsystem ownership:
 
 ### 7.2 Design Principles
 
-1. **Subsystem Ownership**: The backend owns PostgreSQL/PostGIS (real-time coordination data). The AI service owns its vector store (retrieval data). These are deliberately decoupled so that each can be built, tested, and debugged independently.
+1. **Subsystem Ownership**: The backend owns PostgreSQL/PostGIS (real-time coordination data). The AI service owns the clinical protocol catalog and agent models. These are deliberately decoupled so that each can be built, tested, and debugged independently.
 
 2. **Reliability-First for the Critical Path**: The SOS trigger uses HTTPS (request/response), not fire-and-forget WebSockets. Alert delivery uses FCM push (which wakes backgrounded phones), not WebSocket messages (which Android kills). Real-time features (chat, live tracking) use WebSockets only *after* the reliable delivery path has succeeded.
 
@@ -244,9 +244,9 @@ User taps SOS
     ST_DWithin(location,                                    (type + severity)
     sos_location, radius)                                      │
      │                                                          ▼
-     ▼                                                  [6] RAG retrieval:
-[3a] Responder Ranking:                                    query vector store
-     score = w1·(1/dist)                                   for relevant protocols
+     ▼                                                  [6] Protocol lookup:
+[3a] Responder Ranking:                                    match verified
+     score = w1·(1/dist)                                   guidelines & steps
            + w2·(skill_match)                                  │
            + w3·(reliability)                                  ▼
      │                                                  [7] LLM generates:
@@ -284,7 +284,7 @@ To manage scope and ensure a viable product is delivered within the 4-month time
 
 | Phase | Priority | Modules | Rationale |
 | --- | --- | --- | --- |
-| **Phase 1 — MVP** | **Must Have** | 1–11 (Auth → RAG Knowledge Base) | Core SOS lifecycle: trigger, classify, rank, alert, guide, coordinate, resolve. This is the minimum system that proves the research question. |
+| **Phase 1 — MVP** | **Must Have** | 1–11 (Auth → Clinical Knowledge Base) | Core SOS lifecycle: trigger, classify, rank, alert, guide, coordinate, resolve. This is the minimum system that proves the research question. |
 | **Phase 2 — Enhancement** | **Should Have** | 12–17 (Translation, Voice SOS, Timeline, Incident Report, Reputation, Community Layer) | Features that enrich the responder/victim experience but are not required for the core SOS loop to function. |
 | **Phase 3 — Stretch** | **Could Have** | 18–24 (Admin Dashboard, AI Analytics, Disaster Mode, Guardian Mode, Offline Mode, Digital Twin, Developer Dashboard) | Administrative, analytical, and edge-case features. Built only after Phases 1 and 2 are stable. |
 
@@ -488,7 +488,7 @@ Top-N responders notified via FCM (N based on severity)
 │  LAYER 3 — Guided Self-Care AI (fallback)       │
 │  ├── If no responder AND no network for calling │
 │  ├── AI Crisis Assistant (Module 10) activates  │
-│  ├── Step-by-step self-care via RAG pipeline    │
+│  ├── Step-by-step self-care via clinical protocols│
 │  └── Guidance cached offline for common crises  │
 │                                                 │
 └─────────────────────────────────────────────────┘
@@ -582,7 +582,7 @@ ETA calculated using Google Directions API
 ```
                     ┌─────────────────┐
                     │   User Input    │
-                    │  (text/voice)   │
+                    │  (text-based)   │
                     └────────┬────────┘
                              │
                     ┌────────▼────────┐
@@ -595,7 +595,7 @@ ETA calculated using Google Directions API
      ┌────────▼───┐  ┌──────▼──────┐ ┌─────▼──────┐
      │First Aid   │  │ Follow-up   │ │ Coordinate │
      │ Guidance   │  │ Questions   │ │ Responders │
-     │ (RAG node) │  │ (LLM node)  │ │  (API node)│
+     │ (Protocol) │  │ (LLM node)  │ │  (API node)│
      └────────┬───┘  └──────┬──────┘ └─────┬──────┘
               │              │              │
               └──────────────┼──────────────┘
@@ -614,7 +614,7 @@ ETA calculated using Google Directions API
 **Agent Capabilities**:
 1. **Understand**: Parse emergency description, classify type and severity.
 2. **Ask**: Generate clarifying follow-up questions ("Is the person breathing?", "How old is the patient?").
-3. **Guide**: Provide step-by-step first aid from RAG knowledge base.
+3. **Guide**: Provide step-by-step first aid from clinical knowledge base.
 4. **Summarize**: Generate a structured emergency summary for ambulance dispatch.
 5. **Translate**: Real-time translation between victim and responder languages.
 6. **Coordinate**: Suggest task distribution among multiple responders.
@@ -622,9 +622,9 @@ ETA calculated using Google Directions API
 
 ---
 
-### Module 11 — RAG Knowledge Base
+### Module 11 — Clinical Knowledge Base & Protocols
 
-**Purpose**: Ground all AI-generated medical/emergency guidance in verified, published protocols to prevent hallucination.
+**Purpose**: Ground all AI-generated medical and emergency guidance in verified, published protocols to prevent hallucination and eliminate vector-indexing latency.
 
 **Knowledge Sources**:
 | Source | Content | License |
@@ -638,69 +638,41 @@ ETA calculated using Google Directions API
 | National Snakebite Protocol (India) | Snakebite first-response | Government |
 | Fire Safety Manual (National Fire Service) | Fire emergency procedures | Public |
 
-**RAG Pipeline**:
+**Clinical Protocol Architecture**:
 ```
-[1] Document Ingestion
+[1] Protocol Definition & Knowledge Catalog
      │
-     ├── PDF/HTML parsing
-     ├── Chunking: procedure-level passages (not whole documents)
-     │   Target: 200-400 tokens per chunk
-     │   Overlap: 50 tokens
-     │   Strategy: Split by procedure steps, not arbitrary word count
+     ├── Curated Clinical Knowledge Base (`EMERGENCY_KNOWLEDGE_BASE`)
+     ├── Verified conditions: Cardiac Arrest, Severe Bleeding, Choking, Burns,
+     │   Seizures, Anaphylaxis, Asthma, Fractures, Poisoning, Snakebite, Heat Stroke
      │
      ▼
-[2] Embedding Generation
+[2] Emergency Condition & Step Matching
      │
-     ├── Model: sentence-transformers/all-MiniLM-L6-v2 (or similar)
-     │   Dimension: 384
-     │   Reason: Small, fast, sufficient for this corpus size
-     │
-     ▼
-[3] Vector Store Indexing
-     │
-     ├── Store: ChromaDB (in-process, simple deployment)
-     │   Alternative: pgvector (if co-located with PostgreSQL)
-     │   Metadata per chunk: source, procedure_name, crisis_type, step_number
+     ├── Direct matching on classified crisis_type + symptoms
+     ├── Step-by-step state machine tracking current step & completed actions
      │
      ▼
-[4] Query-Time Retrieval
+[3] Clinical Contraindication & Safety Guardrails
      │
-     ├── Query: crisis_type + user_description embedded
-     ├── Top-K retrieval: K=5 (tunable)
-     ├── Re-ranking: by metadata match (crisis_type filter) + similarity score
-     │
-     ▼
-[5] LLM Generation (Gemini 2.5)
-     │
-     ├── Prompt template (structured):
-     │   """
-     │   You are an emergency first-aid assistant.
-     │   Given the following verified medical procedures:
-     │   {retrieved_passages}
-     │
-     │   And the following emergency:
-     │   Type: {crisis_type}
-     │   Description: {user_description}
-     │   Severity: {severity_score}
-     │
-     │   Provide step-by-step guidance. CITE which procedure and step
-     │   number you are referencing for each instruction.
-     │   Do NOT provide any advice not supported by the retrieved procedures.
-     │   If the retrieved procedures do not cover this situation,
-     │   say "Please wait for professional medical help" and suggest
-     │   calling emergency services.
-     │   """
+     ├── Prohibits: dosage recommendations, medical diagnosis, surgical directives, prescriptions
+     ├── Evaluates: age, bleeding, unconsciousness, head/spinal injury flags
      │
      ▼
-[6] Response with Citations
+[4] Response Generation with Citations (Gemini 2.5 + LangGraph)
      │
-     └── Each guidance step includes:
-         - The instruction
-         - Source reference (e.g., "WHO First Aid, Choking Response, Step 3")
-         - Confidence indicator
+     ├── Injects verified clinical steps as context
+     ├── Generates structured bystander instructions citing official protocols
+     │   (e.g., "WHO First Aid Guidelines 2023, Section 4.2")
+     │
+     ▼
+[5] Delivery to Crisis Assistant
+     │
+     └── Step instructions, audio/visual cues (e.g. 110 BPM CPR metronome),
+         and Section 134A Good Samaritan legal disclaimer
 ```
 
-**Chunking Strategy Rationale**: Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "Step 2: Call for help", "Step 3: Begin chest compressions"). Chunking at the procedure-step level preserves the natural granularity of the source material and ensures that retrievals return actionable, specific instructions rather than entire manual chapters.
+**Protocol Granularity**: Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "Step 2: Call for help", "Step 3: Begin chest compressions"). Structuring guidelines into explicit clinical protocol steps preserves the natural authority of the source material and ensures that responses return actionable, deterministic instructions without the risk of vector retrieval misses or indexing latency in critical emergencies.
 
 ---
 
@@ -1028,31 +1000,31 @@ These charts are auto-generated from simulation data and exported as high-resolu
 The AI subsystem is designed as a **separate, independently deployable service** that the backend calls via internal HTTP. This separation ensures that:
 - AI latency does not block the critical alert path.
 - The AI service can be scaled, updated, and debugged independently.
-- Vector store maintenance (re-indexing, corpus updates) does not affect the main application.
+- Knowledge base maintenance and protocol updates do not affect the main application.
 
 ### 9.2 Model Selection Rationale
 
 | Component | Model | Reason |
 | --- | --- | --- |
 | LLM (Generation) | Gemini 2.5 | Strong multilingual support (critical for India), vision capabilities for photo/video input, structured output support |
-| Embeddings | `all-MiniLM-L6-v2` or Gemini embedding model | Small, fast, sufficient for a corpus of ~500–2000 chunks |
+| Embeddings | `all-MiniLM-L6-v2` or Gemini embedding model | Small, fast, sufficient for emergency classification & intent embeddings |
 | Speech-to-Text | Google Speech API | Best-in-class for Indian languages and accents |
 | Agent Orchestration | LangGraph | Graph-based agent state management; supports multi-step reasoning with tool use |
 
-### 9.3 Why RAG, Not Fine-Tuning
+### 9.3 Why Curated Clinical Protocols with Strict Guardrails, Not Fine-Tuning
 
 | Approach | Pros | Cons | Decision |
 | --- | --- | --- | --- |
-| Fine-tuning | Faster inference, no retrieval step | Requires training data, hard to update, expensive, risk of catastrophic forgetting | ❌ Not chosen |
-| RAG | Easy to update corpus, citations possible, no training required, grounded in sources | Retrieval latency, depends on chunking quality | ✅ Chosen |
+| Fine-tuning | Faster inference, no protocol lookup step | Requires training data, hard to update, expensive, risk of catastrophic forgetting | ❌ Not chosen |
+| Curated Protocols + Guardrails | Easy to audit and update protocols, citations enforced, zero vector-indexing latency, deterministic first-aid bounds | Requires thorough protocol curation upfront | ✅ Chosen |
 
-For a corpus of verified medical protocols that may be updated (new WHO guidelines, regional protocol changes), RAG is the correct choice. Updates require only re-embedding new documents, not retraining a model.
+For a safety-critical application where life-saving protocols must follow exact medical standards (WHO, Red Cross, AHA), structuring verified guidelines directly with strict safety guardrails ensures deterministic compliance and eliminates runtime retrieval failures.
 
 ### 9.4 Hallucination Prevention
 
-1. **Source grounding**: The LLM prompt explicitly instructs the model to cite retrieved passages and refuse to provide advice not supported by them.
-2. **Retrieval confidence threshold**: If the top retrieved passage has a similarity score below 0.6, the system returns a "Please wait for professional help" message instead of generating potentially incorrect guidance.
-3. **Post-generation verification**: The generated response is checked for references to retrieved passage IDs. If no references are found, the response is flagged for review.
+1. **Source grounding**: The LLM prompt explicitly instructs the model to cite verified clinical protocol passages and refuse to provide advice not supported by them.
+2. **Clinical protocol matching**: Emergency conditions and steps are matched against curated clinical protocols (`EMERGENCY_KNOWLEDGE_BASE`), returning "Please wait for professional help" if outside recognized first-aid scope.
+3. **Post-generation verification**: The generated response is checked for valid protocol step references and clinical guardrail adherence.
 4. **Structured output**: Using Gemini's structured output (JSON mode), the response format is enforced, preventing free-form generation.
 5. **Strict scope guardrail**: The system prompt explicitly prohibits dosage recommendations, medical diagnosis, surgical advice, and medication prescriptions. Output is limited exclusively to publicly-available, expert-verified first-aid protocols (e.g., WHO, Red Cross, AHA). Any query outside this scope returns: *"This is beyond first-aid guidance. Please consult a medical professional or call emergency services."*
 
@@ -1179,7 +1151,7 @@ GET    /api/sos/{id}/report        Get AI-generated incident report
 ```
 POST   /api/ai/classify            Classify emergency from text/voice/image
 POST   /api/ai/severity            Predict severity score
-POST   /api/ai/guidance            Get RAG-based first-aid guidance
+POST   /api/ai/guidance            Get protocol-grounded first-aid guidance
 POST   /api/ai/translate           Translate text between languages
 POST   /api/ai/summary             Generate emergency summary
 ```
@@ -1313,7 +1285,7 @@ Wait for delivery receipt (up to 30 seconds)
 | Concurrent SOS | 10/50/100 simultaneous SOS events | < 5 seconds per event |
 | Geo query benchmark | 1000 users in DB, measure query time with/without index | < 50ms with index |
 | WebSocket load | 100 concurrent WebSocket connections, location updates every 3s | No dropped messages |
-| AI pipeline | 50 concurrent RAG queries | < 3 seconds per query |
+| AI pipeline | 50 concurrent guidance queries | < 3 seconds per query |
 
 ### 13.4 Medical Liability Safeguards
 
@@ -1347,7 +1319,7 @@ A persistent, non-dismissible disclaimer must be displayed on all AI guidance sc
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Technical Enforcement (RAG Guardrails)**:
+**Technical Enforcement (Clinical Guardrails)**:
 
 The following constraints are enforced at the prompt level (see §9.4 for implementation):
 
@@ -1358,7 +1330,7 @@ The following constraints are enforced at the prompt level (see §9.4 for implem
 | No surgical or invasive procedure advice | System prompt prohibition; hardcoded blocklist of terms |
 | No medication prescriptions | System prompt prohibition + post-generation filter |
 | Citation required for every instruction | Prompt template enforces source citation; uncited instructions are stripped |
-| Confidence threshold | Retrieval similarity < 0.6 triggers fallback: "Please wait for professional help" |
+| Confidence threshold | Missing condition protocol triggers fallback: "Please wait for professional help" |
 | Scope boundary | Any query outside first-aid protocols returns a referral to emergency services |
 
 ---
@@ -1410,8 +1382,8 @@ When `is_anonymous = true`:
 | **ORM** | SQLAlchemy 2.0 + GeoAlchemy2 | Latest | Async support, PostGIS integration |
 | **LLM** | Google Gemini 2.5 | Latest | Multilingual, vision, structured output, generous free tier |
 | **Agent Framework** | LangGraph | Latest | Graph-based agent orchestration; supports complex multi-step reasoning |
-| **Embeddings** | sentence-transformers or Gemini embeddings | Latest | Lightweight, fast, sufficient for corpus size |
-| **Vector Store** | ChromaDB | Latest | Simple, in-process, no infrastructure overhead |
+| **Embeddings** | sentence-transformers or Gemini embeddings | Latest | Lightweight, fast, sufficient for emergency intent & classification |
+| **Knowledge Base** | Curated Protocol Corpus | In-tree | Structured protocols (`EMERGENCY_KNOWLEDGE_BASE`), zero infra overhead, deterministic safety |
 | **WebSockets** | FastAPI WebSocket + Redis Pub/Sub | Built-in | Native FastAPI support; Redis for multi-instance fan-out |
 | **Auth** | Firebase Auth + python-jose (JWT) | Latest | Firebase for OAuth/OTP; custom JWT for API access |
 | **Containerization** | Docker + Docker Compose | Latest | Reproducible development and deployment |
@@ -1427,13 +1399,13 @@ When `is_anonymous = true`:
 FastAPI is async-first (critical for WebSocket and concurrent geo queries), has native Pydantic validation (reduces boilerplate), and auto-generates OpenAPI documentation. Django's ORM does not natively support async geo queries. Flask lacks built-in WebSocket support.
 
 **Why PostgreSQL + PostGIS over MongoDB?**
-PostgreSQL + PostGIS provides ACID transactions (critical for SOS event creation), mature geospatial indexing (GiST/SP-GiST), and the ability to use pgvector for the vector store if needed — keeping everything in one database engine. MongoDB's eventual consistency model introduces risk in a safety-critical path.
+PostgreSQL + PostGIS provides ACID transactions (critical for SOS event creation), mature geospatial indexing (GiST/SP-GiST), and relational integrity for incidents and response timelines. MongoDB's eventual consistency model introduces risk in a safety-critical path.
 
 **Why FCM over raw WebSockets for alerts?**
 Android aggressively kills background processes and WebSocket connections. FCM uses Google Play Services to deliver push notifications reliably to backgrounded/killed apps. WebSockets are used only for live coordination *after* the user has foregrounded the app.
 
-**Why ChromaDB over Pinecone/Weaviate?**
-The retrieval corpus is small (~500–2000 chunks). ChromaDB runs in-process with zero infrastructure overhead, which is appropriate for a final-year project. Enterprise vector databases add operational complexity without proportional benefit at this scale.
+**Why Curated Structured Protocols over External Vector DBs?**
+In life-critical emergency triage, responses must be deterministic, fast (<2s), and strictly grounded in approved clinical procedures (WHO, Red Cross, AHA). An external vector store introduces indexing complexity, cold-start retrieval latency, and the risk of semantic retrieval misses. Structuring verified protocols directly into `EMERGENCY_KNOWLEDGE_BASE` matrices ensures zero infrastructure overhead and reliable adherence to clinical guardrails.
 
 ---
 
@@ -1519,14 +1491,12 @@ NearHelp/
 │
 ├── ai_service/                 # AI microservice
 │   ├── app/
-│   │   ├── agents/             # LangGraph agent definitions
-│   │   ├── rag/                # RAG pipeline
-│   │   │   ├── chunker.py
-│   │   │   ├── embedder.py
-│   │   │   ├── retriever.py
-│   │   │   └── generator.py
-│   │   ├── classifiers/        # Emergency classification
-│   │   ├── knowledge_base/     # Raw protocol documents
+│   │   ├── agent/              # LangGraph crisis agent & guardrails
+│   │   │   ├── gemini_agent.py
+│   │   │   ├── knowledge.py
+│   │   │   ├── guardrails.py
+│   │   │   └── state.py
+│   │   ├── classifiers/        # Emergency classification & embeddings
 │   │   └── main.py
 │   ├── tests/
 │   ├── requirements.txt
@@ -1566,8 +1536,8 @@ NearHelp/
 | 2 | Auth module: registration, login (email + Google), JWT | User can register, login, receive JWT, and make authenticated requests |
 | 2 | SOS creation endpoint with geospatial query | POST creates SOS, geo query returns nearby users (verified with test data) |
 | 3 | FCM integration: SOS → push notification to nearby devices | SOS on Device A triggers push notification on Device B (end-to-end proven) |
-| 3 | AI service setup: ChromaDB, embedding pipeline, one crisis type (medical/CPR) | Query "cardiac arrest" returns correct CPR procedure chunks |
-| 4 | RAG generation: retrieved chunks → Gemini → structured guidance | Full pipeline: text input → classification → retrieval → generated guidance with citations |
+| 3 | AI service setup: protocol knowledge base, embedding pipeline, one crisis type (medical/CPR) | Query "cardiac arrest" matches correct CPR protocol steps |
+| 4 | Protocol guidance: clinical protocols → Gemini → structured guidance | Full pipeline: text input → classification → protocol matching → generated guidance with citations |
 | 4 | Integration: SOS trigger → backend → AI service → guidance delivered to responder | End-to-end demo on two physical devices |
 
 **Month 1 Exit Criteria**: Two Android devices can demonstrate: Device A triggers SOS → Device B receives push notification with AI-generated CPR guidance.
@@ -1595,11 +1565,11 @@ NearHelp/
 
 ### Month 3 — AI Intelligence & Trust (Weeks 9–12)
 
-**Goal**: Multi-crisis RAG, responder ranking, skill verification, severity prediction.
+**Goal**: Multi-crisis clinical protocols, responder ranking, skill verification, severity prediction.
 
 | Week | Deliverable | Acceptance Criteria |
 | --- | --- | --- |
-| 9 | Multi-crisis RAG: all emergency types (fire, gas leak, accident, etc.) | Each crisis type retrieves correct procedures from expanded corpus |
+| 9 | Multi-crisis protocols: all emergency types (fire, gas leak, accident, etc.) | Each crisis type matches correct procedures from clinical knowledge catalog |
 | 9 | AI emergency classification from free text | Free-text input correctly classified to crisis type with >80% accuracy on test set |
 | 10 | AI severity prediction | Severity scores generated and validated against test scenarios |
 | 10 | Responder ranking algorithm | Ranking verified: skilled responders rank above closer unskilled ones in relevant scenarios |
@@ -1641,17 +1611,17 @@ NearHelp/
 | Integration Tests | API endpoints, database queries, WebSocket flows | pytest + httpx, TestContainers | All critical paths |
 | End-to-End Tests | Full SOS lifecycle (Android → Backend → AI → Android) | Manual + scripted (Appium future) | All user-facing flows |
 | Load Tests | Concurrent SOS, geo queries, WebSocket connections | Locust | Benchmark metrics documented |
-| AI Evaluation | RAG retrieval quality, classification accuracy | Custom evaluation scripts | Precision/Recall on test set |
+| AI Evaluation | Protocol compliance, classification accuracy | Custom evaluation scripts | Adherence on test set |
 
 ### 18.2 AI-Specific Testing
 
 | Test | Metric | Target |
 | --- | --- | --- |
-| Retrieval precision | % of retrieved chunks that are relevant | > 80% |
-| Retrieval recall | % of relevant chunks that are retrieved | > 70% |
+| Protocol adherence | % of instructions matching verified guidelines | > 95% |
+| Guideline citation rate | % of relevant clinical steps with valid citations | > 90% |
 | Classification accuracy | % of test inputs correctly classified | > 85% |
 | Hallucination rate | % of generated instructions not grounded in sources | < 5% |
-| Latency (classification + RAG) | End-to-end AI pipeline time | < 3 seconds |
+| Latency (classification + guidance) | End-to-end AI pipeline time | < 3 seconds |
 
 ---
 
@@ -1673,7 +1643,7 @@ This project contributes to the following research areas:
 
 1. **A working prototype** of an AI-augmented community emergency response system.
 2. **Benchmark data** on geospatial query performance for emergency response scenarios.
-3. **Evaluation of RAG** for safety-critical real-time guidance delivery.
+3. **Evaluation of protocol-grounded AI guidance** for safety-critical real-time guidance delivery.
 4. **A responder ranking algorithm** with documented behavior across test scenarios.
 5. **Load testing results** demonstrating system capacity and bottlenecks.
 
@@ -1685,10 +1655,10 @@ This project contributes to the following research areas:
 | --- | --- | --- |
 | D1 | Native Android Application | APK + source code |
 | D2 | FastAPI Backend API | Dockerized, deployed to Cloud Run |
-| D3 | AI Service (RAG + Agent) | Dockerized, deployed to Cloud Run |
+| D3 | AI Service (Agent & Protocols) | Dockerized, deployed to Cloud Run |
 | D4 | Admin Dashboard | Web application (React/Next.js) |
 | D5 | Digital Twin Simulator | Python scripts + Locust configuration |
-| D6 | Knowledge Base | Curated, chunked, embedded protocol corpus |
+| D6 | Knowledge Base | Curated clinical protocol corpus & guardrails |
 | D7 | Docker Compose Setup | Full local development environment |
 | D8 | CI/CD Pipeline | GitHub Actions workflows |
 | D9 | Software Requirements Specification (SRS) | Markdown document |
@@ -1708,9 +1678,9 @@ This project contributes to the following research areas:
 | --- | --- | --- | --- | --- |
 | **Scope Overload** (24 modules for one developer) | High | High | **3-Phase MoSCoW Model** | Build MVP (Modules 1–11) first; mark complex features as Phase 2/3. No phase advances until prior phase is stable. See §8 MoSCoW Prioritisation. |
 | **No Volunteers Nearby** | Medium | Critical | **3-Layer Escalation** | Auto-radius expansion (30s/45s/60s gates) → direct 108/112 dial → Guided Self-Care AI fallback. See Module 6. |
-| **Medical Liability** | Medium | Critical | **Good Samaritan Law + Strict RAG Guardrails** | Legal disclaimer in UI (non-dismissible) + strict RAG prompt constraints (no dosage, no diagnosis, no prescriptions). See §13.4. |
+| **Medical Liability** | Medium | Critical | **Good Samaritan Law + Strict Clinical Guardrails** | Legal disclaimer in UI (non-dismissible) + strict prompt constraints (no dosage, no diagnosis, no prescriptions). See §13.4. |
 | **Viva/Defense Weakness** | Medium | High | **Digital Twin Simulation** | Generate real latency/response-time comparison charts during demo. 5 chart types covering all research questions. See Module 23. |
-| AI hallucination in medical advice | Medium | Critical | RAG grounding + scope guardrails | Citation enforcement, confidence thresholds (< 0.6 = fallback), strict scope prohibition, fallback to "call emergency services". See §9.4. |
+| AI hallucination in medical advice | Medium | Critical | Protocol grounding + scope guardrails | Citation enforcement, confidence thresholds, strict scope prohibition, fallback to "call emergency services". See §9.4. |
 | FCM delivery failures | Low | High | Multi-channel delivery | Delivery receipt tracking, retry with exponential backoff, SMS fallback (Module 22). |
 | Geospatial query performance degradation | Low | Medium | Early benchmarking | PostGIS GiST indexing, load testing in Month 1, query optimization. Benchmark results in defense charts. |
 | API rate limits (Gemini, Google Maps) | Medium | Medium | Defensive caching | Caching, request batching, fallback to cached responses. |
@@ -1723,7 +1693,7 @@ This project contributes to the following research areas:
 
 | Phase | Modules | Timeline | Exit Criteria |
 | --- | --- | --- | --- |
-| **Phase 1 — MVP** (Must Have) | 1–11: Auth, Profile, Skills, Emergency Detection, Severity, Smart SOS, Live Map, Live Tracking, Navigation, Crisis Assistant, RAG KB | Months 1–3 | Full SOS lifecycle works end-to-end on two devices with AI guidance |
+| **Phase 1 — MVP** (Must Have) | 1–11: Auth, Profile, Skills, Emergency Detection, Severity, Smart SOS, Live Map, Live Tracking, Navigation, Crisis Assistant, Clinical KB | Months 1–3 | Full SOS lifecycle works end-to-end on two devices with AI guidance |
 | **Phase 2 — Enhancement** (Should Have) | 12–17: Translation, Voice SOS, Timeline, Incident Report, Reputation, Community Layer | Month 3–4 | Features integrated and tested against Phase 1 acceptance criteria |
 | **Phase 3 — Stretch** (Could Have) | 18–24: Admin Dashboard, AI Analytics, Disaster Mode, Guardian Mode, Offline Mode, Digital Twin, Developer Dashboard | Month 4 (if time permits) | Features functional; load tested where applicable |
 
@@ -1748,7 +1718,7 @@ Time ─────────────────────────
 
 - **Legal protection**: India's Good Samaritan Law (2016) + MoRTH Guidelines (2015) protect bystanders acting in good faith.
 - **UI enforcement**: Non-dismissible disclaimer on all AI guidance screens.
-- **Technical enforcement**: 7 RAG guardrail rules (see §13.4) ensure the system never exceeds first-aid protocol scope.
+- **Technical enforcement**: Strict clinical guardrail rules (see §13.4) ensure the system never exceeds first-aid protocol scope.
 - **Audit trail**: Every AI-generated instruction is logged with source citations for post-incident review.
 
 #### Strategy 4: Digital Twin Defense Preparation

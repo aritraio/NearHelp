@@ -238,6 +238,21 @@ async def test_language_preferences_endpoint(client: AsyncClient):
     assert res.status_code == 200
     assert res.json()["languages"] == ["en", "bn", "hi"]
 
+    # Communication settings include ISO 639-3 codes for Indian languages without
+    # two-letter ISO 639-1 codes. These must survive saving and loading the profile.
+    indian_languages = [
+        "en", "bn", "hi", "as", "brx", "doi", "gu", "kn", "ks", "kok", "mai", "ml", "mni",
+        "mr", "ne", "or", "pa", "sa", "sat", "sd", "ta", "te", "ur", "bho", "raj", "hne",
+        "mag", "gbm", "kfy", "tcy", "kha",
+    ]
+    saved = await client.put("/api/v1/users/me/languages", json={"languages": indian_languages}, headers=headers)
+    assert saved.status_code == 200
+    assert saved.json()["languages"] == indian_languages
+    loaded = await client.get("/api/v1/users/me", headers=headers)
+    assert loaded.json()["languages"] == indian_languages
+    invalid = await client.put("/api/v1/users/me/languages", json={"languages": ["xyz"]}, headers=headers)
+    assert invalid.status_code == 400
+
     # Empty languages list fails
     res_bad = await client.put("/api/v1/users/me/languages", json={"languages": []}, headers=headers)
     assert res_bad.status_code == 422

@@ -5,6 +5,12 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.nearhelp.data.api.models.UserResponse
+import com.example.nearhelp.data.api.models.TokenResponse
+import com.example.nearhelp.data.api.Incident
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
+data class RecordedIncident(val id: String, val address: String, val status: String, val timestamp: String, val receivedHelp: Boolean)
 
 interface ITokenStorage {
   fun saveSession(accessToken: String, refreshToken: String, user: UserResponse)
@@ -19,6 +25,8 @@ interface ITokenStorage {
   fun isLoggedIn(): Boolean
   fun saveFcmToken(token: String)
   fun getFcmToken(): String?
+  fun saveCachedUserProfile(user: UserResponse) {}
+  fun getCachedUserProfile(): UserResponse? = null
   fun clear()
 }
 
@@ -47,12 +55,20 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     }
   }
 
+  @Synchronized
   override fun saveSession(
     accessToken: String,
     refreshToken: String,
     user: UserResponse,
   ) {
+    saveCachedUserProfile(user)
     sharedPreferences.edit().apply {
+      if (getUserId() != user.id) {
+        remove("active_incident_id")
+        remove("pending_sos_key")
+        remove("pending_sos_payload")
+        remove("pending_sos_cancel")
+      }
       putString(KEY_ACCESS_TOKEN, accessToken)
       putString(KEY_REFRESH_TOKEN, refreshToken)
       putString(KEY_USER_ID, user.id)
@@ -66,9 +82,32 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     }
   }
 
+  override fun saveCachedUserProfile(user: UserResponse) {
+    try {
+      sharedPreferences.edit().putString(KEY_CACHED_USER_PROFILE, Gson().toJson(user)).apply()
+    } catch (_: Exception) {}
+  }
+
+  override fun getCachedUserProfile(): UserResponse? {
+    val json = sharedPreferences.getString(KEY_CACHED_USER_PROFILE, null) ?: return null
+    return try {
+      Gson().fromJson(json, UserResponse::class.java)
+    } catch (_: Exception) {
+      null
+    }
+  }
+
   override fun getAccessToken(): String? = sharedPreferences.getString(KEY_ACCESS_TOKEN, null)
 
   override fun getRefreshToken(): String? = sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
+
+  /** An in-flight refresh cannot restore a session after logout or an account switch. */
+  @Synchronized
+  fun saveRefreshedSession(expectedRefresh: String, expectedUserId: String?, session: TokenResponse): Boolean {
+    if (getRefreshToken() != expectedRefresh || getUserId() != expectedUserId || session.user.id != expectedUserId) return false
+    saveSession(session.accessToken, session.refreshToken, session.user)
+    return true
+  }
 
   override fun getUserId(): String? = sharedPreferences.getString(KEY_USER_ID, null)
 
@@ -98,12 +137,28 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
   }
   fun getPendingSosKey(): String? = sharedPreferences.getString("pending_sos_key", null)
   fun getPendingSosPayload(): String? = sharedPreferences.getString("pending_sos_payload", null)
+  fun savePendingSosCancellation(value: Boolean) { sharedPreferences.edit().putBoolean("pending_sos_cancel", value).apply() }
+  fun getPendingSosCancellation(): Boolean = sharedPreferences.getBoolean("pending_sos_cancel", false)
 
   fun saveActiveIncidentId(id: String?) {
     sharedPreferences.edit().putString("active_incident_id", id).apply()
   }
 
   fun getActiveIncidentId(): String? = sharedPreferences.getString("active_incident_id", null)
+
+  fun getIncidentHistory(): List<RecordedIncident> = runCatching {
+    Gson().fromJson<List<RecordedIncident>>(sharedPreferences.getString("history_${getUserId()}", "[]"), object : TypeToken<List<RecordedIncident>>() {}.type) ?: emptyList()
+  }.getOrDefault(emptyList())
+
+  fun recordIncident(incident: Incident) {
+    val userId = getUserId() ?: return
+    val received = incident.broadcasterId == userId
+    if (!received && incident.responses.none { it.responderId == userId && it.status != "DECLINED" }) return
+    val record = RecordedIncident(incident.id, incident.address.orEmpty(), incident.status,
+      incident.timeline.lastOrNull()?.timestamp?.take(10).orEmpty(), received)
+    val history = (listOf(record) + getIncidentHistory().filterNot { it.id == record.id }).take(100)
+    sharedPreferences.edit().putString("history_$userId", Gson().toJson(history)).apply()
+  }
 
   fun saveServerBaseUrl(url: String) {
     sharedPreferences.edit().putString(KEY_SERVER_BASE_URL, url).apply()
@@ -117,6 +172,7 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
 
   fun getGeminiApiKey(): String? = sharedPreferences.getString(KEY_GEMINI_API_KEY, null)
 
+  @Synchronized
   override fun clear() {
     sharedPreferences.edit().clear().apply()
   }
@@ -137,5 +193,6 @@ open class TokenStorage(private val context: Context) : ITokenStorage {
     private const val KEY_FCM_TOKEN = "fcm_token"
     private const val KEY_SERVER_BASE_URL = "server_base_url"
     private const val KEY_GEMINI_API_KEY = "gemini_api_key"
+    private const val KEY_CACHED_USER_PROFILE = "cached_user_profile"
   }
 }

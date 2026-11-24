@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator
 
 from geoalchemy2 import Geometry
 import geoalchemy2.admin.dialects.sqlite as sqlite_admin
-from sqlalchemy import event, text
+from sqlalchemy import event, select, text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -47,21 +47,33 @@ def compile_geometry_sqlite(element, compiler, **kw):
 
 is_sqlite = "sqlite" in settings.DATABASE_URL
 
-# Asynchronous SQLAlchemy Engine with NullPool for robust event loop lifecycle
-async_engine = create_async_engine(
-    _get_async_url(settings.DATABASE_URL),
-    echo=False,
-    future=True,
-    poolclass=StaticPool if is_sqlite else NullPool,
-    connect_args=(
-        {"check_same_thread": False}
-        if is_sqlite
-        else {
+# Asynchronous SQLAlchemy Engine:
+# SQLite uses StaticPool for in-memory or single-file test workflows.
+# PostgreSQL uses AsyncAdaptedQueuePool with pre-ping to reuse warm TLS connections
+# rather than renegotiating SSL/auth handshakes on every single request.
+if is_sqlite:
+    async_engine = create_async_engine(
+        _get_async_url(settings.DATABASE_URL),
+        echo=False,
+        future=True,
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False},
+    )
+else:
+    async_engine = create_async_engine(
+        _get_async_url(settings.DATABASE_URL),
+        echo=False,
+        future=True,
+        pool_size=10,
+        max_overflow=20,
+        pool_timeout=30,
+        pool_recycle=1800,
+        pool_pre_ping=True,
+        connect_args={
             "statement_cache_size": 0,
             "prepared_statement_cache_size": 0,
-        }
-    ),
-)
+        },
+    )
 
 
 @event.listens_for(async_engine.sync_engine, "connect")
@@ -152,6 +164,36 @@ async def init_db() -> None:
                 await FacilityService.seed_kolkata_facilities(session)
             except Exception as e:
                 logger.debug(f"Facility auto-seed check: {e}")
+
+        # Auto-bootstrap initial administrator (ensures admin panel access on environments without shell, like Render Free)
+        if settings.INITIAL_ADMIN_EMAIL and settings.INITIAL_ADMIN_PASSWORD:
+            async with AsyncSessionLocal() as session:
+                try:
+                    from app.core.security import get_password_hash
+                    from app.models.user import User
+
+                    admin_email = str(settings.INITIAL_ADMIN_EMAIL).strip().lower()
+                    existing = await session.scalar(select(User).where(User.email == admin_email))
+                    if not existing:
+                        admin_user = User(
+                            email=admin_email,
+                            name=settings.INITIAL_ADMIN_NAME or "Administrator",
+                            hashed_password=get_password_hash(settings.INITIAL_ADMIN_PASSWORD),
+                            auth_provider="email",
+                            is_active=True,
+                            is_superuser=True,
+                            trust_score=100.0,
+                        )
+                        session.add(admin_user)
+                        await session.commit()
+                        logger.info(f"Bootstrap administrator created: {admin_email}")
+                    elif not existing.is_superuser:
+                        existing.is_superuser = True
+                        existing.is_active = True
+                        await session.commit()
+                        logger.info(f"Existing account promoted to administrator: {admin_email}")
+                except Exception as e:
+                    logger.warning(f"Administrator auto-bootstrap check: {e}")
 
     except Exception as e:
         logger.error(f"Error during database initialization: {e}")

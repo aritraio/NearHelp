@@ -11,6 +11,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
+import android.content.Context
+import android.net.Uri
+import com.example.nearhelp.data.api.RetrofitClient
+import com.example.nearhelp.data.api.SessionTokens
+import com.example.nearhelp.data.api.models.SkillVerificationResponse
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MultipartBody
 
 data class ProfileUiState(
   val isLoading: Boolean = false,
@@ -26,6 +37,7 @@ data class ProfileUiState(
   val editingContact: EmergencyContact? = null,
   val showQualificationsDialog: Boolean = false,
   val showEmergencyHistoryDialog: Boolean = false,
+  val skillClaims: List<SkillVerificationResponse> = emptyList(),
 )
 
 class ProfileViewModel(
@@ -36,12 +48,32 @@ class ProfileViewModel(
   val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
   init {
+    val cachedUser = userRepository.getCachedProfile()
+    if (cachedUser != null) {
+      _uiState.value = ProfileUiState(
+        isLoading = false,
+        user = cachedUser,
+        emergencyContacts = cachedUser.emergencyContacts,
+        medicalId = MedicalIdResponse(
+          bloodGroup = cachedUser.bloodGroup,
+          medicalConditions = cachedUser.medicalConditions,
+          knownAllergies = cachedUser.knownAllergies,
+          hasPacemaker = cachedUser.hasPacemaker,
+          isOrganDonor = cachedUser.isOrganDonor,
+          medicalNotes = cachedUser.medicalNotes,
+          emergencyContacts = cachedUser.emergencyContacts,
+          isEncryptedAtRest = true,
+        ),
+      )
+    }
     loadProfile()
   }
 
   fun loadProfile() {
     viewModelScope.launch {
-      _uiState.update { it.copy(isLoading = true, error = null) }
+      if (_uiState.value.user == null) {
+        _uiState.update { it.copy(isLoading = true, error = null) }
+      }
       val result = userRepository.getProfile()
       result.fold(
         onSuccess = { user ->
@@ -68,7 +100,7 @@ class ProfileViewModel(
           _uiState.update {
             it.copy(
               isLoading = false,
-              error = err.message ?: "Failed to load profile",
+              error = if (it.user == null) (err.message ?: "Failed to load profile") else null,
             )
           }
         },
@@ -327,11 +359,88 @@ class ProfileViewModel(
   fun closeEmergencyHistoryDialog() = _uiState.update { it.copy(showEmergencyHistoryDialog = false) }
 
   fun saveQualification(title: String, organization: String, idNumber: String) {
-    _uiState.update {
-      it.copy(
-        showQualificationsDialog = false,
-        successMessage = "Qualification '$title' submitted for verification.",
-      )
+    _uiState.update { it.copy(error = "Attach your certificate before submitting a qualification.") }
+  }
+
+  fun loadSkillClaims() {
+    viewModelScope.launch {
+      try {
+        val result = RetrofitClient.getUserApiService().listMySkills(SessionTokens.bearer())
+        if (result.isSuccessful) _uiState.update { it.copy(skillClaims = result.body().orEmpty()) }
+      } catch (e: CancellationException) { throw e }
+      catch (_: Exception) { /* Profile data remains available while offline. */ }
+    }
+  }
+
+  fun submitQualification(title: String, organization: String, idNumber: String, uri: Uri?, context: Context) {
+    if (_uiState.value.isSaving) return
+    if (uri == null) { _uiState.update { it.copy(error = "Attach your certificate before submitting.") }; return }
+    viewModelScope.launch {
+      _uiState.update { it.copy(isSaving = true, error = null) }
+      try {
+        val result = withContext(Dispatchers.IO) {
+          val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
+          val rawExtension = mapOf("application/pdf" to "pdf", "image/jpeg" to "jpg", "image/png" to "png", "image/webp" to "webp")[mime]
+            ?: error("Choose a PDF, PNG, JPG or WebP certificate.")
+
+          val (uploadBytes, uploadMime, uploadExtension) = if (mime.startsWith("image/") || rawExtension in listOf("jpg", "jpeg", "png", "webp")) {
+            val compressed = runCatching {
+              val boundsOptions = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+              context.contentResolver.openInputStream(uri)?.use { input ->
+                android.graphics.BitmapFactory.decodeStream(input, null, boundsOptions)
+              }
+              if (boundsOptions.outWidth > 0 && boundsOptions.outHeight > 0) {
+                var inSampleSize = 1
+                val maxDim = maxOf(boundsOptions.outWidth, boundsOptions.outHeight)
+                while (maxDim / inSampleSize > 1600) { inSampleSize *= 2 }
+                val decodeOptions = android.graphics.BitmapFactory.Options().apply { this.inSampleSize = inSampleSize }
+                val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
+                  android.graphics.BitmapFactory.decodeStream(input, null, decodeOptions)
+                }
+                if (bitmap != null) {
+                  val bos = java.io.ByteArrayOutputStream()
+                  bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 82, bos)
+                  bitmap.recycle()
+                  Triple(bos.toByteArray(), "image/jpeg", "jpg")
+                } else null
+              } else null
+            }.getOrNull()
+
+            compressed ?: run {
+              val output = java.io.ByteArrayOutputStream()
+              context.contentResolver.openInputStream(uri)?.use { input ->
+                val buffer = ByteArray(8192)
+                while (true) {
+                  val count = input.read(buffer); if (count < 0) break
+                  check(output.size() + count <= 10 * 1024 * 1024) { "Certificate must be smaller than 10 MB." }
+                  output.write(buffer, 0, count)
+                }
+              } ?: error("Could not open the certificate.")
+              Triple(output.toByteArray(), mime, rawExtension)
+            }
+          } else {
+            val output = java.io.ByteArrayOutputStream()
+            context.contentResolver.openInputStream(uri)?.use { input ->
+              val buffer = ByteArray(8192)
+              while (true) {
+                val count = input.read(buffer); if (count < 0) break
+                check(output.size() + count <= 10 * 1024 * 1024) { "Certificate must be smaller than 10 MB." }
+                output.write(buffer, 0, count)
+              }
+            } ?: error("Could not open the certificate.")
+            Triple(output.toByteArray(), mime, rawExtension)
+          }
+
+          val code = when (title) { "CPR / AED certified" -> "CPR_CERTIFIED"; "First-aid provider" -> "FIRST_AID"; "EMT / Paramedic" -> "EMT"; "Doctor / Physician" -> "DOCTOR"; "Registered nurse" -> "NURSE"; else -> "COMMUNITY_FIRST_RESPONDER" }
+          RetrofitClient.getUserApiService().claimSkillWithCertificate(SessionTokens.bearer(), code.toRequestBody("text/plain".toMediaType()),
+            MultipartBody.Part.createFormData("file", "certificate.$uploadExtension", uploadBytes.toRequestBody(uploadMime.toMediaType())),
+            "Issuing organization: $organization\nCertificate ID: $idNumber".toRequestBody("text/plain".toMediaType()))
+        }
+        check(result.isSuccessful) { "The certificate could not be submitted (${result.code()}). Please try again." }
+        val claim = result.body() ?: error("The server returned an empty response.")
+        _uiState.update { it.copy(isSaving = false, skillClaims = it.skillClaims + claim, successMessage = "Qualification submitted for verification.") }
+      } catch (e: CancellationException) { throw e }
+      catch (e: Exception) { _uiState.update { it.copy(isSaving = false, error = e.message ?: "Could not submit certificate.") } }
     }
   }
 

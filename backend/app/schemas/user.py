@@ -67,7 +67,7 @@ class MedicalIDUpdateRequest(BaseModel):
 
 class LanguagePreferencesRequest(BaseModel):
     """Payload for updating spoken language preferences."""
-    languages: list[str] = Field(..., min_length=1, description="List of ISO 639-1 language codes (e.g., ['en', 'bn', 'hi'])")
+    languages: list[str] = Field(..., min_length=1, description="Spoken language codes (ISO 639-1 or supported ISO 639-3, e.g., ['en', 'bn', 'bho'])")
 
 
 class PhotoUploadResponse(BaseModel):

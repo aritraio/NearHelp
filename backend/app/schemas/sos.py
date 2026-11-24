@@ -35,7 +35,7 @@ class SOSEscalationStatus(BaseModel):
     elapsed_seconds: int = Field(0, description="Elapsed seconds since emergency creation")
     auto_call_108_triggered: bool = Field(False, description="Whether Layer 2 emergency services auto-dial recommendation is active")
     recommended_emergency_number: str = Field("108", description="Official municipal helpline number ('108' medical, '101' fire, '112' unified)")
-    offline_fallback_ready: bool = Field(True, description="Whether Layer 3 offline RAG first-aid protocol is cached and ready")
+    offline_fallback_ready: bool = Field(True, description="Whether Layer 3 offline first-aid protocol is cached and ready")
     layer_description: str = Field("Layer 1: Community Network Radial Dispatch", description="Human-readable escalation state")
 
 

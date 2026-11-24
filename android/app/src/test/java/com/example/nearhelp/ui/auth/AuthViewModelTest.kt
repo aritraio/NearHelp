@@ -111,6 +111,8 @@ class AuthViewModelTest {
     assertTrue(state is AuthUiState.Success)
     val success = state as AuthUiState.Success
     assertTrue(success.user.isAnonymous)
+    assertTrue(viewModel.consumeEmergencyEntry())
+    assertFalse(viewModel.consumeEmergencyEntry())
   }
 
   @Test
@@ -131,6 +133,11 @@ class AuthViewModelTest {
 
   @Test
   fun `logout clears session state`() = runTest {
+    viewModel.onLoginEmailChanged("person@example.com")
+    viewModel.onLoginPasswordChanged("test-password")
+    viewModel.onSignUpNameChanged("Person")
+    viewModel.onSignUpEmailChanged("person@example.com")
+    viewModel.onSignUpPasswordChanged("test-password")
     viewModel.bypassAnonymousEmergency()
     advanceUntilIdle()
 
@@ -139,6 +146,11 @@ class AuthViewModelTest {
     viewModel.logout()
     assertFalse(fakeRepository.isLoggedIn())
     assertEquals(AuthUiState.Idle, viewModel.uiState.value)
+    assertEquals(LoginFormData(), viewModel.loginForm.value)
+    assertEquals(SignUpFormData(), viewModel.signUpForm.value)
+    assertEquals(OtpFormData(), viewModel.otpForm.value)
+    assertFalse(viewModel.consumeEmergencyEntry())
+    assertNull(fakeRepository.getStoredAccessToken())
   }
 }
 

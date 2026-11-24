@@ -21,6 +21,7 @@ class AiAgentRepositoryTest {
   private lateinit var repository: AiAgentRepository
 
   private class FakeAiAgentApiService : AiAgentApiService {
+    override suspend fun describeImage(request: com.example.nearhelp.data.model.ImageAnalysisRequest): Response<com.example.nearhelp.data.model.ImageAnalysisResponse> = Response.success(com.example.nearhelp.data.model.ImageAnalysisResponse("A first-aid document"))
     var shouldFail: Boolean = true
 
     override suspend fun chatWithAgent(request: AgentChatRequestDto): Response<AgentChatResponseDto> {
@@ -234,6 +235,7 @@ class AiAgentRepositoryTest {
   @Test
   fun `server returning generic triage is intercepted and overridden for non-cardiac query`() = runTest {
     val mockService = object : com.example.nearhelp.data.api.AiAgentApiService {
+      override suspend fun describeImage(request: com.example.nearhelp.data.model.ImageAnalysisRequest): Response<com.example.nearhelp.data.model.ImageAnalysisResponse> = throw UnsupportedOperationException()
       override suspend fun getProtocolByCondition(conditionId: String) = throw UnsupportedOperationException()
       override suspend fun getAllProtocols() = throw UnsupportedOperationException()
       override suspend fun chatWithAgent(request: com.example.nearhelp.data.model.AgentChatRequestDto): retrofit2.Response<com.example.nearhelp.data.model.AgentChatResponseDto> {

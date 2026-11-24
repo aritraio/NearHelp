@@ -81,7 +81,7 @@ curl http://localhost:8001/docs
 
 ---
 
-### 🔴 AI Microservice (Gemini 2.5 + LangGraph + ChromaDB)
+### 🔴 AI Microservice (Gemini 2.5 + LangGraph)
 **Owner**: Aritra  
 **Path**: `ai_service/`
 
@@ -128,8 +128,7 @@ curl http://localhost:8001/docs
 **Owner**: Plaban  
 **Path**: `data/`
 
-* Place medical and emergency protocols in `data/protocols/` (JSON / Markdown).
-* Place regional geospatial facility datasets in `data/regional/` (JSON).
+* Regional geospatial facility datasets live in `data/regional/` (JSON).
 
 ---
 

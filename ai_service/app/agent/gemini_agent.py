@@ -25,8 +25,7 @@ from app.schemas.agent import (
     ContraindicationAlert,
     GroundedProtocolResponse,
 )
-from app.rag.guardrails import hallucination_guardrails
-from app.rag.retriever import rag_retriever
+from app.agent.guardrails import hallucination_guardrails
 from langgraph.graph import END, StateGraph
 
 logger = logging.getLogger(__name__)
@@ -177,33 +176,25 @@ class GeminiEmergencyLLM:
             highlight = "Poisoning Emergency Protocol"
             return reply, highlight, citations
 
-        # 4. Hybrid RAG Retrieval for Dynamic Question Answering
-        rag_passages = await rag_retriever.retrieve(
-            query=user_query,
-            condition_id=condition_id,
-            top_k=3,
-        )
-        if rag_passages:
-            for p in rag_passages:
-                if p.citation not in citations:
-                    citations.append(p.citation)
-
-        # 5. If live Gemini client is present, query with clinical RAG prompt
+        # 4. If live Gemini client is present, query with clinical prompt grounded in active protocol
         if self._client:
             try:
-                rag_context = rag_retriever.format_context_for_prompt(rag_passages)
+                protocol_context = "\n".join(
+                    f"Step {s.step_number}: {s.title} - {s.action_instruction} (Warning: {s.warning_note or 'None'})"
+                    for s in protocol.steps
+                )
                 system_prompt = (
                     "You are NearHelp AI, an emergency crisis assistant providing real-time evidence-based first-aid. "
                     f"Current condition: {protocol.condition_label}. Severity Level: {protocol.severity_level}/5.\n\n"
                     "GROUNDED CLINICAL PROTOCOL CONTEXT:\n"
-                    f"{rag_context}\n\n"
+                    f"{protocol_context}\n\n"
                     "Rules: 1. Keep guidance direct, urgent, and concise. "
                     "2. Enforce evidence citations in square brackets like [Source: AHA CPR Guidelines 2020 §3.2] or [Source: Section 134A MV Act 2019]. "
                     "3. Enforce strict contraindications (No oral fluids to unconscious; No moving spinal trauma victims; Never stop CPR for cracked ribs). "
                     "4. Reassure good samaritans about Section 134A legal immunity."
                 )
                 prompt = f"{system_prompt}\n\nBystander question: {user_query}\nCurrent protocol step: {current_step + 1}. What is the immediate actionable instruction?"
-                
+
                 try:
                     response = self._client.models.generate_content(
                         model=self.model_name,
@@ -229,12 +220,6 @@ class GeminiEmergencyLLM:
                     )
             except Exception as e:
                 logger.warning("Gemini 2.5 API invocation failed (%s). Falling back to grounded protocol step.", e)
-
-        # 6. Default: If RAG retrieved a strong relevant passage, use it
-        if rag_passages and rag_passages[0].confidence_score > 0.45:
-            top_p = rag_passages[0]
-            reply = f"📋 {top_p.title.upper()}\n\n{top_p.content}\n\n[Source: {top_p.citation.source} • {top_p.citation.section}]"
-            return reply, f"Grounded Protocol ({top_p.condition_label})", citations
 
         # Default: Grounded current step instruction
         step_idx = min(current_step, len(protocol.steps) - 1)

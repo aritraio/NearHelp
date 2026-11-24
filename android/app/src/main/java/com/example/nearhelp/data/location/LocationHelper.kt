@@ -92,38 +92,56 @@ class LocationHelper(private val context: Context) {
         )
 
         try {
-            // 1. Get best last known location immediately
-            val lastKnownGps = locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            val lastKnownNetwork = locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            val lastKnownPassive = locationManager?.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
-
-            val bestLastLocation = listOfNotNull(lastKnownGps, lastKnownNetwork, lastKnownPassive)
-                .maxByOrNull { it.time }
-
-            if (bestLastLocation != null && android.os.SystemClock.elapsedRealtimeNanos() - bestLastLocation.elapsedRealtimeNanos < 120_000_000_000L) {
+            // 1. Get best last known location immediately from all providers without dropping cached fixes
+            val providers = locationManager?.allProviders ?: listOf(
+                LocationManager.GPS_PROVIDER,
+                LocationManager.NETWORK_PROVIDER,
+                LocationManager.PASSIVE_PROVIDER
+            )
+            val candidateLocations = providers.mapNotNull { provider ->
+                try {
+                    locationManager?.getLastKnownLocation(provider)
+                } catch (_: SecurityException) {
+                    null
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            val bestLastLocation = candidateLocations.maxByOrNull { it.time }
+            if (bestLastLocation != null) {
                 updateFromLocation(bestLastLocation)
             }
 
-            // 2. Register for continuous location updates
+            // 2. Register for continuous location updates across active providers
             if (!isListening && locationManager != null) {
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    locationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER,
-                        5000L,
-                        5f,
-                        locationListener
-                    )
-                    isListening = true
+                val enabledProviders = locationManager.getProviders(true)
+                for (provider in enabledProviders) {
+                    try {
+                        locationManager.requestLocationUpdates(
+                            provider,
+                            1000L,
+                            0f,
+                            locationListener
+                        )
+                        isListening = true
+                    } catch (_: SecurityException) {
+                    } catch (_: Exception) {}
                 }
 
-                if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                    locationManager.requestLocationUpdates(
-                        LocationManager.NETWORK_PROVIDER,
-                        5000L,
-                        5f,
-                        locationListener
-                    )
-                    isListening = true
+                if (!isListening) {
+                    for (provider in listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER)) {
+                        try {
+                            if (locationManager.isProviderEnabled(provider)) {
+                                locationManager.requestLocationUpdates(
+                                    provider,
+                                    1000L,
+                                    0f,
+                                    locationListener
+                                )
+                                isListening = true
+                            }
+                        } catch (_: Exception) {}
+                    }
                 }
             }
         } catch (e: SecurityException) {

@@ -1,0 +1,459 @@
+package com.example.nearhelp.ui.design
+
+import com.example.nearhelp.i18n.LocalizedText as Text
+import com.example.nearhelp.i18n.uiText
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.nearhelp.data.location.LocationHelper
+import com.example.nearhelp.data.location.UserLocationState
+import com.example.nearhelp.theme.ThemeManager
+import com.example.nearhelp.ui.map.MapPinItem
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import android.os.SystemClock
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
+
+@Composable
+fun CarePage(title: String? = null, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
+        if (title != null) CareTopBar(title, onBack)
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).imePadding().padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp), content = content)
+    }
+}
+
+@Composable
+fun CareTopBar(title: String, onBack: (() -> Unit)?) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(start = 10.dp, end = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (onBack != null) {
+            IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, uiText("Go back"), tint = MaterialTheme.colorScheme.onBackground) }
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(title, style = MaterialTheme.typography.titleLarge)
+    }
+}
+
+@Composable
+fun CareHeading(title: String, subtitle: String? = null, compact: Boolean = false) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(title, style = if (compact) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineLarge)
+        if (subtitle != null) CareMuted(subtitle)
+    }
+}
+
+@Composable
+fun CareMuted(text: String, modifier: Modifier = Modifier) = Text(text, modifier, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+enum class CareButtonStyle { PRIMARY, SECONDARY, SOS, QUIET }
+
+@Composable
+fun CareButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, style: CareButtonStyle = CareButtonStyle.SECONDARY,
+               icon: ImageVector? = null, enabled: Boolean = true, subtitle: String? = null, holdDurationMillis: Long? = null) {
+    if (holdDurationMillis != null) {
+        CareSosHoldButton(
+            onTrigger = onClick,
+            modifier = modifier,
+            title = text,
+            subtitle = subtitle ?: "Hold for 2 seconds to trigger it",
+            holdDurationMillis = holdDurationMillis,
+            icon = icon,
+            enabled = enabled
+        )
+        return
+    }
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(12.dp)
+    val contents: @Composable RowScope.() -> Unit = {
+        if (icon != null) { Icon(icon, null, Modifier.size(21.dp)); Spacer(Modifier.width(10.dp)) }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text, style = if (subtitle == null) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium)
+            if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+        }
+    }
+    val sizing = modifier.fillMaxWidth().heightIn(min = if (subtitle == null) 56.dp else 94.dp)
+    when (style) {
+        CareButtonStyle.PRIMARY, CareButtonStyle.SOS -> Button(onClick, sizing, enabled = enabled, shape = shape,
+            colors = ButtonDefaults.buttonColors(containerColor = if (style == CareButtonStyle.SOS) colors.error else colors.primary,
+                contentColor = if (style == CareButtonStyle.SOS) colors.onError else colors.onPrimary),
+            contentPadding = PaddingValues(16.dp), content = contents)
+        CareButtonStyle.SECONDARY -> OutlinedButton(onClick, sizing, enabled = enabled, shape = shape,
+            border = BorderStroke(1.dp, colors.outline), contentPadding = PaddingValues(16.dp), content = contents)
+        CareButtonStyle.QUIET -> TextButton(onClick, sizing, enabled = enabled, shape = shape, contentPadding = PaddingValues(12.dp), content = contents)
+    }
+}
+
+/**
+ * Emergency SOS button requiring a continuous hold (default 2 seconds) to prevent accidental triggers.
+ * Provides progressive fill animation, countdown timer, and tactile haptic feedback.
+ */
+@Composable
+fun CareSosHoldButton(
+    onTrigger: () -> Unit,
+    modifier: Modifier = Modifier,
+    title: String = "SOS",
+    subtitle: String = "Hold for 2 seconds to trigger it",
+    holdDurationMillis: Long = 2000L,
+    icon: ImageVector? = null,
+    enabled: Boolean = true,
+) {
+    val haptic = LocalHapticFeedback.current
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(12.dp)
+    val scope = rememberCoroutineScope()
+
+    var isHolding by remember { mutableStateOf(false) }
+    var showReleaseHint by remember { mutableStateOf(false) }
+    var triggered by remember { mutableStateOf(false) }
+    val progress = remember { Animatable(0f) }
+
+    LaunchedEffect(showReleaseHint) {
+        if (showReleaseHint) {
+            delay(2500)
+            showReleaseHint = false
+        }
+    }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isHolding) 0.98f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "sos_hold_scale"
+    )
+
+    val currentOnTrigger by rememberUpdatedState(onTrigger)
+    val remainingSeconds = ((1f - progress.value) * (holdDurationMillis / 1000f)).coerceAtLeast(0f)
+    val accessibleDescription = "${uiText(title)}. ${uiText(subtitle)}"
+    val triggerLabel = uiText("Trigger SOS")
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 94.dp)
+            .scale(scale)
+            .clip(shape)
+            .background(if (enabled) colors.error else colors.surfaceVariant)
+            .drawBehind {
+                if (progress.value > 0f) {
+                    drawRect(
+                        color = Color.White.copy(alpha = 0.22f),
+                        size = size.copy(width = size.width * progress.value)
+                    )
+                }
+            }
+            .semantics {
+                contentDescription = accessibleDescription
+                onClick(label = triggerLabel) {
+                    currentOnTrigger()
+                    true
+                }
+            }
+            .pointerInput(enabled, holdDurationMillis) {
+                if (!enabled) return@pointerInput
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    isHolding = true
+                    showReleaseHint = false
+                    triggered = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                    val startTime = SystemClock.elapsedRealtime()
+                    var completed = false
+
+                    val holdJob = scope.launch {
+                        progress.snapTo(0f)
+                        progress.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(
+                                durationMillis = holdDurationMillis.toInt(),
+                                easing = LinearEasing
+                            )
+                        )
+                        completed = true
+                        triggered = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        currentOnTrigger()
+                    }
+
+                    val up = waitForUpOrCancellation()
+                    holdJob.cancel()
+                    isHolding = false
+
+                    if (!completed) {
+                        val elapsed = SystemClock.elapsedRealtime() - startTime
+                        scope.launch {
+                            progress.animateTo(0f, tween(150))
+                        }
+                        if (up != null && elapsed < holdDurationMillis) {
+                            showReleaseHint = true
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        }
+                    }
+                }
+            }
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (enabled) colors.onError else colors.onSurfaceVariant
+                )
+                Spacer(Modifier.width(10.dp))
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (enabled) colors.onError else colors.onSurfaceVariant
+                )
+                Text(
+                    text = when {
+                        triggered -> "Triggered"
+                        isHolding -> "Keep holding · ${String.format(java.util.Locale.US, "%.1f", remainingSeconds)}s"
+                        else -> subtitle
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (enabled) colors.onError.copy(alpha = 0.92f) else colors.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
+        if (isHolding || progress.value > 0f) {
+            LinearProgressIndicator(
+                progress = { progress.value },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .align(Alignment.BottomCenter),
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.2f)
+            )
+        }
+    }
+}
+
+@Composable
+fun CareField(label: String, value: String, onChange: (String) -> Unit, modifier: Modifier = Modifier,
+              hint: String? = null, error: String? = null, password: Boolean = false, keyboard: KeyboardType = KeyboardType.Text,
+              multiline: Boolean = false, enabled: Boolean = true) {
+    var visible by remember { mutableStateOf(false) }
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+        Text(label, style = MaterialTheme.typography.labelMedium)
+        OutlinedTextField(value, onChange, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
+            singleLine = !multiline, minLines = if (multiline) 3 else 1, shape = RoundedCornerShape(10.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
+            isError = error != null, placeholder = if (hint != null) ({ Text(hint, style = MaterialTheme.typography.bodyLarge) }) else null,
+            visualTransformation = if (password && !visible) PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions(keyboardType = if (password) KeyboardType.Password else keyboard),
+            trailingIcon = if (password) ({ IconButton(onClick = { visible = !visible }) { Icon(if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility, uiText(if (visible) "Hide password" else "Show password")) } }) else null,
+            colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedContainerColor = MaterialTheme.colorScheme.background, unfocusedContainerColor = MaterialTheme.colorScheme.background))
+        if (error != null) Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+fun CareRow(title: String, description: String? = null, icon: ImageVector? = null, onClick: (() -> Unit)? = null) {
+    Column {
+        Row(Modifier.fillMaxWidth().heightIn(min = 66.dp).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier).padding(vertical = 15.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) Icon(icon, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(title, style = MaterialTheme.typography.titleSmall)
+                if (!description.isNullOrBlank()) CareMuted(description)
+            }
+            if (onClick != null) Icon(Icons.Outlined.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    }
+}
+
+@Composable
+fun CareNote(title: String, description: String? = null, icon: ImageVector = Icons.Outlined.Info, error: Boolean = false) {
+    val colors = MaterialTheme.colorScheme
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(if (error) colors.errorContainer else colors.surfaceVariant).padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Icon(icon, null, tint = if (error) colors.error else colors.primary, modifier = Modifier.size(22.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = if (error) colors.onErrorContainer else colors.onSurface)
+            if (!description.isNullOrBlank()) CareMuted(description)
+        }
+    }
+}
+
+@Composable
+fun CareCheck(text: String, checked: Boolean, onChange: (Boolean) -> Unit, enabled: Boolean = true) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(enabled = enabled) { onChange(!checked) }, verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked, onCheckedChange = onChange, enabled = enabled)
+        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Composable
+fun CareSelect(label: String, selected: String, options: List<String>, onChange: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+        Text(label, style = MaterialTheme.typography.labelMedium)
+        Box {
+            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = RoundedCornerShape(10.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
+                Text(selected, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                Icon(Icons.Outlined.ExpandMore, null)
+            }
+            DropdownMenu(expanded, onDismissRequest = { expanded = false }) { options.forEach { option -> DropdownMenuItem(text = { Text(option) }, onClick = { onChange(option); expanded = false }) } }
+        }
+    }
+}
+
+@Composable
+fun CareBrand() {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        com.example.nearhelp.ui.components.NearHelpSymbol(size = 48.dp)
+        Row { Text("Near", style = MaterialTheme.typography.headlineMedium); Text("Help", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary) }
+    }
+}
+
+@Composable
+fun EmergencyCallButton() {
+    val context = LocalContext.current
+    CareButton("Call emergency services · 112", { dial(context, "112") }, icon = Icons.Outlined.Phone)
+}
+fun dial(context: Context, number: String) { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number.filter { it.isDigit() || it == '+' }))) }
+fun directions(context: Context, point: LatLng, name: String = "") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=${point.latitude},${point.longitude}(${Uri.encode(name)})"))) }
+
+@Composable
+fun rememberCareLocation(): Pair<UserLocationState, () -> Unit> {
+    val context = LocalContext.current
+    val helper = remember { LocationHelper(context.applicationContext) }
+    val state by helper.locationState.collectAsStateWithLifecycle()
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { helper.startLocationUpdates() }
+    val request = { if (helper.hasLocationPermission()) helper.startLocationUpdates() else permission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { helper.startLocationUpdates() }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { helper.stopLocationUpdates() }
+    DisposableEffect(Unit) { onDispose { helper.close() } }
+    return state to request
+}
+
+/** Uses actual device/server coordinates; no simulated responders or invented availability. */
+@Composable
+fun CareMap(location: UserLocationState, modifier: Modifier = Modifier, height: Dp = 270.dp,
+            center: LatLng? = null, pins: List<MapPinItem> = emptyList(), route: List<LatLng> = emptyList(),
+            status: String? = null, onPinClick: ((MapPinItem) -> Unit)? = null, nearbyRadiusMeters: Double? = null) {
+    if (center == null && !location.hasFix) {
+        Box(modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+            Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Outlined.MyLocation, null, tint = MaterialTheme.colorScheme.primary)
+                Text(if (location.hasPermission) "Waiting for GPS" else "Location access needed", style = MaterialTheme.typography.titleSmall)
+                CareMuted("Your live map appears when your location is available.")
+            }
+        }
+        return
+    }
+    val target = center ?: LatLng(location.latitude, location.longitude)
+    val camera = rememberCameraPositionState { position = com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(target, 15f) }
+    var loaded by remember { mutableStateOf(false) }
+    val routeColor = MaterialTheme.colorScheme.primary
+    val dark = ThemeManager.isDarkMode
+    var now by remember { mutableLongStateOf(android.os.SystemClock.elapsedRealtime()) }
+    LaunchedEffect(Unit) { while (true) { delay(5_000); now = android.os.SystemClock.elapsedRealtime() } }
+    val fresh = location.hasFix && maxOf(now, SystemClock.elapsedRealtime()) - location.fixElapsedMillis in 0 until 120_000
+    val centerMarker = remember { MarkerState(target) }
+    SideEffect { centerMarker.position = target }
+    val style = remember(dark) { if (!dark) null else MapStyleOptions("""[{"elementType":"geometry","stylers":[{"color":"#101817"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#afc3c0"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#101817"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"}]}]""") }
+    LaunchedEffect(target, pins.map { it.position }, loaded, nearbyRadiusMeters) {
+        if (loaded) {
+            val points = if (nearbyRadiusMeters != null) {
+                val latDelta = nearbyRadiusMeters / 111_320.0
+                val lngDelta = latDelta / kotlin.math.cos(Math.toRadians(target.latitude)).coerceAtLeast(0.01)
+                listOf(LatLng((target.latitude - latDelta).coerceIn(-90.0, 90.0), target.longitude - lngDelta),
+                    LatLng((target.latitude + latDelta).coerceIn(-90.0, 90.0), target.longitude + lngDelta))
+            } else pins.map { it.position } + target
+            if (points.distinct().size > 1) {
+                val bounds = LatLngBounds.builder().also { b -> points.forEach(b::include) }.build()
+                camera.animate(CameraUpdateFactory.newLatLngBounds(bounds, 90))
+            } else camera.animate(CameraUpdateFactory.newLatLngZoom(target, 15f))
+        }
+    }
+    Box(modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+        GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = camera,
+            properties = MapProperties(mapStyleOptions = style),
+            uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false, myLocationButtonEnabled = false, compassEnabled = false),
+            onMapLoaded = { loaded = true }) {
+            if (nearbyRadiusMeters != null && location.hasFix) Circle(center = target, radius = nearbyRadiusMeters, strokeColor = routeColor.copy(alpha = .35f), fillColor = routeColor.copy(alpha = .04f), strokeWidth = 2f)
+            if (center != null || location.hasFix) Marker(state = centerMarker, title = uiText(if (center != null) "Medical SOS location" else if (fresh) "You" else "Your last known location"), icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+            pins.forEach { pin -> key(pin.id) {
+                val marker = remember { MarkerState(pin.position) }
+                SideEffect { marker.position = pin.position }
+                Marker(state = marker, title = pin.title, snippet = pin.snippet,
+                icon = BitmapDescriptorFactory.defaultMarker(pin.hueColor), onClick = { onPinClick?.invoke(pin); true }) } }
+            if (route.size > 1) Polyline(points = route, color = routeColor, width = 9f)
+        }
+        Surface(Modifier.align(Alignment.TopStart).padding(12.dp), shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.background) {
+            Row(Modifier.padding(horizontal = 10.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Icon(Icons.Outlined.MyLocation, null, Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
+                Text(status ?: if (fresh) "Live location" else if (location.hasFix) "Last known location" else "Waiting for GPS", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}

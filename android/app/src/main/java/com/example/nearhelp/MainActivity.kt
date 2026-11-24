@@ -9,6 +9,8 @@ import java.util.UUID
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,6 +19,9 @@ import com.example.nearhelp.theme.NearHelpTheme
 import com.example.nearhelp.theme.ThemeManager
 
 class MainActivity : ComponentActivity() {
+  override fun attachBaseContext(newBase: android.content.Context) {
+    super.attachBaseContext(com.example.nearhelp.i18n.AppLanguages.wrap(newBase))
+  }
   private var pendingIncident by mutableStateOf<String?>(null)
   private fun readIncident(intent: Intent?) {
     pendingIncident = intent?.getStringExtra("incident_id")?.takeIf { runCatching { UUID.fromString(it) }.isSuccess }
@@ -32,6 +37,11 @@ class MainActivity : ComponentActivity() {
     readIncident(intent)
     enableEdgeToEdge()
     setContent {
+      LaunchedEffect(ThemeManager.selectedTheme) {
+        val bars = if (ThemeManager.isDarkMode) SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+          else SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+        enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+      }
       NearHelpTheme(darkTheme = ThemeManager.isDarkMode) {
         Surface(
           modifier = Modifier.fillMaxSize(),

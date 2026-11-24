@@ -2,7 +2,7 @@
 
 import logging
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -23,6 +23,15 @@ from app.services.eta_service import eta_service
 from app.services.facility_service import FacilityService
 
 logger = logging.getLogger(__name__)
+
+
+def _telemetry_time(value: Any) -> datetime | None:
+    """Normalize actual GPS receipt times; building a snapshot is not a new location fix."""
+    try:
+        parsed = value if isinstance(value, datetime) else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed.astimezone(UTC)
+    except (TypeError, ValueError):
+        return None
 
 
 class TrackingService:
@@ -88,23 +97,29 @@ class TrackingService:
 
         responder_updates: list[ResponderTrackingUpdate] = []
         for sos_response, user in responder_rows:
-            # Check cached telemetry first, then fallback to user.device_info or deterministic position
+            # Pick the newest actual telemetry. REST updates must supersede an older socket cache.
             cached = cls.get_cached_responder_location(incident_id, user.id)
+            device = user.device_info if isinstance(user.device_info, dict) else {}
+            cached_time = _telemetry_time(cached.get("updated_at")) if cached else None
+            device_time = _telemetry_time(device.get("last_updated") or device.get("location_updated_at"))
+            source_updated = None
             user_lat = None
             user_lon = None
             user_heading = None
             user_speed_mps = None
 
-            if cached:
+            if cached and (device_time is None or (cached_time is not None and cached_time >= device_time)):
                 user_lat = cached.get("latitude")
                 user_lon = cached.get("longitude")
                 user_heading = cached.get("heading")
                 user_speed_mps = cached.get("speed_mps")
+                source_updated = cached_time
             elif user.device_info and isinstance(user.device_info, dict):
                 user_lat = user.device_info.get("last_latitude")
                 user_lon = user.device_info.get("last_longitude")
                 user_heading = user.device_info.get("last_heading")
                 user_speed_mps = user.device_info.get("last_speed")
+                source_updated = device_time
 
             if user_lat is None or user_lon is None:
                 continue
@@ -138,7 +153,8 @@ class TrackingService:
 
             # If responder is already marked ARRIVED, force status & ETA display
             current_status = sos_response.status
-            if current_status in ("ARRIVED", "ON_SCENE") or dist_m <= eta_service.ARRIVAL_THRESHOLD_METERS:
+            recent_fix = source_updated is not None and 0 <= (datetime.now(UTC) - source_updated).total_seconds() <= 120
+            if current_status in ("ARRIVED", "ON_SCENE") or (recent_fix and dist_m <= eta_service.ARRIVAL_THRESHOLD_METERS):
                 if current_status == "EN_ROUTE" and dist_m <= eta_service.ARRIVAL_THRESHOLD_METERS:
                     current_status = "ARRIVED"
                 eta_min = 0.0
@@ -150,7 +166,7 @@ class TrackingService:
                     responder_name=user.name,
                     latitude=float(user_lat),
                     longitude=float(user_lon),
-                    heading=user_heading or bearing_deg,
+                    heading=user_heading if user_heading is not None else bearing_deg,
                     bearing_compass=bearing_compass,
                     speed_kmh=speed_kmh,
                     distance_meters=dist_m,
@@ -162,7 +178,7 @@ class TrackingService:
                     is_cpr_certified=is_cpr,
                     verified_skills=skill_list,
                     phone=user.phone,
-                    last_updated=datetime.utcnow(),
+                    last_updated=source_updated,
                 )
             )
 

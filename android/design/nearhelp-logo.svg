@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512" role="img" aria-label="NearHelp location pin with medical pulse">
+  <rect width="108" height="108" rx="25" fill="#17635d"/>
+  <g transform="translate(18.16 18.16) scale(1.12)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke-width="3.8" d="M32 58C27 53 12 41.3 12 27.2C12 16.4 20.5 8 32 8C43.5 8 52 16.4 52 27.2C52 41.3 37 53 32 58Z"/>
+    <path stroke-width="3.5" d="M20 28H25.5L29 21L34 36L38.5 28H44"/>
+  </g>
+</svg>

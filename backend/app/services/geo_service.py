@@ -3,6 +3,7 @@
 import logging
 import math
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -71,6 +72,7 @@ class GeoService:
         if isinstance(current_info, dict):
             current_info["last_latitude"] = latitude
             current_info["last_longitude"] = longitude
+            current_info["last_updated"] = datetime.now(UTC).isoformat()
             user.device_info = current_info
 
         # In PostgreSQL + PostGIS, populate geometry column
