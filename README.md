@@ -3,161 +3,94 @@
 > **AI-Powered Community Emergency Response Network**  
 > *Connecting People. Coordinating Rescue. Powered by AI.*
 
+NearHelp AI is a multi-tier emergency response platform consisting of a **native Android client** (Kotlin + Jetpack Compose), a **core coordination backend** (FastAPI + PostgreSQL/PostGIS + Redis + same-origin Admin Web UI), and an **AI microservice** (FastAPI + LangGraph + Google Gemini + curated clinical protocols).
+
 ---
 
-## 📌 Documentation Index
+## Documentation Suite
 
-The root-level decision register and data-flow guide describe the current implementation. Detailed design, governance, and planning specifications are in [`docs/`](docs/).
+### Reverse-Engineered Technical Documentation (Repository Root)
 
-| Document | Description | Link |
+| Document | Purpose | Link |
 | :--- | :--- | :--- |
-| **Project Decisions** | Technology and architecture choices, rationale, tradeoffs, and implementation status | [decisions.md](decisions.md) |
-| **Application & Data Flow** | User data journeys through Android, APIs, storage, AI, notifications, and tracking | [flow.md](flow.md) |
-| **System Architecture** | Technical blueprint: microservices, data flow, algorithms, DB schemas, security | [docs/architecture.md](docs/architecture.md) |
-| **Design System Specification** | Material 3 Expressive, Neomorphic tokens, screen wireframes, animations | [docs/design.md](docs/design.md) |
-| **Master TODO List** | Comprehensive task tracking (~238 tasks) across 3 MoSCoW phases | [docs/todos.md](docs/todos.md) |
-| **Project Proposal** | Complete academic proposal, problem statement, research questions, deliverables | [docs/proposal.md](docs/proposal.md) |
-| **Mobile UI/UX Guidance** | Jetpack Compose guidelines, color tokens, wireframes, disclaimer rules | [docs/UI_GUIDANCE.md](docs/UI_GUIDANCE.md) |
-| **Two-Phone Readiness Review** | Current integration gaps and device acceptance checklist | [docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md) |
+| **Project Overview** | Vision, implemented vs. planned feature matrix, technology stack, and regional scope | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) |
+| **Architecture** | Three-tier runtime topology, service boundaries, and divergence from early specs | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| **Codebase Map** | Annotated directory-by-directory map of Backend, AI Service, Android, and Data | [CODEBASE_MAP.md](CODEBASE_MAP.md) |
+| **System Design** | Deep dive into SOS dispatch, ranking math, tracking/WS state, routing, and caching | [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md) |
+| **Database** | SQLAlchemy models, PostGIS spatial indexes, encryption at rest, and SQLite test stubs | [DATABASE.md](DATABASE.md) |
+| **API Reference** | Complete REST and WebSocket endpoint reference derived from FastAPI routers | [API_REFERENCE.md](API_REFERENCE.md) |
+| **User Flows** | Step-by-step journeys for Victims, Responders, AI Assistant, and Admins | [USER_FLOWS.md](USER_FLOWS.md) |
+| **AI System** | Classifiers, severity predictor, LangGraph 5-node agent, guardrails, and fallbacks | [AI_SYSTEM.md](AI_SYSTEM.md) |
+| **Security** | Auth flows, JWTs, AES-256-GCM medical ID, input validation, and exposed risks | [SECURITY.md](SECURITY.md) |
+| **Testing** | Pytest suites, Android unit/Robolectric tests, smoke script, and observed results | [TESTING.md](TESTING.md) |
+| **Deployment** | Docker Compose stack, environment variables, Android APK build, and runtime limits | [DEPLOYMENT.md](DEPLOYMENT.md) |
+| **Known Issues** | Verified bugs, schema mismatches, security gaps, dead/template code, and debt | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
+| **Agents Guide** | Guide for AI coding agents and human maintainers working in this repository | [AGENTS.md](AGENTS.md) |
 
----
+### Diagrams, Decisions & Historical Specs
 
-## 🚀 Problem Statement & Vision
-
-During the first few minutes of an emergency (cardiac arrest, fire, accident), professional responders (108/112) are often several minutes away. The nearest person capable of helping is frequently a neighbor, passerby, or off-duty medical volunteer within walking distance. 
-
-**NearHelp AI** creates an AI-assisted, real-time emergency response network that:
-1. **Detects & Classifies** emergencies instantly from text, voice, or photo.
-2. **Ranks & Mobilizes** nearby verified community responders based on proximity, skills, and reliability.
-3. **Guides** bystanders with step-by-step, WHO/Red Cross-grounded first-aid protocols via AI Crisis Assistant.
-4. **Coordinates** rescue via live GPS tracking, real-time WebSockets chat, and automated emergency summaries for professional services.
-
----
-
-## 🏗️ Repository Structure
-
-```
-NearHelp/
-├── docs/                           # Architecture, Specs, Guidelines, TODOs
-│   ├── architecture.md             # System Architecture & Technical Specifications
-│   ├── design.md                   # Comprehensive UI/UX Design System Specification
-│   ├── todos.md                    # Master TODO List (~238 tasks)
-│   ├── proposal.md                 # Master Project Proposal
-│   ├── UI_GUIDANCE.md              # Android UI/UX & Jetpack Compose Specs
-│   └── DEVICE_READINESS.md         # Two-Phone Verification Checklist
-│
-├── android/                        # Android Client (Kotlin + Jetpack Compose)
-├── backend/                        # Backend API Service (FastAPI + PostgreSQL/PostGIS)
-├── ai_service/                     # AI Microservice (Gemini 2.5 + LangGraph)
-├── data/                           # Kolkata Regional JSON Data
-│   └── regional/                   # Hospitals, Police, Fire Station JSONs
-│
-└── docker-compose.yml              # Local Multi-Container Development Infrastructure
-```
-
----
-
-## 🧩 24 Core System Modules (3-Phase MoSCoW Model)
-
-### Phase 1 — MVP Core (Must Have)
-- **Module 1**: Authentication & Identity (Firebase Auth, JWT, Anonymous SOS)
-- **Module 2**: User Profile & Encrypted Medical ID
-- **Module 3**: Skill Verification Workflow (Doctor, Nurse, CPR, NGO)
-- **Module 4**: AI Emergency Detection (Text, Voice, Image)
-- **Module 5**: AI Severity Prediction (0–100 Triage Score)
-- **Module 6**: Smart SOS Engine (Geospatial PostGIS Query + 3-Layer Escalation)
-- **Module 7**: Live Rescue Map (Google Maps SDK)
-- **Module 8**: Live Tracking Stream (WebSocket Location Updates)
-- **Module 9**: AI Navigation & Rescue Routing
-- **Module 10**: AI Crisis Assistant (LangGraph Emergency Agent)
-- **Module 11**: Clinical Knowledge Base & Guidelines (WHO/Red Cross Protocols)
-
-### Phase 2 — System Enhancements (Should Have)
-- **Module 12**: AI Multilingual Translation (Bengali, Hindi, English)
-- **Module 13**: Voice SOS Triage (Speech-to-Text → Structured JSON)
-- **Module 14**: Emergency Timeline Auto-Generation
-- **Module 15**: AI Post-Incident Summary Report
-- **Module 16**: Reputation Engine (Trust Score & Badges)
-- **Module 17**: Community Resource Layer (AEDs, Blood Banks, Shelters)
-
-### Phase 3 — Stretch & Analytics (Could Have)
-- **Module 18**: Admin Web Dashboard
-- **Module 19**: AI Analytics & Emergency Heatmaps
-- **Module 20**: Mass Disaster Mode (Multi-Responder Coordination)
-- **Module 21**: Guardian Safety Mode
-- **Module 22**: Offline SMS Emergency Fallback
-- **Module 23**: Digital Twin Load Simulator (Viva Benchmark Generator)
-- **Module 24**: Developer Dashboard & System Monitoring (Prometheus/Grafana)
-
----
-
-## 🛡️ Risk Mitigation & Fail-Safe Architecture
-
-| Risk | Strategic Solution | Technical Implementation |
+| Resource | Description | Link |
 | :--- | :--- | :--- |
-| **Scope Overload** | **3-Phase MoSCoW Model** | MVP (Modules 1–11) completed first. Phase 2/3 advance only after prior phase stability. |
-| **No Volunteers Nearby** | **3-Layer Escalation** | **Layer 1**: Auto-radius expansion (30s/45s/60s). **Layer 2**: Direct 108/112 auto-dial with AI summary. **Layer 3**: Guided offline self-care AI fallback. |
-| **Medical Liability** | **Good Samaritan Law + Strict Guardrails** | Non-dismissible legal disclaimer on guidance UI. Strict prompt constraints (no dosage, no diagnosis, no prescriptions). Protected under India's Good Samaritan Law (2016). |
-| **Viva/Defense Weakness** | **Digital Twin Simulation** | 5 auto-generated comparative evaluation charts: AI-ranked vs broadcast, indexed vs unindexed geo queries, AI latency breakdown, throughput curves, and skill-aware vs distance-only ranking. |
+| **Mermaid Diagrams** | 8 architecture, communication, ERD, auth, workflow, AI, and deployment diagrams | [docs/diagrams/README.md](docs/diagrams/README.md) |
+| **Architecture Decisions (ADRs)** | 10 ADRs comparing original design choices with actual implementation | [docs/decisions/README.md](docs/decisions/README.md) |
+| **Project Decision Register** | Consolidated engineering decision log | [decisions.md](decisions.md) |
+| **Application & Data Flow** | Detailed runtime data-journey reference | [flow.md](flow.md) |
+| **Two-Phone Readiness** | End-to-end physical device setup and acceptance checklist | [docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md) |
+| **Android Redesign Notes** | Compose Care design system, localization, and Places API setup | [android/REDESIGN.md](android/REDESIGN.md) |
+| **Original Reference Specs** | Pre-implementation blueprint, proposal, design system, and master TODO list | [docs/architecture.md](docs/architecture.md), [docs/design.md](docs/design.md), [docs/proposal.md](docs/proposal.md), [docs/todos.md](docs/todos.md) |
 
 ---
 
-## 🛠️ Technology Stack
-
-| Layer | Technology |
-| :--- | :--- |
-| **Mobile Client** | Kotlin + Jetpack Compose + Google Maps SDK |
-| **Backend API** | FastAPI (Python) + SQLAlchemy 2.0 |
-| **Database & Cache** | PostgreSQL 16 + PostGIS 3.4 / Redis 7 |
-| **AI & LLM** | Gemini 2.5 + LangGraph |
-| **Real-Time** | WebSockets + Firebase Cloud Messaging (FCM) |
-| **DevOps & Infra** | Docker + Docker Compose + Google Cloud Run + GitHub Actions |
-| **Monitoring** | Prometheus + Grafana + Swagger / OpenAPI 3.1 |
-
----
-
-## 👥 Team Roster & Ownership
-
-- **Aritra** — Project Lead & AI Architect (*Core AI, LangGraph, Integration*)
-- **Adil** — Backend & Real-Time Lead (*FastAPI, PostGIS DB, WebSockets, FCM*)
-- **Dishari** — Android App UI/UX Lead (*Jetpack Compose Screens, Navigation, Theme*)
-- **Abhisikta** — Documentation & QA Specialist (*SRS, SDD, UML Diagrams, Test Cases*)
-- **Plaban** — Data & Knowledge Analyst (*Clinical Protocols, Competitor Benchmarks, City Data*)
-- **Sayantan** — Design, Assets & Media Specialist (*Branding, Icons, Slide Deck, Demo Video*)
-
----
-
-*For detailed technical specifications, check out [docs/architecture.md](docs/architecture.md) and [docs/todos.md](docs/todos.md).*
-
-## Admin panel
-
-The backend serves the admin command center at **[http://localhost:8000/admin](http://localhost:8000/admin)**. It uses the same database and authentication as Android and requires an active superuser account. No separate frontend build or hosting is needed.
-
-Start the backend normally, then create your first administrator. With Docker Compose:
+## Quick Start (Local Docker Stack)
 
 ```sh
-docker compose up -d --build backend
+# 1. Copy environment template and set your GEMINI_API_KEY (and SECRET_KEY for non-local use)
+cp .env.example .env
+
+# 2. Start PostgreSQL/PostGIS, Redis, Backend (:8000), and AI Service (:8001)
+docker compose up -d --build
+
+# 3. Verify backend health (checks real DB & PostGIS round trip)
+curl http://localhost:8000/health
+curl http://localhost:8001/health
+```
+
+- **Backend Swagger UI:** `http://localhost:8000/docs`
+- **AI Service Swagger UI:** `http://localhost:8001/docs`
+- **Admin Command Center:** `http://localhost:8000/admin`
+
+### Creating / Managing an Administrator
+
+The backend CLI in [`backend/app/cli.py`](backend/app/cli.py) provisions or promotes an administrator interactively:
+
+```sh
+# With Docker Compose:
 docker compose exec backend python -m app.cli create-admin --email you@example.com --name "Administrator"
-```
 
-For a local Python backend, run the command from `backend/` in your backend virtual environment:
-
-```sh
+# Or locally from backend/:
 python -m app.cli create-admin --email you@example.com --name "Administrator"
 ```
 
-The command prompts for a password without displaying it. For an existing email/password account it sets the supplied password, enables the account, and grants administrator access. Run it only against the database you intend to administer. There are no default administrator credentials.
+> **Important Security Note:** By default, [`backend/app/core/config.py`](backend/app/core/config.py) and [`backend/app/db/session.py`](backend/app/db/session.py) also auto-bootstrap an initial administrator from `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` during startup if those variables are non-empty (and they currently carry hardcoded development defaults). Override or clear these in production; see [SECURITY.md](SECURITY.md) and [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
-The dashboard supports:
+### Building the Android App for Local Testing
 
-- User totals, enabled accounts, online users, pending credentials, active emergencies, and new accounts today (UTC), refreshed every 10 seconds.
-- Search, pagination, and status/role filters, including online members.
-- Creating email/password users; editing name, email, phone, trust score, enabled status, and administrator role; resetting passwords for email accounts.
-- Suspending/re-enabling accounts and permanently deleting accounts with confirmation. Administrators cannot delete, suspend, or demote themselves.
-- Viewing skill verification submissions and approving or rejecting credentials with feedback.
+From `android/` (requires JDK 17):
 
-“Online” means an enabled account made an authenticated HTTP API request in the last five minutes. This includes the administrator viewing the dashboard. It measures recent activity, not exact open-app/socket connections. Presence is shared through the database across API workers; timestamp writes are throttled to once per 30 seconds. The new `user_presence` table is created during normal backend startup; restart existing backends after updating.
+```sh
+./gradlew :app:assembleDebug -PnearhelpBaseUrl=http://YOUR_LAN_IP:8000/
+```
 
-Deleting an account removes its profile, presence, verification submissions, and response engagements. Emergency incidents and timelines remain with nullable account links cleared. Uploaded files and external Google/Firebase identities are not deleted; an external identity can register again after local deletion. Use suspension to block that identity's existing account. Password resets change future logins; existing JWT sessions retain their normal lifetime. Suspension and deletion block subsequent authenticated HTTP API requests immediately. Already-open WebSocket connections retain the project's existing lifecycle behavior.
+The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. See [DEPLOYMENT.md](DEPLOYMENT.md) and [docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md) for emulator URLs (`http://10.0.2.2:8000/`), Firebase push setup (`google-services.json`), and Google Places API (New) requirements.
 
-All account management APIs under `/api/v1/admin` (also `/api/admin`) enforce superuser permissions on the server. Account lists omit password hashes, medical records, and device tokens. Dashboard tokens are kept in page memory and cleared on sign-out; reloading requires signing in again. Serve the backend over HTTPS and configure a private production `SECRET_KEY` when deploying.
+---
+
+## Technology Stack Summary (Verified from Source)
+
+| Layer | Technology in Codebase |
+| :--- | :--- |
+| **Android App** | Kotlin `2.3.20`, Jetpack Compose BOM `2026.03.01`, Material 3, Navigation 3 `1.0.1`, Retrofit `2.11.0`, OkHttp `4.12.0`, Google Maps Compose `4.4.1`, Places SDK `6.0.2`, Firebase Auth/Messaging, AndroidX Security Crypto |
+| **Backend API** | Python 3.11+, FastAPI `>=0.111.0`, SQLAlchemy `>=2.0.30` (asyncpg + GeoAlchemy2), `python-jose` (HS256 JWT), `bcrypt`, `cryptography` (AES-256-GCM), `firebase-admin`, `httpx` |
+| **AI Microservice** | Python 3.11+, FastAPI, LangGraph `>=0.1.0`, `google-genai`, `google-generativeai`, deterministic 384-dim clinical vectorizer |
+| **Database & Cache** | PostgreSQL 16 + PostGIS 3.4 (`postgis/postgis:16-3.4-alpine`), Redis 7 (`redis:7-alpine`) with in-memory fallback |
+| **Admin UI** | Same-origin static HTML/CSS/Vanilla JS served by FastAPI at `/admin` |
