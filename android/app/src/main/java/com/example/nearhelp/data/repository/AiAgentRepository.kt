@@ -468,7 +468,7 @@ class AiAgentRepository(
     currentStepIndex: Int,
     completedSteps: List<Int>
   ): AgentChatResponseDto? {
-    val models = listOf("gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro")
+    val models = listOf("gemini-3.5-flash-lite", "gemini-3.8-flash")
     for (model in models) {
       try {
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey"

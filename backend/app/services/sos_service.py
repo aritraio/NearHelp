@@ -749,9 +749,16 @@ class SOSService:
             cnt_res = await db.execute(cnt_stmt)
             resp_count = len(cnt_res.scalars().all())
 
+            broadcaster_name = None
+            if ev.broadcaster_id and not ev.is_anonymous:
+                b_res = await db.execute(select(User.name).where(User.id == ev.broadcaster_id))
+                broadcaster_name = b_res.scalar_one_or_none()
+
             active_items.append(
                 SOSActiveListItem(
                     id=ev.id,
+                    broadcaster_id=ev.broadcaster_id,
+                    broadcaster_name=broadcaster_name,
                     crisis_type=ev.crisis_type,
                     sub_type=ev.sub_type,
                     severity_score=ev.severity_score,

@@ -136,7 +136,7 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
     }
     BackHandler(enabled = page != "profile") { goBack() }
     Column(modifier.fillMaxSize()) {
-        CarePage(if (page == "profile") null else when (page) { "appearance" -> "Appearance"; "server" -> "Server & DB connection"; "edit-profile" -> "Edit personal details"; "medical" -> "Medical information"; "contacts" -> "Emergency contacts"; "add-contact" -> "Add emergency contact"; "edit-contact" -> "Edit emergency contact"; "languages" -> "Languages you speak"; "communication" -> "Communication"; "app-language" -> "App language"; "qualifications" -> "Responder qualifications"; "verification" -> "Verification status"; "history" -> "Emergency history"; else -> "Impact and statistics" },
+        CarePage(if (page == "profile") null else when (page) { "appearance" -> "Appearance"; "server" -> "Server & DB connection"; "ai-key" -> "Gemini AI API Key"; "edit-profile" -> "Edit personal details"; "medical" -> "Medical information"; "contacts" -> "Emergency contacts"; "add-contact" -> "Add emergency contact"; "edit-contact" -> "Edit emergency contact"; "languages" -> "Languages you speak"; "communication" -> "Communication"; "app-language" -> "App language"; "qualifications" -> "Responder qualifications"; "verification" -> "Verification status"; "history" -> "Emergency history"; else -> "Impact and statistics" },
             if (page == "profile") null else ({ goBack() }), Modifier.weight(1f)) {
             if (state.isLoading || state.isSaving) LinearProgressIndicator(Modifier.fillMaxWidth())
             state.error?.let { CareNote("Could not complete that action", it, error = true); if (page == "profile") CareButton("Retry profile", viewModel::loadProfile) }
@@ -169,6 +169,20 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
                         page = "profile"
                     }, style = CareButtonStyle.PRIMARY, enabled = serverUrlInput.isNotBlank())
                     CareButton("Cancel", { goBack() }, style = CareButtonStyle.QUIET)
+                }
+                "ai-key" -> {
+                    val storage = remember { NearHelpApplication.instance.tokenStorage }
+                    var keyInput by remember { mutableStateOf(storage.getGeminiApiKey().orEmpty()) }
+                    var savedMsg by remember { mutableStateOf<String?>(null) }
+                    CareHeading("Gemini AI API Key", "Configure custom Gemini API key for instant AI chat responses.")
+                    CareField("Gemini API Key", keyInput, { keyInput = it }, password = true, hint = "AIzaSy...")
+                    CareMuted("When configured, the app communicates with Google Gemini directly. If empty, the app uses your active NearHelp backend server.")
+                    savedMsg?.let { CareNote("Settings Updated", it, Icons.Outlined.CheckCircle) }
+                    CareButton("Save Gemini Key", {
+                        storage.saveGeminiApiKey(keyInput.trim())
+                        savedMsg = if (keyInput.isBlank()) "API Key cleared. Using server AI." else "Gemini API Key saved successfully!"
+                    }, style = CareButtonStyle.PRIMARY)
+                    CareButton("Back", { page = "profile" }, style = CareButtonStyle.QUIET)
                 }
                 "appearance" -> {
                     CareHeading("Choose your theme", "Find the look that feels comfortable to read.")
@@ -306,6 +320,9 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
                         CareRow("Server connection", RetrofitClient.getEffectiveBaseUrl().removePrefix("https://").removePrefix("http://").trimEnd('/'), Icons.Outlined.Dns) {
                             serverUrlInput = RetrofitClient.getEffectiveBaseUrl()
                             page = "server"
+                        }
+                        CareRow("AI Assistant & Gemini Key", if (NearHelpApplication.instance.tokenStorage.getGeminiApiKey().isNullOrBlank()) "Using server AI" else "Custom Gemini API key active", Icons.Outlined.ChatBubbleOutline) {
+                            page = "ai-key"
                         }
                         CareRow("Communication", "App language and languages you speak", Icons.Outlined.Language) { page = "communication" }
                         CareRow("Appearance", "${ThemeManager.selectedTheme.title} · 4 themes available", Icons.Outlined.Palette) { page = "appearance" }

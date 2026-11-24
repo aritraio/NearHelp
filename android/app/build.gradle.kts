@@ -17,7 +17,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        val backendUrl = providers.gradleProperty("nearhelpBaseUrl").orElse("https://nearhelp-backend-7sfj.onrender.com/").get().trimEnd('/') + "/"
+        val backendUrl = providers.gradleProperty("nearhelpBaseUrl").orElse("https://twin-greatly-secretariat-members.trycloudflare.com/").get().trimEnd('/') + "/"
         require(backendUrl.startsWith("https://") || backendUrl.startsWith("http://")) { "nearhelpBaseUrl must be an HTTP(S) URL" }
         buildConfigField("String", "API_BASE_URL", "\"$backendUrl\"")
     }

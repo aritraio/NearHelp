@@ -178,6 +178,8 @@ class SOSActiveListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    broadcaster_id: uuid.UUID | None = None
+    broadcaster_name: str | None = None
     crisis_type: str
     sub_type: str | None = None
     severity_score: int

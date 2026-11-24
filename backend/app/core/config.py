@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     # AI Microservice URL & Direct Gemini Fallback
     AI_SERVICE_URL: str = "http://localhost:8001"
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.0-flash"
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
 
     # Initial Administrator Bootstrap (For environments without shell access like Render Free tier)
     INITIAL_ADMIN_EMAIL: str = "admin@nearhelp.ai"

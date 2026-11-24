@@ -774,7 +774,7 @@ android/app/src/main/java/com/nearhelp/app/
 │       ├── GuardianRadarScreen.kt     // Left Screen implementation
 │       ├── CrisisDispatchScreen.kt    // Right Screen implementation
 │       ├── ActiveTrackingScreen.kt    // Post-dispatch live responder map
-│       └── AICrisisChatScreen.kt      // LangGraph AI first-aid chat
+│       └── AICrisisChatScreen.kt      // LangGraph AI first-aid chat (strictly text-based)
 ```
 
 ---

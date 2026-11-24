@@ -578,6 +578,8 @@ ETA calculated using Google Directions API
 
 **Purpose**: An AI agent that actively assists during an emergency, not a passive chatbot.
 
+**Modality & Scope (Text-Only)**: The AI Crisis Assistant operates strictly as a text-based conversational guidance interface. Voice recording/speech-to-text input and photo/image attachments are intentionally excluded from the AI chat section. This architectural constraint guarantees deterministic sub-second response times, reduces packet payloads over degraded cellular connections, avoids audio transcription errors in loud crisis environments, and prevents visual misinterpretations in critical clinical first-aid guidance.
+
 **Agent Architecture (LangGraph)**:
 ```
                     ┌─────────────────┐
@@ -1006,9 +1008,9 @@ The AI subsystem is designed as a **separate, independently deployable service**
 
 | Component | Model | Reason |
 | --- | --- | --- |
-| LLM (Generation) | Gemini 2.5 | Strong multilingual support (critical for India), vision capabilities for photo/video input, structured output support |
+| LLM (Generation) | Gemini 2.5 | Strong multilingual support (critical for India), structured output support, protocol adherence |
 | Embeddings | `all-MiniLM-L6-v2` or Gemini embedding model | Small, fast, sufficient for emergency classification & intent embeddings |
-| Speech-to-Text | Google Speech API | Best-in-class for Indian languages and accents |
+| Speech-to-Text | Google Speech API | Best-in-class for Indian languages and accents (reserved for Phase 2 Voice SOS intake; AI chat assistant is strictly text-based) |
 | Agent Orchestration | LangGraph | Graph-based agent state management; supports multi-step reasoning with tool use |
 
 ### 9.3 Why Curated Clinical Protocols with Strict Guardrails, Not Fine-Tuning
@@ -1154,6 +1156,8 @@ POST   /api/ai/severity            Predict severity score
 POST   /api/ai/guidance            Get protocol-grounded first-aid guidance
 POST   /api/ai/translate           Translate text between languages
 POST   /api/ai/summary             Generate emergency summary
+POST   /api/ai/agent/chat          Text-based conversational emergency guidance (chat)
+WS     /ws/ai/chat                 Text-based real-time emergency guidance stream
 ```
 
 #### Admin

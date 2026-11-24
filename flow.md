@@ -283,7 +283,7 @@ AI-service startup warms classification reference embeddings for multimodal tria
 ### A user question has three possible processing paths
 
 1. **Optional direct provider path:** If a device Gemini key exists, `AiAgentRepository` attempts a Google Gemini request directly. Question/context data leaves the device without going through the backend or server agent graph.
-2. **Backend path:** Otherwise, or after direct failure, the repository sends an agent chat request to the backend (`POST /api/v1/ai/agent/chat`). It includes session ID, text, role, current step, and completed steps. The backend proxies to the AI service's `/agent/chat` endpoint.
+2. **Backend path:** Otherwise, or after direct failure, the repository sends an agent chat request to the backend (`POST /api/v1/ai/agent/chat`). It includes session ID, text, role, current step, and completed steps. The backend proxies to the AI service's `/agent/chat` endpoint. (Note: The AI crisis assistant chat interface is strictly text-based; voice recording and photo/image attachments are intentionally omitted to maintain sub-second response times and avoid unverified media processing during acute crisis assistance.)
 3. **Local app fallback:** If the backend fails or returns a response the repository classifies as generic for that query, the repository constructs a response from built-in condition/protocol logic.
 
 On the AI service, the graph runs **triage → protocol lookup → safety guardrail → reasoning/response or handover**. Session state tracks the current condition and completed steps in process memory. The response returns guidance, citations, warnings, step state, and related UI fields; the ViewModel renders them in the crisis assistant.

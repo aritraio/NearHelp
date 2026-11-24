@@ -1,5 +1,6 @@
 """NearHelp AI — Resilient HTTP Client for AI Microservice."""
 
+import asyncio
 import logging
 import re
 import time
@@ -342,26 +343,23 @@ class AIClient:
                     ) + "\n\n"
 
                 prompt = f"{system_prompt}\n\n{history_context}Active Condition: {active_condition}\nUser Inquiry: {request.text}\nWhat is the immediate actionable clinical first-aid guidance?"
-                try:
-                    response = gemini_client.models.generate_content(
-                        model=settings.GEMINI_MODEL,
-                        contents=prompt,
-                    )
-                except Exception as model_err:
-                    logger.warning(
-                        "Gemini model '%s' failed (%s). Retrying with 'gemini-1.5-flash'...",
-                        settings.GEMINI_MODEL,
-                        model_err,
-                    )
-                    response = gemini_client.models.generate_content(
-                        model="gemini-1.5-flash",
-                        contents=prompt,
-                    )
-
-                if response and response.text:
-                    reply = response.text.strip()
-                    highlight = "Gemini Clinical Response"
-                    gemini_replied = True
+                for model_candidate in ["gemini-3.5-flash-lite", settings.GEMINI_MODEL, "gemini-3.8-flash"]:
+                    for attempt in range(2):
+                        try:
+                            response = await gemini_client.aio.models.generate_content(
+                                model=model_candidate,
+                                contents=prompt,
+                            )
+                            if response and response.text:
+                                reply = response.text.strip()
+                                highlight = "Gemini 3.5 AI Assistant"
+                                gemini_replied = True
+                                break
+                        except Exception as model_err:
+                            logger.warning("Gemini attempt %d with '%s' notice: %s", attempt + 1, model_candidate, model_err)
+                            await asyncio.sleep(0.5)
+                    if gemini_replied:
+                        break
             except Exception as e:
                 logger.warning("Direct Gemini invocation fallback failed: %s", e)
 

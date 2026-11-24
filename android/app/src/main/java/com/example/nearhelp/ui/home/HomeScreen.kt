@@ -15,6 +15,7 @@ import com.example.nearhelp.ui.auth.AuthViewModel
 import com.example.nearhelp.ui.design.*
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
+import com.example.nearhelp.ui.components.EmergencyAlertOverlay
 
 @Composable
 fun HomeScreen(
@@ -40,6 +41,46 @@ fun HomeScreen(
     // Read again whenever Home is re-entered after an incident is created or closed.
     val activeIncident = NearHelpApplication.instance.tokenStorage.getActiveIncidentId()
     val pendingSos = NearHelpApplication.instance.tokenStorage.getPendingSosKey() != null
+    var nearbyAlert by remember { mutableStateOf<com.example.nearhelp.data.api.Incident?>(null) }
+    var dismissedAlertId by rememberSaveable { mutableStateOf<String?>(null) }
+    val myUserId = remember { NearHelpApplication.instance.tokenStorage.getUserId() }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            runCatching {
+                if (NearHelpApplication.instance.tokenStorage.isLoggedIn()) {
+                    val api = com.example.nearhelp.data.api.RetrofitClient.getSosApiService()
+                    val token = com.example.nearhelp.data.api.SessionTokens.bearer()
+                    val res = api.active(token, null, null)
+                    val alert = res.body()?.events?.firstOrNull {
+                        it.broadcasterId != myUserId && it.status !in listOf("RESOLVED", "CANCELLED")
+                    }
+                    if (alert != null && alert.id != dismissedAlertId) {
+                        nearbyAlert = alert
+                    } else if (alert == null) {
+                        nearbyAlert = null
+                    }
+                }
+            }
+            kotlinx.coroutines.delay(4_000)
+        }
+    }
+
+    nearbyAlert?.let { alert ->
+        EmergencyAlertOverlay(
+            incident = alert,
+            onRespond = {
+                dismissedAlertId = alert.id
+                nearbyAlert = null
+                onNavigateToTracking()
+            },
+            onDismiss = {
+                dismissedAlertId = alert.id
+                nearbyAlert = null
+            }
+        )
+    }
+
     LaunchedEffect(editLocation) { onOverlayStateChanged(editLocation) }
     Column(modifier.fillMaxSize()) {
         CarePage(if (editLocation) "Your location" else null, if (editLocation) ({ editLocation = false }) else null, Modifier.weight(1f)) {

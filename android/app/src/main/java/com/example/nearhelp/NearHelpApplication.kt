@@ -36,8 +36,10 @@ class NearHelpApplication : Application() {
 
     tokenStorage = TokenStorage(this)
     val savedServerUrl = tokenStorage.getServerBaseUrl()
-    if (!savedServerUrl.isNullOrBlank()) {
+    if (!savedServerUrl.isNullOrBlank() && !savedServerUrl.contains("onrender.com") && !savedServerUrl.contains("192.168.")) {
       RetrofitClient.setBaseUrl(savedServerUrl)
+    } else {
+      RetrofitClient.setBaseUrl(com.example.nearhelp.BuildConfig.API_BASE_URL)
     }
 
     val authApiService = RetrofitClient.getAuthApiService()

@@ -536,9 +536,9 @@ Input (text / voice transcript / image description)
 
 | Component | Model | Justification |
 | :--- | :--- | :--- |
-| **LLM** | Gemini 2.5 | Multilingual (critical for India), vision capabilities, structured output, generous free tier |
+| **LLM** | Gemini 2.5 | Multilingual (critical for India), structured output, protocol adherence (AI chat is strictly text-based) |
 | **Embeddings** | `all-MiniLM-L6-v2` or Gemini embeddings | Small (384-dim), fast, sufficient for emergency intent & classification |
-| **Speech-to-Text** | Google Speech API | Best-in-class for Indian languages and accents |
+| **Speech-to-Text** | Google Speech API | Best-in-class for Indian languages and accents (reserved for Phase 2 Voice SOS intake) |
 | **Agent Orchestration** | LangGraph | Graph-based state machine; multi-step reasoning with tool use |
 | **Knowledge Base** | Curated Protocols | Structured protocol catalog (`EMERGENCY_KNOWLEDGE_BASE`), zero infra overhead |
 
@@ -1055,6 +1055,8 @@ Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "
 ---
 
 ## 13. LangGraph Agent Architecture
+
+**Modality & Scope (Text-Only)**: The AI Crisis Assistant operates exclusively as a text-based guidance agent. Voice recording/speech-to-text input and photo/image attachments are intentionally excluded from the AI chat section to ensure minimal latency, eliminate transcription failure points during acute emergencies, and guarantee deterministic protocol compliance.
 
 ### Agent State Machine
 

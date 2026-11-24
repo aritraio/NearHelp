@@ -38,6 +38,7 @@ import com.example.nearhelp.data.places.GeoPoint
 import com.example.nearhelp.data.places.usableLocation
 import com.example.nearhelp.i18n.LocalizedText as Text
 import com.example.nearhelp.notifications.PushRegistration
+import com.example.nearhelp.ui.components.EmergencyAlertOverlay
 import com.example.nearhelp.ui.assistant.AiCrisisAssistantViewModel
 import com.example.nearhelp.ui.assistant.CareAiConversation
 import com.example.nearhelp.ui.design.*
@@ -60,6 +61,7 @@ fun IncidentScreen(initialId: String = "", createMode: Boolean = false, onBack: 
     var draft by rememberSaveable { mutableStateOf("") }
     var panel by rememberSaveable { mutableStateOf("tracking") }
     var available by rememberSaveable { mutableStateOf(false) }
+    var dismissedAlertId by rememberSaveable { mutableStateOf<String?>(null) }
     var confirmFinish by rememberSaveable { mutableStateOf<String?>(null) }
     var requestedLocation by rememberSaveable { mutableStateOf(false) }
     var requestedNotifications by rememberSaveable { mutableStateOf(false) }
@@ -161,13 +163,31 @@ fun IncidentScreen(initialId: String = "", createMode: Boolean = false, onBack: 
                 CareHeading("AI help while waiting", compact = true)
                 CareAiConversation(ai, state.pendingDescription)
             } else if (incident == null) {
+                val feed = state.feed.filter { it.crisisType.equals("medical", true) }
+                val incomingAlert = feed.firstOrNull {
+                    it.id != dismissedAlertId && it.broadcasterId != viewModel.userId && it.status !in listOf("RESOLVED", "CANCELLED")
+                }
+                if (incomingAlert != null) {
+                    EmergencyAlertOverlay(
+                        incident = incomingAlert,
+                        onRespond = {
+                            dismissedAlertId = incomingAlert.id
+                            viewModel.open(incomingAlert.id)
+                        },
+                        onDismiss = {
+                            dismissedAlertId = incomingAlert.id
+                        }
+                    )
+                }
                 CareCheck("Available to help nearby", available, { available = it })
                 CareMuted("Share your location to receive nearby medical alerts.")
                 if (!location.hasPermission) CareButton("Allow location access", requestLocation, icon = Icons.Outlined.MyLocation)
                 state.syncError?.let { CareNote("Live updates unavailable", it, Icons.Outlined.WifiOff) }
-                val feed = state.feed.filter { it.crisisType.equals("medical", true) }
                 if (feed.isEmpty()) CareNote("No active medical requests", "The feed updates automatically.", Icons.Outlined.CheckCircle)
-                feed.forEach { event -> CareRow("Medical emergency", listOfNotNull(event.address, event.status.replace('_', ' ')).joinToString(" · "), Icons.Outlined.MonitorHeart) { viewModel.open(event.id) } }
+                feed.forEach { event ->
+                    val requester = event.broadcasterName?.takeIf { it.isNotBlank() } ?: "Someone nearby"
+                    CareRow("$requester needs help", listOfNotNull(event.address, event.status.replace('_', ' ')).joinToString(" · "), Icons.Outlined.MonitorHeart) { viewModel.open(event.id) }
+                }
             } else {
                 RescueStatus(presentation)
                 incident.description?.takeIf(String::isNotBlank)?.let { CareMuted("Your request: $it") }

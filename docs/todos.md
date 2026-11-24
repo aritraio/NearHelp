@@ -259,7 +259,7 @@
 - [x] 🔴 Design emergency state machine (Understand emergency → Triage → Step-by-Step Guidance → Handover)
 - [x] 🔴 Implement Grounded First-Aid Protocol Screen in Jetpack Compose ([`AiCrisisAssistantScreen.kt`](../android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantScreen.kt))
 - [x] 🔴 Implement AHA/ERC **110 BPM CPR Rhythm Metronome** (visual pulse + audio click at 545.45ms period)
-- [x] 🔴 Implement Bystander AI Assistant Q&A Chat Drawer with clinical contraindication guardrails
+- [x] 🔴 Implement Bystander AI Assistant Q&A Chat Drawer with clinical contraindication guardrails (strictly text-based; voice & photo excluded)
 - [x] 🔴 Implement Section 134A Motor Vehicles (Amendment) Act 2019 legal immunity badge
 - [x] 🔴 Set up LangGraph agent orchestration framework in `ai_service/` ([`gemini_agent.py`](../ai_service/app/agent/gemini_agent.py), [`state.py`](../ai_service/app/agent/state.py), [`knowledge.py`](../ai_service/app/agent/knowledge.py))
 - [x] 🔴 Integrate Gemini 2.5 LLM with citation enforcement ([`gemini_agent.py`](../ai_service/app/agent/gemini_agent.py), [`knowledge.py`](../ai_service/app/agent/knowledge.py))

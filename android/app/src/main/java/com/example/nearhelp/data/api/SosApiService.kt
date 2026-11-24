@@ -14,6 +14,7 @@ data class SosCreateRequest(
 data class Incident(
     val id: String = "",
     @SerializedName("broadcaster_id") val broadcasterId: String? = null,
+    @SerializedName("broadcaster_name") val broadcasterName: String? = null,
     @SerializedName("crisis_type") val crisisType: String = "medical",
     val status: String = "",
     val latitude: Double = 0.0,
