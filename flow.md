@@ -17,8 +17,8 @@ flowchart LR
     Backend <--> Redis[(Redis middleware cache)]
     Backend <--> Uploads[Local uploaded files]
     Backend <-->|HTTP| AI[AI service :8001]
-    AI <--> Chroma[(ChromaDB protocol vectors)]
-    Corpus[Protocol files] --> Chroma
+    AI <--> ProtocolStore[(Clinical protocol catalog)]
+    Corpus[Protocol definitions] --> ProtocolStore
     AI <-->|Configured provider requests| Gemini[Google Gemini]
     Backend --> FCM[Firebase Cloud Messaging]
     FCM --> UI
@@ -321,7 +321,7 @@ AI WebSocket routes also exist at `/ws/ai/chat` and `/api/v1/ws/ai/chat`; the An
 | Avatar/certificate bytes | Upload input | Local `uploads` files; URLs/review metadata in DB | Static URLs are currently served without download authorization |
 | AI assistant turns | UI/repository state | Process-local agent/fallback sessions | Gemini on configured branches; durable transcript storage not established |
 | User Gemini key | Device preferences when configured | Not part of ordinary profile records | Used to authenticate direct Google API requests |
-| Protocols/vectors | Built-in fallback guidance | Repository corpus and AI-owned Chroma store | Protocol/query text to provider embedding API when enabled |
+| Protocols/vectors | Built-in fallback guidance | Repository corpus and AI protocol knowledge base | Direct structured protocol matching and clinical guardrails |
 | Middleware response cache | None | Redis or process memory, configured 24-hour default TTL | Can contain API response bodies; not the authoritative incident store |
 
 ## 13. Access boundaries and failure behavior to preserve

@@ -187,7 +187,7 @@
 
 - [x] 🟡 Layer 1: Auto-radius expansion (0–30s: Community Network 500m–1.5km)
 - [x] 🟡 Layer 2: Direct 108/112 municipal ambulance gateway auto-escalation (30–60s)
-- [x] 🟢 Layer 3: Guided self-care AI fallback (cached RAG, offline-capable protocol)
+- [x] 🟢 Layer 3: Guided self-care AI fallback (cached offline clinical protocol)
 
 #### UI Screen Prototypes (Dishari)
 
@@ -269,17 +269,16 @@
 
 ---
 
-### Module 11 — RAG Knowledge Base
+### Module 11 — Clinical Knowledge Base & Guidelines
 
 **Owner**: Aritra (pipeline) · Plaban (data curation)
 
-#### RAG Pipeline (Aritra)
+#### Clinical Protocols & Guardrails (Aritra)
 
-- [x] 🔴 Prototype RAG retrieval logic and prompt guardrails for OHCA cardiac arrest and trauma bleed
-- [x] 🔴 Set up vector store (ChromaDB / pgvector) in `ai_service/` ([`store.py`](../ai_service/app/rag/store.py))
-- [x] 🔴 Implement document chunking pipeline (passage-level chunking) ([`chunker.py`](../ai_service/app/rag/chunker.py))
-- [x] 🔴 Implement embedding generation & semantic search ([`retriever.py`](../ai_service/app/rag/retriever.py), [`rag.py`](../ai_service/app/api/rag.py))
-- [x] 🟡 Implement hallucination guardrails (no unverified medication, no surgical directives) ([`guardrails.py`](../ai_service/app/rag/guardrails.py))
+- [x] 🔴 Prototype clinical protocol matching and safety guardrails for OHCA cardiac arrest and trauma bleed
+- [x] 🔴 Set up structured protocol catalog (`EMERGENCY_KNOWLEDGE_BASE`) in `ai_service/` ([`knowledge.py`](../ai_service/app/agent/knowledge.py))
+- [x] 🔴 Implement protocol step sequencing and state transition tracking ([`gemini_agent.py`](../ai_service/app/agent/gemini_agent.py))
+- [x] 🔴 Implement clinical contraindication and safety guardrails (no unverified medication, no surgical directives) ([`guardrails.py`](../ai_service/app/agent/guardrails.py))
 
 #### Data Curation (Plaban)
 
@@ -374,7 +373,7 @@
 **Owner**: Adil (Backend APIs) · Aritra (integration)
 
 - [x] ⚪ Define Command Center incident monitoring and telemetry endpoints
-  - [x] Live system telemetry schemas (Active emergencies, Bystander count, dispatch latency, RAG index)
+  - [x] Live system telemetry schemas (Active emergencies, Bystander count, dispatch latency, protocol catalog)
   - [x] Real-time incident feed filtering by Severity (Level 1–5) and Status
   - [x] Post-incident report generator data contracts
 - [ ] ⚪ Connect live PostgreSQL/Redis event stream to command endpoints
@@ -442,15 +441,14 @@
   - [x] Suite 6: PostGIS Facilities Nearby Query (`test_facilities.py`)
   - [x] Suite 7: Live GPS Coordinate WebSocket Streaming (`test_tracking_ws.py`)
   - [x] Suite 8: Google Routes & Navigation Service (`test_routing.py`)
-  - [x] Suite 9: AI Classification, Severity & RAG Proxies (`test_ai_*.py`)
-- [x] 🔴 **AI Service Test Suite (Gemini 2.5 + ChromaDB + LangGraph)**: 72/72 unit & RAG tests passing ([`ai_service/tests/`](../ai_service/tests/))
+  - [x] Suite 9: AI Classification, Severity & Agent Proxies (`test_ai_*.py`)
+- [x] 🔴 **AI Service Test Suite (Gemini 2.5 + LangGraph)**: unit tests passing ([`ai_service/tests/`](../ai_service/tests/))
   - [x] Suite 1: AI Emergency Classifier & Cosine Similarity (`test_classifier.py`)
   - [x] Suite 2: Triage & Severity Prediction (`test_severity.py`)
-  - [x] Suite 3: Passage-Level Chunker & Protocol Parser (`test_chunker.py`)
-  - [x] Suite 4: ChromaDB Vector Store & Semantic Retriever (`test_rag.py`, `test_rag_api.py`)
-  - [x] Suite 5: Clinical Contraindication & Hallucination Guardrails (`test_guardrails.py`)
-  - [x] Suite 6: LangGraph Crisis Assistant Agent & Citations (`test_agent.py`)
-  - [x] Suite 7: AI Chat Real-Time WebSockets (`test_agent_ws.py`)
+  - [x] Suite 3: Clinical Protocol Catalog & Step Parser (`knowledge.py`)
+  - [x] Suite 4: Clinical Contraindication & Hallucination Guardrails (`test_guardrails.py`)
+  - [x] Suite 5: LangGraph Crisis Assistant Agent & Citations (`test_agent.py`)
+  - [x] Suite 6: AI Chat Real-Time WebSockets (`test_agent_ws.py`)
 - [x] 🟢 **Android Test Suite (JUnit + Compose ViewModels & Transitions)**: 44/44 unit tests passing ([`android/app/src/test/`](../android/app/src/test/))
   - [x] Suite 1: AuthViewModel & Login/Signup States (`AuthViewModelTest.kt`)
   - [x] Suite 2: AuthRepository & Token Storage (`AuthRepositoryTest.kt`)

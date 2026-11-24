@@ -782,5 +782,5 @@ android/app/src/main/java/com/nearhelp/app/
 ## 🚀 9. Integration with NearHelp AI Core Services
 
 * **AI Triage Integration (Gemini 2.5)**: Tapping the central radar mic captures audio, passes it to the `ai_service` Speech-to-Text pipeline, extracts crisis severity (0–100 score), and pre-selects the appropriate category card in the matrix.
-* **Smart SOS Engine (FastAPI + PostGIS)**: Confirming the address and selecting a category sends a low-latency WebSocket payload (`POST /api/v1/sos/trigger`), initiating 3-layer escalation (Volunteers → 108/112 Auto-dial → Offline RAG).
+* **Smart SOS Engine (FastAPI + PostGIS)**: Confirming the address and selecting a category sends a low-latency WebSocket payload (`POST /api/v1/sos/trigger`), initiating 3-layer escalation (Volunteers → 108/112 Auto-dial → Offline Protocols).
 * **Live GPS Stream**: Telemetry coordinates displayed at the base of the Guardian Radar screen stream live geohash updates to the backend for accurate neighbor proximity ranking.

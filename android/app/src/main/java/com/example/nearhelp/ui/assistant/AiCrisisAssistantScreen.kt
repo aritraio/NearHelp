@@ -1,16 +1,8 @@
 package com.example.nearhelp.ui.assistant
 
 import com.example.nearhelp.i18n.LocalizedText as Text
-import android.app.Activity
-import android.Manifest
-import android.content.pm.PackageManager
-import android.content.Intent
-import android.speech.RecognizerIntent
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,18 +13,12 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.core.content.ContextCompat
 import com.example.nearhelp.ui.design.*
 import com.example.nearhelp.ui.victim.VictimBottomNavBar
 import com.example.nearhelp.ui.victim.VictimNavTab
-import kotlinx.coroutines.launch
 
 @Composable
 fun AiCrisisAssistantScreen(onNavigateBack: () -> Unit, onNavigateToHome: () -> Unit = onNavigateBack,
@@ -114,39 +100,10 @@ fun AiCrisisAssistantScreen(onNavigateBack: () -> Unit, onNavigateToHome: () -> 
 
 /** The same conversation is used in Assistant and inside an active incident; leaving the panel never clears it. */
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
 fun CareAiConversation(viewModel: AiCrisisAssistantViewModel, emergencyDescription: String? = null) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var message by rememberSaveable { mutableStateOf("") }
-    val context = LocalContext.current
-    val speechLanguage = LocalConfiguration.current.locales[0].toLanguageTag()
-    var attachment by remember { mutableStateOf<AssistantAttachment?>(null) }
-    var readingAttachment by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    var attachmentError by remember { mutableStateOf<String?>(null) }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            scope.launch {
-                readingAttachment = true; attachmentError = null
-                try { attachment = readAssistantAttachment(context, uri) }
-                catch (e: kotlinx.coroutines.CancellationException) { throw e }
-                catch (e: Exception) { attachmentError = e.message ?: "Could not read this attachment. Please type your question instead." }
-                finally { readingAttachment = false }
-            }
-        }
-    }
-    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-        bitmap?.let { attachment = cameraAttachment(it); attachmentError = null; it.recycle() }
-    }
-    val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) runCatching { camera.launch(null) }.onFailure { attachmentError = "Camera is unavailable on this device." }
-        else attachmentError = "Allow camera access to attach a photo, or describe the situation in words."
-    }
-    val preview = remember(attachment?.jpeg) { attachment?.jpeg?.let { encoded -> runCatching { val bytes = android.util.Base64.decode(encoded, android.util.Base64.NO_WRAP); android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size) }.getOrNull() } }
-    DisposableEffect(preview) { onDispose { preview?.recycle() } }
-    val speech = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { message = it }
-    }
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (state.chatMessages.isEmpty()) ChatBubble(false, "NearHelp AI Assistant", com.example.nearhelp.i18n.uiText("I’m here to help. Tell me what’s happening."))
         state.chatMessages.forEach { msg ->
@@ -156,24 +113,20 @@ fun CareAiConversation(viewModel: AiCrisisAssistantViewModel, emergencyDescripti
         }
         if (state.isLoading) { LinearProgressIndicator(Modifier.fillMaxWidth()); CareMuted("The assistant is preparing a response…") }
         state.error?.let { CareNote("Could not process your message", it, error = true) }
-        if (readingAttachment) LinearProgressIndicator(Modifier.fillMaxWidth())
-        attachmentError?.let { CareNote("Attachment unavailable", it, error = true) }
-        attachment?.let { CareNote("Attachment ready", it.name, Icons.Outlined.Description); if (preview != null) Image(preview.asImageBitmap(), "Attached photo or PDF first-page preview", Modifier.fillMaxWidth().heightIn(max = 200.dp)); CareButton("Remove attachment", { attachment = null }, style = CareButtonStyle.QUIET) }
         CareField("Ask the AI assistant", message, { message = it.take(4000) }, multiline = true, hint = "What do you need help with?")
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { picker.launch(arrayOf("text/plain", "application/pdf", "image/*")) }, enabled = !readingAttachment && !state.isLoading) { Icon(Icons.Outlined.AttachFile, null); Text("Attach") }
-            TextButton(onClick = {
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) runCatching { camera.launch(null) }.onFailure { attachmentError = "Camera is unavailable on this device." }
-                else cameraPermission.launch(Manifest.permission.CAMERA)
-            }, enabled = !readingAttachment && !state.isLoading) { Icon(Icons.Outlined.CameraAlt, null); Text("Camera") }
-            TextButton(onClick = { runCatching { speech.launch(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM).putExtra(RecognizerIntent.EXTRA_LANGUAGE, speechLanguage)) }.onFailure { attachmentError = "Voice input is unavailable on this device." } }) { Icon(Icons.Outlined.MicNone, null); Text("Voice") }
-        }
-        CareButton("Send to AI assistant", {
-            val content = attachment
-            val question = message.ifBlank { "Please help me understand the attached photo or document." }
-            val text = if (content?.text.isNullOrBlank()) question else "$question\n\nDocument contents:\n${content.text}"
-            viewModel.sendChatMessage(text, content?.jpeg, emergencyDescription); message = ""; attachment = null
-        }, style = CareButtonStyle.PRIMARY, enabled = !state.isLoading && !readingAttachment && (message.isNotBlank() || attachment != null), icon = Icons.AutoMirrored.Outlined.Send)
+        CareButton(
+            "Send to AI assistant",
+            {
+                val text = message.trim()
+                if (text.isNotBlank()) {
+                    viewModel.sendChatMessage(text, emergencyDescription = emergencyDescription)
+                    message = ""
+                }
+            },
+            style = CareButtonStyle.PRIMARY,
+            enabled = !state.isLoading && message.isNotBlank(),
+            icon = Icons.AutoMirrored.Outlined.Send
+        )
         CareMuted("AI guidance may be inaccurate. For urgent help, call emergency services.")
     }
 }

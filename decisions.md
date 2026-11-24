@@ -285,15 +285,15 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Evidence:** [AI settings](ai_service/app/core/config.py), [embedding service](ai_service/app/classifiers/embedding_service.py), [backend AI client](backend/app/services/ai_client.py), [original ADR](docs/architecture.md#18-architecture-decision-records).
 
-### D23 — Removed RAG in favor of curated structured clinical protocols and guardrails
+### D23 — Curated structured clinical protocols and guardrails
 
-**Status:** Superseded / Removed.
+**Status:** Implemented.
 
-**Choice:** Remove ChromaDB vector database, chunking, and semantic vector retrieval. Guide the emergency agent with structured curated clinical protocols and direct clinical contraindication guardrails instead of vector RAG.
+**Choice:** Guide the emergency agent with structured curated clinical protocols and direct clinical contraindication guardrails rather than external vector databases.
 
-**Why — documented:** Simplifies operational complexity, eliminates ChromaDB runtime failures, avoids vector indexing latency in life-critical emergencies, and relies on curated verified emergency protocols (`EMERGENCY_KNOWLEDGE_BASE`).
+**Why — documented:** Simplifies operational complexity, avoids vector indexing latency in life-critical emergencies, and relies directly on curated verified emergency protocols (`EMERGENCY_KNOWLEDGE_BASE`).
 
-**Consequences:** AI guidance operates directly from verified clinical knowledge matrices and Gemini with strict safety guardrails. No ChromaDB dependencies or vector store initialization are required.
+**Consequences:** AI guidance operates directly from verified clinical knowledge matrices and Gemini with strict safety guardrails. No external vector store dependencies or vector index initialization are required.
 
 **Evidence:** [agent graph](ai_service/app/agent/gemini_agent.py), [guardrails](ai_service/app/agent/guardrails.py), [knowledge catalog](ai_service/app/agent/knowledge.py), [Compose mounts](docker-compose.yml).
 

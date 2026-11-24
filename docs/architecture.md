@@ -20,7 +20,7 @@
 9. [SOS Lifecycle — Complete Data Flow](#9-sos-lifecycle--complete-data-flow)
 10. [Responder Ranking Algorithm](#10-responder-ranking-algorithm)
 11. [3-Layer Escalation Protocol](#11-3-layer-escalation-protocol)
-12. [RAG Pipeline Architecture](#12-rag-pipeline-architecture)
+12. [Clinical Protocols & Guardrails Architecture](#12-clinical-protocols--guardrails-architecture)
 13. [LangGraph Agent Architecture](#13-langgraph-agent-architecture)
 14. [Security & Privacy Architecture](#14-security--privacy-architecture)
 15. [Infrastructure & DevOps](#15-infrastructure--devops)
@@ -45,8 +45,8 @@ NearHelp AI follows a **three-tier, microservice-oriented architecture** with st
 │  │   CLIENT    │────▶│    BACKEND       │────▶│     AI SERVICE         │   │
 │  │   LAYER     │◀────│    LAYER         │◀────│     LAYER              │   │
 │  │             │     │                  │     │                        │   │
-│  │  Android    │     │  FastAPI         │     │  RAG + LangGraph       │   │
-│  │  Kotlin     │     │  PostgreSQL      │     │  ChromaDB              │   │
+│  │  Android    │     │  FastAPI         │     │  Agent + Guardrails    │   │
+│  │  Kotlin     │     │  PostgreSQL      │     │  Protocol Store        │   │
 │  │  Compose    │     │  Redis           │     │  Gemini 2.5            │   │
 │  │             │     │  WebSocket       │     │                        │   │
 │  └─────────────┘     └──────────────────┘     └────────────────────────┘   │
@@ -65,7 +65,7 @@ NearHelp AI follows a **three-tier, microservice-oriented architecture** with st
 
 | Principle | Implementation |
 | :--- | :--- |
-| **Subsystem Ownership** | Backend owns PostgreSQL/PostGIS (coordination data). AI Service owns ChromaDB (retrieval data). Independently deployable. |
+| **Subsystem Ownership** | Backend owns PostgreSQL/PostGIS (coordination data). AI Service owns the clinical protocol catalog and agent models. Independently deployable. |
 | **Reliability-First Critical Path** | SOS trigger uses HTTPS (not WebSocket). Alerts use FCM push (not WebSocket). Real-time features use WebSocket only *after* reliable delivery succeeds. |
 | **AI as Parallel Enhancement** | AI processing runs in parallel with alert fan-out. Alerts are delivered immediately; AI guidance follows. The critical path never blocks on AI. |
 | **Decoupled Data Stores** | Each subsystem owns its own database/store, preventing cross-service coupling and enabling independent scaling. |
@@ -115,19 +115,19 @@ NearHelp AI follows a **three-tier, microservice-oriented architecture** with st
           │  │  │Classifier│ │Predictor │ │  Agent   │          │    │
           │  │  └──────────┘ └──────────┘ │(LangGraph│          │    │
           │  │  ┌──────────┐ ┌──────────┐ └──────────┘          │    │
-          │  │  │   RAG    │ │Translator│                       │    │
-          │  │  │ Pipeline │ │          │                       │    │
+          │  │  │ Clinical │ │Translator│                       │    │
+          │  │  │Protocols │ │          │                       │    │
           │  │  └──────────┘ └──────────┘                       │    │
           │  └────────────────────────────────────────────────────┘    │
           └────────────────────────────────────────────────────────────┘
                       │              │              │
             ┌─────────▼──────┐ ┌─────▼──────┐ ┌────▼──────┐
-            │  PostgreSQL    │ │   Redis     │ │ ChromaDB  │
-            │  + PostGIS     │ │   Cache     │ │ (Vector)  │
+            │  PostgreSQL    │ │   Redis     │ │ Protocols │
+            │  + PostGIS     │ │   Cache     │ │ (Catalog) │
             │                │ │             │ │           │
-            │ users          │ │ sessions    │ │ embeddings│
-            │ sos_events     │ │ idempotency │ │ protocol  │
-            │ responses      │ │ rate_limits │ │ chunks    │
+            │ users          │ │ sessions    │ │ clinical  │
+            │ sos_events     │ │ idempotency │ │ guidelines│
+            │ responses      │ │ rate_limits │ │ steps     │
             │ messages       │ │ geo_cache   │ │           │
             │ timeline_events│ │ pub/sub     │ │           │
             │ ai_summaries   │ │             │ │           │
@@ -140,10 +140,9 @@ NearHelp AI follows a **three-tier, microservice-oriented architecture** with st
 | Service | Responsibility | Port | Protocol |
 | :--- | :--- | :--- | :--- |
 | Backend Service | Auth, SOS CRUD, geo queries, WebSocket, FCM, admin | 8000 | HTTPS + WSS |
-| AI Service | Classification, severity, RAG, translation, agent | 8001 | HTTP (internal only) |
+| AI Service | Classification, severity, clinical protocols, translation, agent | 8001 | HTTP (internal only) |
 | PostgreSQL + PostGIS | Relational data + geospatial indexing | 5432 | TCP |
 | Redis | Cache, sessions, idempotency, pub/sub | 6379 | TCP |
-| ChromaDB | Vector embeddings for RAG retrieval | 8002 (or in-process) | HTTP / in-process |
 
 ---
 
@@ -398,7 +397,7 @@ AI Service (proxied to AI microservice)
 ───────────
 POST   /api/ai/classify             Classify emergency from text/voice/image
 POST   /api/ai/severity             Predict severity score (0–100)
-POST   /api/ai/guidance             Get RAG-grounded first-aid guidance
+POST   /api/ai/guidance             Get protocol-grounded first-aid guidance
 POST   /api/ai/translate            Translate text between languages
 POST   /api/ai/summary              Generate emergency summary for dispatch
 
@@ -457,22 +456,16 @@ ai_service/app/
 │   ├── crisis_types.py            # Crisis type taxonomy + reference embeddings
 │   └── severity_predictor.py      # LLM-based severity scoring
 │
-├── rag/
-│   ├── chunker.py                 # Document → procedure-level chunks
-│   ├── embedder.py                # Chunk → vector embedding
-│   ├── retriever.py               # Query → top-k similar chunks
-│   ├── generator.py               # Retrieved chunks + prompt → guidance
-│   └── guardrails.py              # Post-generation safety filters
-│
-├── agents/
-│   ├── crisis_agent.py            # LangGraph agent definition
-│   ├── nodes/
-│   │   ├── intent_router.py       # Route to appropriate sub-agent
-│   │   ├── first_aid_node.py      # RAG-powered guidance node
-│   │   ├── followup_node.py       # Clarifying question generator
-│   │   ├── coordinator_node.py    # Multi-responder coordination
-│   │   └── response_builder.py    # Final response assembly + translation
+├── agent/
+│   ├── gemini_agent.py            # LangGraph agent definition & state
+│   ├── knowledge.py               # Curated clinical protocols catalog
+│   ├── guardrails.py              # Clinical contraindication guardrails
 │   └── state.py                   # Agent state schema
+│
+├── classifiers/
+│   ├── emergency_classifier.py    # Embedding-similarity classification
+│   ├── crisis_types.py            # Crisis type taxonomy + reference embeddings
+│   └── severity_predictor.py      # LLM-based severity scoring
 │
 ├── knowledge_base/                # Raw protocol documents
 │   ├── medical/
@@ -544,10 +537,10 @@ Input (text / voice transcript / image description)
 | Component | Model | Justification |
 | :--- | :--- | :--- |
 | **LLM** | Gemini 2.5 | Multilingual (critical for India), vision capabilities, structured output, generous free tier |
-| **Embeddings** | `all-MiniLM-L6-v2` or Gemini embeddings | Small (384-dim), fast, sufficient for ~500–2000 chunk corpus |
+| **Embeddings** | `all-MiniLM-L6-v2` or Gemini embeddings | Small (384-dim), fast, sufficient for emergency intent & classification |
 | **Speech-to-Text** | Google Speech API | Best-in-class for Indian languages and accents |
 | **Agent Orchestration** | LangGraph | Graph-based state machine; multi-step reasoning with tool use |
-| **Vector Store** | ChromaDB | In-process, zero infra overhead, appropriate for corpus size |
+| **Knowledge Base** | Curated Protocols | Structured protocol catalog (`EMERGENCY_KNOWLEDGE_BASE`), zero infra overhead |
 
 ---
 
@@ -631,7 +624,7 @@ ORDER BY distance_meters;
 | :--- | :--- | :--- | :--- |
 | **PostgreSQL + PostGIS** | Backend Service | All relational data + geospatial | Source of truth for users, events, coordination |
 | **Redis** | Backend Service | Sessions, idempotency keys, rate limits, geo cache, pub/sub | Ephemeral data, performance optimization |
-| **ChromaDB** | AI Service | Embedded protocol chunks + metadata | RAG retrieval for emergency guidance |
+| **Clinical Knowledge Base** | AI Service | Curated protocol matrices + metadata | Protocol guidance & clinical guardrails |
 
 ### Privacy Constraints
 
@@ -796,7 +789,7 @@ Backend: Geo query → ranked responder list
     │  score = w1·D + w2·S + w3·R                          │
     │  Sort by score, take top-N                            │  Classification
     │                                                       │  → Severity scoring
-    ▼                                                       │  → RAG retrieval
+    ▼                                                       │  → Protocol lookup
 [3b] FCM FAN-OUT                                            │  → Guidance generation
     │                                                       │  → Summary generation
     │  Push to each ranked responder                        │
@@ -944,7 +937,7 @@ Time ─────────────────────────
 │ radius    │ │ expansion   │ │ expansion   │ │ 108 / 112   │ │ Care Guide  │
 │ push to   │ │ re-rank,    │ │ all nearby  │ │ with AI-    │ │ (cached     │
 │ top-N     │ │ notify new  │ │ notified    │ │ generated   │ │  offline    │
-│           │ │             │ │             │ │ summary     │ │  RAG)       │
+│           │ │             │ │             │ │ summary     │ │  protocol)  │
 └───────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
 ```
 
@@ -959,69 +952,65 @@ Time ─────────────────────────
 
 ---
 
-## 12. RAG Pipeline Architecture
+## 12. Clinical Protocols & Guardrails Architecture
 
-### End-to-End Pipeline
+### End-to-End Protocol Guidance Pipeline
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          RAG PIPELINE                                    │
+│                    CLINICAL PROTOCOL & GUIDANCE PIPELINE                │
 └─────────────────────────────────────────────────────────────────────────┘
 
-  OFFLINE (Ingestion)                    ONLINE (Query-Time)
-  ──────────────────                     ───────────────────
+  KNOWLEDGE CORPUS (Curation)            ONLINE (Triage & Guidance)
+  ───────────────────────────            ──────────────────────────
 
   ┌────────────────┐                     ┌────────────────┐
-  │  Raw Documents │                     │  User Query    │
-  │  (PDF, HTML)   │                     │  + crisis_type │
-  │                │                     │  + severity    │
-  │  WHO, Red Cross│                     └───────┬────────┘
-  │  NDMA, AHA     │                             │
-  └───────┬────────┘                             ▼
-          │                              ┌────────────────┐
-          ▼                              │    EMBEDDING   │
-  ┌────────────────┐                     │    GENERATION  │
-  │    PARSING     │                     │                │
-  │                │                     │  Query → 384d  │
-  │  PDF → text    │                     │  vector        │
-  │  HTML → text   │                     └───────┬────────┘
+  │ Official       │                     │  User Query    │
+  │ Guidelines     │                     │  + crisis_type │
+  │ (WHO, Red Cross│                     │  + symptoms    │
+  │  NDMA, AHA)    │                     └───────┬────────┘
   └───────┬────────┘                             │
           │                                      ▼
           ▼                              ┌────────────────┐
-  ┌────────────────┐                     │   RETRIEVAL    │
-  │   CHUNKING     │                     │                │
-  │                │                     │  Cosine sim    │
-  │  Strategy:     │                     │  Top-K = 5     │
-  │  procedure-    │                     │  + crisis_type │
-  │  level splits  │                     │  metadata      │
-  │                │                     │  filter        │
-  │  Target:       │                     └───────┬────────┘
-  │  200-400 tok   │                             │
-  │  Overlap: 50   │                             ▼
+  ┌────────────────┐                     │ INTENT & TYPE  │
+  │ CURATED        │                     │ CLASSIFICATION │
+  │ PROTOCOLS      │                     │                │
+  │                │                     │ Emergency Type │
+  │ Verified steps │                     │ + Severity     │
+  │ by condition   │                     └───────┬────────┘
+  │ (CPR, Bleed,   │                             │
+  │  Burns, etc.)  │                             ▼
   └───────┬────────┘                     ┌────────────────┐
-          │                              │  CONFIDENCE    │
-          ▼                              │  CHECK         │
-  ┌────────────────┐                     │                │
-  │   EMBEDDING    │                     │  Score < 0.6?  │
-  │   GENERATION   │                     │  → Fallback:   │
-  │                │                     │  "Wait for     │
-  │  all-MiniLM-   │                     │   professional │
-  │  L6-v2         │                     │   help"        │
-  │  → 384-dim     │                     └───────┬────────┘
-  └───────┬────────┘                             │ Score ≥ 0.6
-          │                                      ▼
-          ▼                              ┌────────────────┐
-  ┌────────────────┐                     │   LLM          │
-  │  VECTOR STORE  │                     │   GENERATION   │
-  │  (ChromaDB)    │                     │                │
-  │                │                     │  Gemini 2.5    │
-  │  Index chunks  │                     │  + retrieved   │
-  │  with metadata:│                     │    passages    │
-  │  - source      │                     │  + structured  │
-  │  - procedure   │                     │    prompt      │
-  │  - crisis_type │                     └───────┬────────┘
-  │  - step_number │                             │
-  └────────────────┘                             ▼
+          │                              │ PROTOCOL       │
+          │                              │ MATCHING       │
+          │                              │                │
+          │                              │ Match condition│
+          │                              │ in Knowledge   │
+          │                              │ Base matrix    │
+          │                              └───────┬────────┘
+          │                                      │
+          ▼                                      ▼
+  ┌────────────────┐                     ┌────────────────┐
+  │ EMERGENCY      │                     │ STEP & STATE   │
+  │ KNOWLEDGE BASE │                     │ TRACKING       │
+  │                │                     │                │
+  │ In-memory/code │────────────────────>│ Current step   │
+  │ structured     │                     │ + completed    │
+  │ protocol dict  │                     │ actions        │
+  └────────────────┘                     └───────┬────────┘
+                                                 │
+                                                 ▼
+                                         ┌────────────────┐
+                                         │  LLM GUIDANCE  │
+                                         │  GENERATION    │
+                                         │                │
+                                         │  Gemini 2.5    │
+                                         │  + LangGraph   │
+                                         │  + verified    │
+                                         │    step context│
+                                         └───────┬────────┘
+                                                 │
+                                                 ▼
                                          ┌────────────────┐
                                          │  GUARDRAILS    │
                                          │                │
@@ -1042,24 +1031,24 @@ Time ─────────────────────────
                                          └────────────────┘
 ```
 
-### Chunking Strategy
+### Protocol Granularity & Structure
 
-Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "Step 2: Begin CPR"). Chunking at the **procedure-step level** preserves natural granularity and ensures retrievals return specific, actionable instructions.
+Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "Step 2: Begin CPR"). Structuring protocols into verified procedural steps preserves natural granularity and ensures instructions are immediately actionable without vector indexing latency or retrieval misses.
 
 | Parameter | Value | Rationale |
 | :--- | :--- | :--- |
-| Chunk size | 200–400 tokens | One complete procedure step per chunk |
-| Overlap | 50 tokens | Context continuity between adjacent steps |
-| Split strategy | By procedure step, not word count | Preserves instruction integrity |
-| Metadata per chunk | source, procedure_name, crisis_type, step_number | Enables filtered retrieval |
+| Representation | Structured condition dictionary (`EMERGENCY_KNOWLEDGE_BASE`) | Instant in-memory access in critical emergencies |
+| Condition coverage | 8 core emergency conditions (Cardiac Arrest, Bleeding, Choking, etc.) | Curated from WHO, Red Cross, and AHA standards |
+| Step attributes | step_number, title, instruction, warning, citations | Complete, self-contained guidance per step |
+| Safety guardrails | Clinical contraindication rules (age, bleeding, spinal flags) | Enforced prior to guidance delivery |
 
 ### Hallucination Prevention (5 Layers)
 
 | Layer | Mechanism |
 | :--- | :--- |
-| **Source Grounding** | Prompt explicitly instructs: cite retrieved passages, refuse unsupported advice |
-| **Confidence Threshold** | Top retrieved passage similarity < 0.6 → fallback to "wait for professional help" |
-| **Post-Generation Check** | Response checked for passage ID references; uncited instructions stripped |
+| **Source Grounding** | Prompt explicitly instructs: cite verified protocol steps, refuse unsupported advice |
+| **Protocol Matrix Validation** | Guidance generated directly from verified clinical protocol passages in context |
+| **Post-Generation Check** | Response checked for protocol step citations; uncited instructions stripped |
 | **Structured Output** | Gemini JSON mode enforces response format, preventing free-form generation |
 | **Scope Guardrail** | System prompt prohibits dosage, diagnosis, surgical advice, prescriptions |
 
@@ -1072,7 +1061,7 @@ Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "
 ```
                         ┌─────────────────────┐
                         │     User Input      │
-                        │   (text / voice)    │
+                        │    (text-based)     │
                         └──────────┬──────────┘
                                    │
                           ┌────────▼────────┐
@@ -1093,7 +1082,7 @@ Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "
       │  FIRST AID      │ │  FOLLOW-UP    │ │   COORDINATOR   │
       │  GUIDANCE NODE  │ │  QUESTION     │ │   NODE          │
       │                 │ │  NODE         │ │                 │
-      │  RAG retrieval  │ │  Generate     │ │  Suggest task   │
+      │  Protocol Lookup│ │  Generate     │ │  Suggest task   │
       │  → Gemini gen   │ │  clarifying   │ │  distribution   │
       │  → Cited steps  │ │  questions    │ │  among multiple │
       │                 │ │  ("Is the     │ │  responders     │
@@ -1126,7 +1115,7 @@ Emergency protocols are inherently step-based ("Step 1: Check responsiveness", "
 | :--- | :--- | :--- |
 | **Understand** | Parse emergency, classify type/severity | Classifier + severity predictor |
 | **Ask** | Generate clarifying follow-ups | LLM node ("Is the person breathing?") |
-| **Guide** | Step-by-step first aid from verified sources | RAG pipeline node |
+| **Guide** | Step-by-step first aid from verified sources | Protocol guidance node |
 | **Summarize** | Structured emergency summary for 108/112 | LLM with structured output |
 | **Translate** | Real-time language translation | Gemini multilingual |
 | **Coordinate** | Distribute tasks among responders | Coordinator node |
@@ -1216,7 +1205,6 @@ services:
     ports: ["8001:8001"]
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - CHROMA_PERSIST_DIR=/data/chroma
 
   postgres:
     image: postgis/postgis:16-3.4
@@ -1360,8 +1348,7 @@ NearHelp/
 ├── ai_service/                     # AI Microservice
 │   ├── app/
 │   │   ├── api/                    # AI endpoint handlers
-│   │   ├── agents/                 # LangGraph agent + node definitions
-│   │   ├── rag/                    # Chunker, embedder, retriever, generator
+│   │   ├── agent/                  # Crisis agent, protocols & guardrails
 │   │   ├── classifiers/            # Emergency classification + severity
 │   │   ├── knowledge_base/         # Raw protocol documents (organized by type)
 │   │   └── main.py
@@ -1422,8 +1409,8 @@ NearHelp/
 | **Cache** | Redis 7 | Latest | Sessions, idempotency, rate limits, pub/sub |
 | **LLM** | Google Gemini 2.5 | Latest | Generation, classification, translation, vision |
 | **Agent** | LangGraph | Latest | Graph-based agent state machine |
-| **Embeddings** | all-MiniLM-L6-v2 / Gemini | Latest | 384-dim vectors for RAG retrieval |
-| **Vector Store** | ChromaDB | Latest | In-process vector storage & retrieval |
+| **Embeddings** | all-MiniLM-L6-v2 / Gemini | Latest | 384-dim vectors for emergency classification & intent |
+| **Knowledge Base** | Curated Protocols | In-tree | Structured emergency procedures (`EMERGENCY_KNOWLEDGE_BASE`) |
 | **Auth** | Firebase Auth + python-jose | Latest | OAuth, OTP, JWT management |
 | **Containers** | Docker + Docker Compose | Latest | Reproducible dev & deployment |
 | **Cloud** | Google Cloud Run | N/A | Serverless container hosting |
@@ -1453,20 +1440,20 @@ NearHelp/
 **Decision**: FCM for alerts, WebSocket for live coordination  
 **Rationale**: Android aggressively kills background WebSocket connections. FCM uses Google Play Services to deliver to killed/backgrounded apps reliably. WebSocket is used only after the user foregrounds the app.
 
-### ADR-4: ChromaDB over Pinecone / Weaviate / pgvector
+### ADR-4: Curated Structured Protocols over External Vector DBs
 
-**Decision**: ChromaDB  
-**Rationale**: Corpus is small (~500–2000 chunks). ChromaDB runs in-process with zero infra overhead. Enterprise vector DBs add operational complexity without proportional benefit at this scale.
+**Decision**: Curated in-memory protocol catalog (`EMERGENCY_KNOWLEDGE_BASE`)  
+**Rationale**: Life-critical emergencies require deterministic guidance in <2 seconds. Vector stores introduce indexing overhead, cold-start latency, and semantic retrieval error risks. Directly structured verified protocols guarantee clinical compliance with zero infrastructure overhead.
 
-### ADR-5: RAG over Fine-Tuning for Medical Guidance
+### ADR-5: Structured Clinical Protocols with Guardrails over Fine-Tuning
 
-**Decision**: RAG  
-**Rationale**: Easy corpus updates (new WHO guidelines = re-embed only), citation support, no training data required, grounded in published sources. Fine-tuning risks catastrophic forgetting and requires expensive retraining for corpus updates.
+**Decision**: Curated Clinical Protocols + Gemini with Safety Guardrails  
+**Rationale**: Medical guidelines (WHO, Red Cross, AHA) require explicit citation, verifiable adherence, and immediate updateability without expensive retraining. Grounding generation in structured protocol context with strict contraindication guardrails prevents hallucination.
 
 ### ADR-6: Separate AI Service over Monolith
 
 **Decision**: AI service as independent microservice  
-**Rationale**: AI latency must not block the critical alert path. Independent deployment allows AI updates without backend redeployment. Vector store maintenance is isolated.
+**Rationale**: AI latency must not block the critical alert path. Independent deployment allows AI updates without backend redeployment. Protocol knowledge base maintenance is isolated.
 
 ### ADR-7: Gemini 2.5 over OpenAI / Anthropic
 
@@ -1486,7 +1473,7 @@ NearHelp/
 | Geospatial query (with index) | < 50 ms | PostGIS `ST_DWithin` at 10K users |
 | AI classification | < 1 second | Text input → emergency type output |
 | AI severity prediction | < 1.5 seconds | Description → severity score |
-| RAG retrieval + generation | < 3 seconds | Query → cited guidance response |
+| Protocol guidance generation | < 3 seconds | Query → cited guidance response |
 | WebSocket message delivery | < 200 ms | Sender → recipient (same event) |
 | ETA calculation | < 1 second | Google Directions API call |
 
@@ -1496,7 +1483,7 @@ NearHelp/
 | :--- | :--- |
 | Concurrent SOS events | 100 simultaneous without degradation |
 | Concurrent WebSocket connections | 500 per instance |
-| Concurrent RAG queries | 50 per second |
+| Concurrent guidance queries | 50 per second |
 | Database connections (pool) | 20 per service instance |
 
 ### Scalability Approach
