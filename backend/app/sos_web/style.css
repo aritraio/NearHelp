@@ -1,0 +1,697 @@
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-variant: #f1f6f5;
+  --primary: #17635d;
+  --on-primary: #ffffff;
+  --ink: #172c30;
+  --muted: #52686c;
+  --outline: #d8e2e1;
+  --error: #b52d3d;
+  --error-container: #fff0f0;
+  --on-error: #ffffff;
+  --secondary: #24664c;
+  --radius-btn: 12px;
+  --radius-card: 16px;
+  --radius-dialog: 20px;
+  --radius-input: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100dvh;
+}
+
+button,
+input,
+a {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a.care-btn,
+a.care-text-btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(23, 99, 93, 0.35);
+  outline-offset: 2px;
+}
+
+.care-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.care-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+}
+
+.care-page-tracking {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+/* Brand Header (mirrors CareBrand & NearHelpLogo) */
+.care-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.care-symbol {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--primary);
+  color: var(--on-primary);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.care-symbol svg {
+  width: 88%;
+  height: 88%;
+}
+
+.care-symbol-sm {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.care-wordmark {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+
+.care-wordmark .accent {
+  color: var(--primary);
+}
+
+.care-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.care-topbar-title {
+  margin: 0;
+  font-size: 19px;
+  line-height: 25px;
+  font-weight: 600;
+}
+
+/* Headings & Text (mirrors Type.kt) */
+.care-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.care-heading h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+
+.care-heading h2 {
+  margin: 0;
+  font-size: 23px;
+  line-height: 29px;
+  font-weight: 600;
+}
+
+.care-muted {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--muted);
+}
+
+.care-muted-sm {
+  margin: 0;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--muted);
+}
+
+/* Location Card (mirrors CareMap) */
+.care-map {
+  position: relative;
+  border-radius: var(--radius-card);
+  background: var(--surface-variant);
+  border: 1px solid var(--outline);
+  min-height: 210px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.care-map-compact {
+  min-height: 112px;
+  gap: 14px;
+}
+
+.care-map-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg);
+  border: 1px solid var(--outline);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 500;
+  color: var(--ink);
+  z-index: 1;
+}
+
+.care-pin-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.care-pin-dot.live {
+  background: var(--primary);
+  box-shadow: 0 0 0 4px rgba(23, 99, 93, 0.16);
+}
+
+.care-pin-dot.error {
+  background: var(--error);
+}
+
+.care-map-visual {
+  position: relative;
+  height: 92px;
+  display: grid;
+  place-items: center;
+}
+
+.radar-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(23, 99, 93, 0.2);
+  background: rgba(23, 99, 93, 0.04);
+}
+
+.radar-ring-outer {
+  width: 118px;
+  height: 118px;
+}
+
+.radar-ring-inner {
+  width: 74px;
+  height: 74px;
+  border-color: rgba(23, 99, 93, 0.32);
+}
+
+.radar-pin {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--outline);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  box-shadow: 0 4px 12px rgba(23, 44, 48, 0.08);
+}
+
+.radar-pin svg {
+  width: 24px;
+  height: 24px;
+}
+
+.care-map-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1;
+}
+
+.care-map-meta strong {
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 600;
+}
+
+/* Location row & edit */
+.loc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.loc-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.loc-row-text p {
+  overflow-wrap: anywhere;
+}
+
+.loc-edit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-btn);
+  background: var(--surface-variant);
+}
+
+.loc-edit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Inputs & Labels */
+.care-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.care-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--outline);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.care-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(23, 99, 93, 0.14);
+}
+
+/* Buttons (mirrors CareButton) */
+.care-btn {
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 16px;
+  border-radius: var(--radius-btn);
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  transition: transform 0.12s ease, opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.care-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.care-btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.care-btn-secondary {
+  background: var(--bg);
+  color: var(--primary);
+  border-color: var(--outline);
+}
+
+.care-btn-sos {
+  background: var(--error);
+  color: var(--on-error);
+}
+
+.care-btn-sos-sm {
+  min-height: 44px;
+  width: auto;
+  padding: 10px 16px;
+  background: var(--error);
+  color: var(--on-error);
+}
+
+.care-btn-quiet {
+  background: transparent;
+  color: var(--primary);
+}
+
+.care-text-btn {
+  background: transparent;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.care-text-btn-muted {
+  color: var(--muted);
+}
+
+.btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* 2-Second Hold SOS Button (mirrors CareSosHoldButton) */
+.care-sos-btn {
+  position: relative;
+  width: 100%;
+  min-height: 94px;
+  padding: 16px;
+  border: 0;
+  border-radius: var(--radius-btn);
+  background: var(--error);
+  color: var(--on-error);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease;
+}
+
+.care-sos-btn.holding {
+  transform: scale(0.98);
+}
+
+.care-sos-btn:disabled {
+  background: var(--surface-variant);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.care-sos-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
+
+.care-sos-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.care-sos-title {
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.care-sos-subtitle {
+  font-size: 14px;
+  line-height: 20px;
+  opacity: 0.94;
+}
+
+.care-sos-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+.care-sos-bar {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: #ffffff;
+}
+
+/* CareNote */
+.care-note {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-btn);
+  background: var(--surface-variant);
+  color: var(--ink);
+}
+
+.care-note strong {
+  display: block;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.care-note-error {
+  background: var(--error-container);
+  color: var(--error);
+}
+
+.care-note-urgent {
+  background: var(--error-container);
+  border: 1px solid rgba(181, 45, 61, 0.2);
+}
+
+/* Tracking Status & 4-step Progress (mirrors RescueStatus) */
+.tracking-block {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rescue-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.rescue-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-align: center;
+}
+
+.rescue-bar {
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--outline);
+  transition: background-color 0.2s ease;
+}
+
+.rescue-label {
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.rescue-step.active .rescue-bar {
+  background: var(--primary);
+}
+
+.rescue-step.active .rescue-label {
+  color: var(--primary);
+}
+
+.responders-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.responder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--outline);
+}
+
+.responder-row strong {
+  display: block;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.tracking-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tracking-call-btn {
+  flex: 1;
+}
+
+/* Dialogs (mirrors MedicalEmergencyDialog & AlertDialog) */
+.care-dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: 90dvh;
+  padding: 0;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-dialog);
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 20px 60px rgba(23, 44, 48, 0.2);
+}
+
+.care-dialog::backdrop {
+  background: rgba(23, 44, 48, 0.45);
+}
+
+.dialog-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.linear-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--surface-variant);
+  overflow: hidden;
+}
+
+.linear-fill-error {
+  width: 100%;
+  height: 100%;
+  background: var(--error);
+  transform-origin: left center;
+}
+
+.linear-indeterminate {
+  width: 100%;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--surface-variant);
+  overflow: hidden;
+  position: relative;
+}
+
+.linear-indeterminate::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: var(--primary);
+  animation: indeterminate 1.1s infinite ease-in-out;
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.symptom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.care-chip-btn {
+  min-height: 54px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  border: 1px solid var(--outline);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 19px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.care-chip-btn:hover {
+  background: var(--surface-variant);
+}
+
+.dialog-footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dialog-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}

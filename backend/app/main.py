@@ -97,6 +97,28 @@ app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
 admin_web_path = os.path.join(os.path.dirname(__file__), "admin_web")
 app.mount("/admin/assets", StaticFiles(directory=admin_web_path), name="admin-assets")
 
+# Same-origin Emergency SOS web app (zero-login, SOS-only fast path).
+sos_web_path = os.path.join(os.path.dirname(__file__), "sos_web")
+os.makedirs(sos_web_path, exist_ok=True)
+app.mount("/sos/assets", StaticFiles(directory=sos_web_path), name="sos-assets")
+
+_SOS_WEB_HEADERS = {
+    "Cache-Control": "no-store",
+    "Content-Security-Policy": (
+        "default-src 'self'; script-src 'self'; style-src 'self'; "
+        "img-src 'self' data:; connect-src 'self' ws: wss:; "
+        "frame-ancestors 'none'; form-action 'self'; base-uri 'self'"
+    ),
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+}
+
+
+@app.get("/sos", include_in_schema=False)
+@app.get("/sos/", include_in_schema=False)
+async def sos_web_app():
+    return FileResponse(os.path.join(sos_web_path, "index.html"), headers=_SOS_WEB_HEADERS)
+
 
 @app.get("/admin", include_in_schema=False)
 @app.get("/admin/", include_in_schema=False)
@@ -143,7 +165,9 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 
 
 @app.get("/", tags=["Root"])
-async def root():
+async def root(request: Request):
+    if "text/html" in request.headers.get("accept", "").lower():
+        return FileResponse(os.path.join(sos_web_path, "index.html"), headers=_SOS_WEB_HEADERS)
     return {
         "message": "NearHelp AI Backend Service Active",
         "documentation": "/docs",

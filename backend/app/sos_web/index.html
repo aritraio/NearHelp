@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17635D">
+  <title>NearHelp · Emergency SOS</title>
+  <link rel="stylesheet" href="/sos/assets/style.css">
+  <script src="/sos/assets/app.js" defer></script>
+</head>
+<body>
+  <main class="care-shell">
+    <!-- Home / Trigger SOS View -->
+    <section id="view-home" class="care-page" aria-label="Emergency SOS">
+      <header class="care-brand">
+        <span class="care-symbol" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke-width="3.8" d="M32,58 C27,53 12,41.3 12,27.2 C12,16.4 20.5,8 32,8 C43.5,8 52,16.4 52,27.2 C52,41.3 37,53 32,58 Z" />
+            <path stroke-width="3.5" d="M20,28 L25.5,28 L29,21 L34,36 L38.5,28 L44,28" />
+          </svg>
+        </span>
+        <span class="care-wordmark">Near<span class="accent">Help</span></span>
+      </header>
+
+      <div class="care-heading">
+        <h1>Medical help, nearby.</h1>
+        <p class="care-muted">Your location stays in view.</p>
+      </div>
+
+      <!-- Location Card (CareMap style, instant zero-dependency render) -->
+      <div class="care-map" id="home-map">
+        <div class="care-map-badge">
+          <span class="care-pin-dot" id="home-gps-dot" aria-hidden="true"></span>
+          <span id="home-gps-badge">Waiting for GPS</span>
+        </div>
+        <div class="care-map-visual" aria-hidden="true">
+          <div class="radar-ring radar-ring-outer"></div>
+          <div class="radar-ring radar-ring-inner"></div>
+          <div class="radar-pin">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke-width="4.2" d="M32,58 C27,53 12,41.3 12,27.2 C12,16.4 20.5,8 32,8 C43.5,8 52,16.4 52,27.2 C52,41.3 37,53 32,58 Z" />
+              <path stroke-width="3.8" d="M20,28 L25.5,28 L29,21 L34,36 L38.5,28 L44,28" />
+            </svg>
+          </div>
+        </div>
+        <div class="care-map-meta">
+          <strong id="home-loc-title">Locating your position…</strong>
+          <span id="home-loc-coords" class="care-muted-sm">Allow GPS access so responders can find you</span>
+        </div>
+      </div>
+
+      <!-- Location summary & optional landmark editor -->
+      <div id="loc-summary-row" class="loc-row">
+        <div class="loc-row-text">
+          <p id="loc-label-display" class="care-muted">Current GPS location</p>
+          <p class="care-muted-sm">GPS location is shared with your SOS</p>
+        </div>
+        <button id="btn-edit-loc" type="button" class="care-text-btn">Edit</button>
+      </div>
+
+      <div id="loc-edit-panel" class="loc-edit-panel" hidden>
+        <label class="care-field-label" for="landmark-input">
+          Address or landmark
+          <input id="landmark-input" class="care-input" type="text" maxlength="160" placeholder="Add a nearby landmark or floor">
+        </label>
+        <p class="care-muted-sm">Add a nearby landmark so responders can find you faster.</p>
+        <div class="loc-edit-actions">
+          <button id="btn-save-loc" type="button" class="care-btn care-btn-primary">Save location</button>
+          <button id="btn-cancel-loc" type="button" class="care-btn care-btn-quiet">Cancel</button>
+        </div>
+      </div>
+
+      <button id="btn-allow-loc" type="button" class="care-btn care-btn-secondary" hidden>
+        <span class="btn-icon" aria-hidden="true">◎</span>
+        <span>Allow location access</span>
+      </button>
+
+      <!-- Primary 2-second hold SOS button -->
+      <button
+        id="sos-hold-btn"
+        type="button"
+        class="care-sos-btn"
+        aria-label="SOS. Hold for 2 seconds to trigger it"
+      >
+        <span class="care-sos-fill" id="sos-hold-fill" aria-hidden="true"></span>
+        <span class="care-sos-content">
+          <span class="care-sos-title" id="sos-hold-title">SOS</span>
+          <span class="care-sos-subtitle" id="sos-hold-subtitle">Hold for 2 seconds to trigger it</span>
+        </span>
+        <span class="care-sos-track" aria-hidden="true">
+          <span class="care-sos-bar" id="sos-hold-bar"></span>
+        </span>
+      </button>
+
+      <p id="home-hint" class="care-note care-note-error" role="alert" hidden></p>
+
+      <!-- Always-available direct emergency dial fallback -->
+      <a href="tel:112" class="care-btn care-btn-secondary">
+        <span class="btn-icon" aria-hidden="true">☎</span>
+        <span>Call emergency services · 112</span>
+      </a>
+    </section>
+
+    <!-- Active / Pending / Ended SOS View -->
+    <section id="view-tracking" class="care-page care-page-tracking" aria-label="SOS status" hidden>
+      <header class="care-topbar">
+        <span class="care-symbol care-symbol-sm" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke-width="3.8" d="M32,58 C27,53 12,41.3 12,27.2 C12,16.4 20.5,8 32,8 C43.5,8 52,16.4 52,27.2 C52,41.3 37,53 32,58 Z" />
+            <path stroke-width="3.5" d="M20,28 L25.5,28 L29,21 L34,36 L38.5,28 L44,28" />
+          </svg>
+        </span>
+        <h1 id="tracking-topbar-title" class="care-topbar-title">Your medical SOS</h1>
+      </header>
+
+      <!-- Compact SOS Location Card -->
+      <div class="care-map care-map-compact">
+        <div class="care-map-badge">
+          <span class="care-pin-dot live" aria-hidden="true"></span>
+          <span id="tracking-map-badge">Medical SOS location</span>
+        </div>
+        <div class="care-map-meta">
+          <strong id="tracking-loc-title">Sharing your live location</strong>
+          <span id="tracking-loc-coords" class="care-muted-sm"></span>
+        </div>
+      </div>
+
+      <!-- Busy / Error Banner -->
+      <div id="tracking-progress-bar" class="linear-indeterminate" hidden aria-hidden="true"></div>
+
+      <div id="tracking-error-box" class="care-note care-note-error" role="alert" hidden>
+        <div>
+          <strong id="tracking-error-title">We couldn’t complete that action</strong>
+          <p id="tracking-error-detail" class="care-muted-sm"></p>
+        </div>
+        <button id="btn-retry-action" type="button" class="care-btn care-btn-secondary">Retry</button>
+      </div>
+
+      <!-- Waiting for GPS / Sending -->
+      <div id="state-pending" class="tracking-block" hidden>
+        <div class="care-heading">
+          <h2 id="pending-heading">Sending medical SOS…</h2>
+          <p id="pending-description" class="care-muted"></p>
+        </div>
+
+        <div id="pending-gps-note" class="care-note" hidden>
+          <div>
+            <strong>Current location needed</strong>
+            <p class="care-muted-sm">Turn on location and allow GPS access to send your medical SOS.</p>
+          </div>
+          <button id="btn-pending-gps" type="button" class="care-btn care-btn-secondary">Allow location access</button>
+        </div>
+
+        <p id="pending-retry-note" class="care-muted" hidden>
+          Your SOS may have reached the server. Retry uses the same request to avoid duplicates.
+        </p>
+      </div>
+
+      <!-- Active Rescue Tracking -->
+      <div id="state-active" class="tracking-block" hidden>
+        <div class="rescue-steps" role="list" aria-label="Rescue progress">
+          <div class="rescue-step active" data-step="0" role="listitem">
+            <span class="rescue-bar"></span>
+            <span class="rescue-label">SOS sent</span>
+          </div>
+          <div class="rescue-step" data-step="1" role="listitem">
+            <span class="rescue-bar"></span>
+            <span class="rescue-label">Accepted</span>
+          </div>
+          <div class="rescue-step" data-step="2" role="listitem">
+            <span class="rescue-bar"></span>
+            <span class="rescue-label">On the way</span>
+          </div>
+          <div class="rescue-step" data-step="3" role="listitem">
+            <span class="rescue-bar"></span>
+            <span class="rescue-label">Arrived</span>
+          </div>
+        </div>
+
+        <div class="care-heading">
+          <h2 id="active-phase-title">Searching for nearby responders</h2>
+          <p id="active-phase-subtitle" class="care-muted">
+            Your medical SOS is active. Stay where responders can reach you.
+          </p>
+        </div>
+
+        <p id="active-request-text" class="care-muted" hidden></p>
+
+        <div id="escalation-note" class="care-note care-note-urgent" hidden>
+          <div>
+            <strong id="escalation-title">Emergency services recommended</strong>
+            <p id="escalation-detail" class="care-muted-sm">
+              No responder has arrived yet. Call official emergency services directly now.
+            </p>
+          </div>
+          <a id="escalation-call-link" href="tel:108" class="care-btn care-btn-sos">Call 108 now</a>
+        </div>
+
+        <div id="responders-list" class="responders-list"></div>
+      </div>
+
+      <!-- Ended (Resolved or Cancelled) -->
+      <div id="state-ended" class="tracking-block" hidden>
+        <div class="care-heading">
+          <h2 id="ended-title">Medical SOS cancelled</h2>
+          <p id="ended-subtitle" class="care-muted"></p>
+        </div>
+        <button id="btn-back-home" type="button" class="care-btn care-btn-primary">Back to SOS</button>
+      </div>
+
+      <!-- Sticky Bottom Emergency Bar -->
+      <footer id="tracking-footer" class="tracking-footer">
+        <a href="tel:112" class="care-btn care-btn-secondary tracking-call-btn">
+          <span class="btn-icon" aria-hidden="true">☎</span>
+          <span>Call 112</span>
+        </a>
+        <button id="btn-cancel-sos" type="button" class="care-text-btn care-text-btn-muted">Cancel SOS</button>
+      </footer>
+    </section>
+  </main>
+
+  <!-- 5-Second Quick Medical Triage Dialog (mirrors Android MedicalEmergencyDialog) -->
+  <dialog id="prompt-dialog" class="care-dialog" aria-labelledby="prompt-title">
+    <div class="dialog-body">
+      <div class="care-heading">
+        <h2 id="prompt-title">What’s the medical emergency?</h2>
+        <p class="care-muted">Tap a symptom or condition to send it now.</p>
+      </div>
+
+      <p id="prompt-countdown-text" class="care-muted">5s until a general medical SOS</p>
+      <div class="linear-track" aria-hidden="true">
+        <div id="prompt-progress-bar" class="linear-fill-error"></div>
+      </div>
+
+      <div class="symptom-grid" id="symptom-grid">
+        <button type="button" class="care-chip-btn" data-symptom="Chest pain">Chest pain</button>
+        <button type="button" class="care-chip-btn" data-symptom="Breathing trouble">Breathing trouble</button>
+        <button type="button" class="care-chip-btn" data-symptom="Injury / bleeding">Injury / bleeding</button>
+        <button type="button" class="care-chip-btn" data-symptom="Fainting">Fainting</button>
+        <button type="button" class="care-chip-btn" data-symptom="Seizure">Seizure</button>
+        <button type="button" class="care-chip-btn" data-symptom="">Other / not sure</button>
+      </div>
+
+      <label class="care-field-label" for="prompt-draft">
+        Or describe what happened
+        <input id="prompt-draft" class="care-input" type="text" maxlength="180" placeholder="Symptoms or a known condition">
+      </label>
+
+      <button id="btn-send-sos-now" type="button" class="care-btn care-btn-sos">Send medical SOS now</button>
+
+      <div class="dialog-footer-links">
+        <a href="tel:112" class="care-text-btn">Call 112</a>
+        <button id="btn-prompt-cancel" type="button" class="care-text-btn care-text-btn-muted">Cancel SOS</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Cancel Confirmation Dialog -->
+  <dialog id="cancel-dialog" class="care-dialog" aria-labelledby="cancel-dialog-title">
+    <div class="dialog-body">
+      <div class="care-heading">
+        <h2 id="cancel-dialog-title">Cancel this medical SOS?</h2>
+        <p class="care-muted">
+          Use this if the SOS was accidental or help is no longer needed. We’ll confirm cancellation with the server.
+        </p>
+      </div>
+      <div class="dialog-actions-row">
+        <button id="btn-keep-sos" type="button" class="care-text-btn">Keep SOS active</button>
+        <button id="btn-confirm-cancel" type="button" class="care-btn care-btn-sos-sm">Yes, cancel SOS</button>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

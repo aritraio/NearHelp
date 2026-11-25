@@ -160,7 +160,8 @@ async def get_emergency_timeline(
 @router.put("/{id}/cancel")
 async def cancel_sos_emergency(
     id: uuid.UUID,
-    current_user: User = Depends(get_current_active_user),
+    cancel_token: str | None = Header(None, alias="X-SOS-Cancel-Token"),
+    current_user: User | None = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await sos_service.cancel_sos(db, current_user, id)
+    return await sos_service.cancel_sos(db, current_user, id, cancel_token=cancel_token)

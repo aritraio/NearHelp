@@ -1,7 +1,9 @@
 """NearHelp AI — Smart SOS Engine Business Logic Service."""
 
 import hashlib
+import hmac
 import logging
+import secrets
 import uuid
 from datetime import UTC, datetime
 
@@ -122,6 +124,15 @@ class SOSService:
 
         # 3. Create SOSEvent DB Entity
         broadcaster_id = user.id if (user and not req.is_anonymous) else None
+        guest_cancel_token = secrets.token_urlsafe(32) if user is None else None
+        metadata_info = {
+            "voice_transcript": req.voice_transcript,
+            "photo_url": req.photo_url,
+            "created_via": "smart_sos_engine",
+            "request_fingerprint": fingerprint,
+        }
+        if guest_cancel_token:
+            metadata_info["guest_cancel_token_hash"] = hashlib.sha256(guest_cancel_token.encode()).hexdigest()
 
         sos_event = SOSEvent(
             id=event_id,
@@ -146,12 +157,7 @@ class SOSService:
             escalation_layer=1,
             auto_call_108_triggered=ai_triage.auto_call_emergency_services,
             ai_triage_data=ai_triage.model_dump(),
-            metadata_info={
-                "voice_transcript": req.voice_transcript,
-                "photo_url": req.photo_url,
-                "created_via": "smart_sos_engine",
-                "request_fingerprint": fingerprint,
-            },
+            metadata_info=metadata_info,
         )
 
         # Set user location if known
@@ -261,6 +267,7 @@ class SOSService:
             escalation=escalation_status,
             top_ranked_responders=ranked_responders,
             candidates_notified_count=delivered_count,
+            guest_cancel_token=guest_cancel_token,
             created_at=sos_event.created_at,
         )
 
@@ -706,16 +713,46 @@ class SOSService:
         )
 
     @classmethod
-    async def cancel_sos(cls, db: AsyncSession, actor: User, sos_id: uuid.UUID) -> dict:
+    async def cancel_sos(
+        cls,
+        db: AsyncSession,
+        actor: User | None,
+        sos_id: uuid.UUID,
+        cancel_token: str | None = None,
+    ) -> dict:
         event = (await db.execute(select(SOSEvent).where(SOSEvent.id == sos_id).with_for_update())).scalars().first()
         if not event:
             raise HTTPException(status_code=404, detail="Incident not found.")
-        if event.broadcaster_id != actor.id and not actor.is_superuser:
-            raise HTTPException(status_code=403, detail="Only the incident owner can cancel this SOS.")
+
+        stored_hash = (event.metadata_info or {}).get("guest_cancel_token_hash")
+        token_valid = bool(
+            cancel_token
+            and stored_hash
+            and hmac.compare_digest(stored_hash, hashlib.sha256(cancel_token.encode()).hexdigest())
+        )
+        if actor is not None:
+            if event.broadcaster_id != actor.id and not actor.is_superuser and not token_valid:
+                raise HTTPException(status_code=403, detail="Only the incident owner can cancel this SOS.")
+        elif not token_valid:
+            if not cancel_token:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Authentication credentials were not provided.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            raise HTTPException(status_code=403, detail="Invalid cancel token for this SOS.")
+
         if event.status not in ("CANCELLED", "RESOLVED"):
             event.status = "CANCELLED"
             event.resolved_at = datetime.now(UTC)
-            db.add(TimelineEvent(sos_event_id=sos_id, actor_id=actor.id, event_type="sos_cancelled", details={}))
+            db.add(
+                TimelineEvent(
+                    sos_event_id=sos_id,
+                    actor_id=actor.id if actor else None,
+                    event_type="sos_cancelled",
+                    details={"cancelled_by": "guest"} if actor is None else {},
+                )
+            )
             await db.commit()
         return {"id": str(event.id), "status": event.status}
 

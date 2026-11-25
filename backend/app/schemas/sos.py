@@ -78,6 +78,10 @@ class SOSCreateResponse(BaseModel):
     escalation: SOSEscalationStatus
     top_ranked_responders: list[RankedResponderItem] = Field(default_factory=list)
     candidates_notified_count: int = 0
+    guest_cancel_token: str | None = Field(
+        None,
+        description="One-time capability token for unauthenticated web SOS cancellation",
+    )
     created_at: datetime
 
 
