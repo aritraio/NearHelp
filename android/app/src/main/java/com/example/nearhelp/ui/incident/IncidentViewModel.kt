@@ -5,14 +5,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nearhelp.data.api.*
+import com.example.nearhelp.data.api.models.ResponderTrackingUpdateDto
+import com.example.nearhelp.data.api.models.RouteLocationPoint
+import com.example.nearhelp.data.api.models.TrackingSnapshotDto
 import com.example.nearhelp.data.api.ws.*
 import com.example.nearhelp.data.location.UserLocationState
 import com.example.nearhelp.data.places.GeoPoint
 import com.example.nearhelp.data.places.usableLocation
 import com.example.nearhelp.data.repository.*
-import com.example.nearhelp.ui.tracking.TrackingSnapshotDto
-import com.example.nearhelp.ui.tracking.ResponderTrackingUpdateDto
-import com.example.nearhelp.ui.navigation.RouteLocationPoint
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*

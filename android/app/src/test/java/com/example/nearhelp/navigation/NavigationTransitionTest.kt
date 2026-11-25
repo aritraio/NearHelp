@@ -1,10 +1,6 @@
-package com.example.nearhelp.ui.main
+package com.example.nearhelp.navigation
 
-import com.example.nearhelp.AiCrisisAssistantNavKey
-import com.example.nearhelp.CommunityMapNavKey
-import com.example.nearhelp.HomeNavKey
-import com.example.nearhelp.ProfileNavKey
-import com.example.nearhelp.ui.victim.VictimNavTab
+import com.example.nearhelp.ui.components.VictimNavTab
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

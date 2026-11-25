@@ -95,4 +95,4 @@ cd ai_service && ruff check .
 
 1. **GitHub Actions CI (`.github/workflows/ci.yml`) does not run `pytest` or Gradle:** Despite job names `Backend Lint & Unit Tests` and `AI Service Lint & Unit Tests`, those jobs only run `ruff check .`.
 2. **SQLite Masks PostGIS Bugs:** `backend/tests/conftest.py` stubs `ST_DWithin` to always return `1`, meaning spatial radius filtering, geography casts, and GIST index usage are **only** tested if you run `device_smoke.py` or manual tests against real PostgreSQL/PostGIS.
-3. **Unverified Physical Hardware Flows:** Actual GPS hardware fixes, physical FCM push wakeups on backgrounded phones, Google Places API (New) responses, and Compose layout on physical screens require manual device testing ([docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md)).
+3. **Unverified Physical Hardware Flows:** Actual GPS hardware fixes, physical FCM push wakeups on backgrounded phones, Google Places API (New) responses, and Compose layout on physical screens require manual device testing ([docs/DEVICE_READINESS.md](../guides/DEVICE_READINESS.md)).

@@ -1,27 +1,28 @@
-package com.example.nearhelp
+package com.example.nearhelp.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.example.nearhelp.ui.incident.IncidentScreen
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.ContentTransform
-import com.example.nearhelp.ui.navigation.AppMotion
-import androidx.navigation3.scene.Scene
-import androidx.navigationevent.NavigationEvent
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigationevent.NavigationEvent
+import com.example.nearhelp.NearHelpApplication
 import com.example.nearhelp.ui.auth.AuthViewModel
 import com.example.nearhelp.ui.auth.screens.LoginScreen
 import com.example.nearhelp.ui.auth.screens.SignUpScreen
 import com.example.nearhelp.ui.auth.screens.SplashScreen
+import com.example.nearhelp.ui.components.VictimNavTab
+import com.example.nearhelp.ui.guardian.GuardianRadarScreen
 import com.example.nearhelp.ui.home.VictimMainScreen
-import com.example.nearhelp.ui.victim.VictimNavTab
+import com.example.nearhelp.ui.incident.IncidentScreen
 
 private fun <T : Any> appTransitionSpec():
     AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform = {
@@ -129,12 +130,12 @@ fun MainNavigation(
         }
 
         entry<GuardianRadarNavKey> {
-          com.example.nearhelp.ui.screens.GuardianRadarScreen(
+          GuardianRadarScreen(
             onExit = { backStack.removeLastOrNull() },
-            onNavigateToCrisis = { _ -> backStack.add(CrisisDispatchNavKey) },
+            onNavigateToCrisis = { _ -> backStack.add(SosCreateNavKey) },
             onNavigateToMap = { backStack.add(CommunityMapNavKey) },
             onNavigateToProfile = { backStack.add(ProfileNavKey) },
-            onVoiceSosClick = { backStack.add(CrisisDispatchNavKey) },
+            onVoiceSosClick = { backStack.add(SosCreateNavKey) },
             modifier = Modifier.fillMaxSize(),
           )
         }
@@ -232,4 +233,3 @@ fun MainNavigation(
       },
   )
 }
-

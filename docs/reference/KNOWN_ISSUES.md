@@ -43,10 +43,8 @@ Every item below was directly observed in the repository source code, configurat
 2. **Missing Alembic Migrations:** `alembic` is in `requirements.txt`, but no migrations exist; schema changes rely on `create_all` and 3 hardcoded `ALTER TABLE` statements in `init_db()`.
 3. **CI Pipeline Blind Spots (`.github/workflows/ci.yml`):** Only runs `ruff check .` and `docker compose config`—never runs `pytest` or Gradle tests.
 4. **Model Version Drift:** Backend `config.py` defaults `GEMINI_MODEL` to `"gemini-3.5-flash-lite"`, `ai_service` defaults to `"gemini-2.0-flash"`, `AiAgentRepository.kt` tries `"gemini-3.5-flash-lite"` / `"gemini-3.8-flash"`, and docs say `"Gemini 2.5"`.
-5. **Leftover / Unused Code & Files:**
-   - Android starter template files remain (`MainScreen.kt`, `MainScreenViewModel.kt`, `DataRepository.kt`, `MainScreenTest.kt`).
-   - Legacy demo ViewModels (`LiveTrackingViewModel.kt`, `RescueNavigationViewModel.kt`) with hardcoded `"KOL-SOS-8821"` waypoints coexist alongside `IncidentViewModel.kt`.
-   - `backend/nearhelp.db` and `backend/uploads/` sample files are present in the working tree.
+5. **Local Runtime Artifacts in Working Tree:**
+   - `backend/nearhelp.db` and `backend/uploads/` sample files are present in the working tree (gitignored).
 6. **Unverified Components in This Environment:**
    - `ai_service/tests/` (57 tests) could not run (no `langgraph` venv).
    - Android unit tests (98 tests) and APK build could not run (no JDK on shell PATH).

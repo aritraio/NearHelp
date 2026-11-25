@@ -8,8 +8,8 @@ This file provides repository-specific rules, architecture realities, verificati
 
 When documentation disagrees, trust sources in this exact order:
 1. **Executable Source Code** (`backend/app/`, `ai_service/app/`, `android/app/src/`)
-2. **Current Architecture & Audit Docs** (`ARCHITECTURE.md`, `SYSTEM_DESIGN.md`, `DATABASE.md`, `KNOWN_ISSUES.md`, `decisions.md`, `flow.md`, `docs/DEVICE_READINESS.md`)
-3. **Historical Planning Specs** (`docs/architecture.md`, `docs/design.md`, `docs/todos.md`, `docs/proposal.md`) — *these describe an earlier 24-module vision (e.g., Hilt DI, Next.js `admin_dashboard/`, ChromaDB RAG, `messages` table, RS256 JWTs) that does not match the current codebase.*
+2. **Current Architecture & Audit Docs** (`docs/architecture/`, `docs/reference/`, `docs/guides/DEVICE_READINESS.md`)
+3. **Historical Planning Specs** (`docs/planning/architecture.md`, `docs/planning/design.md`, `docs/planning/todos.md`, `docs/planning/proposal.md`) — *these describe an earlier 24-module vision (e.g., Hilt DI, Next.js `admin_dashboard/`, ChromaDB RAG, `messages` table, RS256 JWTs) that does not match the current codebase.*
 
 ---
 
@@ -66,4 +66,4 @@ cd backend && python scripts/device_smoke.py --base-url http://127.0.0.1:8000
 - [ ] Preserve `Idempotency-Key` + `pending_sos_*` deduplication semantics when touching SOS creation.
 - [ ] Preserve `with_for_update()` locking and owner checks when touching `resolve_sos` / `cancel_sos`.
 - [ ] Run `HallucinationGuardrails` / contraindication checks *before* any LLM call in any fallback or agent path.
-- [ ] Keep `docs/decisions/` and `decisions.md` updated whenever architectural choices or external providers change.
+- [ ] Keep `docs/decisions/` and `docs/architecture/DECISIONS.md` updated whenever architectural choices or external providers change.

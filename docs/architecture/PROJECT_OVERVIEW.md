@@ -10,7 +10,7 @@ The system connects a person in distress (**Victim / Broadcaster**) with nearby,
 
 ## 2. Implementation Reality Check (Implemented vs. Partial vs. Planned)
 
-Because NearHelp evolved rapidly from an academic 24-module blueprint ([`docs/architecture.md`](docs/architecture.md), [`docs/todos.md`](docs/todos.md)) into a working prototype, several planned features were scaled back, replaced, or left partially wired. The table below reflects the **verified state of the codebase**:
+Because NearHelp evolved rapidly from an academic 24-module blueprint ([`docs/architecture.md`](../planning/architecture.md), [`docs/todos.md`](../planning/todos.md)) into a working prototype, several planned features were scaled back, replaced, or left partially wired. The table below reflects the **verified state of the codebase**:
 
 | Capability | Status | Evidence & Actual Behavior |
 | :--- | :--- | :--- |

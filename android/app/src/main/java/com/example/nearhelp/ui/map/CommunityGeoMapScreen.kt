@@ -21,9 +21,9 @@ import androidx.core.text.HtmlCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nearhelp.data.places.*
+import com.example.nearhelp.ui.components.VictimBottomNavBar
+import com.example.nearhelp.ui.components.VictimNavTab
 import com.example.nearhelp.ui.design.*
-import com.example.nearhelp.ui.victim.VictimBottomNavBar
-import com.example.nearhelp.ui.victim.VictimNavTab
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import kotlinx.coroutines.delay
@@ -33,7 +33,7 @@ import java.util.Locale
 @Composable
 fun CommunityGeoMapScreen(onNavigateBack: () -> Unit, onNavigateToHome: () -> Unit = onNavigateBack,
     onNavigateToAssistant: () -> Unit = {}, onNavigateToProfile: () -> Unit = {}, onNavigateToTracking: () -> Unit = {},
-    onNavigateToNavigation: () -> Unit = {}, modifier: Modifier = Modifier, viewModel: CommunityGeoMapViewModel = viewModel(), showBottomBar: Boolean = true) {
+    onNavigateToNavigation: () -> Unit = {}, modifier: Modifier = Modifier, showBottomBar: Boolean = true) {
     val (location, requestLocation) = rememberCareLocation()
     val context = LocalContext.current
     val nearby: NearbyPlacesViewModel = viewModel { NearbyPlacesViewModel(GoogleNearbyPlacesRepository(context.applicationContext)) }

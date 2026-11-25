@@ -1,6 +1,6 @@
 # NearHelp AI — Architecture Decision Records (ADRs)
 
-This directory contains detailed Architecture Decision Records reverse-engineered from the repository source code, commit history, [`decisions.md`](../../decisions.md), and [`docs/architecture.md`](../architecture.md).
+This directory contains detailed Architecture Decision Records reverse-engineered from the repository source code, commit history, [`decisions.md`](../architecture/DECISIONS.md), and [`docs/architecture.md`](../planning/architecture.md).
 
 Each ADR documents the **Context**, **Decision**, **Implementation Status** (`Implemented`, `Partial`, `Diverged`, or `Planned`), **Evidence in Code**, and **Consequences / Trade-offs**.
 

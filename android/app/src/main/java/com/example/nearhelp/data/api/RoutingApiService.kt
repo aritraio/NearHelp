@@ -1,9 +1,9 @@
 package com.example.nearhelp.data.api
 
-import com.example.nearhelp.ui.navigation.DirectionsRequestDto
-import com.example.nearhelp.ui.navigation.DirectionsResponseDto
-import com.example.nearhelp.ui.navigation.HazardsListResponseDto
-import com.example.nearhelp.ui.navigation.RoadHazardReportDto
+import com.example.nearhelp.data.api.models.DirectionsRequestDto
+import com.example.nearhelp.data.api.models.DirectionsResponseDto
+import com.example.nearhelp.data.api.models.HazardsListResponseDto
+import com.example.nearhelp.data.api.models.RoadHazardReportDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET

@@ -16,9 +16,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.nearhelp.ui.components.VictimBottomNavBar
+import com.example.nearhelp.ui.components.VictimNavTab
 import com.example.nearhelp.ui.design.*
-import com.example.nearhelp.ui.victim.VictimBottomNavBar
-import com.example.nearhelp.ui.victim.VictimNavTab
 
 @Composable
 fun AiCrisisAssistantScreen(onNavigateBack: () -> Unit, onNavigateToHome: () -> Unit = onNavigateBack,

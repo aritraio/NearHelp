@@ -13,9 +13,9 @@ import androidx.compose.ui.unit.dp
 import com.example.nearhelp.NearHelpApplication
 import com.example.nearhelp.ui.auth.AuthViewModel
 import com.example.nearhelp.ui.design.*
-import com.example.nearhelp.ui.victim.VictimBottomNavBar
-import com.example.nearhelp.ui.victim.VictimNavTab
 import com.example.nearhelp.ui.components.EmergencyAlertOverlay
+import com.example.nearhelp.ui.components.VictimBottomNavBar
+import com.example.nearhelp.ui.components.VictimNavTab
 
 @Composable
 fun HomeScreen(

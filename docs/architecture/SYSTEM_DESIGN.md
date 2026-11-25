@@ -6,11 +6,11 @@ This document explains the internal algorithms, state machines, concurrency cont
 
 ## 1. Smart SOS Engine & Idempotent Creation
 
-Source: [`backend/app/services/sos_service.py`](backend/app/services/sos_service.py), [`android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt`](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt)
+Source: [`backend/app/services/sos_service.py`](../../backend/app/services/sos_service.py), [`android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt)
 
 ### 1.1 Two-Layer Idempotency
 Emergency mobile networks drop connections frequently. NearHelp protects `POST /api/v1/sos/create` against duplicate incidents in two places:
-1. **HTTP Middleware (`IdempotencyMiddleware`):** In [`backend/app/core/middleware.py`](backend/app/core/middleware.py), any `POST`/`PUT`/`PATCH` with an `Idempotency-Key` (or `X-Idempotency-Key`) header hashes `method + path + authorization + key + request_body` with SHA-256 and caches responses with `status_code < 500` in Redis (or `_in_memory_idempotency`) for 24 hours (`86400s`), replaying them with header `X-Idempotent-Replay: true`.
+1. **HTTP Middleware (`IdempotencyMiddleware`):** In [`backend/app/core/middleware.py`](../../backend/app/core/middleware.py), any `POST`/`PUT`/`PATCH` with an `Idempotency-Key` (or `X-Idempotency-Key`) header hashes `method + path + authorization + key + request_body` with SHA-256 and caches responses with `status_code < 500` in Redis (or `_in_memory_idempotency`) for 24 hours (`86400s`), replaying them with header `X-Idempotent-Replay: true`.
 2. **Database-Backed Deterministic UUIDv5 (`SOSService.create_sos_event`):** Even if Redis restarts or clears, `SOSService` computes:
    - `fingerprint = sha256(req.model_dump_json())`
    - `event_id = uuid5(NAMESPACE_URL, f"nearhelp:sos:{user.id if user else 'guest'}:{idempotency_key}")`
@@ -22,7 +22,7 @@ Emergency mobile networks drop connections frequently. NearHelp protects `POST /
 > **Important Limitation:** Replaying an existing incident returns its saved state but **does not re-run FCM notification fan-out** if the original process crashed mid-loop after `db.commit()`.
 
 ### 1.2 Synchronous AI Triage Call
-Before persisting `SOSEvent`, `SOSService.create_sos_event` awaits `ai_client.predict_severity(severity_req)`. Note that `sos_service.py` passes `crisis_type`, `symptoms`, and `photo_url` into `backend/app/schemas/ai.py`'s `SeverityRequest`, which actually expects `emergency_type` and `detected_symptoms`—so `crisis_type`, `symptoms`, and `photo_url` are currently ignored by Pydantic (see [KNOWN_ISSUES.md](KNOWN_ISSUES.md)).
+Before persisting `SOSEvent`, `SOSService.create_sos_event` awaits `ai_client.predict_severity(severity_req)`. Note that `sos_service.py` passes `crisis_type`, `symptoms`, and `photo_url` into `backend/app/schemas/ai.py`'s `SeverityRequest`, which actually expects `emergency_type` and `detected_symptoms`—so `crisis_type`, `symptoms`, and `photo_url` are currently ignored by Pydantic (see [KNOWN_ISSUES.md](../reference/KNOWN_ISSUES.md)).
 
 ### 1.3 Incident Lifecycle State Machine
 
@@ -45,7 +45,7 @@ stateDiagram-v2
 
 ## 2. Geospatial Dispatch & Responder Ranking
 
-Source: [`backend/app/services/geo_service.py`](backend/app/services/geo_service.py), [`backend/app/services/ranking_service.py`](backend/app/services/ranking_service.py)
+Source: [`backend/app/services/geo_service.py`](../../backend/app/services/geo_service.py), [`backend/app/services/ranking_service.py`](../../backend/app/services/ranking_service.py)
 
 ### 2.1 Availability Eligibility
 `GeoService.is_available(user)` requires:
@@ -85,7 +85,7 @@ $$
 
 ## 3. 3-Layer Escalation Protocol
 
-Source: [`backend/app/services/sos_service.py`](backend/app/services/sos_service.py) (`escalate_sos`)
+Source: [`backend/app/services/sos_service.py`](../../backend/app/services/sos_service.py) (`escalate_sos`)
 
 When `POST /api/v1/sos/{id}/escalate` is invoked with `elapsed_seconds` or `force_layer`:
 - **Layer 1 (`30 <= elapsed < 45`):** Multiplies `current_radius_meters` by `2.0` (capped at `max_radius_meters = 5000.0m`).
@@ -99,7 +99,7 @@ If `new_radius > old_radius`, newly covered responders are ranked and notified v
 
 ## 4. Live Tracking, ETA, and WebSocket Room Design
 
-Source: [`backend/app/api/tracking_ws.py`](backend/app/api/tracking_ws.py), [`backend/app/services/tracking_service.py`](backend/app/services/tracking_service.py), [`backend/app/services/eta_service.py`](backend/app/services/eta_service.py)
+Source: [`backend/app/api/tracking_ws.py`](../../backend/app/api/tracking_ws.py), [`backend/app/services/tracking_service.py`](../../backend/app/services/tracking_service.py), [`backend/app/services/eta_service.py`](../../backend/app/services/eta_service.py)
 
 ### 4.1 Role Assignment on Socket Connect
 When a client connects to `/ws/tracking/{incident_id}?token=...`:

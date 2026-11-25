@@ -55,7 +55,7 @@ interface SosApiService {
     @GET("api/v1/sos/{id}")
     suspend fun detail(@Path("id") id: String): Response<Incident>
     @GET("api/v1/sos/{id}/tracking")
-    suspend fun tracking(@Path("id") id: String): Response<com.example.nearhelp.ui.tracking.TrackingSnapshotDto>
+    suspend fun tracking(@Path("id") id: String): Response<com.example.nearhelp.data.api.models.TrackingSnapshotDto>
     @POST("api/v1/sos/{id}/respond")
     suspend fun respond(@Path("id") id: String, @Header("Authorization") token: String, @Body body: SosRespondRequest): Response<IncidentResponse>
     @PUT("api/v1/sos/{id}/resolve")

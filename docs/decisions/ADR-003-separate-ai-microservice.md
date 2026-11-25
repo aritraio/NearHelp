@@ -19,6 +19,6 @@ Split `backend/` (`:8000`) and `ai_service/` (`:8001`) into two FastAPI services
 
 ## Consequences & Trade-offs
 
-- **Divergence from Planned Architecture:** [`docs/architecture.md`](../architecture.md) states *"the critical alert path must never be blocked by AI processing"* and diagrams SOS creation + AI triage running in parallel. In reality, [`SOSService.create_sos_event`](../../backend/app/services/sos_service.py) **awaits** `ai_client.predict_severity()` *before* persisting `SOSEvent` or notifying responders (up to a 10s timeout if `ai_service` hangs).
+- **Divergence from Planned Architecture:** [`docs/architecture.md`](../planning/architecture.md) states *"the critical alert path must never be blocked by AI processing"* and diagrams SOS creation + AI triage running in parallel. In reality, [`SOSService.create_sos_event`](../../backend/app/services/sos_service.py) **awaits** `ai_client.predict_severity()` *before* persisting `SOSEvent` or notifying responders (up to a 10s timeout if `ai_service` hangs).
 - **Direct Client Bypass:** [`AiAgentRepository.kt`](../../android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt) also calls the Gemini REST API directly from Android before calling the backend proxy, bypassing `ai_service` LangGraph guardrails.
 - **Pros:** When `ai_service` is down (connection refused), `AIClient` immediately falls back to deterministic local rules so SOS creation still succeeds.

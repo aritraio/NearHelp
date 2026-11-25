@@ -16,7 +16,7 @@ NearHelp AI is structured as a **three-tier system**:
    - **Local Filesystem** (`backend/uploads/`): Stores uploaded avatar images and skill verification certificates served statically under `/uploads`.
    - **External Cloud Services**: Google Gemini API, Firebase Auth & Cloud Messaging (FCM), Google Maps SDK & Places API (New).
 
-See [docs/diagrams/01-system-architecture.md](docs/diagrams/01-system-architecture.md) for the full architecture diagram, [docs/diagrams/02-frontend-backend-communication.md](docs/diagrams/02-frontend-backend-communication.md) for client-server transport details, and the Data Flow Diagrams ([DFD Level 0](docs/diagrams/dfd-level-0-context.md), [DFD Level 1](docs/diagrams/dfd-level-1-system.md), [Level 2 Auth](docs/diagrams/dfd-level-2-authentication.md), [Level 2 Core Workflow](docs/diagrams/dfd-level-2-core-workflow.md), [Level 2 AI](docs/diagrams/dfd-level-2-ai-processing.md)).
+See [docs/diagrams/01-system-architecture.md](diagrams/01-system-architecture.md) for the full architecture diagram, [docs/diagrams/02-frontend-backend-communication.md](diagrams/02-frontend-backend-communication.md) for client-server transport details, and the Data Flow Diagrams ([DFD Level 0](diagrams/dfd-level-0-context.md), [DFD Level 1](diagrams/dfd-level-1-system.md), [Level 2 Auth](diagrams/dfd-level-2-authentication.md), [Level 2 Core Workflow](diagrams/dfd-level-2-core-workflow.md), [Level 2 AI](diagrams/dfd-level-2-ai-processing.md)).
 
 ---
 
@@ -34,15 +34,15 @@ See [docs/diagrams/01-system-architecture.md](docs/diagrams/01-system-architectu
 
 ## 3. Architectural Divergences from Original Specifications
 
-Inspecting the actual code reveals several important differences from [`docs/architecture.md`](docs/architecture.md):
+Inspecting the actual code reveals several important differences from [`docs/architecture.md`](../planning/architecture.md):
 
-1. **AI Severity Blocks SOS Creation:** `docs/architecture.md` specifies that AI processing runs *in parallel* so it never blocks the SOS critical path. In [`backend/app/services/sos_service.py`](backend/app/services/sos_service.py), `create_sos_event` **synchronously awaits** `ai_client.predict_severity()` (up to 10s timeout) *before* inserting `SOSEvent` or notifying responders.
-2. **Direct-to-Gemini Bypass on Android:** When a user-supplied Gemini API key is stored in `TokenStorage`, [`AiAgentRepository.kt`](android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt) calls the Gemini REST endpoint directly from the mobile device *before* calling the backend `/api/v1/ai/agent/chat` proxy. This bypasses server-side LangGraph guardrails (`HallucinationGuardrails`) unless no local key is set or the direct call fails.
-3. **Single-Worker WebSocket State:** `ConnectionManager` ([`backend/app/core/websocket_manager.py`](backend/app/core/websocket_manager.py)) publishes broadcasts to Redis Pub/Sub (`channel:tracking:{incident_id}`), **but no subscriber reads from Redis**. Rooms and `TrackingService._live_telemetry_cache` exist only in single-process memory.
+1. **AI Severity Blocks SOS Creation:** `docs/architecture.md` specifies that AI processing runs *in parallel* so it never blocks the SOS critical path. In [`backend/app/services/sos_service.py`](../../backend/app/services/sos_service.py), `create_sos_event` **synchronously awaits** `ai_client.predict_severity()` (up to 10s timeout) *before* inserting `SOSEvent` or notifying responders.
+2. **Direct-to-Gemini Bypass on Android:** When a user-supplied Gemini API key is stored in `TokenStorage`, [`AiAgentRepository.kt`](../../android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt) calls the Gemini REST endpoint directly from the mobile device *before* calling the backend `/api/v1/ai/agent/chat` proxy. This bypasses server-side LangGraph guardrails (`HallucinationGuardrails`) unless no local key is set or the direct call fails.
+3. **Single-Worker WebSocket State:** `ConnectionManager` ([`backend/app/core/websocket_manager.py`](../../backend/app/core/websocket_manager.py)) publishes broadcasts to Redis Pub/Sub (`channel:tracking:{incident_id}`), **but no subscriber reads from Redis**. Rooms and `TrackingService._live_telemetry_cache` exist only in single-process memory.
 4. **No `messages` or `ai_summaries` Tables:** Participant chat is stored as `TimelineEvent` rows (`event_type="chat_message"`) in `timeline_events`, and AI triage output is stored in `sos_events.ai_triage_data` JSON.
 5. **In-Process Admin Web Instead of Next.js:** The planned `admin_dashboard/` Next.js app does not exist; an admin SPA is served from `backend/app/admin_web/` at `/admin`.
-6. **RAG / Vector DB Removed:** ChromaDB and document ingestion were removed in commit `9699a81`; AI protocols live in Python dictionaries (`GROUNDED_PROTOCOLS` in [`ai_service/app/agent/knowledge.py`](ai_service/app/agent/knowledge.py)).
-7. **Dual API Prefixes:** Backend mounts both `/api/v1/*` and `/api/*` compatibility aliases in [`backend/app/main.py`](backend/app/main.py); AI service mounts both `/api/v1/*` and root `/` aliases in [`ai_service/app/main.py`](ai_service/app/main.py).
+6. **RAG / Vector DB Removed:** ChromaDB and document ingestion were removed in commit `9699a81`; AI protocols live in Python dictionaries (`GROUNDED_PROTOCOLS` in [`ai_service/app/agent/knowledge.py`](../../ai_service/app/agent/knowledge.py)).
+7. **Dual API Prefixes:** Backend mounts both `/api/v1/*` and `/api/*` compatibility aliases in [`backend/app/main.py`](../../backend/app/main.py); AI service mounts both `/api/v1/*` and root `/` aliases in [`ai_service/app/main.py`](../../ai_service/app/main.py).
 
 ---
 

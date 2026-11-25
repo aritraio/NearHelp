@@ -7,37 +7,56 @@ NearHelp AI is a multi-tier emergency response platform consisting of a **native
 
 ---
 
+## Repository Structure
+
+```text
+NearHelp/
+├── android/       # Native Android app (Kotlin, Jetpack Compose, Navigation 3, Maps/Places)
+├── backend/       # FastAPI coordination API (:8000), SQLAlchemy models, Admin Web UI (/admin)
+├── ai_service/    # FastAPI AI microservice (:8001), LangGraph agent, classifiers, guardrails
+├── data/          # Regional seed datasets (Kolkata facilities, police, fire stations, blood banks)
+├── docs/          # Organized architecture, API reference, guides, ADRs, and planning archives
+├── AGENTS.md      # Guide for AI coding agents and maintainers
+├── CONTRIBUTING.md
+├── docker-compose.yml
+└── render.yaml
+```
+
+---
+
 ## Documentation Suite
 
-### Reverse-Engineered Technical Documentation (Repository Root)
+Browse the [Documentation Hub](docs/README.md) for the full reading order, or jump directly to a section:
+
+### Architecture & System Design (`docs/architecture/`)
 
 | Document | Purpose | Link |
 | :--- | :--- | :--- |
-| **Project Overview** | Vision, implemented vs. planned feature matrix, technology stack, and regional scope | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) |
-| **Architecture** | Three-tier runtime topology, service boundaries, and divergence from early specs | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| **Codebase Map** | Annotated directory-by-directory map of Backend, AI Service, Android, and Data | [CODEBASE_MAP.md](CODEBASE_MAP.md) |
-| **System Design** | Deep dive into SOS dispatch, ranking math, tracking/WS state, routing, and caching | [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md) |
-| **Database** | SQLAlchemy models, PostGIS spatial indexes, encryption at rest, and SQLite test stubs | [DATABASE.md](DATABASE.md) |
-| **API Reference** | Complete REST and WebSocket endpoint reference derived from FastAPI routers | [API_REFERENCE.md](API_REFERENCE.md) |
-| **User Flows** | Step-by-step journeys for Victims, Responders, AI Assistant, and Admins | [USER_FLOWS.md](USER_FLOWS.md) |
-| **AI System** | Classifiers, severity predictor, LangGraph 5-node agent, guardrails, and fallbacks | [AI_SYSTEM.md](AI_SYSTEM.md) |
-| **Security** | Auth flows, JWTs, AES-256-GCM medical ID, input validation, and exposed risks | [SECURITY.md](SECURITY.md) |
-| **Testing** | Pytest suites, Android unit/Robolectric tests, smoke script, and observed results | [TESTING.md](TESTING.md) |
-| **Deployment** | Docker Compose stack, environment variables, Android APK build, and runtime limits | [DEPLOYMENT.md](DEPLOYMENT.md) |
-| **Known Issues** | Verified bugs, schema mismatches, security gaps, dead/template code, and debt | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
-| **Agents Guide** | Guide for AI coding agents and human maintainers working in this repository | [AGENTS.md](AGENTS.md) |
+| **Project Overview** | Vision, implemented vs. planned feature matrix, technology stack, and regional scope | [PROJECT_OVERVIEW.md](docs/architecture/PROJECT_OVERVIEW.md) |
+| **Architecture** | Three-tier runtime topology, service boundaries, and divergence from early specs | [ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) |
+| **Codebase Map** | Annotated directory-by-directory map of Backend, AI Service, Android, and Data | [CODEBASE_MAP.md](docs/architecture/CODEBASE_MAP.md) |
+| **System Design** | Deep dive into SOS dispatch, ranking math, tracking/WS state, routing, and caching | [SYSTEM_DESIGN.md](docs/architecture/SYSTEM_DESIGN.md) |
+| **Database** | SQLAlchemy models, PostGIS spatial indexes, encryption at rest, and SQLite test stubs | [DATABASE.md](docs/architecture/DATABASE.md) |
+| **AI System** | Classifiers, severity predictor, LangGraph 5-node agent, guardrails, and fallbacks | [AI_SYSTEM.md](docs/architecture/AI_SYSTEM.md) |
+| **Data Flow** | Detailed runtime data-journey reference | [DATA_FLOW.md](docs/architecture/DATA_FLOW.md) |
+| **Decision Register** | Consolidated engineering decision log | [DECISIONS.md](docs/architecture/DECISIONS.md) |
+| **Mermaid Diagrams** | Architecture, communication, ERD, auth, workflow, AI, DFD, and deployment diagrams | [diagrams/README.md](docs/architecture/diagrams/README.md) |
 
-### Diagrams, Decisions & Historical Specs
+### Reference, Operations & Guides (`docs/reference/`, `docs/guides/`, `docs/decisions/`)
 
-| Resource | Description | Link |
+| Document | Purpose | Link |
 | :--- | :--- | :--- |
-| **Mermaid Diagrams** | 8 architecture, communication, ERD, auth, workflow, AI, and deployment diagrams | [docs/diagrams/README.md](docs/diagrams/README.md) |
+| **API Reference** | Complete REST and WebSocket endpoint reference derived from FastAPI routers | [API_REFERENCE.md](docs/reference/API_REFERENCE.md) |
+| **User Flows** | Step-by-step journeys for Victims, Responders, AI Assistant, and Admins | [USER_FLOWS.md](docs/reference/USER_FLOWS.md) |
+| **Security** | Auth flows, JWTs, AES-256-GCM medical ID, input validation, and exposed risks | [SECURITY.md](docs/reference/SECURITY.md) |
+| **Testing** | Pytest suites, Android unit/Robolectric tests, smoke script, and observed results | [TESTING.md](docs/reference/TESTING.md) |
+| **Deployment** | Docker Compose stack, environment variables, Android APK build, and runtime limits | [DEPLOYMENT.md](docs/reference/DEPLOYMENT.md) |
+| **Known Issues** | Verified bugs, schema mismatches, security gaps, and technical debt | [KNOWN_ISSUES.md](docs/reference/KNOWN_ISSUES.md) |
 | **Architecture Decisions (ADRs)** | 10 ADRs comparing original design choices with actual implementation | [docs/decisions/README.md](docs/decisions/README.md) |
-| **Project Decision Register** | Consolidated engineering decision log | [decisions.md](decisions.md) |
-| **Application & Data Flow** | Detailed runtime data-journey reference | [flow.md](flow.md) |
-| **Two-Phone Readiness** | End-to-end physical device setup and acceptance checklist | [docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md) |
-| **Android Redesign Notes** | Compose Care design system, localization, and Places API setup | [android/REDESIGN.md](android/REDESIGN.md) |
-| **Original Reference Specs** | Pre-implementation blueprint, proposal, design system, and master TODO list | [docs/architecture.md](docs/architecture.md), [docs/design.md](docs/design.md), [docs/proposal.md](docs/proposal.md), [docs/todos.md](docs/todos.md) |
+| **Two-Phone Readiness** | End-to-end physical device setup and acceptance checklist | [DEVICE_READINESS.md](docs/guides/DEVICE_READINESS.md) |
+| **UI Guidance** | Compose UI design guidance | [UI_GUIDANCE.md](docs/guides/UI_GUIDANCE.md) |
+| **Android Redesign Notes** | Compose Care design system, localization, and Places API setup | [ANDROID_REDESIGN.md](docs/guides/ANDROID_REDESIGN.md) |
+| **Historical Planning Specs** | Pre-implementation blueprint, proposal, design system, and master TODO list | [docs/planning/](docs/planning/) |
 
 ---
 
@@ -71,7 +90,7 @@ docker compose exec backend python -m app.cli create-admin --email you@example.c
 python -m app.cli create-admin --email you@example.com --name "Administrator"
 ```
 
-> **Important Security Note:** By default, [`backend/app/core/config.py`](backend/app/core/config.py) and [`backend/app/db/session.py`](backend/app/db/session.py) also auto-bootstrap an initial administrator from `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` during startup if those variables are non-empty (and they currently carry hardcoded development defaults). Override or clear these in production; see [SECURITY.md](SECURITY.md) and [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+> **Important Security Note:** By default, [`backend/app/core/config.py`](backend/app/core/config.py) and [`backend/app/db/session.py`](backend/app/db/session.py) also auto-bootstrap an initial administrator from `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` during startup if those variables are non-empty (and they currently carry hardcoded development defaults). Override or clear these in production; see [SECURITY.md](docs/reference/SECURITY.md) and [KNOWN_ISSUES.md](docs/reference/KNOWN_ISSUES.md).
 
 ### Building the Android App for Local Testing
 
@@ -81,7 +100,7 @@ From `android/` (requires JDK 17):
 ./gradlew :app:assembleDebug -PnearhelpBaseUrl=http://YOUR_LAN_IP:8000/
 ```
 
-The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. See [DEPLOYMENT.md](DEPLOYMENT.md) and [docs/DEVICE_READINESS.md](docs/DEVICE_READINESS.md) for emulator URLs (`http://10.0.2.2:8000/`), Firebase push setup (`google-services.json`), and Google Places API (New) requirements.
+The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. See [DEPLOYMENT.md](docs/reference/DEPLOYMENT.md) and [DEVICE_READINESS.md](docs/guides/DEVICE_READINESS.md) for emulator URLs (`http://10.0.2.2:8000/`), Firebase push setup (`google-services.json`), and Google Places API (New) requirements.
 
 ---
 

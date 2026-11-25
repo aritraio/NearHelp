@@ -2,8 +2,8 @@ package com.example.nearhelp.ui.incident
 
 import com.example.nearhelp.data.api.Incident
 import com.example.nearhelp.data.api.IncidentResponse
-import com.example.nearhelp.ui.tracking.ResponderTrackingUpdateDto
-import com.example.nearhelp.ui.tracking.TrackingSnapshotDto
+import com.example.nearhelp.data.api.models.ResponderTrackingUpdateDto
+import com.example.nearhelp.data.api.models.TrackingSnapshotDto
 import com.google.gson.Gson
 import org.junit.Assert.*
 import org.junit.Test

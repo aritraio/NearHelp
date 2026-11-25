@@ -32,9 +32,9 @@ import com.example.nearhelp.data.api.models.EmergencyContact
 import com.example.nearhelp.theme.AppTheme
 import com.example.nearhelp.theme.ThemeManager
 import com.example.nearhelp.theme.appColorScheme
+import com.example.nearhelp.ui.components.VictimBottomNavBar
+import com.example.nearhelp.ui.components.VictimNavTab
 import com.example.nearhelp.ui.design.*
-import com.example.nearhelp.ui.victim.VictimBottomNavBar
-import com.example.nearhelp.ui.victim.VictimNavTab
 import com.example.nearhelp.i18n.AppLanguages
 import com.example.nearhelp.i18n.activity
 import com.example.nearhelp.data.api.RetrofitClient
@@ -146,7 +146,7 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
                     CareField("Server Base URL", serverUrlInput, { serverUrlInput = it })
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         CareButton("Cloud Tunnel", {
-                            serverUrlInput = "https://ought-afford-classroom-acrobat.trycloudflare.com/"
+                            serverUrlInput = "https://mother-kate-commitments-tell.trycloudflare.com/"
                             testServer(serverUrlInput)
                         }, Modifier.weight(1f))
                         CareButton("Local (10.0.2.2)", {

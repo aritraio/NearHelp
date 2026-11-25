@@ -1,6 +1,6 @@
 package com.example.nearhelp.ui.incident
 
-import com.example.nearhelp.ui.tracking.ResponderTrackingUpdateDto
+import com.example.nearhelp.data.api.models.ResponderTrackingUpdateDto
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset

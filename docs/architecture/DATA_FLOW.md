@@ -2,7 +2,7 @@
 
 Last reviewed: **2 November 2026**
 
-This document traces data from user input through Android, APIs, processing, storage, and back to the screen. It describes this checkout, including fallback branches and current access boundaries. For the reasoning behind these choices, see [decisions.md](decisions.md).
+This document traces data from user input through Android, APIs, processing, storage, and back to the screen. It describes this checkout, including fallback branches and current access boundaries. For the reasoning behind these choices, see [decisions.md](DECISIONS.md).
 
 ## 1. System overview
 
@@ -57,7 +57,7 @@ sequenceDiagram
     Screen-->>User: Render success, data, or retryable error
 ```
 
-Most features use repositories. [IncidentViewModel](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt) currently calls [SosApiService](android/app/src/main/java/com/example/nearhelp/data/api/SosApiService.kt) directly. Requests go to the single configured [Retrofit backend URL](android/app/src/main/java/com/example/nearhelp/data/api/RetrofitClient.kt).
+Most features use repositories. [IncidentViewModel](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt) currently calls [SosApiService](../../android/app/src/main/java/com/example/nearhelp/data/api/SosApiService.kt) directly. Requests go to the single configured [Retrofit backend URL](../../android/app/src/main/java/com/example/nearhelp/data/api/RetrofitClient.kt).
 
 ## 3. Sign-up, sign-in, session refresh, and logout
 
@@ -81,7 +81,7 @@ Most features use repositories. [IncidentViewModel](android/app/src/main/java/co
 
 All abbreviated `/auth/...` paths above are under `/api/v1`. Device preferences normally use Android encrypted storage, but initialization failure falls back to ordinary app-private preferences.
 
-**Sources:** [auth API](backend/app/api/auth.py), [auth service](backend/app/services/auth_service.py), [AuthRepository](android/app/src/main/java/com/example/nearhelp/data/repository/AuthRepository.kt), [SessionTokens](android/app/src/main/java/com/example/nearhelp/data/api/SessionTokens.kt), [TokenStorage](android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt).
+**Sources:** [auth API](../../backend/app/api/auth.py), [auth service](../../backend/app/services/auth_service.py), [AuthRepository](../../android/app/src/main/java/com/example/nearhelp/data/repository/AuthRepository.kt), [SessionTokens](../../android/app/src/main/java/com/example/nearhelp/data/api/SessionTokens.kt), [TokenStorage](../../android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt).
 
 ## 4. Profile, medical ID, contacts, and verification data
 
@@ -107,7 +107,7 @@ flowchart LR
 
 The profile is **not automatically copied wholesale into every AI request or FCM alert**. Data passed to those integrations follows their explicit request construction below. Legacy medical values may remain plaintext because the decrypt helper accepts old formats.
 
-**Sources:** [user routes](backend/app/api/users.py), [user service](backend/app/services/user_service.py), [encryption](backend/app/core/crypto.py), [skill service](backend/app/services/skill_service.py), [admin routes](backend/app/api/admin.py).
+**Sources:** [user routes](../../backend/app/api/users.py), [user service](../../backend/app/services/user_service.py), [encryption](../../backend/app/core/crypto.py), [skill service](../../backend/app/services/skill_service.py), [admin routes](../../backend/app/api/admin.py).
 
 ## 5. Availability and device location before dispatch
 
@@ -120,7 +120,7 @@ The profile is **not automatically copied wholesale into every AI request or FCM
 
 Availability expiry changes eligibility; it does not erase the last stored coordinates. Current sharing is tied to foreground screens, not a continuous background location service.
 
-**Sources:** [location helper](android/app/src/main/java/com/example/nearhelp/data/location/LocationHelper.kt), [incident ViewModel](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [user location API](backend/app/api/users.py), [geo service](backend/app/services/geo_service.py).
+**Sources:** [location helper](../../android/app/src/main/java/com/example/nearhelp/data/location/LocationHelper.kt), [incident ViewModel](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [user location API](../../backend/app/api/users.py), [geo service](../../backend/app/services/geo_service.py).
 
 ## 6. SOS creation, persistence, dispatch, and retry
 
@@ -181,7 +181,7 @@ The bearer identity determines the broadcaster for an ordinary incident. An expl
 
 The phone retains the same payload and key until it receives success. A retry can recover the persisted incident even after a backend restart. Redis/memory middleware can also replay cached HTTP responses. If the server committed the incident but stopped during notifications, recovering the incident does **not** resume unfinished push sends; there is no durable dispatch queue here.
 
-**Sources:** [Android request DTO](android/app/src/main/java/com/example/nearhelp/data/api/SosApiService.kt), [incident ViewModel](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [SOS schema](backend/app/schemas/sos.py), [SOS service](backend/app/services/sos_service.py), [AI client](backend/app/services/ai_client.py).
+**Sources:** [Android request DTO](../../android/app/src/main/java/com/example/nearhelp/data/api/SosApiService.kt), [incident ViewModel](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [SOS schema](../../backend/app/schemas/sos.py), [SOS service](../../backend/app/services/sos_service.py), [AI client](../../backend/app/services/ai_client.py).
 
 ## 7. Notification delivery and responder discovery
 
@@ -198,7 +198,7 @@ To accept, Android sends `POST /api/v1/sos/{id}/respond` with status and availab
 
 Initial response ETA is an estimate; if response coordinates are absent, the service currently uses an 800 m fallback for its initial calculation. Live tracking later uses actual known positions.
 
-**Sources:** [messaging service](android/app/src/main/java/com/example/nearhelp/notifications/NearHelpMessagingService.kt), [notifications](backend/app/services/notification_service.py), [SOS service](backend/app/services/sos_service.py), [device configuration](docs/DEVICE_READINESS.md).
+**Sources:** [messaging service](../../android/app/src/main/java/com/example/nearhelp/notifications/NearHelpMessagingService.kt), [notifications](../../backend/app/services/notification_service.py), [SOS service](../../backend/app/services/sos_service.py), [device configuration](../guides/DEVICE_READINESS.md).
 
 ## 8. Live tracking, snapshots, chat, and reconnection
 
@@ -236,7 +236,7 @@ sequenceDiagram
 
 HTTP alternatives include `GET /api/v1/sos/{incident_id}/tracking` and `POST /api/v1/sos/{incident_id}/tracking/location`. The current incident screen uses the socket path for live updates.
 
-**Sources:** [tracking socket API](backend/app/api/tracking_ws.py), [tracking service](backend/app/services/tracking_service.py), [socket manager](backend/app/core/websocket_manager.py), [Android socket client](android/app/src/main/java/com/example/nearhelp/data/api/ws/LiveTrackingWebSocketClient.kt).
+**Sources:** [tracking socket API](../../backend/app/api/tracking_ws.py), [tracking service](../../backend/app/services/tracking_service.py), [socket manager](../../backend/app/core/websocket_manager.py), [Android socket client](../../android/app/src/main/java/com/example/nearhelp/data/api/ws/LiveTrackingWebSocketClient.kt).
 
 ## 9. Escalation, cancellation, and resolution
 
@@ -262,7 +262,7 @@ This shows the core implemented incident path, not every status string listed in
 
 No automatic deletion of incident text, chat, contacts, or latest location occurs as part of these endings. An explicitly anonymous API incident with no broadcaster has no ordinary owner identity for these checks.
 
-**Source:** [SOS routes](backend/app/api/sos.py), [lifecycle service](backend/app/services/sos_service.py).
+**Source:** [SOS routes](../../backend/app/api/sos.py), [lifecycle service](../../backend/app/services/sos_service.py).
 
 ## 10. AI assistant and protocol data flow
 
@@ -292,7 +292,7 @@ The backend has its own fallback if the AI service fails, including local guidan
 
 AI WebSocket routes also exist at `/ws/ai/chat` and `/api/v1/ws/ai/chat`; the Android repository's chat method above uses HTTP. Do not confuse an available socket API with the active UI transport.
 
-**Sources:** [Android AI repository](android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt), [backend AI API](backend/app/api/ai.py), [backend AI client](backend/app/services/ai_client.py), [agent graph](ai_service/app/agent/gemini_agent.py), [guardrails](ai_service/app/agent/guardrails.py), [knowledge catalog](ai_service/app/agent/knowledge.py).
+**Sources:** [Android AI repository](../../android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt), [backend AI API](../../backend/app/api/ai.py), [backend AI client](../../backend/app/services/ai_client.py), [agent graph](../../ai_service/app/agent/gemini_agent.py), [guardrails](../../ai_service/app/agent/guardrails.py), [knowledge catalog](../../ai_service/app/agent/knowledge.py).
 
 ## 11. Facilities, maps, routes, and external coordinates
 
@@ -302,7 +302,7 @@ AI WebSocket routes also exist at `/ws/ai/chat` and `/api/v1/ws/ai/chat`; the An
 - **External route branch:** The routing service can attempt Google Routes with origin/destination when a server key is available; current backend settings do not declare the key it looks up. Otherwise local calculations build estimates and constructed polylines, including regional demo instructions.
 - **Hazards:** Curated defaults and submitted hazards live in routing-service process memory. They are not an established live road-authority stream and do not survive every process restart.
 
-**Sources:** [facility service](backend/app/services/facility_service.py), [routing API](backend/app/api/routing.py), [routing service](backend/app/services/routing_service.py), [Android map](android/app/src/main/java/com/example/nearhelp/ui/map/NearHelpGoogleMapView.kt).
+**Sources:** [facility service](../../backend/app/services/facility_service.py), [routing API](../../backend/app/api/routing.py), [routing service](../../backend/app/services/routing_service.py), [Android map](../../android/app/src/main/java/com/example/nearhelp/ui/map/MapPinItem.kt).
 
 ## 12. Where each data category lives
 
@@ -348,6 +348,6 @@ The original architecture's privacy and reliability goals go beyond some of thes
 
 ## 14. Checking and updating these flows
 
-For a two-phone walkthrough and configuration, use [DEVICE_READINESS.md](docs/DEVICE_READINESS.md). [backend/scripts/device_smoke.py](backend/scripts/device_smoke.py) exercises real HTTP/WebSocket incident creation, responder GPS/chat, reconnection, and resolution against a test backend. It creates test records and does not establish physical notification delivery, clinical accuracy, or production readiness.
+For a two-phone walkthrough and configuration, use [DEVICE_READINESS.md](../guides/DEVICE_READINESS.md). [backend/scripts/device_smoke.py](../../backend/scripts/device_smoke.py) exercises real HTTP/WebSocket incident creation, responder GPS/chat, reconnection, and resolution against a test backend. It creates test records and does not establish physical notification delivery, clinical accuracy, or production readiness.
 
-When an endpoint, DTO, store, provider, access check, retry rule, or lifecycle transition changes, update its flow here and the corresponding entry in [decisions.md](decisions.md). Diagrams should describe the executable path, with proposed behavior explicitly marked as planned.
+When an endpoint, DTO, store, provider, access check, retry rule, or lifecycle transition changes, update its flow here and the corresponding entry in [decisions.md](DECISIONS.md). Diagrams should describe the executable path, with proposed behavior explicitly marked as planned.

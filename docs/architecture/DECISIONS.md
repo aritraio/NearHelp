@@ -2,7 +2,7 @@
 
 Last reviewed: **2 November 2026**
 
-This document records the project's product, architecture, technology, data, and delivery decisions, with their reasons and consequences. See [flow.md](flow.md) for the corresponding data journeys.
+This document records the project's product, architecture, technology, data, and delivery decisions, with their reasons and consequences. See [flow.md](DATA_FLOW.md) for the corresponding data journeys.
 
 ## How to read this register
 
@@ -11,7 +11,7 @@ This document records the project's product, architecture, technology, data, and
 - **Planned** means the choice appears in project specifications but is not established as working here.
 - **Documented rationale** comes from the existing specifications. **Inferred rationale** explains the apparent purpose of an implementation where no historical decision record exists; it is not a claim about a discussion the team had.
 
-The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence when older planning documents describe different behavior. This is a consolidated register of decisions evidenced by the repository, rather than a reconstruction of undocumented meetings.
+The code and [device readiness review](../guides/DEVICE_READINESS.md) take precedence when older planning documents describe different behavior. This is a consolidated register of decisions evidenced by the repository, rather than a reconstruction of undocumented meetings.
 
 ## 1. Product and scope
 
@@ -21,7 +21,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Choice:** Build NearHelp around a person raising an SOS, nearby volunteers responding, and participants coordinating until resolution. Include first-aid guidance and professional-service escalation in the design.
 
-**Why — documented:** The [proposal](docs/proposal.md) identifies the interval before professional help arrives as the problem to address. Nearby people with useful skills may be able to assist during that interval.
+**Why — documented:** The [proposal](../planning/proposal.md) identifies the interval before professional help arrives as the problem to address. Nearby people with useful skills may be able to assist during that interval.
 
 **Consequences:** Location, responder availability, skills, incident state, and timely communication are central data. An escalation flag or generated handover does not establish that a professional service has actually been contacted.
 
@@ -35,7 +35,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** A screen, dependency, or roadmap checkbox alone should not be treated as proof of an integrated feature. Offline SMS, continuous background GPS, and the admin web dashboard are not established as complete in this checkout.
 
-**Evidence:** [README](README.md), [master task list](docs/todos.md), [device readiness](docs/DEVICE_READINESS.md).
+**Evidence:** [README](../../README.md), [master task list](../planning/todos.md), [device readiness](../guides/DEVICE_READINESS.md).
 
 ## 2. Application and service architecture
 
@@ -49,7 +49,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** The delivered client targets Android. An iOS or web client requires additional implementation. Permission behavior and background limits still need device testing.
 
-**Evidence:** [Android dependencies](android/gradle/libs.versions.toml), [navigation](android/app/src/main/java/com/example/nearhelp/Navigation.kt), [UI guidance](docs/UI_GUIDANCE.md).
+**Evidence:** [Android dependencies](../../android/gradle/libs.versions.toml), [navigation](../../android/app/src/main/java/com/example/nearhelp/navigation/Navigation.kt), [UI guidance](../guides/UI_GUIDANCE.md).
 
 ### D04 — ViewModels and observable state, with repositories where present
 
@@ -61,7 +61,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** The app is not uniformly repository-based. Future refactoring should preserve the incident-specific lifecycle, retry payload, and socket cleanup behavior.
 
-**Evidence:** [IncidentViewModel](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [repositories](android/app/src/main/java/com/example/nearhelp/data/repository/), [navigation](android/app/src/main/java/com/example/nearhelp/Navigation.kt).
+**Evidence:** [IncidentViewModel](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [repositories](../../android/app/src/main/java/com/example/nearhelp/data/repository/), [navigation](../../android/app/src/main/java/com/example/nearhelp/navigation/Navigation.kt).
 
 ### D05 — FastAPI for backend and AI APIs
 
@@ -73,7 +73,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** API schemas provide a shared contract, but Kotlin DTOs must still match them. An async handler can still be delayed by synchronous work within it.
 
-**Evidence:** [architecture ADRs](docs/architecture.md#18-architecture-decision-records), [backend entry point](backend/app/main.py), [AI entry point](ai_service/app/main.py).
+**Evidence:** [architecture ADRs](../planning/architecture.md#18-architecture-decision-records), [backend entry point](../../backend/app/main.py), [AI entry point](../../ai_service/app/main.py).
 
 ### D06 — Separate coordination backend and AI service
 
@@ -85,7 +85,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Service outages require timeouts and fallbacks. **The current SOS implementation awaits severity prediction before creating the incident and notifying responders.** The architecture's proposed parallel, non-blocking AI path is not implemented by that function.
 
-**Evidence:** [architecture ADR-6](docs/architecture.md#18-architecture-decision-records), [SOS service](backend/app/services/sos_service.py), [AI client](backend/app/services/ai_client.py).
+**Evidence:** [architecture ADR-6](../planning/architecture.md#18-architecture-decision-records), [SOS service](../../backend/app/services/sos_service.py), [AI client](../../backend/app/services/ai_client.py).
 
 ### D07 — Retrofit/OkHttp JSON APIs and one configured backend
 
@@ -97,7 +97,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** An unreachable configured backend produces a visible failure. Local trials need an explicit LAN URL; separate networks need a reachable deployment. Other application logs still need consideration: the AI repository includes query text in some logs.
 
-**Evidence:** [RetrofitClient](android/app/src/main/java/com/example/nearhelp/data/api/RetrofitClient.kt), [Android build](android/app/build.gradle.kts), [device setup](docs/DEVICE_READINESS.md).
+**Evidence:** [RetrofitClient](../../android/app/src/main/java/com/example/nearhelp/data/api/RetrofitClient.kt), [Android build](../../android/app/build.gradle.kts), [device setup](../guides/DEVICE_READINESS.md).
 
 ### D08 — Versioned routes with compatibility aliases
 
@@ -109,7 +109,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Maintain equivalent behavior across aliases. New documentation uses versioned HTTP routes where available; socket paths must be checked separately.
 
-**Evidence:** [backend route registration](backend/app/main.py), [API router](backend/app/api/__init__.py), [tracking routes](backend/app/api/tracking_ws.py).
+**Evidence:** [backend route registration](../../backend/app/main.py), [API router](../../backend/app/api/__init__.py), [tracking routes](../../backend/app/api/tracking_ws.py).
 
 ## 3. Databases, persistence, and identity
 
@@ -123,7 +123,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** PostgreSQL/PostGIS is required for representative spatial verification. Latitude/longitude use WGS84; point construction uses **longitude first**, while API payloads name each coordinate explicitly. Geometry indexes exist, but geography-cast query performance still needs measurement.
 
-**Evidence:** [Compose stack](docker-compose.yml), [models](backend/app/models/), [geo service](backend/app/services/geo_service.py), [DB initialization](backend/app/db/session.py).
+**Evidence:** [Compose stack](../../docker-compose.yml), [models](../../backend/app/models/), [geo service](../../backend/app/services/geo_service.py), [DB initialization](../../backend/app/db/session.py).
 
 ### D10 — SQLAlchemy async sessions; SQLite only as a test convenience
 
@@ -135,7 +135,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** SQLite tests do not validate PostGIS semantics or index performance. Startup `create_all` and individual `ALTER TABLE` statements are not a complete versioned migration process. PostgreSQL currently uses `NullPool`, which also affects connection behavior under load.
 
-**Evidence:** [session management](backend/app/db/session.py), [test setup](backend/tests/conftest.py), [network smoke test](backend/scripts/device_smoke.py).
+**Evidence:** [session management](../../backend/app/db/session.py), [test setup](../../backend/tests/conftest.py), [network smoke test](../../backend/scripts/device_smoke.py).
 
 ### D11 — Redis for short-lived middleware state, with memory fallbacks
 
@@ -147,7 +147,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Memory fallbacks disappear on restart and are not shared across workers. Publishing to Redis alone does not synchronize rooms: there is no corresponding cross-worker subscriber in the current socket manager. Use one backend worker/replica for the documented device trial.
 
-**Evidence:** [middleware](backend/app/core/middleware.py), [socket manager](backend/app/core/websocket_manager.py), [device readiness](docs/DEVICE_READINESS.md).
+**Evidence:** [middleware](../../backend/app/core/middleware.py), [socket manager](../../backend/app/core/websocket_manager.py), [device readiness](../guides/DEVICE_READINESS.md).
 
 ### D12 — Backend JWT sessions with multiple identity providers
 
@@ -159,7 +159,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Firebase credentials and client setup are needed for real provider verification. The phone send-OTP endpoint currently returns an acknowledgement; the code-only verification branch accepts a code based on length rather than validating an issued OTP. It must not be described as a completed secure OTP delivery/verification flow.
 
-**Evidence:** [auth service](backend/app/services/auth_service.py), [security](backend/app/core/security.py), [auth API](backend/app/api/auth.py), [configuration](backend/app/core/config.py).
+**Evidence:** [auth service](../../backend/app/services/auth_service.py), [security](../../backend/app/core/security.py), [auth API](../../backend/app/api/auth.py), [configuration](../../backend/app/core/config.py).
 
 ### D13 — Guest emergency access with an explicit privacy flag
 
@@ -171,7 +171,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** A guest session still has a stored user UUID and tokens. An incident explicitly created with `is_anonymous=true` has no `broadcaster_id`; current owner checks therefore cannot identify that guest as its owner. The current Android SOS DTO does not send this flag, so guest-session use and an explicitly anonymous incident are different paths. Neither path implies automatic deletion or absence of location/text data.
 
-**Evidence:** [auth service](backend/app/services/auth_service.py), [SOS service](backend/app/services/sos_service.py), [Android SOS DTO](android/app/src/main/java/com/example/nearhelp/data/api/SosApiService.kt).
+**Evidence:** [auth service](../../backend/app/services/auth_service.py), [SOS service](../../backend/app/services/sos_service.py), [Android SOS DTO](../../android/app/src/main/java/com/example/nearhelp/data/api/SosApiService.kt).
 
 ### D14 — Encrypt selected medical fields and prefer encrypted device storage
 
@@ -183,7 +183,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Server encryption uses a key derived from `SECRET_KEY`; changing that secret affects both JWTs and medical-data decryption. Blood group, contacts, location, and several medical flags remain ordinary database fields. Legacy plaintext is accepted by the decrypt helper. Android falls back to ordinary app-private SharedPreferences if encrypted-store initialization fails, so encryption is not guaranteed on that path.
 
-**Evidence:** [crypto helper](backend/app/core/crypto.py), [profile service](backend/app/services/user_service.py), [TokenStorage](android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt).
+**Evidence:** [crypto helper](../../backend/app/core/crypto.py), [profile service](../../backend/app/services/user_service.py), [TokenStorage](../../android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt).
 
 ### D15 — Local files for avatars and skill certificates
 
@@ -195,7 +195,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Files depend on the backend filesystem and are outside the relational transaction. The static mount does not enforce participant authorization for downloads. Durable multi-instance hosting and private certificate delivery require additional work.
 
-**Evidence:** [static mount](backend/app/main.py), [avatar service](backend/app/services/user_service.py), [skill service](backend/app/services/skill_service.py).
+**Evidence:** [static mount](../../backend/app/main.py), [avatar service](../../backend/app/services/user_service.py), [skill service](../../backend/app/services/skill_service.py).
 
 ## 4. SOS coordination and real-time behavior
 
@@ -209,7 +209,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** FCM requires Android and backend Firebase configuration. A server `delivered` result means FCM accepted the request, not that a phone displayed it or a person read it. Push is not a guaranteed rescue-delivery mechanism.
 
-**Evidence:** [notification service](backend/app/services/notification_service.py), [Android messaging service](android/app/src/main/java/com/example/nearhelp/notifications/NearHelpMessagingService.kt), [architecture ADR-3](docs/architecture.md#18-architecture-decision-records).
+**Evidence:** [notification service](../../backend/app/services/notification_service.py), [Android messaging service](../../android/app/src/main/java/com/example/nearhelp/notifications/NearHelpMessagingService.kt), [architecture ADR-3](../planning/architecture.md#18-architecture-decision-records).
 
 ### D17 — Durable SOS retry identity, plus cached responses
 
@@ -221,7 +221,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Reusing a key with changed details returns a conflict. Incident deduplication survives a backend restart; the original notification fan-out is not a durable job and is not automatically resumed by replaying an existing incident.
 
-**Evidence:** [IncidentViewModel](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [SOS creation](backend/app/services/sos_service.py), [middleware](backend/app/core/middleware.py).
+**Evidence:** [IncidentViewModel](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [SOS creation](../../backend/app/services/sos_service.py), [middleware](../../backend/app/core/middleware.py).
 
 ### D18 — Rank available nearby responders by proximity, skill, and trust
 
@@ -233,7 +233,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** This is an explicit weighted formula, not a learned dispatch model. Claimed skills may contribute; verification is a bonus rather than a universal eligibility gate. Weights and trust rules require evaluation before claiming improved outcomes.
 
-**Evidence:** [ranking service](backend/app/services/ranking_service.py), [geo service](backend/app/services/geo_service.py), [skill review](backend/app/services/skill_service.py).
+**Evidence:** [ranking service](../../backend/app/services/ranking_service.py), [geo service](../../backend/app/services/geo_service.py), [skill review](../../backend/app/services/skill_service.py).
 
 ### D19 — Fresh, explicit availability and foreground location sharing
 
@@ -245,7 +245,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** A volunteer who stops refreshing availability will become ineligible. Continuous background GPS is not implemented. Latest coordinates remain in user data; expiry of availability does not delete coordinates.
 
-**Evidence:** [geo service](backend/app/services/geo_service.py), [IncidentViewModel](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [location helper](android/app/src/main/java/com/example/nearhelp/data/location/LocationHelper.kt).
+**Evidence:** [geo service](../../backend/app/services/geo_service.py), [IncidentViewModel](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [location helper](../../android/app/src/main/java/com/example/nearhelp/data/location/LocationHelper.kt).
 
 ### D20 — Reconnection snapshots and polling alongside socket events
 
@@ -257,7 +257,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Polling adds requests and some changes may appear after a delay. Socket rooms and high-frequency telemetry remain process-local. Chat writes are restricted to incident participant roles, but incident reads and initial tracking access have broader visibility in the current API.
 
-**Evidence:** [incident ViewModel](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [tracking API](backend/app/api/tracking_ws.py), [tracking service](backend/app/services/tracking_service.py).
+**Evidence:** [incident ViewModel](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt), [tracking API](../../backend/app/api/tracking_ws.py), [tracking service](../../backend/app/services/tracking_service.py).
 
 ### D21 — Three escalation layers and owner-controlled incident endings
 
@@ -269,7 +269,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Radius changes happen when the escalation API is called; there is no proven autonomous scheduler in the core incident workflow. The service multiplies the current radius at time gates and caps it at 5 km. `auto_call_108_triggered` and `offline_fallback_ready` are state/response fields, not proof of a placed call or a complete offline system.
 
-**Evidence:** [SOS service](backend/app/services/sos_service.py), [SOS routes](backend/app/api/sos.py).
+**Evidence:** [SOS service](../../backend/app/services/sos_service.py), [SOS routes](../../backend/app/api/sos.py).
 
 ## 5. AI, knowledge, maps, and delivery
 
@@ -283,7 +283,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Planning documents say Gemini 2.5, while current settings/Compose default to `gemini-2.0-flash` and `models/text-embedding-004`. Fallbacks are a different processing mode, not equivalent model output. Embeddings and stored vectors must use compatible dimensions and representations; switching providers can require reindexing.
 
-**Evidence:** [AI settings](ai_service/app/core/config.py), [embedding service](ai_service/app/classifiers/embedding_service.py), [backend AI client](backend/app/services/ai_client.py), [original ADR](docs/architecture.md#18-architecture-decision-records).
+**Evidence:** [AI settings](../../ai_service/app/core/config.py), [embedding service](../../ai_service/app/classifiers/embedding_service.py), [backend AI client](../../backend/app/services/ai_client.py), [original ADR](../planning/architecture.md#18-architecture-decision-records).
 
 ### D23 — Curated structured clinical protocols and guardrails
 
@@ -295,7 +295,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** AI guidance operates directly from verified clinical knowledge matrices and Gemini with strict safety guardrails. No external vector store dependencies or vector index initialization are required.
 
-**Evidence:** [agent graph](ai_service/app/agent/gemini_agent.py), [guardrails](ai_service/app/agent/guardrails.py), [knowledge catalog](ai_service/app/agent/knowledge.py), [Compose mounts](docker-compose.yml).
+**Evidence:** [agent graph](../../ai_service/app/agent/gemini_agent.py), [guardrails](../../ai_service/app/agent/guardrails.py), [knowledge catalog](../../ai_service/app/agent/knowledge.py), [Compose mounts](../../docker-compose.yml).
 
 ### D24 — Stateful LangGraph guidance with guardrails and citations
 
@@ -307,7 +307,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Sessions are process-local rather than a durable medical conversation record. Guardrails and confidence fields are application logic, not clinical validation or guarantees of correctness. Source labels refer to the repository corpus; this review does not certify the corpus or establish legal protection.
 
-**Evidence:** [agent graph](ai_service/app/agent/gemini_agent.py), [guardrails](ai_service/app/agent/guardrails.py), [disclaimer UI](android/app/src/main/java/com/example/nearhelp/ui/components/AIDisclaimerBanner.kt).
+**Evidence:** [agent graph](../../ai_service/app/agent/gemini_agent.py), [guardrails](../../ai_service/app/agent/guardrails.py), [disclaimer UI](../../android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantScreen.kt).
 
 ### D25 — Support an optional direct-to-Gemini mobile path
 
@@ -319,7 +319,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Assistant text can leave the phone directly for Google, bypassing backend/AI-service processing. The direct and local branches do not execute the same server LangGraph checks. A displayed response does not prove that the backend was used.
 
-**Evidence:** [AI repository](android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt), [device settings storage](android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt).
+**Evidence:** [AI repository](../../android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt), [device settings storage](../../android/app/src/main/java/com/example/nearhelp/data/local/TokenStorage.kt).
 
 ### D26 — Google Maps display, regional facility data, and route estimates
 
@@ -331,7 +331,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Seed data and curated hazards are not live municipal feeds. Local routes include constructed polylines, estimates, and demo-specific street instructions. The routing code looks for `GOOGLE_MAPS_API_KEY`, which the current backend settings class does not declare; a real Routes integration needs configuration work and verification.
 
-**Evidence:** [map component](android/app/src/main/java/com/example/nearhelp/ui/map/NearHelpGoogleMapView.kt), [facility service](backend/app/services/facility_service.py), [regional dataset](data/regional/kolkata_facilities.json), [routing service](backend/app/services/routing_service.py).
+**Evidence:** [map component](../../android/app/src/main/java/com/example/nearhelp/ui/map/MapPinItem.kt), [facility service](../../backend/app/services/facility_service.py), [regional dataset](../../data/regional/kolkata_facilities.json), [routing service](../../backend/app/services/routing_service.py).
 
 ### D27 — Docker Compose development and layered verification
 
@@ -343,7 +343,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** The network smoke test does not prove GPS hardware, FCM display, or AI quality. Cloud Run, Prometheus/Grafana, and an admin dashboard remain architecture goals rather than verified deployments. The checked-in GitHub workflow references a missing `admin_dashboard` directory and its Python jobs run Ruff without pytest; job names alone do not establish complete CI coverage.
 
-**Evidence:** [Compose](docker-compose.yml), [CI workflow](.github/workflows/ci.yml), [smoke script](backend/scripts/device_smoke.py), [readiness review](docs/DEVICE_READINESS.md).
+**Evidence:** [Compose](../../docker-compose.yml), [CI workflow](../../.github/workflows/ci.yml), [smoke script](../../backend/scripts/device_smoke.py), [readiness review](../guides/DEVICE_READINESS.md).
 
 ### D28 — Distinct calm and crisis UI states with deliberate SOS activation
 
@@ -355,7 +355,7 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Existing design wireframes include future voice/photo and guardian features. Treat the working incident form as the current dispatch path; do not infer that every animated component or wireframe triggers a server operation. Readability and physical-device behavior still need UI verification.
 
-**Evidence:** [design specification](docs/design.md), [UI guidance](docs/UI_GUIDANCE.md), [home screen](android/app/src/main/java/com/example/nearhelp/ui/home/HomeScreen.kt), [incident screen](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentScreen.kt).
+**Evidence:** [design specification](../planning/design.md), [UI guidance](../guides/UI_GUIDANCE.md), [home screen](../../android/app/src/main/java/com/example/nearhelp/ui/home/HomeScreen.kt), [incident screen](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentScreen.kt).
 
 ### D29 — English, Hindi, and Bengali as regional language priorities
 
@@ -367,8 +367,8 @@ The code and [device readiness review](docs/DEVICE_READINESS.md) take precedence
 
 **Consequences:** Saving a language preference or matching selected keywords does not establish full app localization, automatic participant-chat translation, or reliable speech handling. These flows need their own integration and quality verification.
 
-**Evidence:** [proposal](docs/proposal.md), [README module plan](README.md), [embedding lexicon](ai_service/app/classifiers/embedding_service.py), [user language API](backend/app/api/users.py).
+**Evidence:** [proposal](../planning/proposal.md), [README module plan](../../README.md), [embedding lexicon](../../ai_service/app/classifiers/embedding_service.py), [user language API](../../backend/app/api/users.py).
 
 ## Maintaining this document
 
-When changing a major choice, update its status, rationale, consequences, and source links here; update [flow.md](flow.md) if data movement changes. Preserve superseded choices with a short explanation when their history matters. Add a new decision when introducing a provider, changing storage/access boundaries, altering the SOS lifecycle, or committing to a deployment model.
+When changing a major choice, update its status, rationale, consequences, and source links here; update [flow.md](DATA_FLOW.md) if data movement changes. Preserve superseded choices with a short explanation when their history matters. Add a new decision when introducing a provider, changing storage/access boundaries, altering the SOS lifecycle, or committing to a deployment model.

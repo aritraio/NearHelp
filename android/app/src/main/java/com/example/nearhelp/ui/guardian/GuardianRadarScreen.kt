@@ -1,21 +1,44 @@
-package com.example.nearhelp.ui.screens
+package com.example.nearhelp.ui.guardian
 
-import com.example.nearhelp.i18n.LocalizedText as Text
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Contacts
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.nearhelp.NearHelpApplication
-import com.example.nearhelp.ui.design.*
+import com.example.nearhelp.ui.design.CareButton
+import com.example.nearhelp.ui.design.CareButtonStyle
+import com.example.nearhelp.ui.design.CareHeading
+import com.example.nearhelp.ui.design.CareMap
+import com.example.nearhelp.ui.design.CareNote
+import com.example.nearhelp.ui.design.CarePage
+import com.example.nearhelp.ui.design.CareSosHoldButton
+import com.example.nearhelp.ui.design.rememberCareLocation
 import kotlinx.coroutines.launch
 
 @Composable
-fun GuardianRadarScreen(onExit: () -> Unit, onNavigateToCrisis: (String) -> Unit, onNavigateToMap: () -> Unit,
-    onNavigateToProfile: () -> Unit, onVoiceSosClick: () -> Unit, modifier: Modifier = Modifier,
-    localityName: String? = null, safetyIndex: Int? = null, coordinatesText: String? = null, isAnonymous: Boolean = false) {
+fun GuardianRadarScreen(
+    onExit: () -> Unit,
+    onNavigateToCrisis: (String) -> Unit,
+    onNavigateToMap: () -> Unit,
+    onNavigateToProfile: () -> Unit,
+    onVoiceSosClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    localityName: String? = null,
+    safetyIndex: Int? = null,
+    coordinatesText: String? = null,
+    isAnonymous: Boolean = false,
+) {
     val (location, requestLocation) = rememberCareLocation()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -46,7 +69,7 @@ fun GuardianRadarScreen(onExit: () -> Unit, onNavigateToCrisis: (String) -> Unit
             title = "SOS",
             subtitle = "Hold for 2 seconds to trigger it",
             onTrigger = { onNavigateToCrisis("medical") },
-            holdDurationMillis = 2000L
+            holdDurationMillis = 2000L,
         )
         CareButton("Emergency contacts", onNavigateToProfile, icon = Icons.Outlined.Contacts)
         CareButton("Open nearby facilities", onNavigateToMap, icon = Icons.Outlined.LocationOn)

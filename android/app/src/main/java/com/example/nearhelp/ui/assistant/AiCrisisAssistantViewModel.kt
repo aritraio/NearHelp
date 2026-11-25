@@ -2,11 +2,11 @@ package com.example.nearhelp.ui.assistant
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nearhelp.data.model.AiChatMessageUiModel
-import com.example.nearhelp.data.model.CitationDto
-import com.example.nearhelp.data.model.ClinicalHandoverSummaryDto
-import com.example.nearhelp.data.model.ContraindicationAlertDto
-import com.example.nearhelp.data.model.GroundedProtocolDto
+import com.example.nearhelp.data.api.models.AiChatMessageUiModel
+import com.example.nearhelp.data.api.models.CitationDto
+import com.example.nearhelp.data.api.models.ClinicalHandoverSummaryDto
+import com.example.nearhelp.data.api.models.ContraindicationAlertDto
+import com.example.nearhelp.data.api.models.GroundedProtocolDto
 import com.example.nearhelp.data.repository.IAiAgentRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

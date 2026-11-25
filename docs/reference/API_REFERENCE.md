@@ -18,7 +18,7 @@ All Backend endpoints are served at `http://localhost:8000` under `/api/v1/*` (c
 
 ## 2. Authentication & Identity (`/api/v1/auth`)
 
-Source: [`backend/app/api/auth.py`](backend/app/api/auth.py) | Rate-limited: `30 req/min` per IP on `POST` routes.
+Source: [`backend/app/api/auth.py`](../../backend/app/api/auth.py) | Rate-limited: `30 req/min` per IP on `POST` routes.
 
 | Method | Path | Auth | Request Body | Response |
 | :--- | :--- | :--- | :--- | :--- |
@@ -36,7 +36,7 @@ Source: [`backend/app/api/auth.py`](backend/app/api/auth.py) | Rate-limited: `30
 
 ## 3. User Profile, Medical ID, Contacts & Skills (`/api/v1/users`)
 
-Source: [`backend/app/api/users.py`](backend/app/api/users.py) | All routes require active Bearer JWT (`get_current_active_user`).
+Source: [`backend/app/api/users.py`](../../backend/app/api/users.py) | All routes require active Bearer JWT (`get_current_active_user`).
 
 | Method | Path | Body / Params | Response | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -61,7 +61,7 @@ Source: [`backend/app/api/users.py`](backend/app/api/users.py) | All routes requ
 
 ## 4. Smart SOS Engine (`/api/v1/sos`)
 
-Source: [`backend/app/api/sos.py`](backend/app/api/sos.py)
+Source: [`backend/app/api/sos.py`](../../backend/app/api/sos.py)
 
 | Method | Path | Auth | Body / Query | Response |
 | :--- | :--- | :--- | :--- | :--- |
@@ -78,7 +78,7 @@ Source: [`backend/app/api/sos.py`](backend/app/api/sos.py)
 
 ## 5. Live Tracking & WebSockets
 
-Source: [`backend/app/api/tracking_ws.py`](backend/app/api/tracking_ws.py)
+Source: [`backend/app/api/tracking_ws.py`](../../backend/app/api/tracking_ws.py)
 
 ### REST Tracking Endpoints
 | Method | Path | Auth | Body | Response |
@@ -100,7 +100,7 @@ Source: [`backend/app/api/tracking_ws.py`](backend/app/api/tracking_ws.py)
 
 ## 6. Facilities & Rescue Routing
 
-Source: [`backend/app/api/facilities.py`](backend/app/api/facilities.py), [`backend/app/api/routing.py`](backend/app/api/routing.py)
+Source: [`backend/app/api/facilities.py`](../../backend/app/api/facilities.py), [`backend/app/api/routing.py`](../../backend/app/api/routing.py)
 
 | Method | Path | Auth | Query / Body | Response |
 | :--- | :--- | :--- | :--- | :--- |
@@ -118,7 +118,7 @@ Source: [`backend/app/api/facilities.py`](backend/app/api/facilities.py), [`back
 
 ## 7. AI Endpoints (Backend Proxy `/api/v1/ai` & AI Service `:8001/api/v1`)
 
-Source: [`backend/app/api/ai.py`](backend/app/api/ai.py), [`backend/app/api/ai_ws.py`](backend/app/api/ai_ws.py), [`ai_service/app/api/`](ai_service/app/api/)
+Source: [`backend/app/api/ai.py`](../../backend/app/api/ai.py), [`backend/app/api/ai_ws.py`](../../backend/app/api/ai_ws.py), [`ai_service/app/api/`](../../ai_service/app/api/)
 
 | Method | Backend Path | AI Service Path | Auth | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -137,7 +137,7 @@ Source: [`backend/app/api/ai.py`](backend/app/api/ai.py), [`backend/app/api/ai_w
 
 ## 8. Admin APIs (`/api/v1/admin`)
 
-Source: [`backend/app/api/admin.py`](backend/app/api/admin.py), [`backend/app/api/admin_users.py`](backend/app/api/admin_users.py) | All routes require superuser (`get_current_admin_user`).
+Source: [`backend/app/api/admin.py`](../../backend/app/api/admin.py), [`backend/app/api/admin_users.py`](../../backend/app/api/admin_users.py) | All routes require superuser (`get_current_admin_user`).
 
 | Method | Path | Description |
 | :--- | :--- | :--- |

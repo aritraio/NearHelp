@@ -2,23 +2,23 @@
 
 ## 1. Engine & Connection Configuration
 
-Source: [`backend/app/db/session.py`](backend/app/db/session.py)
+Source: [`backend/app/db/session.py`](../../backend/app/db/session.py)
 
 - **Production / Docker Engine:** PostgreSQL 16 + PostGIS 3.4 (`postgis/postgis:16-3.4-alpine`), accessed via `sqlalchemy.ext.asyncio` + `asyncpg`.
   - Pool: `AsyncAdaptedQueuePool` with `pool_size=10`, `max_overflow=20`, `pool_timeout=30`, `pool_recycle=1800`, `pool_pre_ping=True`, `statement_cache_size=0`, `prepared_statement_cache_size=0`.
   - URL normalization in `Settings.validate_db_urls` and `_get_async_url`: converts `postgres://` and `postgresql://` to `postgresql+asyncpg://`.
-- **Unit Test Engine:** In-memory SQLite (`sqlite+aiosqlite:///:memory:`) with `StaticPool` in [`backend/tests/conftest.py`](backend/tests/conftest.py).
+- **Unit Test Engine:** In-memory SQLite (`sqlite+aiosqlite:///:memory:`) with `StaticPool` in [`backend/tests/conftest.py`](../../backend/tests/conftest.py).
   - GeoAlchemy2 `Geometry` compiles to `BLOB` under SQLite (`@compiles(Geometry, "sqlite")`).
   - Spatial functions (`ST_DWithin`, `ST_Distance`, `ST_SetSRID`, `ST_MakePoint`, `AsEWKT`, `AsEWKB`) are registered as Python SQLite stubs (note: `ST_DWithin` always returns `1` and `ST_Distance` returns `0` in SQLite).
 - **Schema Initialization & Migrations:** `alembic` is listed in `backend/requirements.txt`, **but no Alembic `migrations/` directory or `alembic.ini` exists**. Tables are created on startup via `Base.metadata.create_all`, followed by ad-hoc PostgreSQL `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS` statements in `init_db()`.
 
-See [docs/diagrams/04-database-erd.md](docs/diagrams/04-database-erd.md) for the complete Mermaid Entity Relationship Diagram.
+See [docs/diagrams/04-database-erd.md](diagrams/04-database-erd.md) for the complete Mermaid Entity Relationship Diagram.
 
 ---
 
 ## 2. Tables & Schemas
 
-### 2.1 `users` ([`backend/app/models/user.py`](backend/app/models/user.py))
+### 2.1 `users` ([`backend/app/models/user.py`](../../backend/app/models/user.py))
 
 Stores registered users, OAuth/phone users, administrators, and disposable anonymous SOS users.
 
@@ -52,7 +52,7 @@ Stores registered users, OAuth/phone users, administrators, and disposable anony
 | `location` | `Geometry(POINT, 4326)` | Nullable, GiST index `idx_users_location` | WGS84 PostGIS point (`POINT(lon lat)`) |
 | `created_at`, `updated_at`, `last_login_at` | `DateTime(tz)` | `func.now()` | Audit timestamps |
 
-### 2.2 `user_presence` ([`backend/app/models/user_presence.py`](backend/app/models/user_presence.py))
+### 2.2 `user_presence` ([`backend/app/models/user_presence.py`](../../backend/app/models/user_presence.py))
 
 Tracks recent authenticated HTTP activity across workers.
 
@@ -61,7 +61,7 @@ Tracks recent authenticated HTTP activity across workers.
 | `user_id` | `UUID` | PK, FK -> `users.id` (`ON DELETE CASCADE`) | 1-to-1 with `users` |
 | `last_seen_at` | `DateTime(tz)` | Not null, indexed | Upserted with 30s throttle; "online" = within 300s |
 
-### 2.3 `sos_events` ([`backend/app/models/sos_event.py`](backend/app/models/sos_event.py))
+### 2.3 `sos_events` ([`backend/app/models/sos_event.py`](../../backend/app/models/sos_event.py))
 
 | Column | Type | Constraints / Default | Notes |
 | :--- | :--- | :--- | :--- |
@@ -77,7 +77,7 @@ Tracks recent authenticated HTTP activity across workers.
 | `ai_triage_data`, `metadata_info` | `JSON`, `JSON` | `{}` | Full AI response JSON + `request_fingerprint` |
 | `created_at`, `updated_at`, `resolved_at` | `DateTime(tz)` | `func.now()` | Lifecycle timestamps |
 
-### 2.4 `responses` ([`backend/app/models/response.py`](backend/app/models/response.py))
+### 2.4 `responses` ([`backend/app/models/response.py`](../../backend/app/models/response.py))
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
@@ -89,7 +89,7 @@ Tracks recent authenticated HTTP activity across workers.
 | `joined_at`, `arrived_at` | `DateTime(tz)` | `func.now()`, nullable | Response timestamps |
 | `feedback_score`, `feedback_notes` | `Float`, `String(1024)` | Nullable | Recorded on resolution |
 
-### 2.5 `timeline_events` ([`backend/app/models/timeline_event.py`](backend/app/models/timeline_event.py))
+### 2.5 `timeline_events` ([`backend/app/models/timeline_event.py`](../../backend/app/models/timeline_event.py))
 
 Immutable audit log + persisted participant chat.
 
@@ -102,7 +102,7 @@ Immutable audit log + persisted participant chat.
 | `details` | `JSON` | Not null, `{}` | Event metadata or `{text, language}` for chat |
 | `timestamp` | `DateTime(tz)` | `func.now()`, indexed | Event timestamp |
 
-### 2.6 `skill_verifications` ([`backend/app/models/skill_verification.py`](backend/app/models/skill_verification.py))
+### 2.6 `skill_verifications` ([`backend/app/models/skill_verification.py`](../../backend/app/models/skill_verification.py))
 
 | Column | Type | Constraints | Notes |
 | :--- | :--- | :--- | :--- |
@@ -115,9 +115,9 @@ Immutable audit log + persisted participant chat.
 | `reviewed_by` | `UUID` | FK -> `users.id` (`ON DELETE SET NULL`), nullable | Reviewing admin |
 | `submitted_at`, `reviewed_at` | `DateTime(tz)` | `func.now()`, nullable | Audit timestamps |
 
-### 2.7 `facilities` ([`backend/app/models/facility.py`](backend/app/models/facility.py))
+### 2.7 `facilities` ([`backend/app/models/facility.py`](../../backend/app/models/facility.py))
 
-Auto-seeded on startup from [`data/regional/kolkata_facilities.json`](data/regional/kolkata_facilities.json).
+Auto-seeded on startup from [`data/regional/kolkata_facilities.json`](../../data/regional/kolkata_facilities.json).
 
 | Column | Type | Notes |
 | :--- | :--- | :--- |

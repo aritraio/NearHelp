@@ -1,10 +1,12 @@
 package com.example.nearhelp.data.repository
 
 import com.example.nearhelp.data.api.AiAgentApiService
-import com.example.nearhelp.data.model.AgentChatRequestDto
-import com.example.nearhelp.data.model.AgentChatResponseDto
-import com.example.nearhelp.data.model.ClinicalHandoverSummaryDto
-import com.example.nearhelp.data.model.GroundedProtocolDto
+import com.example.nearhelp.data.api.models.AgentChatRequestDto
+import com.example.nearhelp.data.api.models.AgentChatResponseDto
+import com.example.nearhelp.data.api.models.ClinicalHandoverSummaryDto
+import com.example.nearhelp.data.api.models.GroundedProtocolDto
+import com.example.nearhelp.data.api.models.ImageAnalysisRequest
+import com.example.nearhelp.data.api.models.ImageAnalysisResponse
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -21,7 +23,7 @@ class AiAgentRepositoryTest {
   private lateinit var repository: AiAgentRepository
 
   private class FakeAiAgentApiService : AiAgentApiService {
-    override suspend fun describeImage(request: com.example.nearhelp.data.model.ImageAnalysisRequest): Response<com.example.nearhelp.data.model.ImageAnalysisResponse> = Response.success(com.example.nearhelp.data.model.ImageAnalysisResponse("A first-aid document"))
+    override suspend fun describeImage(request: ImageAnalysisRequest): Response<ImageAnalysisResponse> = Response.success(ImageAnalysisResponse("A first-aid document"))
     var shouldFail: Boolean = true
 
     override suspend fun chatWithAgent(request: AgentChatRequestDto): Response<AgentChatResponseDto> {
@@ -235,11 +237,11 @@ class AiAgentRepositoryTest {
   @Test
   fun `server returning generic triage is intercepted and overridden for non-cardiac query`() = runTest {
     val mockService = object : com.example.nearhelp.data.api.AiAgentApiService {
-      override suspend fun describeImage(request: com.example.nearhelp.data.model.ImageAnalysisRequest): Response<com.example.nearhelp.data.model.ImageAnalysisResponse> = throw UnsupportedOperationException()
+      override suspend fun describeImage(request: ImageAnalysisRequest): Response<ImageAnalysisResponse> = throw UnsupportedOperationException()
       override suspend fun getProtocolByCondition(conditionId: String) = throw UnsupportedOperationException()
       override suspend fun getAllProtocols() = throw UnsupportedOperationException()
-      override suspend fun chatWithAgent(request: com.example.nearhelp.data.model.AgentChatRequestDto): retrofit2.Response<com.example.nearhelp.data.model.AgentChatResponseDto> {
-        val genericBody = com.example.nearhelp.data.model.AgentChatResponseDto(
+      override suspend fun chatWithAgent(request: AgentChatRequestDto): retrofit2.Response<AgentChatResponseDto> {
+        val genericBody = AgentChatResponseDto(
           sessionId = request.sessionId,
           replyText = "📋 General Emergency Assessment:\n\n1. Check scene safety before approaching.\n2. Check victim responsiveness (tap shoulders and shout).\n3. Check for normal breathing.\n4. Dial 108 immediately for ambulance dispatch.\n\nPlease state the specific emergency (e.g. CPR, bleeding, burns, choking, fracture, snakebite) for step-by-step guidance.\n\n[Source: Indian Resuscitation Council & WHO First-Aid Guidelines]",
           highlightText = "Emergency Triage Assessment",
@@ -259,7 +261,7 @@ class AiAgentRepositoryTest {
         )
         return retrofit2.Response.success(genericBody)
       }
-      override suspend fun generateHandoverReport(request: com.example.nearhelp.data.model.AgentChatRequestDto) = throw UnsupportedOperationException()
+      override suspend fun generateHandoverReport(request: AgentChatRequestDto) = throw UnsupportedOperationException()
     }
 
     val interceptingRepo = com.example.nearhelp.data.repository.AiAgentRepository(mockService)

@@ -19,18 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nearhelp.NearHelpApplication
-import com.example.nearhelp.theme.VictimBackground
+import com.example.nearhelp.navigation.AppMotion
 import com.example.nearhelp.ui.assistant.AiCrisisAssistantScreen
 import com.example.nearhelp.ui.assistant.AiCrisisAssistantViewModel
 import com.example.nearhelp.ui.auth.AuthViewModel
+import com.example.nearhelp.ui.auth.clearGoogleAuthentication
+import com.example.nearhelp.ui.components.VictimBottomNavBar
+import com.example.nearhelp.ui.components.VictimNavTab
 import com.example.nearhelp.ui.map.CommunityGeoMapScreen
-import com.example.nearhelp.ui.map.CommunityGeoMapViewModel
 import com.example.nearhelp.ui.profile.ProfileScreen
 import com.example.nearhelp.ui.profile.ProfileViewModel
-import com.example.nearhelp.ui.navigation.AppMotion
-import com.example.nearhelp.ui.victim.VictimBottomNavBar
-import com.example.nearhelp.ui.victim.VictimNavTab
-import com.example.nearhelp.ui.auth.clearGoogleAuthentication
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -157,7 +155,6 @@ fun VictimMainScreen(
                             )
                         }
                         VictimNavTab.MAP -> {
-                            val mapViewModel: CommunityGeoMapViewModel = viewModel()
                             CommunityGeoMapScreen(
                                 onNavigateBack = { currentTab = VictimNavTab.HOME },
                                 onNavigateToHome = { currentTab = VictimNavTab.HOME },
@@ -169,7 +166,6 @@ fun VictimMainScreen(
                                 },
                                 onNavigateToTracking = onNavigateToTracking,
                                 onNavigateToNavigation = onNavigateToNavigation,
-                                viewModel = mapViewModel,
                                 showBottomBar = false,
                                 modifier = Modifier.fillMaxSize(),
                             )

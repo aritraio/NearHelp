@@ -1,12 +1,12 @@
 # User Flows
 
-This document traces the primary user journeys implemented in NearHelp AI across the Android app and Admin Web panel. See [docs/diagrams/06-user-workflows.md](docs/diagrams/06-user-workflows.md) and [flow.md](flow.md) for sequence and state diagrams.
+This document traces the primary user journeys implemented in NearHelp AI across the Android app and Admin Web panel. See [docs/diagrams/06-user-workflows.md](../architecture/diagrams/06-user-workflows.md) and [flow.md](../architecture/DATA_FLOW.md) for sequence and state diagrams.
 
 ---
 
 ## 1. Onboarding, Authentication & Guest Bypass
 
-Files: [`SplashScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/auth/screens/SplashScreen.kt), [`LoginScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/auth/screens/LoginScreen.kt), [`SignUpScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/auth/screens/SignUpScreen.kt), [`AuthViewModel.kt`](android/app/src/main/java/com/example/nearhelp/ui/auth/AuthViewModel.kt)
+Files: [`SplashScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/SplashScreen.kt), [`LoginScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/LoginScreen.kt), [`SignUpScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/auth/screens/SignUpScreen.kt), [`AuthViewModel.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/auth/AuthViewModel.kt)
 
 1. **Splash Check:** `SplashScreen` checks `TokenStorage.isLoggedIn()` (non-blank `access_token`). If logged in, navigates directly to `HomeNavKey` (`VictimMainScreen`); otherwise navigates to `LoginNavKey`.
 2. **Email Sign-In / Sign-Up:** `AuthViewModel` validates email regex and password length (`>= 6` chars), calls `AuthRepository.login` or `register`, and stores `access_token`, `refresh_token`, and user profile in `TokenStorage`.
@@ -18,7 +18,7 @@ Files: [`SplashScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/aut
 
 ## 2. Victim Flow: Triggering & Tracking a Medical SOS
 
-Files: [`HomeScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/home/HomeScreen.kt), [`IncidentScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentScreen.kt), [`MedicalSosPromptViewModel.kt`](android/app/src/main/java/com/example/nearhelp/ui/incident/MedicalSosPromptViewModel.kt), [`IncidentViewModel.kt`](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt)
+Files: [`HomeScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/home/HomeScreen.kt), [`IncidentScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentScreen.kt), [`MedicalSosPromptViewModel.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/incident/MedicalSosPromptViewModel.kt), [`IncidentViewModel.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentViewModel.kt)
 
 1. **Hold-to-Trigger SOS:** On `HomeScreen`, the victim holds `CareSosHoldButton` for **2 seconds** (preventing accidental taps).
 2. **5-Second Medical Prompt:** `IncidentScreen(createMode = true)` opens `MedicalEmergencyDialog` with a 5-second countdown (`MEDICAL_PROMPT_DURATION_MILLIS = 5000L`, surviving screen rotation via `SavedStateHandle`).
@@ -40,7 +40,7 @@ Files: [`HomeScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/home/
 
 ## 3. Responder Flow: Discovery, Acceptance & Navigation
 
-Files: [`HomeScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/home/HomeScreen.kt), [`IncidentScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentScreen.kt), [`NearHelpMessagingService.kt`](android/app/src/main/java/com/example/nearhelp/notifications/NearHelpMessagingService.kt)
+Files: [`HomeScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/home/HomeScreen.kt), [`IncidentScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/incident/IncidentScreen.kt), [`NearHelpMessagingService.kt`](../../android/app/src/main/java/com/example/nearhelp/notifications/NearHelpMessagingService.kt)
 
 1. **Availability Opt-In:** Responder opens **"Nearby medical requests"** (`IncidentScreen` in browse mode) and toggles **"Available to help nearby"**. While this screen is open with a fresh GPS fix, `IncidentViewModel.updateLocation` sends `PUT /api/v1/users/me/location` (`available = true`) throttled to 15s.
 2. **Alert Reception (Two Paths):**
@@ -56,7 +56,7 @@ Files: [`HomeScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/home/
 
 ## 4. AI Crisis Assistant Flow
 
-Files: [`AiCrisisAssistantScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantScreen.kt), [`AiCrisisAssistantViewModel.kt`](android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantViewModel.kt), [`AiAgentRepository.kt`](android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt)
+Files: [`AiCrisisAssistantScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantScreen.kt), [`AiCrisisAssistantViewModel.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/assistant/AiCrisisAssistantViewModel.kt), [`AiAgentRepository.kt`](../../android/app/src/main/java/com/example/nearhelp/data/repository/AiAgentRepository.kt)
 
 1. **Protocol Browser:** Users select from 18 fallback protocol topics (`getAllProtocols()`), view step-by-step checklists, and toggle completed steps locally.
 2. **Text-Only Crisis Chat:** Users ask questions or tap quick-question chips. `AiAgentRepository.chatWithAgent` attempts:
@@ -69,7 +69,7 @@ Files: [`AiCrisisAssistantScreen.kt`](android/app/src/main/java/com/example/near
 
 ## 5. Profile, Medical ID & Skill Verification Flow
 
-Files: [`ProfileScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/profile/ProfileScreen.kt), [`ProfileViewModel.kt`](android/app/src/main/java/com/example/nearhelp/ui/profile/ProfileViewModel.kt)
+Files: [`ProfileScreen.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/profile/ProfileScreen.kt), [`ProfileViewModel.kt`](../../android/app/src/main/java/com/example/nearhelp/ui/profile/ProfileViewModel.kt)
 
 1. **Medical ID:** Users edit blood group, conditions, allergies, pacemaker/organ donor flags, and notes via `PUT /api/v1/users/me/medical` (encrypted at rest on server).
 2. **Emergency Contacts:** Up to 5 contacts via `/api/v1/users/me/contacts`.
@@ -82,7 +82,7 @@ Files: [`ProfileScreen.kt`](android/app/src/main/java/com/example/nearhelp/ui/pr
 
 ## 6. Administrator Web Flow (`/admin`)
 
-Files: [`backend/app/admin_web/index.html`](backend/app/admin_web/index.html), [`app.js`](backend/app/admin_web/app.js), [`admin.py`](backend/app/api/admin.py), [`admin_users.py`](backend/app/api/admin_users.py)
+Files: [`backend/app/admin_web/index.html`](../../backend/app/admin_web/index.html), [`app.js`](../../backend/app/admin_web/app.js), [`admin.py`](../../backend/app/api/admin.py), [`admin_users.py`](../../backend/app/api/admin_users.py)
 
 1. Admin signs in at `/admin` via `POST /api/v1/auth/login` + `GET /api/v1/admin/me` (tokens held only in JS memory).
 2. Dashboard polls `/api/v1/admin/stats` and the active tab every **10 seconds**.

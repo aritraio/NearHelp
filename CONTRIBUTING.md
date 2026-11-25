@@ -119,7 +119,7 @@ curl http://localhost:8001/docs
 **Owner**: Abhisikta  
 **Path**: `docs/`
 
-* Project specifications, architecture blueprints, and design systems live in `docs/`.
+* Architecture docs, API reference, guides, ADRs, and historical specs live in `docs/`.
 * Follow Markdown standards for SRS, SDD, and architectural documentation.
 
 ---
@@ -134,10 +134,10 @@ curl http://localhost:8001/docs
 
 ### 🔵 Design & Assets (Sayantan)
 **Owner**: Sayantan  
-**Path**: `android/app/src/main/res/` & `docs/design.md`
+**Path**: `android/app/src/main/res/` & `docs/planning/design.md`
 
 * App icons, vector drawables, and branding assets live in `android/app/src/main/res/drawable/` and `mipmap-*/`.
-* UI specifications and design tokens are documented in `docs/design.md`.
+* UI specifications and design tokens are documented in `docs/planning/design.md` and `docs/guides/ANDROID_REDESIGN.md`.
 
 ---
 

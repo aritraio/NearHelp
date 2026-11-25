@@ -1,4 +1,4 @@
-package com.example.nearhelp.ui.navigation
+package com.example.nearhelp.navigation
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.FastOutSlowInEasing

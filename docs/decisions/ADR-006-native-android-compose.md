@@ -16,7 +16,7 @@ Build a native Android application (`minSdk = 24`, `targetSdk = 36`, `compileSdk
 - [`android/gradle/libs.versions.toml`](../../android/gradle/libs.versions.toml)
 - [`android/app/build.gradle.kts`](../../android/app/build.gradle.kts)
 - [`android/app/src/main/java/com/example/nearhelp/NearHelpApplication.kt`](../../android/app/src/main/java/com/example/nearhelp/NearHelpApplication.kt)
-- [`android/app/src/main/java/com/example/nearhelp/Navigation.kt`](../../android/app/src/main/java/com/example/nearhelp/Navigation.kt)
+- [`android/app/src/main/java/com/example/nearhelp/Navigation.kt`](../../android/app/src/main/java/com/example/nearhelp/navigation/Navigation.kt)
 
 ## Consequences & Trade-offs
 

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
 
-  const val PRODUCTION_BASE_URL: String = "https://ought-afford-classroom-acrobat.trycloudflare.com/"
+  const val PRODUCTION_BASE_URL: String = "https://mother-kate-commitments-tell.trycloudflare.com/"
 
   // All devices use one explicit backend; never replay credentials or SOS writes on unrelated LAN hosts.
   val CANDIDATE_BASE_URLS: List<String> = listOf(com.example.nearhelp.BuildConfig.API_BASE_URL)

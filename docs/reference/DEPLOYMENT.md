@@ -1,12 +1,12 @@
 # Deployment & Configuration Guide
 
-See [docs/diagrams/08-deployment-architecture.md](docs/diagrams/08-deployment-architecture.md) for the deployment topology diagram.
+See [docs/diagrams/08-deployment-architecture.md](../architecture/diagrams/08-deployment-architecture.md) for the deployment topology diagram.
 
 ---
 
 ## 1. Local Docker Compose Stack
 
-Source: [`docker-compose.yml`](docker-compose.yml), [`backend/Dockerfile`](backend/Dockerfile), [`ai_service/Dockerfile`](ai_service/Dockerfile)
+Source: [`docker-compose.yml`](../../docker-compose.yml), [`backend/Dockerfile`](../../backend/Dockerfile), [`ai_service/Dockerfile`](../../ai_service/Dockerfile)
 
 | Service | Container Name | Image / Base | Host Port | Healthcheck / Startup |
 | :--- | :--- | :--- | :---: | :--- |
@@ -31,7 +31,7 @@ curl http://localhost:8001/health
 
 ## 2. Environment Variables Inventory
 
-Compiled from [`.env.example`](.env.example), [`backend/app/core/config.py`](backend/app/core/config.py), [`ai_service/app/core/config.py`](ai_service/app/core/config.py), and [`docker-compose.yml`](docker-compose.yml):
+Compiled from [`.env.example`](../../.env.example), [`backend/app/core/config.py`](../../backend/app/core/config.py), [`ai_service/app/core/config.py`](../../ai_service/app/core/config.py), and [`docker-compose.yml`](../../docker-compose.yml):
 
 ### Shared / Database / Cache
 - `ENVIRONMENT` (`development`), `DEBUG` (`True`), `PROJECT_NAME`, `API_V1_STR` (`/api/v1`), `CORS_ORIGINS`
@@ -59,7 +59,7 @@ Compiled from [`.env.example`](.env.example), [`backend/app/core/config.py`](bac
 
 ## 3. Android Build & Device Deployment
 
-Source: [`android/app/build.gradle.kts`](android/app/build.gradle.kts), [`docs/DEVICE_READINESS.md`](docs/DEVICE_READINESS.md)
+Source: [`android/app/build.gradle.kts`](../../android/app/build.gradle.kts), [`docs/DEVICE_READINESS.md`](../guides/DEVICE_READINESS.md)
 
 - **SDK Targets:** `compileSdk = 36`, `targetSdk = 36`, `minSdk = 24`, Java `17`.
 - **Backend URL Injection:** `BuildConfig.API_BASE_URL` defaults to a `trycloudflare.com` URL in `build.gradle.kts`. Override per build with `-PnearhelpBaseUrl=...`:

@@ -1,4 +1,4 @@
-package com.example.nearhelp
+package com.example.nearhelp.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
@@ -19,5 +19,3 @@ import kotlinx.serialization.Serializable
   val conditionId: String = "cardiac_arrest",
   val incidentId: String = ""
 ) : NavKey
-
-

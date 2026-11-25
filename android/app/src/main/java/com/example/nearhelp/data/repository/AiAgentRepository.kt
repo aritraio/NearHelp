@@ -1,14 +1,15 @@
 package com.example.nearhelp.data.repository
 
 import com.example.nearhelp.data.api.AiAgentApiService
+import com.example.nearhelp.data.api.models.AgentChatRequestDto
+import com.example.nearhelp.data.api.models.AgentChatResponseDto
+import com.example.nearhelp.data.api.models.CitationDto
+import com.example.nearhelp.data.api.models.ClinicalHandoverSummaryDto
+import com.example.nearhelp.data.api.models.ContraindicationAlertDto
+import com.example.nearhelp.data.api.models.GroundedProtocolDto
+import com.example.nearhelp.data.api.models.ImageAnalysisRequest
+import com.example.nearhelp.data.api.models.ProtocolStepDto
 import com.example.nearhelp.data.local.TokenStorage
-import com.example.nearhelp.data.model.AgentChatRequestDto
-import com.example.nearhelp.data.model.AgentChatResponseDto
-import com.example.nearhelp.data.model.CitationDto
-import com.example.nearhelp.data.model.ClinicalHandoverSummaryDto
-import com.example.nearhelp.data.model.ContraindicationAlertDto
-import com.example.nearhelp.data.model.GroundedProtocolDto
-import com.example.nearhelp.data.model.ProtocolStepDto
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -40,7 +41,7 @@ class AiAgentRepository(
 
   override suspend fun describeImage(base64: String): Result<String> = withContext(Dispatchers.IO) {
     try {
-      val response = apiService.describeImage(com.example.nearhelp.data.model.ImageAnalysisRequest(base64))
+      val response = apiService.describeImage(ImageAnalysisRequest(base64))
       if (!response.isSuccessful) error("Image analysis is unavailable. Please describe the situation in words.")
       val description = response.body()?.description?.takeIf { it.isNotBlank() }
         ?: error("The image could not be read. Please describe the situation in words.")

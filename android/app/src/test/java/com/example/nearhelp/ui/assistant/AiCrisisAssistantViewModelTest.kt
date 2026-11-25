@@ -1,8 +1,8 @@
 package com.example.nearhelp.ui.assistant
 
-import com.example.nearhelp.data.model.AgentChatResponseDto
-import com.example.nearhelp.data.model.ClinicalHandoverSummaryDto
-import com.example.nearhelp.data.model.GroundedProtocolDto
+import com.example.nearhelp.data.api.models.AgentChatResponseDto
+import com.example.nearhelp.data.api.models.ClinicalHandoverSummaryDto
+import com.example.nearhelp.data.api.models.GroundedProtocolDto
 import com.example.nearhelp.data.repository.IAiAgentRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

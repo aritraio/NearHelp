@@ -2,9 +2,9 @@ package com.example.nearhelp.data.repository
 
 import com.example.nearhelp.NearHelpApplication
 import com.example.nearhelp.data.api.*
-import com.example.nearhelp.ui.tracking.TrackingSnapshotDto
-import com.example.nearhelp.ui.navigation.DirectionsRequestDto
-import com.example.nearhelp.ui.navigation.RouteLocationPoint
+import com.example.nearhelp.data.api.models.DirectionsRequestDto
+import com.example.nearhelp.data.api.models.RouteLocationPoint
+import com.example.nearhelp.data.api.models.TrackingSnapshotDto
 import com.google.gson.Gson
 import retrofit2.Response
 
