@@ -71,7 +71,7 @@ class LiveTrackingWebSocketClient(
   private var currentToken: String? = null
 
   companion object {
-    const val DEFAULT_PRODUCTION_WS_URL: String = "wss://mother-kate-commitments-tell.trycloudflare.com"
+    const val DEFAULT_PRODUCTION_WS_URL: String = "wss://nearhelp-backend-7sfj.onrender.com"
   }
 
   private val defaultWsUrl: String

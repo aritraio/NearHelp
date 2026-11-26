@@ -145,8 +145,8 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit, onNavigateTo
                     CareHeading("Server & Database Connection", "Verify connectivity, latency, and database status.")
                     CareField("Server Base URL", serverUrlInput, { serverUrlInput = it })
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        CareButton("Cloud Tunnel", {
-                            serverUrlInput = "https://mother-kate-commitments-tell.trycloudflare.com/"
+                        CareButton("Cloud Server", {
+                            serverUrlInput = "https://nearhelp-backend-7sfj.onrender.com/"
                             testServer(serverUrlInput)
                         }, Modifier.weight(1f))
                         CareButton("Local (10.0.2.2)", {
