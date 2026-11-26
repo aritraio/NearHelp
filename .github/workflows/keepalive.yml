@@ -1,0 +1,19 @@
+name: NearHelp Backend — Keep-Alive Ping
+
+on:
+  schedule:
+    # Ping every 5 minutes to prevent Render free-tier 15-minute idle spin-down
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    name: Ping Render /health Endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Wake / Keep Alive Backend
+        run: |
+          curl -fsS --retry 2 --retry-delay 10 --max-time 65 \
+            https://nearhelp-backend-7sfj.onrender.com/health
+          echo ""
